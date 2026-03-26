@@ -33,6 +33,7 @@
           <button class="button button-primary" id="admin-save" type="button">Save Catalog</button>
           <button class="button button-secondary" id="admin-reset" type="button">Restore Default Catalog</button>
           <a class="button button-secondary" href="index.html" target="_blank" rel="noreferrer">Open Storefront</a>
+          <button class="button button-secondary" id="admin-logout" type="button" style="display: none;">Logout</button>
         </div>
         <p id="admin-status" class="admin-status">Admin panel ready.</p>
       </section>
@@ -946,6 +947,10 @@
   </main>
 
   <script src="assets/js/data.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-catalog.js"></script>
+  <script src="assets/js/admin-auth.js" defer></script>
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/admin.js" defer></script>
 </body>

@@ -145,6 +145,27 @@
     return user;
   };
 
+  const isAdmin = async () => {
+    const supabase = getClient();
+    if (!supabase) {
+      return false;
+    }
+    const user = await getCurrentUser();
+    if (!user) {
+      return false;
+    }
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .single();
+    if (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+    return !!data;
+  };
+
   const saveProducts = async (products) => {
     const supabase = getClient();
     if (!supabase) {
@@ -306,6 +327,7 @@
     signUpWithPassword,
     signOut,
     getCurrentUser,
+    isAdmin,
     onAuthStateChange,
   };
 }());

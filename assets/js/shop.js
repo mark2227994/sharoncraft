@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const utils = window.SharonCraftUtils;
   const grid = document.getElementById("shop-grid");
   const searchInput = document.getElementById("shop-search");
@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!grid) {
     return;
   }
+
+  // Wait for data to be loaded
+  await utils.waitForData();
 
   utils.renderCategorySelect(categorySelect);
 
@@ -53,10 +56,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (value === "newest") {
-      return copy.sort((left, right) => Number(right.newArrival) - Number(left.newArrival));
+      return copy.sort((left, right) => {
+        // Sort by new_until date or updated_at for Supabase products
+        const leftDate = left.newUntil ? new Date(left.newUntil) : new Date(left.updatedAt || 0);
+        const rightDate = right.newUntil ? new Date(right.newUntil) : new Date(right.updatedAt || 0);
+        return rightDate - leftDate;
+      });
     }
 
-    return copy.sort((left, right) => Number(right.featured) - Number(left.featured));
+    return copy.sort((left, right) => {
+      // Sort by spotlight first, then by sort_order
+      const leftSpotlight = Boolean(left.spotlightUntil || left.spotlightText);
+      const rightSpotlight = Boolean(right.spotlightUntil || right.spotlightText);
+      if (leftSpotlight !== rightSpotlight) {
+        return rightSpotlight ? 1 : -1;
+      }
+      return (left.sortOrder || 0) - (right.sortOrder || 0);
+    });
   }
 
   function renderProducts() {
@@ -69,8 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const textMatch =
         !keyword ||
         product.name.toLowerCase().includes(keyword) ||
-        product.shortDescription.toLowerCase().includes(keyword) ||
-        product.description.toLowerCase().includes(keyword);
+        (product.story || "").toLowerCase().includes(keyword) ||
+        (product.material || "").toLowerCase().includes(keyword);
       const categoryMatch = !category || product.category === category;
       const priceMatch = matchesPrice(product, price);
       return textMatch && categoryMatch && priceMatch;

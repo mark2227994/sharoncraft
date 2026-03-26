@@ -1,8 +1,12 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const utils = window.SharonCraftUtils;
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");
-  const product = utils.getProductById(productId);
+
+  // Wait for data to be loaded
+  await utils.waitForData();
+
+  const product = await utils.getProductById(productId);
 
   const breadcrumb = document.getElementById("product-breadcrumb");
   const title = document.getElementById("product-title");
@@ -33,14 +37,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const productCategory = utils.getCategoryBySlug(product.category);
 
-  document.title = `${product.name} | SharonCraft`;
-  title.textContent = product.name;
+  document.title = `${product.name || 'Artisan Creation'} | SharonCraft`;
+  title.textContent = product.name || '✨ Artisan Creation';
   price.textContent = utils.formatCurrency(product.price);
   description.textContent = product.description;
   category.textContent = productCategory ? productCategory.name : "Collection";
   mainImage.src = product.images[0];
-  mainImage.alt = product.name;
-  mpesaCopy.textContent = `Confirm ${product.name} on WhatsApp, then pay via M-Pesa after the total and delivery fee are shared.`;
+  mainImage.alt = product.name || 'SharonCraft artisan product';
+  mpesaCopy.textContent = `Confirm ${product.name || 'this beautiful piece'} on WhatsApp, then pay via M-Pesa after the total and delivery fee are shared.`;
   if (limitedCopy) {
     limitedCopy.textContent = utils.getScarcityNote(product);
   }
@@ -51,12 +55,12 @@ document.addEventListener("DOMContentLoaded", function () {
     <span>/</span>
     <a href="shop.html?category=${product.category}">${productCategory ? productCategory.name : "Collection"}</a>
     <span>/</span>
-    <strong>${product.name}</strong>
+    <strong>${product.name || '✨ Artisan Creation'}</strong>
   `;
 
   detailList.innerHTML = product.details.map((item) => `<li>${item}</li>`).join("");
   buyButton.href = utils.buildWhatsAppUrl(
-    `Hello SharonCraft, I would like to order the ${product.name} for ${utils.formatCurrency(product.price)}.`
+    `Hello SharonCraft, I would like to order the ${product.name || 'beautiful artisan piece'} for ${utils.formatCurrency(product.price)}.`
   );
 
   if (addCartButton) {
@@ -75,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .map(
       (image, index) => `
         <button class="thumb-button ${index === 0 ? "is-active" : ""}" type="button" data-image="${image}" aria-label="View image ${index + 1}">
-          <img src="${image}" alt="${product.name} thumbnail ${index + 1}" loading="lazy" />
+          <img src="${image}" alt="${product.name || 'SharonCraft product'} thumbnail ${index + 1}" loading="lazy" />
         </button>
       `
     )
@@ -93,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
     mainImage.src = button.dataset.image;
   });
 
-  relatedGrid.innerHTML = utils.getRelatedProducts(product).map(utils.createProductCard).join("");
+  relatedGrid.innerHTML = (await utils.getRelatedProducts(product)).map(utils.createProductCard).join("");
   utils.ensureCartTimer();
   utils.refreshReveal();
 });

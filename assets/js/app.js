@@ -1,10 +1,45 @@
 (function () {
   // Shared storefront helpers for layout, formatting, cart state, and reusable rendering.
-  const data = window.SharonCraftData;
-  const categoryMap = new Map(data.categories.map((category) => [category.slug, category]));
+  const staticData = window.SharonCraftData;
+  let data = staticData; // Start with static data as fallback
+  let productsLoaded = false;
+  const categoryMap = new Map(staticData.categories.map((category) => [category.slug, category]));
   const cartStorageKey = "sharoncraft-cart";
   const timerStorageKey = "sharoncraft-cart-timer";
   let cartTimerInterval = null;
+
+  // Initialize Supabase data
+  async function initializeData() {
+    if (window.SharonCraftCatalog && window.SharonCraftCatalog.isConfigured()) {
+      try {
+        const supabaseProducts = await window.SharonCraftCatalog.fetchProducts();
+        if (supabaseProducts && supabaseProducts.length > 0) {
+          // Merge Supabase products with static categories
+          data = {
+            ...staticData,
+            products: supabaseProducts.map(product => ({
+              ...product,
+              category: product.material || 'bracelets', // Map material to category
+              badge: product.spotlightText || (product.newUntil ? 'New' : ''),
+              images: [product.image, ...product.gallery].filter(Boolean)
+            }))
+          };
+          productsLoaded = true;
+          console.log('Loaded products from Supabase:', data.products.length);
+        }
+      } catch (error) {
+        console.warn('Failed to load Supabase products, using static data:', error);
+      }
+    }
+  }
+
+  // Wait for data to be loaded
+  async function waitForData() {
+    if (!productsLoaded) {
+      await initializeData();
+    }
+    return data;
+  }
 
   function formatCurrency(value) {
     return new Intl.NumberFormat("en-KE", {
@@ -18,20 +53,23 @@
     return `https://wa.me/${data.site.whatsapp}?text=${encodeURIComponent(message)}`;
   }
 
-  function getProductById(id) {
-    return data.products.find((product) => product.id === id);
+  async function getProductById(id) {
+    const currentData = await waitForData();
+    return currentData.products.find((product) => product.id === id);
   }
 
   function getCategoryBySlug(slug) {
     return categoryMap.get(slug);
   }
 
-  function getProductsByCategory(slug) {
-    return data.products.filter((product) => product.category === slug);
+  async function getProductsByCategory(slug) {
+    const currentData = await waitForData();
+    return currentData.products.filter((product) => product.category === slug);
   }
 
-  function getRelatedProducts(product, limit = 4) {
-    return data.products
+  async function getRelatedProducts(product, limit = 4) {
+    const currentData = await waitForData();
+    return currentData.products
       .filter((item) => item.id !== product.id)
       .sort((left, right) => {
         const leftScore = left.category === product.category ? 0 : 1;
@@ -123,17 +161,17 @@
     return `
       <article class="product-card reveal">
         <a class="product-card-media" href="product.html?id=${product.id}">
-          <img src="${product.images[0]}" alt="${product.name}" loading="lazy" />
+          <img src="${product.images[0]}" alt="${product.name || 'SharonCraft artisan product'}" loading="lazy" />
           ${badgeMarkup}
         </a>
         <div class="product-card-body">
           <div class="product-card-topline">
             <p class="product-card-category">${category ? category.name : "Collection"}</p>
-            <button class="cart-icon-button" type="button" data-add-to-cart="${product.id}" aria-label="Add ${product.name} to cart">
+            <button class="cart-icon-button" type="button" data-add-to-cart="${product.id}" aria-label="Add ${product.name || 'this beautiful piece'} to cart">
               ${cartIconMarkup()}
             </button>
           </div>
-          <h3><a href="product.html?id=${product.id}">${product.name}</a></h3>
+          <h3><a href="product.html?id=${product.id}">${product.name || '✨ Artisan Creation'}</a></h3>
           <div class="product-card-meta">
             <strong>${formatCurrency(product.price)}</strong>
             <span>Handmade</span>
@@ -359,14 +397,14 @@
         .map(
           (item) => `
             <article class="cart-item">
-              <img src="${item.product.images[0]}" alt="${item.product.name}" />
+              <img src="${item.product.images[0]}" alt="${item.product.name || 'SharonCraft product'}" />
               <div class="cart-item-copy">
-                <strong>${item.product.name}</strong>
+                <strong>${item.product.name || '✨ Artisan Piece'}</strong>
                 <span>${formatCurrency(item.product.price)} each</span>
                 <div class="cart-quantity-controls">
-                  <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce ${item.product.name} quantity">-</button>
+                  <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce ${item.product.name || 'item'} quantity">-</button>
                   <span>${item.quantity}</span>
-                  <button type="button" data-cart-increase="${item.productId}" aria-label="Increase ${item.product.name} quantity">+</button>
+                  <button type="button" data-cart-increase="${item.productId}" aria-label="Increase ${item.product.name || 'item'} quantity">+</button>
                 </div>
               </div>
               <strong>${formatCurrency(item.lineTotal)}</strong>
@@ -624,7 +662,7 @@
   document.addEventListener("DOMContentLoaded", hydrateSharedShell);
 
   window.SharonCraftUtils = {
-    data,
+    get data() { return data; }, // Dynamic getter for current data
     formatCurrency,
     buildWhatsAppUrl,
     getProductById,
@@ -641,6 +679,7 @@
     closeCart,
     ensureCartTimer,
     getTimeRemaining,
-    formatTimeRemaining
+    formatTimeRemaining,
+    waitForData
   };
 })();

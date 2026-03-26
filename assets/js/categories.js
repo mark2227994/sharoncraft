@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const utils = window.SharonCraftUtils;
   const grid = document.getElementById("categories-grid");
 
@@ -6,9 +6,13 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  grid.innerHTML = utils.data.categories
-    .map((category) => {
-      const products = utils.getProductsByCategory(category.slug).slice(0, 3);
+  // Wait for data to be loaded
+  await utils.waitForData();
+
+  grid.innerHTML = await Promise.all(
+    utils.data.categories.map(async (category) => {
+      const products = (await utils.getProductsByCategory(category.slug)).slice(0, 3);
+      const allProducts = await utils.getProductsByCategory(category.slug);
 
       return `
         <article class="category-feature-card reveal accent-${category.accent}">
@@ -18,16 +22,27 @@ document.addEventListener("DOMContentLoaded", function () {
           <div class="category-feature-copy">
             <span class="section-kicker">${category.name}</span>
             <h2>${category.description}</h2>
-            <p>${utils.getProductsByCategory(category.slug).length} products ready to explore.</p>
+            <p>${allProducts ? allProducts.length : 'Several'} products ready to explore.</p>
             <div class="category-preview-list">
-              ${products.map((product) => `<span>${product.name}</span>`).join("")}
+              ${products.map((product, index) => {
+                const creativeNames = [
+                  "✨ Artisan Treasure",
+                  "🌟 Handcrafted Gem", 
+                  "🎨 Colorful Creation",
+                  "💎 Beaded Beauty",
+                  "🌈 Kenyan Craft",
+                  "🎭 Unique Piece"
+                ];
+                const displayName = product.name || `✨ ${category.name} Exclusive`;
+                return `<span>${displayName}</span>`;
+              }).join("")}
             </div>
             <a class="button button-primary" href="shop.html?category=${category.slug}">Shop ${category.name}</a>
           </div>
         </article>
       `;
     })
-    .join("");
+  ).then(results => results.join(""));
 
   utils.refreshReveal();
 });

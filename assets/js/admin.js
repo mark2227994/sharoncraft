@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   // Browser-based admin state for the static storefront.
   const storageKey = (window.SharonCraftStorage && window.SharonCraftStorage.storageKey) || "sharoncraft-admin-catalog";
   const socialSettingsKey =
@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const replyTemplatesKey = "sharoncraft-reply-templates";
   const goalKey = "sharoncraft-kiosk-goal";
   const utils = window.SharonCraftUtils;
+
+  // Wait for data to be loaded
+  await utils.waitForData();
+
   const categoryMap = new Map(utils.data.categories.map((category) => [category.slug, category.name]));
   const availableImages = [
     "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.jpeg",
@@ -108,17 +112,29 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-  function loadCatalog() {
+  async function loadCatalog() {
     try {
+      // Try to load from Supabase first
+      if (window.SharonCraftCatalog && window.SharonCraftCatalog.isConfigured()) {
+        const supabaseProducts = await window.SharonCraftCatalog.fetchProducts();
+        if (supabaseProducts && supabaseProducts.length > 0) {
+          console.log('Loaded catalog from Supabase:', supabaseProducts.length, 'products');
+          return supabaseProducts.map((product, index) => normalizeProduct(product, index));
+        }
+      }
+
+      // Fallback to localStorage
       const saved = window.localStorage.getItem(storageKey);
       const raw = saved ? JSON.parse(saved) : defaultProducts;
+      console.log('Loaded catalog from localStorage');
       return raw.map((product, index) => normalizeProduct(product, index));
     } catch (error) {
+      console.error('Failed to load catalog:', error);
       return defaultProducts.map((product, index) => normalizeProduct(product, index));
     }
   }
 
-  let catalog = loadCatalog();
+  let catalog = await loadCatalog();
   let editingId = null;
   let temporaryMainPreviewSrc = "";
   const socialDefaults = utils.data.site.socials.map((social) => ({ label: social.label, url: social.url }));
@@ -1807,24 +1823,38 @@ document.addEventListener("DOMContentLoaded", function () {
       .join("");
   }
 
-  function saveCatalogState(message) {
-    window.localStorage.setItem(storageKey, JSON.stringify(catalog));
-    renderList();
-    renderFeaturedManager();
-    renderSalesDashboard();
-    renderProfitProductSelect();
-    syncProfitCalculatorFromSelection();
-    renderProfitDashboard();
-    renderOrderProductSelect();
-    renderStockList();
-    renderSocialProductSelect();
-    renderSocialMedia();
-    renderSocialTracker();
-    renderBundleProductPicker();
-    renderBundles();
-    renderGoalCard();
-    if (message) {
-      setStatus(message);
+  async function saveCatalogState(message) {
+    try {
+      // Try to save to Supabase first
+      if (window.SharonCraftCatalog && window.SharonCraftCatalog.isConfigured()) {
+        await window.SharonCraftCatalog.saveProducts(catalog);
+        console.log('Saved catalog to Supabase');
+      } else {
+        // Fallback to localStorage
+        window.localStorage.setItem(storageKey, JSON.stringify(catalog));
+        console.log('Saved catalog to localStorage (Supabase not configured)');
+      }
+
+      renderList();
+      renderFeaturedManager();
+      renderSalesDashboard();
+      renderProfitProductSelect();
+      syncProfitCalculatorFromSelection();
+      renderProfitDashboard();
+      renderOrderProductSelect();
+      renderStockList();
+      renderSocialProductSelect();
+      renderSocialMedia();
+      renderSocialTracker();
+      renderBundleProductPicker();
+      renderBundles();
+      renderGoalCard();
+      if (message) {
+        setStatus(message);
+      }
+    } catch (error) {
+      console.error('Failed to save catalog:', error);
+      setStatus(`Error saving catalog: ${error.message}`);
     }
   }
 
@@ -2476,8 +2506,8 @@ document.addEventListener("DOMContentLoaded", function () {
     setStatus("Default catalog restored.");
   });
 
-  saveButton.addEventListener("click", function () {
-    saveCatalogState("Catalog saved. Storefront pages in this browser now use the updated products.");
+  saveButton.addEventListener("click", async function () {
+    await saveCatalogState("Catalog saved. Storefront pages in this browser now use the updated products.");
   });
 
   list.addEventListener("click", function (event) {
