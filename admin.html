@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SharonCraft Admin Panel</title>
+  <meta name="description" content="SharonCraft product admin panel for updating the live local storefront catalog." />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <div class="container">
+      <section class="admin-hero">
+        <div class="admin-brand-lockup">
+          <img class="admin-brand-logo" src="assets/images/sharoncraft-logo-transparent.png" alt="SharonCraft logo" />
+          <div class="admin-brand-copy">
+            <span class="section-kicker">SharonCraft Admin</span>
+            <strong>Brand Control Room</strong>
+          </div>
+        </div>
+        <div class="section-heading admin-heading">
+          <span class="section-kicker">SharonCraft Admin</span>
+          <h1>Edit products, save the catalog, and move around the admin without long scrolling.</h1>
+          <p>This panel is arranged as a horizontal control room. Save products here, then move quickly between catalog work, repeat customers, bundles, replies, and growth tracking using the tab bar below.</p>
+        </div>
+        <div class="admin-hero-actions">
+          <button class="button button-primary" id="admin-save" type="button">Save Catalog</button>
+          <button class="button button-secondary" id="admin-reset" type="button">Restore Default Catalog</button>
+          <a class="button button-secondary" href="index.html" target="_blank" rel="noreferrer">Open Storefront</a>
+        </div>
+        <p id="admin-status" class="admin-status">Admin panel ready.</p>
+      </section>
+
+      <nav class="admin-tab-bar" aria-label="Admin sections">
+        <button class="admin-tab-button is-active" type="button" data-admin-tab="workspace">Workspace</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="catalog">Catalog</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="preview">Preview</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="sales">Sales</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="orders">Orders</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="operations">Operations</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="profit">Profit</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="social">Social</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="customers">Customers</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="bundles">Bundles</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="replies">Replies</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="growth">Growth</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="tips">Guide</button>
+        <button class="admin-tab-button" type="button" data-admin-tab="assets">Assets</button>
+      </nav>
+
+      <section class="admin-tab-panel is-active" data-admin-panel="workspace">
+        <div class="admin-workspace">
+          <section class="admin-panel admin-editor-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker" id="admin-form-title">Add Product</span>
+                <h2>Product Editor</h2>
+              </div>
+              <button class="button button-secondary" id="admin-add-product" type="button">New Product</button>
+            </div>
+
+            <form id="admin-form" class="admin-form">
+              <div class="admin-beginner-note">
+                <strong>Beginner quick start</strong>
+                <p>1. Upload or choose a photo. 2. Pick the category and price. 3. Click the AI name helper if you do not know the product name yet. 4. Use the description starter, then edit the words so they sound natural for your product.</p>
+              </div>
+              <div class="admin-form-group">
+                <label for="admin-name">Product name</label>
+                <div class="admin-smart-row">
+                  <input id="admin-name" type="text" placeholder="Product name or leave blank and use AI helper" />
+                  <button class="button button-secondary" id="admin-suggest-name" type="button">AI Name Helper</button>
+                </div>
+                <p class="admin-field-tip">The helper gives you a starter name from the category, description, details, and badge. You can always edit the result.</p>
+              </div>
+              <div class="admin-inline">
+                <select id="admin-category">
+                  <option value="necklaces">Necklaces</option>
+                  <option value="bracelets">Bracelets</option>
+                  <option value="home-decor">Home Decor</option>
+                  <option value="bags-accessories">Bags & Accessories</option>
+                  <option value="gift-sets">Gift Sets</option>
+                  <option value="bridal-occasion">Bridal & Occasion</option>
+                </select>
+                <input id="admin-price" type="number" min="0" placeholder="Price in KES" required />
+              </div>
+              <div class="admin-inline">
+                <input id="admin-mom-price" type="number" min="0" placeholder="Mom price / cost price" />
+                <input id="admin-delivery-charge" type="number" min="0" placeholder="Delivery charged to client" />
+              </div>
+              <div class="admin-inline">
+                <input id="admin-delivery-cost" type="number" min="0" placeholder="Actual delivery cost" />
+                <input id="admin-total-profit" type="text" placeholder="Auto total profit" readonly />
+              </div>
+              <div class="admin-inline">
+                <select id="admin-source">
+                  <option value="mom-kiosk">Mom's kiosk stock</option>
+                  <option value="my-stock">My own stock</option>
+                  <option value="shared-stock">Shared stock</option>
+                </select>
+                <input id="admin-stock-qty" type="number" min="0" placeholder="Stock quantity" />
+              </div>
+              <div class="admin-inline">
+                <input id="admin-reserved-qty" type="number" min="0" placeholder="Reserved quantity" />
+              </div>
+              <div class="admin-inline">
+                <input id="admin-badge" type="text" placeholder="Badge, for example New" />
+                  <input id="admin-image" type="text" placeholder="Main image path or uploaded image" required />
+                </div>
+                <textarea id="admin-gallery-images" placeholder="More gallery image paths separated by commas"></textarea>
+                <div class="admin-form">
+                  <label for="admin-image-file">Choose image from computer</label>
+                  <input id="admin-image-file" type="file" accept="image/*" />
+                  <p>Select a file to save it inside this browser for previews and product cards, or type an `assets/images/...` path if the file already exists in the project.</p>
+                  <div class="admin-beginner-steps">
+                    <strong>How to upload a product photo</strong>
+                    <ol class="admin-mini-steps">
+                      <li>Click `Choose image from computer` and pick one clear photo.</li>
+                      <li>Wait for the preview image to appear.</li>
+                      <li>If you want more than one photo, add extra image paths in `More gallery image paths` or use the Assets tab.</li>
+                      <li>Use `Selected gallery images` to choose the main photo that customers see first.</li>
+                    </ol>
+                  </div>
+                  <div class="admin-image-preview-wrap">
+                    <img id="admin-image-preview" src="assets/images/IMG-20260226-WA0005.jpg" alt="Selected image preview" />
+                  </div>
+                </div>
+              <div class="admin-form">
+                <label>Selected gallery images</label>
+                <div id="admin-selected-gallery" class="admin-selected-gallery"></div>
+              </div>
+              <div class="admin-form-group">
+                <label for="admin-description">Product description</label>
+                <textarea id="admin-description" placeholder="Simple client-friendly description" required></textarea>
+                <div class="admin-actions">
+                  <button class="button button-secondary" id="admin-description-starter" type="button">Add Description Starter</button>
+                </div>
+                <p class="admin-field-tip">Easy formula: what it is + standout color or style + where someone can wear or use it + why it feels special.</p>
+                <div class="admin-reply-helper">
+                  <span class="admin-summary-tag">Color or pattern</span>
+                  <span class="admin-summary-tag">Handmade detail</span>
+                  <span class="admin-summary-tag">Gift idea</span>
+                  <span class="admin-summary-tag">Wedding or daily use</span>
+                  <span class="admin-summary-tag">Comfort or size feel</span>
+                </div>
+              </div>
+              <textarea id="admin-details" placeholder="Details separated by commas"></textarea>
+              <div class="admin-checks">
+                <label><input id="admin-featured" type="checkbox" /> Featured on homepage</label>
+                <label><input id="admin-new" type="checkbox" /> Mark as new</label>
+              </div>
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Product</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Live Product Preview</span>
+                  <h2>Draft Card</h2>
+                </div>
+              </div>
+              <div class="admin-draft-stage">
+                <article class="admin-draft-card">
+                  <div class="admin-draft-media">
+                    <span id="admin-draft-badge" class="badge badge-teal">New</span>
+                    <img id="admin-draft-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="Draft product preview" />
+                  </div>
+                  <div class="admin-draft-body">
+                    <p id="admin-draft-category" class="product-card-category">Necklaces</p>
+                    <h3 id="admin-draft-title">Your product title</h3>
+                    <p id="admin-draft-description" class="product-card-text">Your short product description will appear here as you type.</p>
+                    <div class="product-card-meta">
+                      <strong id="admin-draft-price">KES 0</strong>
+                      <span>Handmade</span>
+                    </div>
+                    <div id="admin-draft-profit" class="admin-draft-profit">Profit snapshot will appear here.</div>
+                    <div id="admin-draft-gallery" class="admin-draft-gallery"></div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Quick Snapshot</span>
+                  <h2>Saved Catalog</h2>
+                </div>
+              </div>
+              <textarea id="admin-json-preview" class="admin-json" readonly></textarea>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="catalog">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Catalog</span>
+                <h2>Product List</h2>
+              </div>
+            </div>
+            <div class="admin-list-toolbar">
+              <input id="admin-product-search" type="search" placeholder="Search products" />
+              <select id="admin-product-filter">
+                <option value="">All categories</option>
+                <option value="necklaces">Necklaces</option>
+                <option value="bracelets">Bracelets</option>
+                <option value="home-decor">Home Decor</option>
+                <option value="bags-accessories">Bags & Accessories</option>
+                <option value="gift-sets">Gift Sets</option>
+                <option value="bridal-occasion">Bridal & Occasion</option>
+              </select>
+              <select id="admin-feature-filter">
+                <option value="">All products</option>
+                <option value="featured">Featured only</option>
+                <option value="new">New arrivals only</option>
+              </select>
+            </div>
+            <div id="admin-product-list"></div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Homepage</span>
+                  <h2>Featured Products</h2>
+                </div>
+              </div>
+              <div id="admin-featured-summary" class="admin-featured-summary"></div>
+              <div id="admin-featured-manager" class="admin-featured-manager"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="preview">
+        <section class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Storefront Preview</span>
+              <h2>Mobile View</h2>
+            </div>
+          </div>
+          <div class="admin-mobile-toolbar">
+            <select id="admin-preview-page" aria-label="Select page to preview">
+              <option value="index.html">Home Page</option>
+              <option value="shop.html">Shop Page</option>
+              <option value="categories.html">Categories Page</option>
+              <option value="about.html">About Page</option>
+              <option value="contact.html">Contact Page</option>
+              <option value="product.html?id=uhuru-home-set">Product Page</option>
+            </select>
+            <button class="button button-secondary" id="admin-preview-reload" type="button">Reload Preview</button>
+            <a class="button button-secondary" id="admin-preview-open" href="index.html" target="_blank" rel="noreferrer">Open Full Page</a>
+          </div>
+          <div class="admin-phone-stage">
+            <div class="admin-phone-shell">
+              <div class="admin-phone-notch"></div>
+              <iframe
+                id="admin-preview-frame"
+                class="admin-preview-frame"
+                src="index.html"
+                title="Live SharonCraft mobile preview"
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="sales">
+        <section class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Sales</span>
+              <h2>Dashboard</h2>
+            </div>
+            <button class="button button-secondary" id="admin-reset-sales" type="button">Reset Sales to 0</button>
+          </div>
+          <p class="admin-note">These figures are still sample numbers for now, but the dashboard layout is ready for real data later.</p>
+          <div id="admin-sales-metrics" class="admin-sales-metrics"></div>
+          <div class="admin-sales-stack">
+            <div id="admin-sales-chart" class="admin-sales-chart"></div>
+            <div id="admin-sales-table" class="admin-sales-table"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="orders">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Orders</span>
+                <h2>Order Manager</h2>
+              </div>
+            </div>
+            <form id="admin-order-form" class="admin-form">
+              <div class="admin-inline">
+                <input id="admin-order-customer" type="text" placeholder="Customer name" />
+                <input id="admin-order-phone" type="text" placeholder="Phone / WhatsApp number" />
+              </div>
+              <div class="admin-inline">
+                <select id="admin-order-product"></select>
+                <select id="admin-order-area"></select>
+              </div>
+              <div class="admin-inline">
+                <input id="admin-order-quantity" type="number" min="1" value="1" placeholder="Quantity" />
+                <select id="admin-order-status">
+                  <option value="new">New</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="paid">Paid</option>
+                  <option value="delivered">Delivered</option>
+                </select>
+              </div>
+              <textarea id="admin-order-note" placeholder="Short order note"></textarea>
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Order</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Today</span>
+                  <h2>Order Snapshot</h2>
+                </div>
+              </div>
+              <div id="admin-order-metrics" class="admin-profit-metrics"></div>
+            </section>
+          </aside>
+        </div>
+        <section class="admin-panel admin-section-tight">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Saved Orders</span>
+              <h2>Order List</h2>
+            </div>
+          </div>
+          <div id="admin-order-list" class="admin-order-list"></div>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="operations">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Delivery Areas</span>
+                <h2>Delivery Manager</h2>
+              </div>
+            </div>
+            <form id="admin-delivery-form" class="admin-form">
+              <div class="admin-inline">
+                <input id="admin-delivery-name" type="text" placeholder="Area name" />
+                <input id="admin-delivery-client-charge" type="number" min="0" placeholder="Charge client" />
+              </div>
+              <div class="admin-inline">
+                <input id="admin-delivery-real-cost" type="number" min="0" placeholder="Actual delivery cost" />
+              </div>
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Delivery Area</button>
+              </div>
+            </form>
+            <div id="admin-delivery-list" class="admin-ops-list"></div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Expenses</span>
+                  <h2>Expense Tracker</h2>
+                </div>
+              </div>
+              <form id="admin-expense-form" class="admin-form">
+                <div class="admin-inline">
+                  <input id="admin-expense-name" type="text" placeholder="Expense name" />
+                  <input id="admin-expense-amount" type="number" min="0" placeholder="Amount" />
+                </div>
+                <textarea id="admin-expense-note" placeholder="Short note"></textarea>
+                <div class="admin-actions">
+                  <button class="button button-primary" type="submit">Save Expense</button>
+                </div>
+              </form>
+              <div id="admin-expense-summary" class="admin-profit-metrics"></div>
+              <div id="admin-expense-list" class="admin-ops-list"></div>
+            </section>
+
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Stock</span>
+                  <h2>Source & Reserved</h2>
+                </div>
+              </div>
+              <div id="admin-stock-list" class="admin-stock-list"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="profit">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Reseller Profit</span>
+                <h2>Profit Dashboard</h2>
+              </div>
+              <button class="button button-secondary" id="admin-reset-profit" type="button">Reset Profit History</button>
+            </div>
+            <p class="admin-note">Track what your mom charges you, what you sell for online, what you charge for delivery, and the real profit that stays with you.</p>
+            <div id="admin-profit-metrics" class="admin-profit-metrics"></div>
+            <div id="admin-profit-table" class="admin-profit-table"></div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Quick Calculator</span>
+                  <h2>Order Profit</h2>
+                </div>
+              </div>
+              <div class="admin-form">
+                <select id="admin-profit-product"></select>
+                <div class="admin-inline">
+                  <input id="admin-profit-quantity" type="number" min="1" value="1" placeholder="Quantity" />
+                  <input id="admin-profit-order-mom-price" type="number" min="0" placeholder="Mom price" />
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-profit-order-price" type="number" min="0" placeholder="My selling price" />
+                  <input id="admin-profit-order-delivery-charge" type="number" min="0" placeholder="Delivery charged" />
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-profit-order-delivery-cost" type="number" min="0" placeholder="Actual delivery cost" />
+                </div>
+              </div>
+              <div id="admin-profit-breakdown" class="admin-profit-breakdown"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="customers">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Customers</span>
+                <h2>Repeat Customer Tracker</h2>
+              </div>
+            </div>
+            <p class="admin-note">These customers are grouped from your saved orders so you can quickly see who comes back, what they like, and who is helping your business grow.</p>
+            <div id="admin-customer-metrics" class="admin-profit-metrics"></div>
+            <div id="admin-customer-list" class="admin-customer-list"></div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Loyalty Snapshot</span>
+                  <h2>Best Relationship View</h2>
+                </div>
+              </div>
+              <div id="admin-customer-highlight" class="admin-customer-highlight"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="bundles">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Bundles</span>
+                <h2>Bundle Builder</h2>
+              </div>
+            </div>
+            <form id="admin-bundle-form" class="admin-form">
+              <div class="admin-inline">
+                <input id="admin-bundle-name" type="text" placeholder="Bundle name" />
+                <input id="admin-bundle-price" type="number" min="0" placeholder="Bundle price" />
+              </div>
+              <textarea id="admin-bundle-note" placeholder="Short note, for example Birthday gift set or Matching set"></textarea>
+              <div>
+                <label>Choose products for this bundle</label>
+                <div id="admin-bundle-product-picker" class="admin-bundle-picker"></div>
+              </div>
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Bundle</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Quick View</span>
+                  <h2>Bundle Summary</h2>
+                </div>
+              </div>
+              <div id="admin-bundle-metrics" class="admin-profit-metrics"></div>
+            </section>
+          </aside>
+        </div>
+
+        <section class="admin-panel admin-section-tight">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Saved Bundles</span>
+              <h2>Bundle List</h2>
+            </div>
+          </div>
+          <div id="admin-bundle-list" class="admin-bundle-list"></div>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="replies">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Replies</span>
+                <h2>WhatsApp Reply Templates</h2>
+              </div>
+            </div>
+            <form id="admin-reply-form" class="admin-form">
+              <div class="admin-inline">
+                <input id="admin-reply-title" type="text" placeholder="Template title" />
+                <select id="admin-reply-category">
+                  <option value="new-inquiry">New inquiry</option>
+                  <option value="order-follow-up">Order follow up</option>
+                  <option value="payment">Payment</option>
+                  <option value="delivery">Delivery</option>
+                  <option value="custom-order">Custom order</option>
+                </select>
+              </div>
+              <textarea id="admin-reply-message" placeholder="Write a simple message you can quickly copy to WhatsApp."></textarea>
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Template</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Shortcut Tips</span>
+                  <h2>Useful Placeholders</h2>
+                </div>
+              </div>
+              <div class="admin-reply-helper">
+                <span class="admin-summary-tag">[Customer Name]</span>
+                <span class="admin-summary-tag">[Product Name]</span>
+                <span class="admin-summary-tag">[Price]</span>
+                <span class="admin-summary-tag">[Delivery Area]</span>
+                <span class="admin-summary-tag">[M-Pesa Number]</span>
+              </div>
+              <p class="admin-note">Keep replies short, warm, and easy to edit before sending.</p>
+            </section>
+          </aside>
+        </div>
+
+        <section class="admin-panel admin-section-tight">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Saved Replies</span>
+              <h2>Template List</h2>
+            </div>
+          </div>
+          <div id="admin-reply-list" class="admin-reply-list"></div>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="growth">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">My Kiosk Fund</span>
+                <h2>Growth Tracker</h2>
+              </div>
+            </div>
+            <form id="admin-goal-form" class="admin-form">
+              <div class="admin-inline">
+                <input id="admin-goal-target" type="number" min="0" placeholder="Target amount for your kiosk" />
+                <input id="admin-goal-saved" type="number" min="0" placeholder="Amount already saved" />
+              </div>
+              <textarea id="admin-goal-note" placeholder="Short note about your goal"></textarea>
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Goal</button>
+              </div>
+            </form>
+            <div id="admin-growth-metrics" class="admin-profit-metrics"></div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Progress</span>
+                  <h2>Opening Your Own Kiosk</h2>
+                </div>
+              </div>
+              <div id="admin-goal-card" class="admin-goal-card"></div>
+            </section>
+
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Monthly View</span>
+                  <h2>Growth Dashboard</h2>
+                </div>
+              </div>
+              <div id="admin-growth-monthly" class="admin-growth-monthly"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="social">
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Social</span>
+                <h2>Brand & Links</h2>
+              </div>
+            </div>
+            <div class="admin-social-stack">
+              <article class="admin-social-intro">
+                <div>
+                  <strong>Simple social control</strong>
+                  <p>Keep your links fresh, write faster captions, and plan what to post without leaving the admin.</p>
+                </div>
+                <span class="admin-summary-pill">Lightweight and easy to update</span>
+              </article>
+
+              <form id="admin-social-form" class="admin-form">
+                <div class="admin-inline">
+                  <input id="admin-social-whatsapp" type="url" placeholder="WhatsApp link" />
+                  <input id="admin-social-instagram" type="url" placeholder="Instagram link" />
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-social-facebook" type="url" placeholder="Facebook link" />
+                  <input id="admin-social-tiktok" type="url" placeholder="TikTok link" />
+                </div>
+                <div class="admin-actions">
+                  <button class="button button-primary" type="submit">Save Social Links</button>
+                </div>
+              </form>
+
+              <section class="admin-social-card">
+                <div class="admin-panel-header">
+                  <div>
+                    <span class="section-kicker">Caption Studio</span>
+                    <h2>Post Copy</h2>
+                  </div>
+                </div>
+                <div class="admin-inline">
+                  <select id="admin-social-product"></select>
+                  <select id="admin-social-tone">
+                    <option value="warm">Warm and friendly</option>
+                    <option value="sales">Sales push</option>
+                    <option value="gift">Gift focused</option>
+                  </select>
+                </div>
+                <div class="admin-actions">
+                  <button class="button button-secondary" id="admin-generate-caption" type="button">Generate Caption</button>
+                  <button class="button button-secondary" id="admin-copy-caption" type="button">Copy Caption</button>
+                </div>
+                <textarea id="admin-social-caption" placeholder="Your product caption will appear here."></textarea>
+              </section>
+            </div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Weekly Planner</span>
+                  <h2>Content Calendar</h2>
+                </div>
+              </div>
+              <div id="admin-social-calendar" class="admin-social-calendar"></div>
+            </section>
+
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Media Picker</span>
+                  <h2>Social Ready Products</h2>
+                </div>
+              </div>
+              <div id="admin-social-media" class="admin-social-media"></div>
+            </section>
+
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Inquiry Tracker</span>
+                  <h2>Top Chat Drivers</h2>
+                </div>
+              </div>
+              <div id="admin-social-tracker" class="admin-social-tracker"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="tips">
+        <div class="admin-guide-layout">
+          <aside class="admin-panel admin-guide-nav-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Admin Guide</span>
+                <h2>Tool Map</h2>
+              </div>
+            </div>
+            <p class="admin-note">This is the built-in handbook for the admin panel. Use the links below to jump through the guide, then use the open buttons to jump into the real tool.</p>
+            <nav class="admin-guide-nav" aria-label="Admin guide navigation">
+              <a class="admin-guide-link" href="#guide-start">Start Here</a>
+              <a class="admin-guide-link" href="#guide-workflow">Product Workflow</a>
+              <a class="admin-guide-link" href="#guide-orders-ops">Orders and Operations</a>
+              <a class="admin-guide-link" href="#guide-profit-growth">Profit and Growth</a>
+              <a class="admin-guide-link" href="#guide-social-replies">Social and Replies</a>
+              <a class="admin-guide-link" href="#guide-customers-bundles">Customers and Bundles</a>
+              <a class="admin-guide-link" href="#guide-dashboards">Dashboards</a>
+              <a class="admin-guide-link" href="#guide-tips">Business Tips</a>
+            </nav>
+          </aside>
+
+          <div class="admin-guide-content">
+            <article class="admin-panel admin-guide-card" id="guide-start">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Start Here</span>
+                  <h2>What the Main Controls Do</h2>
+                </div>
+              </div>
+              <p class="admin-guide-lead">The top action buttons affect the whole admin. `Save Catalog` stores your current catalog in this browser, `Restore Default Catalog` returns the starter catalog, `Open Storefront` opens the public site, and the status line under the hero tells you what just changed.</p>
+              <ul class="admin-guide-list">
+                <li><strong>Top tab bar:</strong> moves you between Workspace, Catalog, Preview, Sales, Orders, Operations, Profit, Social, Customers, Bundles, Replies, Growth, Guide, and Assets.</li>
+                <li><strong>Status line:</strong> confirms saves, resets, uploads, and quick actions.</li>
+                <li><strong>Best work order:</strong> edit in Workspace, confirm in Catalog, and check the result in Preview.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-workflow">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Product Workflow</span>
+                  <h2>Workspace, Catalog, Preview, and Assets</h2>
+                </div>
+              </div>
+              <div class="admin-guide-actions">
+                <button class="button button-secondary" type="button" data-admin-jump="workspace">Open Workspace</button>
+                <button class="button button-secondary" type="button" data-admin-jump="catalog">Open Catalog</button>
+                <button class="button button-secondary" type="button" data-admin-jump="preview">Open Preview</button>
+                <button class="button button-secondary" type="button" data-admin-jump="assets">Open Assets</button>
+              </div>
+              <ul class="admin-guide-list">
+                <li><strong>Workspace:</strong> `New Product` clears the form, `AI Name Helper` suggests a starter name, `Add Description Starter` helps beginners write product copy, and `Save Product` creates or updates one product.</li>
+                <li><strong>Product fields:</strong> name, category, price, badge, description, details, featured toggle, and new toggle control how the storefront presents the item.</li>
+                <li><strong>Profit-related fields:</strong> mom price, delivery charged, delivery cost, stock source, stock quantity, and reserved quantity help operations and profit tabs stay accurate.</li>
+                <li><strong>Image tools:</strong> main image, gallery images, computer upload, and selected gallery controls decide what image appears first and what extra views the customer sees.</li>
+                <li><strong>Catalog:</strong> search, category filter, and feature filter help you find products fast. `Edit` sends the product back to Workspace, `Preview` opens it in Preview, and `Delete` removes it from the catalog.</li>
+                <li><strong>Featured Products manager:</strong> switches homepage featuring on or off without reopening every product.</li>
+                <li><strong>Preview:</strong> page selector changes the page in the phone frame, `Reload Preview` refreshes it, and `Open Full Page` opens that page outside the frame.</li>
+                <li><strong>Assets:</strong> the image library shows existing project images. `Use as Main` makes one the main product image, and `Add to Gallery` pushes it into the current product gallery.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-orders-ops">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Orders and Operations</span>
+                  <h2>Daily Selling Tools</h2>
+                </div>
+              </div>
+              <div class="admin-guide-actions">
+                <button class="button button-secondary" type="button" data-admin-jump="orders">Open Orders</button>
+                <button class="button button-secondary" type="button" data-admin-jump="operations">Open Operations</button>
+              </div>
+              <ul class="admin-guide-list">
+                <li><strong>Orders form:</strong> customer name, phone, product, area, quantity, status, and order note capture the full order record.</li>
+                <li><strong>Save Order:</strong> stores the order and feeds related summaries such as customer and growth data.</li>
+                <li><strong>Order Snapshot:</strong> gives a quick top-level picture of current orders.</li>
+                <li><strong>Order List:</strong> lets you update status or delete an order row.</li>
+                <li><strong>Delivery Manager:</strong> area name, charge client, and actual delivery cost define delivery zones and their costs.</li>
+                <li><strong>Expense Tracker:</strong> records business spending with name, amount, note, and saved history.</li>
+                <li><strong>Stock panel:</strong> shows each product source, stock quantity, and reserved quantity to reduce overselling risk.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-profit-growth">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Profit and Growth</span>
+                  <h2>Money Tracking Tools</h2>
+                </div>
+              </div>
+              <div class="admin-guide-actions">
+                <button class="button button-secondary" type="button" data-admin-jump="profit">Open Profit</button>
+                <button class="button button-secondary" type="button" data-admin-jump="growth">Open Growth</button>
+              </div>
+              <ul class="admin-guide-list">
+                <li><strong>Profit Dashboard:</strong> summarizes saved product margin values so you can see what is worth pushing harder.</li>
+                <li><strong>Reset Profit History:</strong> clears mom price and delivery values from products. Use it only when you want a true reset.</li>
+                <li><strong>Quick Calculator:</strong> product selector, quantity, mom price, my selling price, delivery charged, and actual delivery cost let you test an order before accepting it.</li>
+                <li><strong>Profit Breakdown:</strong> converts the calculator numbers into cost total, selling total, product profit, delivery profit, and total profit.</li>
+                <li><strong>Growth form:</strong> target amount, amount saved, and goal note track the bigger business milestone you are saving toward.</li>
+                <li><strong>Growth metrics, goal card, and monthly view:</strong> show whether current business activity is moving you toward your kiosk goal.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-social-replies">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Social and Replies</span>
+                  <h2>Marketing and Fast Messaging</h2>
+                </div>
+              </div>
+              <div class="admin-guide-actions">
+                <button class="button button-secondary" type="button" data-admin-jump="social">Open Social</button>
+                <button class="button button-secondary" type="button" data-admin-jump="replies">Open Replies</button>
+              </div>
+              <ul class="admin-guide-list">
+                <li><strong>Social links:</strong> WhatsApp, Instagram, Facebook, and TikTok fields control the public social links on the storefront.</li>
+                <li><strong>Caption Studio:</strong> product selector, tone selector, `Generate Caption`, `Copy Caption`, and caption box help you prepare social posts faster.</li>
+                <li><strong>Weekly Planner:</strong> stores daily themes and notes for the content calendar.</li>
+                <li><strong>Social Ready Products:</strong> lets you load strong products straight into the caption workflow.</li>
+                <li><strong>Top Chat Drivers:</strong> highlights which products are most likely to pull shopper attention.</li>
+                <li><strong>Replies form:</strong> template title, category, and reply message build reusable WhatsApp messages.</li>
+                <li><strong>Useful Placeholders:</strong> tokens like `[Customer Name]` remind you what to personalize before sending.</li>
+                <li><strong>Reply list:</strong> `Copy` sends a template to clipboard, `Edit` loads it back into the form, and `Delete` removes it.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-customers-bundles">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Customers and Bundles</span>
+                  <h2>Relationship and Offer Tools</h2>
+                </div>
+              </div>
+              <div class="admin-guide-actions">
+                <button class="button button-secondary" type="button" data-admin-jump="customers">Open Customers</button>
+                <button class="button button-secondary" type="button" data-admin-jump="bundles">Open Bundles</button>
+              </div>
+              <ul class="admin-guide-list">
+                <li><strong>Customers tab:</strong> customer metrics, customer list, and best relationship view help you spot repeat buyers and what they like most.</li>
+                <li><strong>Bundles form:</strong> bundle name, price, note, and product picker help you package multiple products into one stronger offer.</li>
+                <li><strong>Save Bundle:</strong> stores the new bundle or updates the bundle currently being edited.</li>
+                <li><strong>Bundle Summary and Bundle List:</strong> show how many bundle offers you have, what is inside them, and which ones need editing or removal.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-dashboards">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Dashboards</span>
+                  <h2>Sales and Summary Views</h2>
+                </div>
+                <button class="button button-secondary" type="button" data-admin-jump="sales">Open Sales</button>
+              </div>
+              <ul class="admin-guide-list">
+                <li><strong>Sales metrics:</strong> summarize revenue, clicks, and units in one place.</li>
+                <li><strong>Sales chart and sales table:</strong> help you compare products visually and in row form.</li>
+                <li><strong>Reset Sales to 0:</strong> clears sample sales values across products when you want to start fresh.</li>
+                <li><strong>Snapshots across the admin:</strong> order snapshot, bundle summary, customer highlight, goal card, and draft card are mini dashboards for quick decisions.</li>
+              </ul>
+            </article>
+
+            <article class="admin-panel admin-guide-card" id="guide-tips">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Business Tips</span>
+                  <h2>Simple Rules to Keep Nearby</h2>
+                </div>
+              </div>
+              <div class="admin-tips-grid">
+                <article class="admin-tip-card">
+                  <strong>1. Product Profit</strong>
+                  <p>If your mom says a product is `1000` and you sell it online for `1500`, your product profit is `500`.</p>
+                </article>
+                <article class="admin-tip-card">
+                  <strong>2. Delivery Profit</strong>
+                  <p>If you charge the client `500` for delivery and the real delivery costs `200`, your delivery profit is `300`.</p>
+                </article>
+                <article class="admin-tip-card">
+                  <strong>3. Total Profit</strong>
+                  <p>Total profit = product profit + delivery profit. This is the main number to watch before opening your own kiosk.</p>
+                </article>
+                <article class="admin-tip-card">
+                  <strong>4. Safe Pricing</strong>
+                  <p>Always check that your selling price covers your mom price, packaging, transport, and your own margin.</p>
+                </article>
+                <article class="admin-tip-card">
+                  <strong>5. Small Batch Thinking</strong>
+                  <p>Start with the products that bring the highest profit and move fast. Grow from what is already working.</p>
+                </article>
+                <article class="admin-tip-card">
+                  <strong>6. Your Goal</strong>
+                  <p>Use the website to learn which products sell well, build steady profit, then reinvest into your own kiosk step by step.</p>
+                </article>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="assets">
+        <section class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Assets</span>
+              <h2>Image Library</h2>
+            </div>
+          </div>
+          <div id="admin-image-library" class="admin-image-library"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+  <script src="assets/js/admin.js" defer></script>
+</body>
+</html>

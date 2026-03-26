@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shop | SharonCraft</title>
+  <meta name="description" content="Browse SharonCraft products by category, price, and keyword." />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="shop">
+  <div data-site-header></div>
+
+  <main>
+    <!-- Shop intro -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="page-hero-copy">
+          <span class="section-kicker">Shop SharonCraft</span>
+          <h1>Find beadwork you can scan quickly and order with confidence.</h1>
+          <p>Use the search bar, category filter, and price filter to narrow down the collection. Every product card leads to a simple detail page with WhatsApp buying support.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="section">
+      <div class="container">
+        <div class="filter-card">
+          <div class="filter-grid">
+            <input id="shop-search" type="search" placeholder="Search by product name or style" />
+            <select id="shop-category" aria-label="Filter by category"></select>
+            <select id="shop-price" aria-label="Filter by price">
+              <option value="">All prices</option>
+              <option value="under-2000">Under KES 2,000</option>
+              <option value="2000-5000">KES 2,000 to 5,000</option>
+              <option value="over-5000">Above KES 5,000</option>
+            </select>
+            <select id="shop-sort" aria-label="Sort products">
+              <option value="featured">Sort by featured</option>
+              <option value="newest">Sort by new</option>
+              <option value="price-asc">Price low to high</option>
+              <option value="price-desc">Price high to low</option>
+            </select>
+          </div>
+          <div class="filter-meta">
+            <span id="shop-count">0 products found</span>
+            <button id="clear-shop-filters" class="button button-secondary" type="button">Clear Filters</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product grid -->
+    <section class="section">
+      <div class="container">
+        <div id="shop-grid" class="product-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+  <script src="assets/js/shop.js" defer></script>
+</body>
+</html>

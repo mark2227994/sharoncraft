@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product | SharonCraft</title>
+  <meta name="description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="shop">
+  <div data-site-header></div>
+
+  <main>
+    <!-- Product details -->
+    <section class="section">
+      <div class="container">
+        <nav id="product-breadcrumb" class="breadcrumb" aria-label="Breadcrumb"></nav>
+        <div class="product-layout">
+          <section class="product-gallery">
+            <div class="product-main-image">
+              <img id="product-main-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="SharonCraft product" />
+            </div>
+            <div id="product-thumbs" class="thumb-grid"></div>
+          </section>
+
+          <section class="product-summary">
+            <p id="product-category" class="eyebrow">Collection</p>
+            <h1 id="product-title">Loading product...</h1>
+            <strong id="product-price"></strong>
+            <div class="product-limited-box" data-cart-urgency="always">
+              <strong>Limited hold</strong>
+              <p>Popular pieces move fast. This product hold ends in <span data-cart-timer>05:00</span>.</p>
+              <small id="product-limited-copy">Only a few pieces are left in this batch.</small>
+            </div>
+            <p id="product-description"></p>
+            <ul id="product-details"></ul>
+            <div class="cta-row">
+              <button id="product-add-cart" class="button button-secondary" type="button">Add to Cart</button>
+              <a id="product-buy" class="button button-primary" href="#" target="_blank" rel="noreferrer">Buy via WhatsApp</a>
+              <button id="product-view-cart" class="button button-secondary" type="button">View Cart</button>
+              <a class="button button-secondary" href="shop.html">Back to Shop</a>
+            </div>
+            <div class="mpesa-box">
+              <strong>M-Pesa</strong>
+              <p id="product-mpesa-copy">Confirm your product on WhatsApp, then pay after delivery details are shared.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related products -->
+    <section class="section">
+      <div class="container">
+        <div class="section-heading">
+          <span class="section-kicker">Related Products</span>
+          <h2>You may also like these SharonCraft favorites.</h2>
+        </div>
+        <div id="related-products" class="product-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+  <script src="assets/js/product.js" defer></script>
+</body>
+</html>
