@@ -24,6 +24,54 @@ document.addEventListener("DOMContentLoaded", async function () {
     categorySelect.value = initialCategory;
   }
 
+  const chipContainer = document.getElementById("shop-chips");
+  const filterGrid = document.getElementById("shop-filter-grid");
+  const toggleFiltersButton = document.getElementById("shop-toggle-filters");
+
+  function buildChips() {
+    if (!chipContainer) return;
+
+    const categories = [
+      { value: "", label: "All" },
+      ...Array.from(categorySelect.options)
+        .filter((option) => option.value)
+        .map((option) => ({ value: option.value, label: option.textContent }))
+        .slice(0, 4)
+    ];
+
+    chipContainer.innerHTML = categories
+      .map(
+        (cat) => `
+          <button type="button" class="filter-chip ${cat.value === categorySelect.value ? "is-active" : ""}" data-chip="${cat.value}">
+            ${cat.label}
+          </button>
+        `
+      )
+      .join("");
+  }
+
+  function setFilterOpen(open) {
+    if (!filterGrid) return;
+    filterGrid.classList.toggle("is-open", open);
+    if (toggleFiltersButton) {
+      toggleFiltersButton.textContent = open ? "Hide Filters" : "Show Filters";
+    }
+  }
+
+  if (toggleFiltersButton) {
+    toggleFiltersButton.addEventListener("click", () => setFilterOpen(!filterGrid.classList.contains("is-open")));
+  }
+
+  if (chipContainer) {
+    chipContainer.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-chip]");
+      if (!button) return;
+      const value = button.dataset.chip;
+      categorySelect.value = value;
+      renderProducts();
+    });
+  }
+
   function matchesPrice(product, priceFilter) {
     if (!priceFilter) {
       return true;
@@ -80,6 +128,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const category = categorySelect.value;
     const price = priceSelect.value;
     const sort = sortSelect.value;
+
+    buildChips();
 
     const filtered = utils.data.products.filter((product) => {
       const textMatch =

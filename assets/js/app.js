@@ -42,11 +42,7 @@
   }
 
   function formatCurrency(value) {
-    return new Intl.NumberFormat("en-KE", {
-      style: "currency",
-      currency: "KES",
-      maximumFractionDigits: 0
-    }).format(value);
+    return isNaN(value) ? "KSH 0.00" : `KSH ${value.toFixed(2)}`;
   }
 
   function buildWhatsAppUrl(message) {
@@ -56,6 +52,10 @@
   async function getProductById(id) {
     const currentData = await waitForData();
     return currentData.products.find((product) => product.id === id);
+  }
+
+  function findProductById(id) {
+    return (data.products || []).find((product) => product.id === id);
   }
 
   function getCategoryBySlug(slug) {
@@ -207,8 +207,13 @@
 
   function getCart() {
     try {
-      const parsed = JSON.parse(window.localStorage.getItem(cartStorageKey) || "[]");
-      return Array.isArray(parsed) ? parsed.filter((item) => getProductById(item.productId) && item.quantity > 0) : [];
+      const stored = window.localStorage.getItem(cartStorageKey) || "[]";
+      const parsed = JSON.parse(stored);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((item) => item.productId && item.quantity > 0)
+        .map((item) => ({ ...item, quantity: Number(item.quantity) || 0 }))
+        .filter((item) => item.quantity > 0);
     } catch (error) {
       return [];
     }
@@ -297,14 +302,19 @@
   function getCartSummary() {
     return getCart()
       .map((item) => {
-        const product = getProductById(item.productId);
+        const product = findProductById(item.productId);
+        const price = Number(item.productPrice || (product && product.price) || 0);
+        const name = item.productName || (product && product.name) || "SharonCraft item";
+
         return {
           ...item,
           product,
-          lineTotal: product.price * item.quantity
+          productName: name,
+          productPrice: price,
+          lineTotal: price * item.quantity,
         };
       })
-      .filter((item) => item.product);
+      .filter((item) => item.product || item.productName);
   }
 
   function buildCartMessage() {
@@ -338,24 +348,29 @@
     }
   }
 
-  function addToCart(productId, quantity = 1) {
-    const product = getProductById(productId);
+  async function addToCart(productId) {
+    const product = await getProductById(productId);
     if (!product) {
+      console.error("addToCart: product not found", productId);
       return;
     }
 
     const cart = getCart();
-    const existing = cart.find((item) => item.productId === productId);
+    const existingItem = cart.find((item) => item.productId === productId);
 
-    if (existing) {
-      existing.quantity += quantity;
+    if (existingItem) {
+      existingItem.quantity += 1;
     } else {
-      cart.push({ productId, quantity });
+      cart.push({
+        productId,
+        productName: product.name || "Unnamed Product",
+        productPrice: Number(product.price) || 0,
+        quantity: 1,
+      });
     }
 
-    ensureCartTimer();
     saveCart(cart);
-    openCart();
+    alert(`✅ ${product.name || "Item"} has been added to your cart`);
   }
 
   function updateCartQuantity(productId, nextQuantity) {
@@ -371,41 +386,35 @@
   }
 
   function renderCartUi() {
-    const summary = getCartSummary();
-    const totalItems = summary.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = summary.reduce((sum, item) => sum + item.lineTotal, 0);
-    const countNodes = document.querySelectorAll("[data-cart-count]");
-    const totalNode = document.getElementById("cart-total-price");
-    const listNode = document.getElementById("cart-items");
-    const checkoutNode = document.getElementById("cart-checkout");
-    const emptyNode = document.getElementById("cart-empty");
+    const cart = getCart();
+    const cartItemsNode = document.getElementById("cart-items");
+    const cartTotalNode = document.getElementById("cart-total-price");
+    const cartEmptyNode = document.getElementById("cart-empty");
+    const cartCountNodes = document.querySelectorAll("[data-cart-count]");
 
-    countNodes.forEach((node) => {
-      node.textContent = String(totalItems);
-    });
+    const cartSummary = cart
+      .map((item) => {
+        const product = data.products.find((p) => p.id === item.productId) || {};
+        return {
+          ...item,
+          product,
+          lineTotal: (item.productPrice || 0) * item.quantity,
+          displayName: item.productName || product.name || "Artisan item",
+          displayPrice: Number(item.productPrice) || Number(product.price) || 0,
+        };
+      });
 
-    if (totalNode) {
-      totalNode.textContent = formatCurrency(totalPrice);
-    }
-
-    if (checkoutNode) {
-      checkoutNode.href = buildCartMessage();
-    }
-
-    if (listNode) {
-      listNode.innerHTML = summary
+    if (cartItemsNode) {
+      cartItemsNode.innerHTML = cartSummary
         .map(
           (item) => `
             <article class="cart-item">
-              <img src="${item.product.images[0]}" alt="${item.product.name || 'SharonCraft product'}" />
-              <div class="cart-item-copy">
-                <strong>${item.product.name || '✨ Artisan Piece'}</strong>
-                <span>${formatCurrency(item.product.price)} each</span>
-                <div class="cart-quantity-controls">
-                  <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce ${item.product.name || 'item'} quantity">-</button>
-                  <span>${item.quantity}</span>
-                  <button type="button" data-cart-increase="${item.productId}" aria-label="Increase ${item.product.name || 'item'} quantity">+</button>
-                </div>
+              <strong>${item.displayName}</strong>
+              <span>${formatCurrency(item.displayPrice)} each</span>
+              <div class="cart-quantity-controls">
+                <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce quantity">-</button>
+                <span>${item.quantity}</span>
+                <button type="button" data-cart-increase="${item.productId}" aria-label="Increase quantity">+</button>
               </div>
               <strong>${formatCurrency(item.lineTotal)}</strong>
             </article>
@@ -414,11 +423,24 @@
         .join("");
     }
 
-    if (emptyNode) {
-      emptyNode.classList.toggle("is-hidden", summary.length > 0);
+    const totalPrice = cartSummary.reduce((sum, item) => sum + item.lineTotal, 0);
+
+    if (cartTotalNode) {
+      cartTotalNode.textContent = formatCurrency(totalPrice);
     }
 
-    renderCartTimer();
+    if (cartEmptyNode) {
+      cartEmptyNode.classList.toggle("is-hidden", cart.length > 0);
+    }
+
+    cartCountNodes.forEach((node) => {
+      node.textContent = String(cart.reduce((sum, item) => sum + item.quantity, 0));
+    });
+
+    const checkoutNode = document.getElementById("cart-checkout");
+    if (checkoutNode) {
+      checkoutNode.href = buildCartMessage();
+    }
   }
 
   function renderHeader() {
@@ -630,7 +652,8 @@
       const decreaseButton = event.target.closest("[data-cart-decrease]");
 
       if (addButton) {
-        addToCart(addButton.dataset.addToCart, 1);
+        addToCart(addButton.dataset.addToCart);
+        openCart();
       }
 
       if (increaseButton) {

@@ -32,8 +32,13 @@
     <section class="section">
       <div class="container">
         <div class="filter-card">
-          <div class="filter-grid">
-            <input id="shop-search" type="search" placeholder="Search by product name or style" />
+          <div class="filter-banner">
+            <span class="section-kicker">Quick find</span>
+            <button id="shop-toggle-filters" class="button button-secondary">Show Filters</button>
+          </div>
+          <div class="filter-chips" id="shop-chips"></div>
+          <div class="filter-grid" id="shop-filter-grid">
+            <input id="shop-search" type="search" placeholder="Search by product name or style" aria-label="Search products" />
             <select id="shop-category" aria-label="Filter by category"></select>
             <select id="shop-price" aria-label="Filter by price">
               <option value="">All prices</option>

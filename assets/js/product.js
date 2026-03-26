@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (addCartButton) {
     addCartButton.addEventListener("click", function () {
-      utils.addToCart(product.id, 1);
+      utils.addToCart(product.id);
     });
   }
 
