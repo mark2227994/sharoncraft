@@ -31,6 +31,21 @@
     <!-- Filters -->
     <section class="section">
       <div class="container">
+        <div class="live-catalog-panel reveal">
+          <div class="live-catalog-header">
+            <div class="section-heading live-catalog-copy">
+              <span class="section-kicker">Live Supabase Shelf</span>
+              <h2>See what is currently in the live SharonCraft catalog.</h2>
+              <p>This row pulls directly from Supabase before the regular website collection below, so visitors can spot newly published pieces fast.</p>
+            </div>
+            <div class="live-catalog-meta">
+              <span class="live-status-pill" data-live-state>Checking Supabase connection...</span>
+              <strong><span data-live-count>0</span> live pieces</strong>
+              <span data-live-updated>Waiting for live sync</span>
+            </div>
+          </div>
+          <div data-live-catalog data-limit="6" class="product-grid"></div>
+        </div>
         <div class="filter-card">
           <div class="filter-banner">
             <span class="section-kicker">Quick find</span>
@@ -77,6 +92,8 @@
   <script src="supabase-catalog.js" defer></script>
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/mobile-ux.js" defer></script>
+  <script src="assets/js/supabase-data-sync.js" defer></script>
   <script src="assets/js/shop.js" defer></script>
+  <script src="assets/js/live-catalog.js" defer></script>
 </body>
 </html>

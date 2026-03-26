@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    await window.SharonCraftLiveSync.ready;
+  }
   const utils = window.SharonCraftUtils;
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");

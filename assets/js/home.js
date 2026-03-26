@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    await window.SharonCraftLiveSync.ready;
+  }
   const utils = window.SharonCraftUtils;
   const featuredGrid = document.getElementById("featured-products");
   const categoryGrid = document.getElementById("home-categories");

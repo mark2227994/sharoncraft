@@ -11,10 +11,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const replyTemplatesKey = "sharoncraft-reply-templates";
   const goalKey = "sharoncraft-kiosk-goal";
   const utils = window.SharonCraftUtils;
-
   // Wait for data to be loaded
   await utils.waitForData();
-
+  const liveCatalogApi = window.SharonCraftCatalog || null;
   const categoryMap = new Map(utils.data.categories.map((category) => [category.slug, category.name]));
   const availableImages = [
     "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.jpeg",
@@ -195,6 +194,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imagePreview = document.getElementById("admin-image-preview");
   const selectedGallery = document.getElementById("admin-selected-gallery");
   const imageLibrary = document.getElementById("admin-image-library");
+  const imageLibrarySearch = document.getElementById("admin-image-search");
   const descriptionInput = document.getElementById("admin-description");
   const descriptionStarterButton = document.getElementById("admin-description-starter");
   const detailsInput = document.getElementById("admin-details");
@@ -205,7 +205,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const preview = document.getElementById("admin-json-preview");
   const addButton = document.getElementById("admin-add-product");
   const resetButton = document.getElementById("admin-reset");
-  const resetSalesButton = document.getElementById("admin-reset-sales");
   const saveButton = document.getElementById("admin-save");
   const previewPageSelect = document.getElementById("admin-preview-page");
   const previewReloadButton = document.getElementById("admin-preview-reload");
@@ -297,6 +296,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   const replyCategoryInput = document.getElementById("admin-reply-category");
   const replyMessageInput = document.getElementById("admin-reply-message");
   const replyList = document.getElementById("admin-reply-list");
+  const adminOverviewGrid = document.getElementById("admin-overview-grid");
+  const liveAuthState = document.getElementById("admin-live-auth-state");
+  const liveAuthForm = document.getElementById("admin-live-auth-form");
+  const liveEmailInput = document.getElementById("admin-live-email");
+  const livePasswordInput = document.getElementById("admin-live-password");
+  const liveSignOutButton = document.getElementById("admin-live-sign-out");
+  const adminTabStorageKey = "sharoncraft-admin-active-tab";
+  let currentLiveUser = null;
 
   function loadSocialSettings() {
     try {
@@ -786,6 +793,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function syncPreviewJson() {
+    if (!preview) {
+      return;
+    }
+
     preview.value = JSON.stringify(catalog, null, 2);
   }
 
@@ -807,6 +818,163 @@ document.addEventListener("DOMContentLoaded", async function () {
     status.textContent = message;
   }
 
+  function setLiveAuthState(message, tone) {
+    if (!liveAuthState) {
+      return;
+    }
+
+    liveAuthState.textContent = message;
+    liveAuthState.classList.remove("is-connected", "is-warning", "is-error");
+
+    if (tone) {
+      liveAuthState.classList.add(`is-${tone}`);
+    }
+  }
+
+  function renderLiveAuthState() {
+    if (!liveAuthState) {
+      return;
+    }
+
+    if (!liveCatalogApi || typeof liveCatalogApi.isConfigured !== "function" || !liveCatalogApi.isConfigured()) {
+      setLiveAuthState("Supabase is not configured on this admin yet.", "warning");
+      return;
+    }
+
+    if (currentLiveUser && currentLiveUser.email) {
+      setLiveAuthState(`Live publish ready as ${currentLiveUser.email}`, "connected");
+      return;
+    }
+
+    setLiveAuthState("Not signed in. Local saves will not reach the live website yet.", "warning");
+  }
+
+  function buildLiveCatalogProducts() {
+    const now = Date.now();
+
+    return catalog.map((product, index) => {
+      const trackedStock = Number(product.stockQty) || 0;
+      const reservedStock = Number(product.reservedQty) || 0;
+      const hasTrackedStock = trackedStock > 0;
+
+      return {
+        id: product.id,
+        image: product.images && product.images.length ? product.images[0] : "",
+        name: product.name,
+        price: Number(product.price) || 0,
+        material: categoryMap.get(product.category) || product.category || "Handmade",
+        story: product.description || product.shortDescription || "Handmade by SharonCraft artisans.",
+        specs: Array.isArray(product.details) ? product.details : [],
+        gallery: Array.isArray(product.images) ? product.images : [],
+        soldOut: hasTrackedStock ? reservedStock >= trackedStock : false,
+        spotlightUntil: product.featured ? new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString() : "",
+        spotlightText: product.badge || "Featured",
+        notes: `${product.category || ""}|${product.source || ""}`,
+        updatedAt: new Date().toISOString(),
+        newUntil: product.newArrival ? new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString() : "",
+        sortOrder: index,
+      };
+    });
+  }
+
+  async function refreshLiveUser() {
+    if (!liveCatalogApi || typeof liveCatalogApi.getCurrentUser !== "function" || !liveCatalogApi.isConfigured()) {
+      currentLiveUser = null;
+      renderLiveAuthState();
+      return null;
+    }
+
+    try {
+      currentLiveUser = await liveCatalogApi.getCurrentUser();
+    } catch (error) {
+      currentLiveUser = null;
+      console.error("Unable to read current Supabase user.", error);
+    }
+
+    renderLiveAuthState();
+    return currentLiveUser;
+  }
+
+  async function publishCatalogToSupabase(localMessage) {
+    if (!liveCatalogApi || typeof liveCatalogApi.saveProducts !== "function" || !liveCatalogApi.isConfigured()) {
+      renderLiveAuthState();
+      if (localMessage) {
+        setStatus(`${localMessage} Saved locally only because Supabase is not configured here.`);
+      }
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      if (localMessage) {
+        setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+      }
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.saveProducts(buildLiveCatalogProducts());
+      renderLiveAuthState();
+      if (localMessage) {
+        setStatus(`${localMessage} Supabase live catalog updated too.`);
+      }
+      return true;
+    } catch (error) {
+      console.error("Unable to publish catalog to Supabase.", error);
+      if (error && /sign in/i.test(String(error.message || ""))) {
+        currentLiveUser = null;
+        renderLiveAuthState();
+      } else {
+        setLiveAuthState("Signed in, but live publish failed. Check Supabase table or permissions.", "error");
+      }
+      if (localMessage) {
+        setStatus(`${localMessage} Saved locally, but live publish failed.`);
+      }
+      return false;
+    }
+  }
+
+  function getAdminTabLabel(tabName) {
+    const labels = {
+      workspace: "Add Product",
+      catalog: "Product List",
+      preview: "Phone Preview",
+      orders: "Orders",
+      operations: "Delivery & Stock",
+      profit: "Profit",
+      social: "Social Tools",
+      replies: "Quick Replies",
+      assets: "Photo Library"
+    };
+
+    return labels[tabName] || tabName;
+  }
+
+  function renderAdminOverview() {
+    if (!adminOverviewGrid) {
+      return;
+    }
+
+    const cards = [
+      { label: "Products", value: catalog.length },
+      { label: "Featured", value: catalog.filter((product) => product.featured).length },
+      { label: "Orders", value: orders.length },
+      { label: "Delivery Areas", value: deliveryAreas.length },
+      { label: "Replies", value: replyTemplates.length }
+    ];
+
+    adminOverviewGrid.innerHTML = cards
+      .map(
+        (card) => `
+          <article class="admin-overview-card">
+            <span>${card.label}</span>
+            <strong>${card.value}</strong>
+          </article>
+        `
+      )
+      .join("");
+  }
+
   function activateAdminTab(tabName) {
     adminTabButtons.forEach((button) => {
       button.classList.toggle("is-active", button.getAttribute('data-admin-tab') === tabName);
@@ -816,7 +984,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       panel.classList.toggle("is-active", panel.getAttribute('data-admin-panel') === tabName);
     });
 
-    // Render content for the active tab
     switch (tabName) {
       case "catalog":
         renderList();
@@ -840,9 +1007,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         renderBundles();
         break;
       default:
-        // No specific render for other tabs
         break;
     }
+    window.localStorage.setItem(adminTabStorageKey, tabName);
   }
 
   function syncLivePreviewFrame() {
@@ -890,7 +1057,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderImageLibrary() {
-    imageLibrary.innerHTML = availableImages
+    const query = imageLibrarySearch ? imageLibrarySearch.value.trim().toLowerCase() : "";
+    const filteredImages = availableImages.filter((image) => {
+      return !query || image.toLowerCase().includes(query);
+    });
+
+    imageLibrary.innerHTML = filteredImages.length
+      ? filteredImages
       .map(
         (image) => `
           <article class="admin-library-item">
@@ -905,7 +1078,13 @@ document.addEventListener("DOMContentLoaded", async function () {
           </article>
         `
       )
-      .join("");
+      .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No matching images</strong>
+            <p>Try a shorter file name or clear the search to see the full library again.</p>
+          </article>
+        `;
   }
 
   function renderDraftPreview() {
@@ -1148,6 +1327,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderOrders();
     renderCustomerDashboard();
     renderGoalCard();
+    renderAdminOverview();
     if (message) {
       setStatus(message);
     }
@@ -1182,6 +1362,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   function saveBundles(message) {
     window.localStorage.setItem(bundlesKey, JSON.stringify(bundles));
     renderBundles();
+    renderAdminOverview();
     if (message) {
       setStatus(message);
     }
@@ -1190,6 +1371,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   function saveReplyTemplates(message) {
     window.localStorage.setItem(replyTemplatesKey, JSON.stringify(replyTemplates));
     renderReplyTemplates();
+    renderAdminOverview();
     if (message) {
       setStatus(message);
     }
@@ -1695,6 +1877,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function populateSocialForm() {
+    if (!socialWhatsappInput || !socialInstagramInput || !socialFacebookInput || !socialTiktokInput) {
+      return;
+    }
+
     const map = new Map(socialSettings.map((social) => [social.label, social.url]));
     socialWhatsappInput.value = map.get("WhatsApp") || "";
     socialInstagramInput.value = map.get("Instagram") || "";
@@ -1703,6 +1889,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderSocialProductSelect() {
+    if (!socialProductSelect) {
+      return;
+    }
+
     socialProductSelect.innerHTML = catalog
       .map((product) => `<option value="${product.id}">${product.name}</option>`)
       .join("");
@@ -1725,6 +1915,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderSocialCalendar() {
+    if (!socialCalendar) {
+      return;
+    }
+
     socialCalendar.innerHTML = socialPlanner
       .map(
         (item, index) => `
@@ -1742,6 +1936,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderSocialMedia() {
+    if (!socialMedia) {
+      return;
+    }
+
     const featuredFirst = [...catalog].sort((left, right) => {
       const leftScore = left.featured ? 0 : 1;
       const rightScore = right.featured ? 0 : 1;
@@ -1766,6 +1964,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderSocialTracker() {
+    if (!socialTracker) {
+      return;
+    }
+
     const topChatProducts = [...catalog]
       .sort((left, right) => (right.analytics.whatsappClicks || 0) - (left.analytics.whatsappClicks || 0))
       .slice(0, 4);
@@ -1786,6 +1988,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderSalesDashboard() {
+    if (!salesMetrics || !salesChart || !salesTable) {
+      return;
+    }
+
     const totals = catalog.reduce(
       (accumulator, product) => {
         accumulator.revenue += product.analytics.revenue;
@@ -1852,38 +2058,29 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join("");
   }
 
-  async function saveCatalogState(message) {
-    try {
-      // Try to save to Supabase first
-      if (window.SharonCraftCatalog && window.SharonCraftCatalog.isConfigured()) {
-        await window.SharonCraftCatalog.saveProducts(catalog);
-        console.log('Saved catalog to Supabase');
-      } else {
-        // Fallback to localStorage
-        window.localStorage.setItem(storageKey, JSON.stringify(catalog));
-        console.log('Saved catalog to localStorage (Supabase not configured)');
-      }
-
-      renderList();
-      renderFeaturedManager();
-      renderSalesDashboard();
-      renderProfitProductSelect();
-      syncProfitCalculatorFromSelection();
-      renderProfitDashboard();
-      renderOrderProductSelect();
-      renderStockList();
-      renderSocialProductSelect();
-      renderSocialMedia();
-      renderSocialTracker();
-      renderBundleProductPicker();
-      renderBundles();
-      renderGoalCard();
-      if (message) {
-        setStatus(message);
-      }
-    } catch (error) {
-      console.error('Failed to save catalog:', error);
-      setStatus(`Error saving catalog: ${error.message}`);
+  async function saveCatalogState(message, options = {}) {
+    window.localStorage.setItem(storageKey, JSON.stringify(catalog));
+    renderList();
+    renderFeaturedManager();
+    renderSalesDashboard();
+    renderProfitProductSelect();
+    syncProfitCalculatorFromSelection();
+    renderProfitDashboard();
+    renderOrderProductSelect();
+    renderStockList();
+    renderSocialProductSelect();
+    renderSocialMedia();
+    renderSocialTracker();
+    renderBundleProductPicker();
+    renderBundles();
+    renderGoalCard();
+    renderAdminOverview();
+    if (options.publishLive) {
+      await publishCatalogToSupabase(message);
+      return;
+    }
+    if (message) {
+      setStatus(message);
     }
   }
 
@@ -1905,8 +2102,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     }));
 
-    saveCatalogState("Sales dashboard reset to 0.");
-    activateAdminTab("sales");
+    saveCatalogState("Sales dashboard reset to 0.", { publishLive: false });
   }
 
   function resetProfitHistory() {
@@ -1945,7 +2141,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     resetForm();
-    saveCatalogState("Profit history cleared.");
+    saveCatalogState("Profit history cleared.", { publishLive: false });
     activateAdminTab("profit");
   }
 
@@ -2128,6 +2324,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     input.addEventListener("change", renderList);
   });
 
+  if (imageLibrarySearch) {
+    imageLibrarySearch.addEventListener("input", renderImageLibrary);
+    imageLibrarySearch.addEventListener("change", renderImageLibrary);
+  }
+
   adminTabButtons.forEach((button) => {
     button.addEventListener("click", function () {
       alert(`Switching to ${button.dataset.adminTab}`);
@@ -2148,7 +2349,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     activateAdminTab(targetTab);
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setStatus(`${targetTab.charAt(0).toUpperCase()}${targetTab.slice(1)} opened from the guide.`);
+    setStatus(`${getAdminTabLabel(targetTab)} opened from the guide.`);
   });
 
   addButton.addEventListener("click", function () {
@@ -2505,6 +2706,60 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
+  if (liveAuthForm) {
+    liveAuthForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      if (!liveCatalogApi || typeof liveCatalogApi.signInWithPassword !== "function" || !liveCatalogApi.isConfigured()) {
+        setLiveAuthState("Supabase is not configured on this admin yet.", "warning");
+        setStatus("Supabase is not configured, so live publish is unavailable.");
+        return;
+      }
+
+      if (!liveEmailInput.value.trim() || !livePasswordInput.value.trim()) {
+        setStatus("Add your Supabase email and password to sign in for live publishing.");
+        return;
+      }
+
+      setLiveAuthState("Signing in to Supabase...", "warning");
+
+      try {
+        await liveCatalogApi.signInWithPassword(liveEmailInput.value, livePasswordInput.value);
+        await refreshLiveUser();
+        livePasswordInput.value = "";
+        setStatus("Supabase sign-in successful. Product saves can now publish to the live website.");
+      } catch (error) {
+        console.error("Unable to sign in to Supabase.", error);
+        currentLiveUser = null;
+        setLiveAuthState("Supabase sign-in failed. Check your email or password.", "error");
+        setStatus("Supabase sign-in failed. Please check your email and password.");
+      }
+    });
+  }
+
+  if (liveSignOutButton) {
+    liveSignOutButton.addEventListener("click", async function () {
+      if (!liveCatalogApi || typeof liveCatalogApi.signOut !== "function" || !liveCatalogApi.isConfigured()) {
+        currentLiveUser = null;
+        renderLiveAuthState();
+        return;
+      }
+
+      try {
+        await liveCatalogApi.signOut();
+      } catch (error) {
+        console.error("Unable to sign out from Supabase.", error);
+      }
+
+      currentLiveUser = null;
+      if (livePasswordInput) {
+        livePasswordInput.value = "";
+      }
+      renderLiveAuthState();
+      setStatus("Signed out of Supabase. Future saves will stay local until you sign in again.");
+    });
+  }
+
   if (goalForm) {
     goalForm.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -2520,41 +2775,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   resetButton.addEventListener("click", function () {
     catalog = defaultProducts.map((product, index) => normalizeProduct(product, index));
-    window.localStorage.removeItem(storageKey);
-    renderList();
-    renderFeaturedManager();
-    renderSalesDashboard();
-    renderProfitProductSelect();
-    syncProfitCalculatorFromSelection();
-    renderProfitDashboard();
-    renderOrderProductSelect();
-    renderStockList();
     resetBundleForm();
     resetReplyForm();
-    renderBundles();
     resetForm();
-    setStatus("Default catalog restored.");
+    saveCatalogState("Default catalog restored.", { publishLive: true });
   });
 
-  resetSalesButton.addEventListener("click", function () {
-    // Reset sales-related data to zero
-    window.localStorage.removeItem(ordersKey);
-    window.localStorage.removeItem(expensesKey);
-    window.localStorage.removeItem(goalKey);
-    orders = [];
-    expenses = [];
-    kioskGoal = { target: 0, saved: 0, note: "" };
-    renderSalesDashboard();
-    renderProfitDashboard();
-    renderOrderList();
-    renderExpenseList();
-    renderGrowthMetrics();
-    renderCustomerList();
-    setStatus("Sales dashboard reset to zero.");
-  });
-
-  saveButton.addEventListener("click", async function () {
-    await saveCatalogState("Catalog saved. Storefront pages in this browser now use the updated products.");
+  saveButton.addEventListener("click", function () {
+    saveCatalogState("Catalog saved. Storefront pages in this browser now use the updated products.", { publishLive: true });
   });
 
   list.addEventListener("click", function (event) {
@@ -2583,7 +2811,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (button.dataset.action === "delete") {
       catalog = catalog.filter((item) => item.id !== product.id);
-      saveCatalogState(`${product.name} removed from the catalog.`);
+      saveCatalogState(`${product.name} removed from the catalog.`, { publishLive: true });
       resetForm();
     }
   });
@@ -2600,7 +2828,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (editingId === input.dataset.featuredId) {
       featuredInput.checked = input.checked;
     }
-    saveCatalogState("Homepage featured products updated.");
+    saveCatalogState("Homepage featured products updated.", { publishLive: true });
     renderDraftPreview();
   });
 
@@ -2642,10 +2870,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (editingId) {
       catalog = catalog.map((product) => (product.id === editingId ? payload : product));
-      saveCatalogState(`${payload.name} updated in the catalog.`);
+      saveCatalogState(`${payload.name} updated in the catalog.`, { publishLive: true });
     } else {
       catalog.unshift(payload);
-      saveCatalogState(`${payload.name} added to the catalog.`);
+      saveCatalogState(`${payload.name} added to the catalog.`, { publishLive: true });
     }
 
     temporaryMainPreviewSrc = "";
@@ -2682,11 +2910,25 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderSocialMedia();
   renderSocialTracker();
   renderGoalCard();
-  if (catalog[0]) {
+  renderAdminOverview();
+  renderLiveAuthState();
+  if (liveCatalogApi && typeof liveCatalogApi.onAuthStateChange === "function" && liveCatalogApi.isConfigured()) {
+    liveCatalogApi.onAuthStateChange(function (user) {
+      currentLiveUser = user || null;
+      renderLiveAuthState();
+    });
+    refreshLiveUser();
+  }
+  if (catalog[0] && socialProductSelect && socialCaption && socialToneSelect) {
     socialProductSelect.value = catalog[0].id;
     socialCaption.value = buildCaption(catalog[0], socialToneSelect.value);
   }
   syncLivePreviewFrame();
-  activateAdminTab("workspace");
+  const savedAdminTab = window.localStorage.getItem(adminTabStorageKey);
+  if (savedAdminTab && Array.from(adminTabButtons).some((button) => button.dataset.adminTab === savedAdminTab)) {
+    activateAdminTab(savedAdminTab);
+  } else {
+    activateAdminTab("workspace");
+  }
   setStatus("Admin panel ready. Saved catalog changes now drive the storefront in this browser.");
 });

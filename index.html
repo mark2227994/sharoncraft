@@ -72,6 +72,27 @@
       </div>
     </section>
 
+    <!-- Live Supabase catalog -->
+    <section class="section" id="live-catalog">
+      <div class="container">
+        <div class="live-catalog-panel reveal">
+          <div class="live-catalog-header">
+            <div class="section-heading live-catalog-copy">
+              <span class="section-kicker">Live Catalog</span>
+              <h2>Fresh pieces pulled straight from SharonCraft Supabase.</h2>
+              <p>This shelf updates from the live product table, so new uploads can appear here without manually editing the homepage.</p>
+            </div>
+            <div class="live-catalog-meta">
+              <span class="live-status-pill" data-live-state>Checking Supabase connection...</span>
+              <strong><span data-live-count>0</span> pieces ready</strong>
+              <span data-live-updated>Waiting for live sync</span>
+            </div>
+          </div>
+          <div data-live-catalog data-limit="4" class="product-grid"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Category shortcuts -->
     <section class="section">
       <div class="container">
@@ -124,6 +145,8 @@
   <script src="supabase-catalog.js" defer></script>
   <script src="assets/js/app.js" defer></script>
   <script src="assets/js/mobile-ux.js" defer></script>
+  <script src="assets/js/supabase-data-sync.js" defer></script>
   <script src="assets/js/home.js" defer></script>
+  <script src="assets/js/live-catalog.js" defer></script>
 </body>
 </html>
