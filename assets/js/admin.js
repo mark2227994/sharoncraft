@@ -205,6 +205,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const preview = document.getElementById("admin-json-preview");
   const addButton = document.getElementById("admin-add-product");
   const resetButton = document.getElementById("admin-reset");
+  const resetSalesButton = document.getElementById("admin-reset-sales");
   const saveButton = document.getElementById("admin-save");
   const previewPageSelect = document.getElementById("admin-preview-page");
   const previewReloadButton = document.getElementById("admin-preview-reload");
@@ -808,12 +809,40 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function activateAdminTab(tabName) {
     adminTabButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.adminTab === tabName);
+      button.classList.toggle("is-active", button.getAttribute('data-admin-tab') === tabName);
     });
 
     adminTabPanels.forEach((panel) => {
-      panel.classList.toggle("is-active", panel.dataset.adminPanel === tabName);
+      panel.classList.toggle("is-active", panel.getAttribute('data-admin-panel') === tabName);
     });
+
+    // Render content for the active tab
+    switch (tabName) {
+      case "catalog":
+        renderList();
+        renderFeaturedManager();
+        break;
+      case "preview":
+        syncLivePreviewFrame();
+        break;
+      case "sales":
+        renderSalesDashboard();
+        break;
+      case "profit":
+        renderProfitDashboard();
+        break;
+      case "social":
+        renderSocialCalendar();
+        renderSocialMedia();
+        renderSocialTracker();
+        break;
+      case "bundles":
+        renderBundles();
+        break;
+      default:
+        // No specific render for other tabs
+        break;
+    }
   }
 
   function syncLivePreviewFrame() {
@@ -2101,6 +2130,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   adminTabButtons.forEach((button) => {
     button.addEventListener("click", function () {
+      alert(`Switching to ${button.dataset.adminTab}`);
       activateAdminTab(button.dataset.adminTab);
     });
   });
@@ -2504,6 +2534,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderBundles();
     resetForm();
     setStatus("Default catalog restored.");
+  });
+
+  resetSalesButton.addEventListener("click", function () {
+    // Reset sales-related data to zero
+    window.localStorage.removeItem(ordersKey);
+    window.localStorage.removeItem(expensesKey);
+    window.localStorage.removeItem(goalKey);
+    orders = [];
+    expenses = [];
+    kioskGoal = { target: 0, saved: 0, note: "" };
+    renderSalesDashboard();
+    renderProfitDashboard();
+    renderOrderList();
+    renderExpenseList();
+    renderGrowthMetrics();
+    renderCustomerList();
+    setStatus("Sales dashboard reset to zero.");
   });
 
   saveButton.addEventListener("click", async function () {

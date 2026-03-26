@@ -112,6 +112,7 @@ button {
   border: 1px solid transparent;
   font-weight: 800;
   transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  touch-action: manipulation;
 }
 
 .button:hover {
@@ -1231,6 +1232,7 @@ body.cart-open .scroll-top {
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 0.85rem;
   margin: 1.2rem 0 1.4rem;
   border: 1px solid var(--border);
@@ -1252,6 +1254,7 @@ body.cart-open .scroll-top {
   color: var(--deep-brown);
   font-weight: 800;
   transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
 }
 
 .admin-tab-button:hover {
