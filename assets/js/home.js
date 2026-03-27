@@ -97,7 +97,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (featuredGrid) {
       const featuredProducts = allProducts.filter((product) => product.featured).slice(0, 4);
       const visibleProducts = featuredProducts.length ? featuredProducts : allProducts.slice(0, 4);
-      featuredGrid.innerHTML = visibleProducts.map(utils.createProductCard).join("");
+      featuredGrid.innerHTML = visibleProducts
+        .map((product, index) =>
+          utils.createProductCard(product, {
+            listId: "home_featured",
+            listName: "Homepage Featured",
+            index: index + 1
+          })
+        )
+        .join("");
+      utils.trackProductListView({
+        listId: "home_featured",
+        listName: "Homepage Featured",
+        products: visibleProducts
+      });
     }
 
     if (categoryGrid) {
@@ -107,7 +120,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (arrivalsGrid) {
       const newItems = allProducts.filter((product) => product.newArrival).slice(0, 3);
       const visibleNewItems = newItems.length ? newItems : allProducts.slice(0, 3);
-      arrivalsGrid.innerHTML = visibleNewItems.map(utils.createProductCard).join("");
+      arrivalsGrid.innerHTML = visibleNewItems
+        .map((product, index) =>
+          utils.createProductCard(product, {
+            listId: "home_new_arrivals",
+            listName: "Homepage New Arrivals",
+            index: index + 1
+          })
+        )
+        .join("");
+      utils.trackProductListView({
+        listId: "home_new_arrivals",
+        listName: "Homepage New Arrivals",
+        products: visibleNewItems
+      });
     }
 
     if (typeof utils.setPageMetadata === "function") {
