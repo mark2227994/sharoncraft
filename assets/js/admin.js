@@ -560,6 +560,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const analyticsConversions = document.getElementById("admin-analytics-conversions");
   const analyticsProductsTitle = document.getElementById("admin-analytics-products-title");
   const analyticsProducts = document.getElementById("admin-analytics-products");
+  const analyticsPages = document.getElementById("admin-analytics-pages");
   const analyticsFeed = document.getElementById("admin-analytics-feed");
   const analyticsRangeLabel = document.getElementById("admin-analytics-range-label");
   const analyticsRefreshButton = document.getElementById("admin-analytics-refresh");
@@ -1848,6 +1849,43 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
 
+  function formatAnalyticsPageLabel(payload) {
+    const safePayload = payload && typeof payload === "object" ? payload : {};
+    const pagePath = String(safePayload.page_path || "").trim();
+    const pageTitle = String(safePayload.page_title || "").trim();
+    const rawLabel = pageTitle || pagePath || "Storefront page";
+
+    if (!pagePath) {
+      return rawLabel;
+    }
+
+    if (pagePath === "/") {
+      return "Homepage";
+    }
+
+    if (pagePath.startsWith("/product.html")) {
+      return pageTitle && !/^product\b/i.test(pageTitle) ? pageTitle : "Product Page";
+    }
+
+    if (pagePath.startsWith("/shop.html")) {
+      return "Shop";
+    }
+
+    if (pagePath.startsWith("/categories.html")) {
+      return "Categories";
+    }
+
+    if (pagePath.startsWith("/about.html")) {
+      return "About";
+    }
+
+    if (pagePath.startsWith("/contact.html")) {
+      return "Contact";
+    }
+
+    return rawLabel;
+  }
+
   async function refreshStorefrontAnalytics(options) {
     const config = options || {};
     remoteStorefrontAnalyticsEvents = [];
@@ -1923,7 +1961,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderAnalyticsDashboard() {
-    if (!analyticsSummary || !analyticsConversions || !analyticsProducts || !analyticsFeed) {
+    if (!analyticsSummary || !analyticsConversions || !analyticsProducts || !analyticsPages || !analyticsFeed) {
       return;
     }
 
@@ -1943,6 +1981,30 @@ document.addEventListener("DOMContentLoaded", async function () {
       },
       { total: 0, views: 0, carts: 0, whatsapp: 0 }
     );
+
+    const pageStats = events.reduce((map, event) => {
+      if (event.name !== "page_view") {
+        return map;
+      }
+
+      const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
+      const pagePath = String(payload.page_path || "").trim();
+      if (!pagePath) {
+        return map;
+      }
+
+      const key = pagePath;
+      if (!map.has(key)) {
+        map.set(key, {
+          path: pagePath,
+          label: formatAnalyticsPageLabel(payload),
+          views: 0
+        });
+      }
+
+      map.get(key).views += 1;
+      return map;
+    }, new Map());
 
     const conversionStats = events.reduce((map, event) => {
       const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
@@ -2011,6 +2073,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const topProducts = Array.from(productStats.values())
       .sort((left, right) => right.score - left.score)
+      .slice(0, 6);
+    const topPages = Array.from(pageStats.values())
+      .sort((left, right) => right.views - left.views)
       .slice(0, 6);
     const topConversions = Array.from(conversionStats.values())
       .filter((product) => product.intentActions > 0 || product.views > 0)
@@ -2111,6 +2176,29 @@ document.addEventListener("DOMContentLoaded", async function () {
           <article class="empty-state-card">
             <strong>No tracked product activity yet</strong>
             <p>Open the storefront and tap through products, or widen the date range to pull in more live activity.</p>
+          </article>
+        `;
+
+    analyticsPages.innerHTML = topPages.length
+      ? topPages
+          .map(
+            (page) => `
+              <article class="admin-analytics-product-row">
+                <div class="admin-analytics-product-copy">
+                  <strong>${escapeHtml(page.label)}</strong>
+                  <span>${escapeHtml(page.path)}</span>
+                </div>
+                <div class="admin-analytics-product-stats">
+                  <strong>${page.views} view${page.views === 1 ? "" : "s"}</strong>
+                </div>
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No page traffic in this range</strong>
+            <p>Open a few storefront pages or widen the date range to see which pages are attracting visitors.</p>
           </article>
         `;
 
