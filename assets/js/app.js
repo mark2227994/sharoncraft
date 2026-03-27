@@ -9,6 +9,7 @@
   const analyticsQueueStorageKey = "sharoncraft-analytics-queue";
   const analyticsVisitorKey = "sharoncraft-analytics-visitor-id";
   const analyticsSessionKey = "sharoncraft-analytics-session-id";
+  const analyticsAcquisitionKey = "sharoncraft-analytics-acquisition";
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
@@ -79,6 +80,129 @@
 
   function getSessionAnalyticsId() {
     return getPersistentAnalyticsId(window.sessionStorage, analyticsSessionKey, "session");
+  }
+
+  function getHostnameLabel(value) {
+    const normalized = normalizeText(value).toLowerCase();
+    return normalized.replace(/^www\./, "");
+  }
+
+  function classifyReferrerMedium(hostname) {
+    const host = getHostnameLabel(hostname);
+
+    if (!host) {
+      return "direct";
+    }
+
+    if (/google\.|bing\.|yahoo\.|duckduckgo\.|baidu\.|yandex\./i.test(host)) {
+      return "organic";
+    }
+
+    if (/facebook\.|instagram\.|tiktok\.|x\.com|twitter\.|pinterest\.|linkedin\./i.test(host)) {
+      return "social";
+    }
+
+    if (/whatsapp\.|wa\.me|telegram\.|messenger\./i.test(host)) {
+      return "messaging";
+    }
+
+    if (/mail\.|gmail\.|outlook\.|yahoo\./i.test(host)) {
+      return "email";
+    }
+
+    return "referral";
+  }
+
+  function classifyReferrerSource(hostname) {
+    const host = getHostnameLabel(hostname);
+
+    if (!host) {
+      return "Direct";
+    }
+
+    if (/google\./i.test(host)) return "Google";
+    if (/bing\./i.test(host)) return "Bing";
+    if (/instagram\./i.test(host)) return "Instagram";
+    if (/facebook\./i.test(host)) return "Facebook";
+    if (/tiktok\./i.test(host)) return "TikTok";
+    if (/whatsapp\.|wa\.me/i.test(host)) return "WhatsApp";
+    if (/linkedin\./i.test(host)) return "LinkedIn";
+    if (/pinterest\./i.test(host)) return "Pinterest";
+    if (/twitter\.|x\.com/i.test(host)) return "X";
+
+    return host;
+  }
+
+  function buildAnalyticsAcquisition() {
+    const url = new URL(window.location.href);
+    const referrer = normalizeText(document.referrer);
+    let referrerHost = "";
+    if (referrer) {
+      try {
+        referrerHost = getHostnameLabel(new URL(referrer).hostname);
+      } catch (error) {
+        referrerHost = "";
+      }
+    }
+    const utmSource = normalizeText(url.searchParams.get("utm_source"));
+    const utmMedium = normalizeText(url.searchParams.get("utm_medium"));
+    const utmCampaign = normalizeText(url.searchParams.get("utm_campaign"));
+    const gclid = normalizeText(url.searchParams.get("gclid"));
+
+    if (utmSource || utmMedium || utmCampaign) {
+      return {
+        source: utmSource || "Campaign",
+        medium: utmMedium || "campaign",
+        campaign: utmCampaign,
+        referrerHost
+      };
+    }
+
+    if (gclid) {
+      return {
+        source: "Google Ads",
+        medium: "cpc",
+        campaign: utmCampaign,
+        referrerHost: referrerHost || "google.com"
+      };
+    }
+
+    if (referrer && (!referrerHost || referrerHost !== getHostnameLabel(window.location.hostname))) {
+      return {
+        source: classifyReferrerSource(referrerHost),
+        medium: classifyReferrerMedium(referrerHost),
+        campaign: "",
+        referrerHost
+      };
+    }
+
+    return {
+      source: "Direct",
+      medium: "direct",
+      campaign: "",
+      referrerHost
+    };
+  }
+
+  function getAnalyticsAcquisition() {
+    try {
+      const stored = JSON.parse(window.sessionStorage.getItem(analyticsAcquisitionKey) || "null");
+      if (stored && typeof stored === "object" && normalizeText(stored.source)) {
+        return stored;
+      }
+    } catch (error) {
+      // Ignore invalid session payloads and rebuild them.
+    }
+
+    const nextAcquisition = buildAnalyticsAcquisition();
+
+    try {
+      window.sessionStorage.setItem(analyticsAcquisitionKey, JSON.stringify(nextAcquisition));
+    } catch (error) {
+      console.warn("Unable to cache analytics acquisition data.", error);
+    }
+
+    return nextAcquisition;
   }
 
   function getQueuedAnalyticsEvents() {
@@ -226,12 +350,17 @@
     }
 
     const timestamp = new Date().toISOString();
+    const acquisition = getAnalyticsAcquisition();
     const eventPayload = {
       page_type: document.body.dataset.page || "unknown",
       page_path: `${window.location.pathname}${window.location.search}`,
       page_title: document.title,
       visitor_id: getVisitorAnalyticsId(),
       session_id: getSessionAnalyticsId(),
+      traffic_source: normalizeText(acquisition.source) || "Direct",
+      traffic_medium: normalizeText(acquisition.medium) || "direct",
+      traffic_campaign: normalizeText(acquisition.campaign),
+      referrer_host: normalizeText(acquisition.referrerHost),
       ...payload
     };
     const eventEntry = {
