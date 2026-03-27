@@ -568,6 +568,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const liveSignOutButton = document.getElementById("admin-live-sign-out");
   const adminTabStorageKey = "sharoncraft-admin-active-tab";
   let currentLiveUser = null;
+  let remoteStorefrontAnalyticsEvents = [];
+  let analyticsDataSource = "browser";
 
   function loadSocialSettings() {
     try {
@@ -1717,7 +1719,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const trackedEvents = loadStorefrontAnalyticsEvents();
+    const trackedEvents = getStorefrontAnalyticsEvents();
     const whatsappClicks = trackedEvents.filter((event) => event.name === "whatsapp_click").length;
 
     const cards = [
@@ -1741,12 +1743,69 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join("");
   }
 
-  function loadStorefrontAnalyticsEvents() {
+  function loadLocalStorefrontAnalyticsEvents() {
     try {
       const saved = JSON.parse(window.localStorage.getItem(storefrontAnalyticsKey) || "[]");
       return Array.isArray(saved) ? saved : [];
     } catch (error) {
       return [];
+    }
+  }
+
+  function getStorefrontAnalyticsEvents() {
+    return analyticsDataSource === "supabase" ? remoteStorefrontAnalyticsEvents : loadLocalStorefrontAnalyticsEvents();
+  }
+
+  function getAnalyticsSourceLabel() {
+    return analyticsDataSource === "supabase" ? "Supabase live" : "This browser";
+  }
+
+  function getAnalyticsEventProduct(payload) {
+    const safePayload = payload && typeof payload === "object" ? payload : {};
+    const items = Array.isArray(safePayload.items) ? safePayload.items : [];
+    const firstItem = items[0] && typeof items[0] === "object" ? items[0] : {};
+
+    return {
+      id: String(safePayload.product_id || firstItem.item_id || "").trim(),
+      name: String(safePayload.product_name || firstItem.item_name || "").trim()
+    };
+  }
+
+  async function refreshStorefrontAnalytics(options) {
+    const config = options || {};
+    remoteStorefrontAnalyticsEvents = [];
+    analyticsDataSource = "browser";
+
+    if (
+      liveCatalogApi &&
+      typeof liveCatalogApi.fetchAnalyticsEvents === "function" &&
+      typeof liveCatalogApi.isConfigured === "function" &&
+      liveCatalogApi.isConfigured()
+    ) {
+      const user = currentLiveUser || (await refreshLiveUser());
+
+      if (user) {
+        try {
+          const remoteEvents = await liveCatalogApi.fetchAnalyticsEvents(200);
+          if (Array.isArray(remoteEvents)) {
+            remoteStorefrontAnalyticsEvents = remoteEvents;
+            analyticsDataSource = "supabase";
+          }
+        } catch (error) {
+          console.error("Unable to load storefront analytics from Supabase.", error);
+        }
+      }
+    }
+
+    renderAnalyticsDashboard();
+    renderAdminOverview();
+
+    if (config.showStatus) {
+      setStatus(
+        analyticsDataSource === "supabase"
+          ? "Storefront analytics refreshed from Supabase live activity."
+          : "Storefront analytics refreshed from this browser."
+      );
     }
   }
 
@@ -1778,7 +1837,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       page_view: "Page View",
       product_view: "Product View",
       add_to_cart: "Add To Cart",
-      whatsapp_click: "WhatsApp Click"
+      whatsapp_click: "WhatsApp Click",
+      view_item_list: "List View",
+      select_item: "Product Open"
     };
 
     return labels[name] || String(name || "Event").replace(/_/g, " ");
@@ -1789,7 +1850,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const events = loadStorefrontAnalyticsEvents()
+    const events = getStorefrontAnalyticsEvents()
       .filter((event) => event && typeof event === "object" && event.name)
       .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""));
 
@@ -1806,8 +1867,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const productStats = events.reduce((map, event) => {
       const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
-      const productId = String(payload.product_id || "").trim();
-      const productName = String(payload.product_name || "").trim();
+      const productDetails = getAnalyticsEventProduct(payload);
+      const productId = productDetails.id;
+      const productName = productDetails.name;
       if (!productId && !productName) {
         return map;
       }
@@ -1853,6 +1915,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         <span>WhatsApp Clicks</span>
         <strong>${eventCounts.whatsapp}</strong>
       </article>
+      <article class="admin-metric-card">
+        <span>Data Source</span>
+        <strong>${escapeHtml(getAnalyticsSourceLabel())}</strong>
+      </article>
     `;
 
     analyticsProducts.innerHTML = topProducts.length
@@ -1876,7 +1942,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       : `
           <article class="empty-state-card">
             <strong>No tracked product activity yet</strong>
-            <p>Open the storefront on this browser, view a product, and tap a few buttons to start filling this dashboard.</p>
+            <p>Open the storefront and tap through products, or sign in to Supabase here to load live cross-device activity.</p>
           </article>
         `;
 
@@ -1885,7 +1951,8 @@ document.addEventListener("DOMContentLoaded", async function () {
           .slice(0, 14)
           .map((event) => {
             const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
-            const detail = String(payload.product_name || payload.button_label || payload.page_path || "Storefront action").trim();
+            const productDetails = getAnalyticsEventProduct(payload);
+            const detail = String(productDetails.name || payload.button_label || payload.page_path || "Storefront action").trim();
             return `
               <article class="admin-analytics-event-row">
                 <div class="admin-analytics-event-copy">
@@ -1900,7 +1967,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       : `
           <article class="empty-state-card">
             <strong>No storefront events yet</strong>
-            <p>Visit the live store in this browser, open products, add to cart, or tap WhatsApp so activity can appear here.</p>
+            <p>Visit the live store, or sign in to Supabase here so this admin can load shared live activity instead of only local browser events.</p>
           </article>
         `;
   }
@@ -3784,22 +3851,40 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   if (analyticsRefreshButton) {
-    analyticsRefreshButton.addEventListener("click", function () {
-      renderAnalyticsDashboard();
-      renderAdminOverview();
-      setStatus("Storefront analytics refreshed from this browser.");
+    analyticsRefreshButton.addEventListener("click", async function () {
+      await refreshStorefrontAnalytics({ showStatus: true });
     });
   }
 
   if (analyticsClearButton) {
-    analyticsClearButton.addEventListener("click", function () {
-      if (!window.confirm("Clear the storefront analytics event log saved in this browser?")) {
+    analyticsClearButton.addEventListener("click", async function () {
+      if (!window.confirm("Clear the storefront analytics log in this browser and, if available, from Supabase live analytics too?")) {
         return;
       }
 
       window.localStorage.removeItem(storefrontAnalyticsKey);
-      renderAnalyticsDashboard();
-      renderAdminOverview();
+      window.localStorage.removeItem("sharoncraft-analytics-queue");
+      remoteStorefrontAnalyticsEvents = [];
+      analyticsDataSource = "browser";
+
+      if (
+        liveCatalogApi &&
+        typeof liveCatalogApi.clearAnalyticsEvents === "function" &&
+        typeof liveCatalogApi.isConfigured === "function" &&
+        liveCatalogApi.isConfigured()
+      ) {
+        const user = currentLiveUser || (await refreshLiveUser());
+
+        if (user) {
+          try {
+            await liveCatalogApi.clearAnalyticsEvents();
+          } catch (error) {
+            console.error("Unable to clear Supabase analytics events.", error);
+          }
+        }
+      }
+
+      await refreshStorefrontAnalytics();
       setStatus("Storefront analytics log cleared.");
     });
   }
@@ -4710,11 +4795,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderAdminOverview();
   renderLiveAuthState();
   if (liveCatalogApi && typeof liveCatalogApi.onAuthStateChange === "function" && liveCatalogApi.isConfigured()) {
-    liveCatalogApi.onAuthStateChange(function (user) {
+    liveCatalogApi.onAuthStateChange(async function (user) {
       currentLiveUser = user || null;
       renderLiveAuthState();
+      await refreshStorefrontAnalytics();
     });
-    refreshLiveUser();
+    refreshLiveUser().then(function () {
+      refreshStorefrontAnalytics();
+    });
+  } else {
+    refreshStorefrontAnalytics();
   }
   if (catalog[0] && socialProductSelect && socialCaption && socialToneSelect) {
     socialProductSelect.value = catalog[0].id;

@@ -21,6 +21,7 @@ Use this setup for:
 This creates:
 - `public.products`
 - `public.site_settings` (website settings like homepage visuals)
+- `public.analytics_events` (shared storefront activity across devices)
 - `public.admin_users` (admin allow-list)
 - storage bucket `product-images`
 - RLS policies so:
@@ -83,6 +84,7 @@ Deploy these files:
 4. Log out.
 5. Confirm products still load.
 6. Confirm admin-only publish/upload actions work only for allow-listed admin user.
+7. Open the live storefront, trigger a few events, then check the admin `Analytics` tab while signed in to confirm Supabase analytics are arriving.
 
 ## Troubleshooting
 
