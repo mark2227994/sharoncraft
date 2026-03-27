@@ -10,6 +10,11 @@
       Array.isArray(product && product.images) ? product.images.filter(Boolean) : [],
     ]))
   );
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  const isLocalPreview =
+    window.location.protocol === "file:" ||
+    hostname === "localhost" ||
+    hostname === "127.0.0.1";
 
   if (!data || !storage) {
     window.SharonCraftLiveSync = { ready: Promise.resolve(null) };
@@ -130,7 +135,7 @@
   };
 
   async function syncProductsFromSupabase() {
-    if (hasLocalCatalogOverride()) {
+    if (isLocalPreview && hasLocalCatalogOverride()) {
       return null;
     }
 
@@ -162,11 +167,20 @@
 
     data.products.length = 0;
     nextProducts.forEach((product) => data.products.push(product));
+
+    if (!isLocalPreview) {
+      try {
+        window.localStorage.removeItem(storage.storageKey);
+      } catch (error) {
+        console.warn("Unable to clear stale local catalog override.", error);
+      }
+    }
+
     return nextProducts;
   }
 
   async function syncHomeVisualsFromSupabase() {
-    if (hasLocalHomeVisualsOverride()) {
+    if (isLocalPreview && hasLocalHomeVisualsOverride()) {
       return null;
     }
 
@@ -190,6 +204,15 @@
       {};
 
     data.homeVisuals = normalizeHomeVisuals(setting, fallback);
+
+    if (!isLocalPreview) {
+      try {
+        window.localStorage.removeItem(storage.homeVisualsSettingsKey);
+      } catch (error) {
+        console.warn("Unable to clear stale local visual override.", error);
+      }
+    }
+
     return data.homeVisuals;
   }
 

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "sharoncraft-v5-mobile-refresh";
+const CACHE_VERSION = "sharoncraft-v6-live-fix";
 const CORE_ASSETS = [
   "index.html",
   "style.css",

@@ -307,7 +307,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const repairedCatalogOnLoad = hasLikelyRepeatedImageIssue(catalog);
   if (repairedCatalogOnLoad) {
     catalog = repairCatalogImages(catalog);
-    window.localStorage.setItem(storageKey, JSON.stringify(catalog));
+    safeLocalStorageSetItem(storageKey, JSON.stringify(catalog), "catalog");
   }
   let editingId = null;
   let temporaryMainPreviewSrc = "";
@@ -656,6 +656,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   let uploadedImageCounter = 0;
   const uploadedImageTokenPrefix = "__uploaded_image__:";
   const uploadedImageRegistry = new Map();
+
+  function safeLocalStorageSetItem(key, value, label) {
+    try {
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      console.warn(`Unable to save ${label || key} to localStorage.`, error);
+      return false;
+    }
+  }
 
   function dedupeImages(images) {
     return images.map(cleanImagePath).filter(Boolean).filter((path, index, listRef) => listRef.indexOf(path) === index);
@@ -1037,16 +1047,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function saveSocialSettings(message) {
-    window.localStorage.setItem(socialSettingsKey, JSON.stringify(socialSettings));
+    const saved = safeLocalStorageSetItem(socialSettingsKey, JSON.stringify(socialSettings), "social settings");
     if (message) {
-      setStatus(message);
+      setStatus(saved ? message : `${message} Local save failed because browser storage is full.`);
     }
   }
 
   function saveSocialPlanner(message) {
-    window.localStorage.setItem(socialPlannerKey, JSON.stringify(socialPlanner));
+    const saved = safeLocalStorageSetItem(socialPlannerKey, JSON.stringify(socialPlanner), "social planner");
     if (message) {
-      setStatus(message);
+      setStatus(saved ? message : `${message} Local save failed because browser storage is full.`);
     }
   }
 
@@ -1061,8 +1071,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     utils.data.categories = categoryCatalog.map((category) => ({ ...category }));
 
     if (saveToStorage) {
-      window.localStorage.setItem(categoriesSettingsKey, JSON.stringify(categoryCatalog));
+      return safeLocalStorageSetItem(categoriesSettingsKey, JSON.stringify(categoryCatalog), "category settings");
     }
+
+    return true;
   }
 
   function renderCategorySelectControls() {
@@ -1206,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function saveCategoryState(message) {
-    syncCategoryRuntimeData(true);
+    const saved = syncCategoryRuntimeData(true);
     renderCategorySelectControls();
     renderCategoryList();
     renderCategoryPreview();
@@ -1223,7 +1235,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderSocialTracker();
     renderAdminOverview();
     renderDraftPreview();
-    setStatus(message);
+    setStatus(saved ? message : `${message} Local save failed because browser storage is full.`);
   }
 
   function syncHomeVisualsRuntimeData(saveToStorage) {
@@ -1231,8 +1243,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     utils.data.homeVisuals = JSON.parse(JSON.stringify(homeVisuals));
 
     if (saveToStorage) {
-      window.localStorage.setItem(homeVisualsSettingsKey, JSON.stringify(homeVisuals));
+      return safeLocalStorageSetItem(homeVisualsSettingsKey, JSON.stringify(homeVisuals), "homepage visuals");
     }
+
+    return true;
   }
 
   function renderFavoriteProductSelect() {
@@ -1385,9 +1399,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function saveHomeVisualState(message) {
-    syncHomeVisualsRuntimeData(true);
+    const savedLocally = syncHomeVisualsRuntimeData(true);
     renderVisualPreview();
-    setStatus(message);
+    setStatus(savedLocally ? message : `${message} (Local save failed - storage full. Publishing to Supabase still runs.)`);
     publishHomeVisualsToSupabase(message).catch(function (error) {
       console.error("Unable to publish home visuals to Supabase.", error);
       setStatus(`${message} Saved locally only. Supabase publish failed.`);
@@ -2686,7 +2700,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   async function saveCatalogState(message, options = {}) {
-    window.localStorage.setItem(storageKey, JSON.stringify(catalog));
+    const savedLocally = safeLocalStorageSetItem(storageKey, JSON.stringify(catalog), "catalog");
     renderCategoryList();
     renderCategoryPreview();
     renderList();
@@ -2709,7 +2723,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
     if (message) {
-      setStatus(message);
+      setStatus(savedLocally ? message : `${message} Local save failed because browser storage is full.`);
     }
   }
 
@@ -3320,25 +3334,64 @@ document.addEventListener("DOMContentLoaded", async function () {
   function handleImageUpload(fileInput, textInput, previewElement) {
     if (!fileInput) return;
     
-    fileInput.addEventListener("change", function (event) {
-      const file = event.target.files[0];
+    fileInput.addEventListener("change", async function (event) {
+      const file = event.target && event.target.files ? event.target.files[0] : null;
       if (!file) return;
+
+      const canUploadToSupabase =
+        liveCatalogApi &&
+        typeof liveCatalogApi.uploadProductImage === "function" &&
+        typeof liveCatalogApi.isConfigured === "function" &&
+        liveCatalogApi.isConfigured();
+
+      if (canUploadToSupabase) {
+        const user = currentLiveUser || (await refreshLiveUser());
+        if (user) {
+          try {
+            setStatus(`Uploading ${file.name}...`);
+            const uploaded = await liveCatalogApi.uploadProductImage(file);
+            const publicUrl = uploaded && uploaded.publicUrl ? uploaded.publicUrl : "";
+
+            if (publicUrl) {
+              if (previewElement) {
+                previewElement.classList.add("is-visible");
+                previewElement.innerHTML = `<img src="${publicUrl}" alt="Preview" />`;
+              }
+
+              if (textInput) {
+                textInput.value = publicUrl;
+                textInput.dispatchEvent(new Event("change", { bubbles: true }));
+              }
+
+              setStatus(`Image uploaded to Supabase: ${file.name}`);
+              return;
+            }
+          } catch (error) {
+            console.error("Unable to upload visual image to Supabase.", error);
+            setStatus("Supabase upload failed. Falling back to local preview (may not persist).", "warning");
+          }
+        }
+      }
 
       const reader = new FileReader();
       reader.onload = function (e) {
-        // Show preview
-        if (previewElement) {
-          previewElement.classList.add("is-visible");
-          previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview" />`;
+        const dataUrl = e && e.target ? e.target.result : "";
+        if (!dataUrl) {
+          setStatus("Error reading image file.", "error");
+          return;
         }
 
-        // Save as data URL in the text input
+        if (previewElement) {
+          previewElement.classList.add("is-visible");
+          previewElement.innerHTML = `<img src="${dataUrl}" alt="Preview" />`;
+        }
+
         if (textInput) {
-          textInput.value = e.target.result;
+          textInput.value = dataUrl;
           textInput.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
-        setStatus(`Image uploaded: ${file.name}`);
+        setStatus(`Image preview loaded: ${file.name} (Tip: sign in to publish so it doesn't revert)`);
       };
 
       reader.onerror = function () {

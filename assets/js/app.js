@@ -750,7 +750,44 @@
     });
   }
 
-  function hydrateSharedShell() {
+  async function unregisterLegacyRootServiceWorker() {
+    if (!("serviceWorker" in navigator) || !window.isSecureContext) {
+      return;
+    }
+
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      const currentOrigin = window.location.origin;
+
+      await Promise.all(
+        registrations.map(async function (registration) {
+          try {
+            const scriptUrl = new URL(
+              (registration.active && registration.active.scriptURL) ||
+                (registration.waiting && registration.waiting.scriptURL) ||
+                (registration.installing && registration.installing.scriptURL) ||
+                "",
+              currentOrigin
+            );
+            const scopeUrl = new URL(registration.scope, currentOrigin);
+            const isRootScope = scopeUrl.origin === currentOrigin && scopeUrl.pathname === "/";
+            const isRootSw = scriptUrl.origin === currentOrigin && scriptUrl.pathname === "/sw.js";
+
+            if (isRootScope && isRootSw) {
+              await registration.unregister();
+            }
+          } catch (error) {
+            console.warn("Unable to inspect a service worker registration.", error);
+          }
+        })
+      );
+    } catch (error) {
+      console.warn("Unable to check for legacy service workers.", error);
+    }
+  }
+
+  async function hydrateSharedShell() {
+    await unregisterLegacyRootServiceWorker();
     renderHeader();
     renderFooter();
     initReveal();
