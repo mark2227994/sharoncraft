@@ -160,6 +160,21 @@
     }, Math.max(0, Number(delay) || 0));
   }
 
+  function shouldTrackAnalytics() {
+    if (window.location.protocol === "file:") {
+      return false;
+    }
+
+    const pathname = normalizeText(window.location.pathname).toLowerCase();
+    const pageType = normalizeText(document.body && document.body.dataset && document.body.dataset.page).toLowerCase();
+
+    if (pathname.endsWith("/admin.html") || pathname === "/admin.html" || pageType === "admin") {
+      return false;
+    }
+
+    return true;
+  }
+
   function loadGa4IfNeeded() {
     const config = getAnalyticsConfig();
     if (!config.ga4MeasurementId) {
@@ -206,7 +221,7 @@
 
   function trackEvent(name, payload) {
     const eventName = normalizeText(name);
-    if (!eventName) {
+    if (!eventName || !shouldTrackAnalytics()) {
       return;
     }
 
