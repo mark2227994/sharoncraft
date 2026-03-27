@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SharonCraft | Handmade Beadwork and African-Inspired Gifts</title>
   <meta name="description" content="Shop joyful handmade beadwork, gift sets, decor, and occasion pieces from SharonCraft." />
+  <link rel="canonical" href="https://sharoncraft.co.ke/" />
+  <meta property="og:title" content="SharonCraft | Handmade Beadwork and African-Inspired Gifts" />
+  <meta property="og:description" content="Shop joyful handmade beadwork, gift sets, decor, and occasion pieces from SharonCraft." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sharoncraft.co.ke/" />
+  <meta property="og:image" content="https://sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SharonCraft | Handmade Beadwork and African-Inspired Gifts" />
+  <meta name="twitter:description" content="Shop joyful handmade beadwork, gift sets, decor, and occasion pieces from SharonCraft." />
+  <meta name="twitter:image" content="https://sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.jpg" />
   <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
   <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
   <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
@@ -46,10 +56,10 @@
 
         <div class="hero-media-stack">
           <div class="hero-media-main reveal">
-            <img id="home-hero-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="Model wearing SharonCraft occasion beadwork" />
+            <img id="home-hero-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="Model wearing SharonCraft occasion beadwork" loading="eager" fetchpriority="high" decoding="sync" />
           </div>
           <article class="hero-floating-card reveal">
-            <img id="home-favorite-image" src="assets/images/IMG-20260214-WA0006.jpg" alt="Beaded mirror from SharonCraft" />
+            <img id="home-favorite-image" src="assets/images/IMG-20260214-WA0006.jpg" alt="Beaded mirror from SharonCraft" loading="eager" fetchpriority="high" decoding="async" />
             <div>
               <span id="home-favorite-kicker" class="section-kicker">Client Favorite</span>
               <h2 id="home-favorite-title">Kijani Mirror Duo</h2>
@@ -59,6 +69,44 @@
         </div>
       </div>
     </section>
+    <script>
+      (function () {
+        try {
+          var raw = window.localStorage.getItem("sharoncraft-live-home-visuals-cache");
+          if (!raw) {
+            return;
+          }
+
+          var visuals = JSON.parse(raw);
+          var version = visuals && visuals.version ? String(visuals.version).trim() : "";
+          var addVersion = function (image) {
+            var source = String(image || "").trim();
+            if (!source || !version || source.indexOf("data:") === 0 || source.indexOf("blob:") === 0) {
+              return source;
+            }
+            return source + (source.indexOf("?") === -1 ? "?" : "&") + "v=" + encodeURIComponent(version);
+          };
+          var heroImage = document.getElementById("home-hero-image");
+          var favoriteImage = document.getElementById("home-favorite-image");
+
+          if (heroImage && visuals.hero && visuals.hero.image) {
+            heroImage.src = addVersion(visuals.hero.image);
+            if (visuals.hero.imageAlt) {
+              heroImage.alt = visuals.hero.imageAlt;
+            }
+          }
+
+          if (favoriteImage && visuals.favorite && visuals.favorite.image) {
+            favoriteImage.src = addVersion(visuals.favorite.image);
+            if (visuals.favorite.imageAlt) {
+              favoriteImage.alt = visuals.favorite.imageAlt;
+            }
+          }
+        } catch (error) {
+          console.warn("Unable to preload cached homepage visuals.", error);
+        }
+      }());
+    </script>
 
     <!-- Featured products -->
     <section class="section">
@@ -101,6 +149,38 @@
           <img class="reveal" src="assets/images/IMG_20260116_135153.jpg" alt="Hanging beaded necklaces" />
           <img class="reveal" src="assets/images/IMG_20240316_151041.jpg" alt="Colorful bracelet selection" />
         </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container marketing-proof-grid">
+        <article class="story-card reveal marketing-order-card">
+          <span class="section-kicker">Easy Ordering</span>
+          <h2>From product photo to checkout in a few comfortable steps.</h2>
+          <div class="marketing-step-list">
+            <article class="marketing-step">
+              <strong>1. Pick your favorite</strong>
+              <p>Open the product page, check the gallery, and confirm the style you want.</p>
+            </article>
+            <article class="marketing-step">
+              <strong>2. Chat on WhatsApp</strong>
+              <p>Ask about colors, delivery, or custom requests before paying.</p>
+            </article>
+            <article class="marketing-step">
+              <strong>3. Confirm M-Pesa and delivery</strong>
+              <p>Get the total, share your location, and finish your order quickly.</p>
+            </article>
+          </div>
+          <div class="cta-row">
+            <a class="button button-primary" href="shop.html">Start Shopping</a>
+            <a class="button button-secondary" href="contact.html">Ask a Question</a>
+          </div>
+        </article>
+        <article class="story-card reveal marketing-testimonial-card">
+          <span class="section-kicker">Client Love</span>
+          <h2>Why customers feel confident ordering from SharonCraft.</h2>
+          <div id="home-testimonials" class="testimonial-stack"></div>
+        </article>
       </div>
     </section>
 

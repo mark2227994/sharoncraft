@@ -5,10 +5,254 @@
   const cartStorageKey = "sharoncraft-cart";
   const wishlistStorageKey = "sharoncraft-wishlist";
   const timerStorageKey = "sharoncraft-cart-timer";
+  const analyticsStorageKey = "sharoncraft-analytics-events";
   let cartTimerInterval = null;
+  let analyticsEventsBound = false;
+  let gaLoadPromise = null;
 
   function normalizeText(value) {
     return String(value || "").trim();
+  }
+
+  function absoluteUrl(path) {
+    const normalized = normalizeText(path);
+    return new URL(normalized || window.location.pathname, window.location.origin).href;
+  }
+
+  function getAnalyticsConfig() {
+    const siteAnalytics = data && data.site && data.site.analytics ? data.site.analytics : {};
+    return {
+      ga4MeasurementId:
+        normalizeText(siteAnalytics.ga4MeasurementId) ||
+        normalizeText(window.SHARONCRAFT_GA4_ID) ||
+        ""
+    };
+  }
+
+  function getStoredAnalyticsEvents() {
+    try {
+      const raw = window.localStorage.getItem(analyticsStorageKey) || "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveAnalyticsEvents(events) {
+    try {
+      window.localStorage.setItem(analyticsStorageKey, JSON.stringify(events.slice(-150)));
+    } catch (error) {
+      console.warn("Unable to save analytics events locally.", error);
+    }
+  }
+
+  function loadGa4IfNeeded() {
+    const config = getAnalyticsConfig();
+    if (!config.ga4MeasurementId) {
+      return Promise.resolve(false);
+    }
+
+    if (typeof window.gtag === "function") {
+      return Promise.resolve(true);
+    }
+
+    if (gaLoadPromise) {
+      return gaLoadPromise;
+    }
+
+    gaLoadPromise = new Promise((resolve) => {
+      const existingScript = document.querySelector('script[data-ga4-loader="true"]');
+      if (existingScript) {
+        resolve(true);
+        return;
+      }
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function gtag() {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag("js", new Date());
+      window.gtag("config", config.ga4MeasurementId, { send_page_view: false });
+
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(config.ga4MeasurementId)}`;
+      script.setAttribute("data-ga4-loader", "true");
+      script.addEventListener("load", function () {
+        resolve(true);
+      });
+      script.addEventListener("error", function () {
+        resolve(false);
+      });
+      document.head.appendChild(script);
+    });
+
+    return gaLoadPromise;
+  }
+
+  function trackEvent(name, payload) {
+    const eventName = normalizeText(name);
+    if (!eventName) {
+      return;
+    }
+
+    const eventPayload = {
+      page_type: document.body.dataset.page || "unknown",
+      page_path: `${window.location.pathname}${window.location.search}`,
+      ...payload
+    };
+
+    const storedEvents = getStoredAnalyticsEvents();
+    storedEvents.push({
+      name: eventName,
+      payload: eventPayload,
+      timestamp: new Date().toISOString()
+    });
+    saveAnalyticsEvents(storedEvents);
+
+    loadGa4IfNeeded().then(function (loaded) {
+      if (loaded && typeof window.gtag === "function") {
+        window.gtag("event", eventName, eventPayload);
+      }
+    });
+  }
+
+  function bindAnalyticsEvents() {
+    if (analyticsEventsBound) {
+      return;
+    }
+
+    analyticsEventsBound = true;
+
+    document.addEventListener("click", function (event) {
+      const link = event.target.closest("a[href]");
+      if (!link) {
+        return;
+      }
+
+      const href = normalizeText(link.href);
+      if (!href || !/wa\.me\//i.test(href)) {
+        return;
+      }
+
+      trackEvent("whatsapp_click", {
+        button_label: normalizeText(link.dataset.analyticsLabel || link.textContent || "WhatsApp"),
+        destination: href,
+        product_id: normalizeText(link.dataset.productId),
+        product_name: normalizeText(link.dataset.productName)
+      });
+    });
+  }
+
+  function setHeadValue(selector, builder, value) {
+    if (!document || !document.head) {
+      return;
+    }
+
+    let node = document.head.querySelector(selector);
+    if (!node) {
+      node = builder();
+      document.head.appendChild(node);
+    }
+
+    node.setAttribute("content", value);
+  }
+
+  function setPageMetadata(options) {
+    const settings = options || {};
+    const title = normalizeText(settings.title) || document.title || data.site.name;
+    const description = normalizeText(settings.description) || data.site.tagline;
+    const path = normalizeText(settings.path) || window.location.pathname;
+    const image = normalizeText(settings.image) || "assets/images/IMG-20260226-WA0005.jpg";
+    const type = normalizeText(settings.type) || "website";
+    const canonicalUrl = absoluteUrl(path);
+    const imageUrl = absoluteUrl(image);
+
+    document.title = title;
+
+    setHeadValue('meta[name="description"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      return meta;
+    }, description);
+
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = canonicalUrl;
+
+    setHeadValue('meta[property="og:title"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:title");
+      return meta;
+    }, title);
+    setHeadValue('meta[property="og:description"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:description");
+      return meta;
+    }, description);
+    setHeadValue('meta[property="og:type"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:type");
+      return meta;
+    }, type);
+    setHeadValue('meta[property="og:url"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:url");
+      return meta;
+    }, canonicalUrl);
+    setHeadValue('meta[property="og:image"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:image");
+      return meta;
+    }, imageUrl);
+    setHeadValue('meta[name="twitter:card"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "twitter:card";
+      return meta;
+    }, "summary_large_image");
+    setHeadValue('meta[name="twitter:title"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "twitter:title";
+      return meta;
+    }, title);
+    setHeadValue('meta[name="twitter:description"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "twitter:description";
+      return meta;
+    }, description);
+    setHeadValue('meta[name="twitter:image"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "twitter:image";
+      return meta;
+    }, imageUrl);
+  }
+
+  function setStructuredData(schemaId, payload) {
+    if (!document || !document.head || !schemaId) {
+      return;
+    }
+
+    let node = document.head.querySelector(`script[data-schema-id="${schemaId}"]`);
+    if (!payload) {
+      if (node) {
+        node.remove();
+      }
+      return;
+    }
+
+    if (!node) {
+      node = document.createElement("script");
+      node.type = "application/ld+json";
+      node.setAttribute("data-schema-id", schemaId);
+      document.head.appendChild(node);
+    }
+
+    node.textContent = JSON.stringify(payload);
   }
 
   function getProductImages(product) {
@@ -211,6 +455,7 @@
     const image = getProductImages(product)[0];
     const description = product.shortDescription || product.description || "Handmade by SharonCraft artisans.";
     const wishlisted = isWishlisted(product.id);
+    const category = getCategoryBySlug(product.category);
     const badgeMarkup = product.badge
       ? `<span class="${buildBadgeClass(product.badge)}">${product.badge}</span>`
       : "";
@@ -223,7 +468,10 @@
         </a>
         <div class="product-card-body">
           <div class="product-card-head">
-            <h3 class="product-name"><a href="product.html?id=${product.id}">${productName}</a></h3>
+            <div>
+              <p class="product-card-category">${category ? category.name : "Collection"}</p>
+              <h3 class="product-name"><a href="product.html?id=${product.id}">${productName}</a></h3>
+            </div>
             <div class="product-card-icon-row">
               <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
                 ${heartIconMarkup()}
@@ -236,10 +484,14 @@
           <p class="product-card-text product-story">${description}</p>
           <div class="product-card-price-row">
             <strong class="product-price">${formatCurrency(product.price)}</strong>
+            <span class="product-card-stock">${getScarcityNote(product)}</span>
           </div>
           <div class="product-card-actions">
-            <a class="button button-primary product-card-order" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer">
+            <a class="button button-primary product-card-order" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
               Order on WhatsApp
+            </a>
+            <a class="button button-secondary product-card-view" href="product.html?id=${product.id}">
+              View Details
             </a>
           </div>
         </div>
@@ -435,6 +687,12 @@
     }
 
     saveCart(cart);
+    trackEvent("add_to_cart", {
+      product_id: product.id,
+      product_name: product.name || "Unnamed Product",
+      value: Number(product.price) || 0,
+      currency: "KES"
+    });
 
     const message = `${product.name || "Item"} added to your cart.`;
     if (typeof window.showToast === "function") {
@@ -524,12 +782,15 @@
     }
 
     const currentPage = document.body.dataset.page || "";
+    const isShopFamilyPage = currentPage === "shop" || currentPage === "product";
 
     target.innerHTML = `
       <div class="promo-bar">
         <div class="container promo-bar-inner">
           <p>${data.site.promo}</p>
-          <a href="${buildWhatsAppUrl("Hello SharonCraft, I would like to claim the current delivery offer.")}" target="_blank" rel="noreferrer">Claim on WhatsApp</a>
+          <a href="${buildWhatsAppUrl("Hello SharonCraft, I would like to claim the current delivery offer.")}" target="_blank" rel="noreferrer" data-analytics-label="Promo WhatsApp">
+            Claim on WhatsApp
+          </a>
         </div>
       </div>
       <header class="site-header">
@@ -543,11 +804,11 @@
           </a>
           <nav id="site-nav" class="site-nav" aria-label="Main navigation">
             <a href="index.html" class="${currentPage === "home" ? "is-active" : ""}">${navIconMarkup("home")}<span>Home</span></a>
-            <a href="shop.html" class="${currentPage === "shop" ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
+            <a href="shop.html" class="${isShopFamilyPage ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
             <a href="categories.html" class="${currentPage === "categories" ? "is-active" : ""}">${navIconMarkup("categories")}<span>Categories</span></a>
             <a href="about.html" class="${currentPage === "about" ? "is-active" : ""}">${navIconMarkup("about")}<span>About</span></a>
             <a href="contact.html" class="${currentPage === "contact" ? "is-active" : ""}">${navIconMarkup("contact")}<span>Contact</span></a>
-            <a class="button button-primary nav-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer">
+            <a class="button button-primary nav-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer" data-analytics-label="Header WhatsApp">
               <span class="nav-cta-icon">
                 ${whatsappIconMarkup()}
               </span>
@@ -652,10 +913,12 @@
             <span>Total</span>
             <strong id="cart-total-price">${formatCurrency(0)}</strong>
           </div>
-          <a id="cart-checkout" class="button button-primary" href="${buildCartMessage()}" target="_blank" rel="noreferrer">Checkout on WhatsApp</a>
+          <a id="cart-checkout" class="button button-primary" href="${buildCartMessage()}" target="_blank" rel="noreferrer" data-analytics-label="Cart Checkout WhatsApp">Checkout on WhatsApp</a>
         </div>
       </aside>
-      <a class="floating-whatsapp" href="${buildWhatsAppUrl("Hello SharonCraft, I would like to chat about your products.")}" target="_blank" rel="noreferrer">WhatsApp</a>
+      <a class="floating-whatsapp" href="${buildWhatsAppUrl("Hello SharonCraft, I would like to chat about your products.")}" target="_blank" rel="noreferrer" data-analytics-label="Floating WhatsApp">
+        WhatsApp
+      </a>
       <button class="scroll-top" type="button" aria-label="Scroll to top">Top</button>
     `;
 
@@ -788,6 +1051,11 @@
 
   async function hydrateSharedShell() {
     await unregisterLegacyRootServiceWorker();
+    bindAnalyticsEvents();
+    trackEvent("page_view", {
+      page_title: document.title,
+      page_location: window.location.href
+    });
     renderHeader();
     renderFooter();
     initReveal();
@@ -809,6 +1077,10 @@
     createProductCard,
     createCategoryCard,
     getScarcityNote,
+    setPageMetadata,
+    setStructuredData,
+    trackEvent,
+    getTrackedEvents: getStoredAnalyticsEvents,
     renderCategorySelect,
     refreshReveal: initReveal,
     addToCart,

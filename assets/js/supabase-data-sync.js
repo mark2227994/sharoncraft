@@ -4,6 +4,16 @@
   const liveCatalog = window.SharonCraftCatalog;
   const fallbackImage = "assets/images/IMG-20260226-WA0005.jpg";
   const normalizeText = (value) => String(value || "").trim();
+  const computeCacheVersion = (value) => {
+    const input = JSON.stringify(value || {});
+    let hash = 0;
+
+    for (let index = 0; index < input.length; index += 1) {
+      hash = ((hash << 5) - hash + input.charCodeAt(index)) | 0;
+    }
+
+    return Math.abs(hash).toString(36);
+  };
   const defaultProductImageMap = new Map(
     (((window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || []).map((product) => [
       normalizeText(product && product.id),
@@ -55,6 +65,7 @@
     const favorite = visuals && typeof visuals === "object" ? visuals.favorite || {} : {};
 
     return {
+      version: String((visuals && visuals.version) || fallback.version || "").trim(),
       hero: {
         kicker: String(hero.kicker || fallbackHero.kicker || "").trim(),
         title: String(hero.title || fallbackHero.title || "").trim(),
@@ -174,6 +185,12 @@
       } catch (error) {
         console.warn("Unable to clear stale local catalog override.", error);
       }
+
+      try {
+        window.localStorage.setItem(storage.liveCatalogCacheKey, JSON.stringify(nextProducts));
+      } catch (error) {
+        console.warn("Unable to cache the latest live catalog.", error);
+      }
     }
 
     return nextProducts;
@@ -203,13 +220,22 @@
       data.homeVisuals ||
       {};
 
-    data.homeVisuals = normalizeHomeVisuals(setting, fallback);
+    data.homeVisuals = {
+      ...normalizeHomeVisuals(setting, fallback),
+      version: computeCacheVersion(setting),
+    };
 
     if (!isLocalPreview) {
       try {
         window.localStorage.removeItem(storage.homeVisualsSettingsKey);
       } catch (error) {
         console.warn("Unable to clear stale local visual override.", error);
+      }
+
+      try {
+        window.localStorage.setItem(storage.liveHomeVisualsCacheKey, JSON.stringify(data.homeVisuals));
+      } catch (error) {
+        console.warn("Unable to cache the latest live homepage visuals.", error);
       }
     }
 

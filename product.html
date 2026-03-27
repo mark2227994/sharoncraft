@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Product | SharonCraft</title>
   <meta name="description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
+  <link rel="canonical" href="https://sharoncraft.co.ke/product.html" />
+  <meta property="og:title" content="Product | SharonCraft" />
+  <meta property="og:description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
+  <meta property="og:type" content="product" />
+  <meta property="og:url" content="https://sharoncraft.co.ke/product.html" />
+  <meta property="og:image" content="https://sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Product | SharonCraft" />
+  <meta name="twitter:description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
+  <meta name="twitter:image" content="https://sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.jpg" />
   <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
   <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
   <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
@@ -13,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css?v=20260327-live-fix" />
 </head>
-<body data-page="shop">
+<body data-page="product">
   <div data-site-header></div>
 
   <main>
@@ -43,12 +53,27 @@
             <div class="cta-row">
               <button id="product-add-cart" class="button button-secondary" type="button">Add to Cart</button>
               <a id="product-buy" class="button button-primary" href="#" target="_blank" rel="noreferrer">Buy via WhatsApp</a>
+              <a id="product-customize" class="button button-secondary" href="#" target="_blank" rel="noreferrer">Ask About Custom Colors</a>
               <button id="product-view-cart" class="button button-secondary" type="button">View Cart</button>
               <a class="button button-secondary" href="shop.html">Back to Shop</a>
             </div>
             <div class="mpesa-box">
               <strong>M-Pesa</strong>
               <p id="product-mpesa-copy">Confirm your product on WhatsApp, then pay after delivery details are shared.</p>
+            </div>
+            <div class="product-assurance-grid">
+              <article class="product-assurance-card">
+                <strong>Fast WhatsApp support</strong>
+                <p>Ask about stock, delivery, colors, and gifting before you commit.</p>
+              </article>
+              <article class="product-assurance-card">
+                <strong>Simple delivery flow</strong>
+                <p>Get the total, confirm M-Pesa, and receive clear delivery guidance.</p>
+              </article>
+              <article class="product-assurance-card">
+                <strong>Handmade in Kenya</strong>
+                <p>Each piece keeps the SharonCraft craft story visible and personal.</p>
+              </article>
             </div>
           </section>
         </div>
@@ -66,6 +91,18 @@
       </div>
     </section>
   </main>
+
+  <aside id="product-sticky-bar" class="product-sticky-bar" hidden>
+    <div class="product-sticky-copy">
+      <span class="section-kicker">Ready to order?</span>
+      <strong id="product-sticky-title">SharonCraft piece</strong>
+      <span id="product-sticky-price">KES 0</span>
+    </div>
+    <div class="product-sticky-actions">
+      <button id="product-sticky-cart" class="button button-secondary" type="button">Add to Cart</button>
+      <a id="product-sticky-buy" class="button button-primary" href="#" target="_blank" rel="noreferrer">WhatsApp</a>
+    </div>
+  </aside>
 
   <div data-site-footer></div>
 
