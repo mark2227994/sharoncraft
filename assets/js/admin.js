@@ -14,11 +14,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const bundlesKey = "sharoncraft-bundles";
   const replyTemplatesKey = "sharoncraft-reply-templates";
   const goalKey = "sharoncraft-kiosk-goal";
+  const storefrontAnalyticsKey = "sharoncraft-analytics-events";
   const utils = window.SharonCraftUtils;
   // Wait for data to be loaded
   await utils.waitForData();
   const liveCatalogApi = window.SharonCraftCatalog || null;
-  const availableImages = [
+  const fallbackAvailableImages = [
     "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.jpeg",
     "assets/images/d2801c4b-e113-440b-8eaf-fa52ac5703a8_0_watermark.jpeg",
     "assets/images/IMG-20260212-WA0020.jpeg",
@@ -74,21 +75,36 @@ document.addEventListener("DOMContentLoaded", async function () {
     "assets/images/WhatsApp Image 2026-03-21 at 15.48.32 (1).jpeg",
     "assets/images/WhatsApp Image 2026-03-21 at 15.48.32.jpeg"
   ];
+  let availableImages = [];
   const fallbackImage = "assets/images/IMG-20260226-WA0005.jpg";
   const defaultCategorySource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
   const defaultHomeVisualSource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.homeVisuals) || utils.data.homeVisuals || {};
   const defaultProductSource = (window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || utils.data.products;
-  const curatedLibraryImages = availableImages.filter(
-    (image) => /\.(jpe?g|png|webp)$/i.test(image) && !/logo|favicon/i.test(image)
-  );
+  let curatedLibraryImages = [];
   let categoryCatalog = (utils.data.categories || []).map((category) => normalizeCategory(category));
   let categoryMap = new Map(categoryCatalog.map((category) => [category.slug, category.name]));
 
   const defaultProducts = defaultProductSource.map((product, index) => normalizeProduct(product, index));
   const defaultProductImageMap = new Map(defaultProducts.map((product) => [product.id, product.images]));
   let defaultCategoryImageMap = buildDefaultCategoryImageMap(categoryCatalog);
+
+  function setAvailableImages(imageList) {
+    availableImages = Array.from(
+      new Set(
+        (Array.isArray(imageList) ? imageList : [])
+          .concat(fallbackAvailableImages)
+          .map((image) => String(image || "").trim())
+          .filter(Boolean)
+      )
+    );
+    curatedLibraryImages = availableImages.filter(
+      (image) => /\.(jpe?g|png|webp|svg)$/i.test(image) && !/logo|favicon/i.test(image)
+    );
+  }
+
+  setAvailableImages(Array.isArray(window.SharonCraftImageManifest) ? window.SharonCraftImageManifest : []);
 
   function defaultAnalytics(product, index) {
     const unitsSold = (index + 2) * (product.featured ? 4 : 2);
@@ -103,6 +119,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   function normalizeProduct(product, index) {
     const rawImages = Array.isArray(product.images) ? product.images : [];
     const rawGallery = Array.isArray(product.gallery) ? product.gallery : [];
+    const noteParts = String(product.notes || "").split("|");
+    const categoryFromNotes = String(noteParts[0] || "").trim();
+    const sourceFromNotes = String(noteParts[1] || "").trim();
+    const material = String(product.material || "").trim().toLowerCase();
+    const fallbackCategory =
+      categoryFromNotes ||
+      product.category ||
+      ((categoryCatalog || []).find((category) => String(category.name || "").trim().toLowerCase() === material) || {}).slug ||
+      ((defaultCategorySource || []).find((category) => String(category.name || "").trim().toLowerCase() === material) || {}).slug ||
+      "necklaces";
+    const spotlightUntil = Date.parse(product.spotlightUntil || "");
+    const newUntil = Date.parse(product.newUntil || "");
     const mainImage =
       cleanImagePath(product.image) ||
       cleanImagePath(rawImages[0]) ||
@@ -112,17 +140,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     return {
       id: product.id,
       name: product.name,
-      category: product.category,
+      category: fallbackCategory,
       price: Number(product.price) || 0,
       momPrice: Number(product.momPrice) || 0,
       deliveryCharge: Number(product.deliveryCharge) || 0,
       deliveryCost: Number(product.deliveryCost) || 0,
-      source: product.source || "mom-kiosk",
+      source: product.source || sourceFromNotes || "mom-kiosk",
       stockQty: Number(product.stockQty) || 0,
       reservedQty: Number(product.reservedQty) || 0,
-      badge: product.badge || "",
-      featured: Boolean(product.featured),
-      newArrival: Boolean(product.newArrival),
+      badge: product.badge || product.spotlightText || "",
+      featured: Boolean(product.featured) || (Number.isFinite(spotlightUntil) && spotlightUntil > Date.now()),
+      newArrival: Boolean(product.newArrival) || (Number.isFinite(newUntil) && newUntil > Date.now()),
       shortDescription: product.shortDescription || product.description || product.story || "",
       description: product.description || product.shortDescription || product.story || "",
       details: Array.isArray(product.details) ? product.details : Array.isArray(product.specs) ? product.specs : [],
@@ -370,6 +398,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const selectedGallery = document.getElementById("admin-selected-gallery");
   const imageLibrary = document.getElementById("admin-image-library");
   const imageLibrarySearch = document.getElementById("admin-image-search");
+  const refreshGalleryButton = document.getElementById("admin-refresh-gallery");
+  const inlineImageLibrary = document.getElementById("admin-inline-image-library");
+  const inlineImageSearch = document.getElementById("admin-inline-image-search");
+  const inlineRefreshGalleryButton = document.getElementById("admin-inline-refresh-gallery");
   const descriptionInput = document.getElementById("admin-description");
   const descriptionStarterButton = document.getElementById("admin-description-starter");
   const detailsInput = document.getElementById("admin-details");
@@ -388,6 +420,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const previewFrame = document.getElementById("admin-preview-frame");
   const searchInput = document.getElementById("admin-product-search");
   const categoryFilter = document.getElementById("admin-product-filter");
+  const catalogSummary = document.getElementById("admin-catalog-summary");
   const categoryList = document.getElementById("admin-category-list");
   const categoryEditorForm = document.getElementById("admin-category-form");
   const categoryNameInput = document.getElementById("admin-category-name");
@@ -439,6 +472,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const featureFilter = document.getElementById("admin-feature-filter");
   const featuredSummary = document.getElementById("admin-featured-summary");
   const featuredManager = document.getElementById("admin-featured-manager");
+  const featuredSearchInput = document.getElementById("admin-featured-search");
+  const featuredCandidates = document.getElementById("admin-featured-candidates");
   const salesMetrics = document.getElementById("admin-sales-metrics");
   const salesChart = document.getElementById("admin-sales-chart");
   const salesTable = document.getElementById("admin-sales-table");
@@ -521,6 +556,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const replyMessageInput = document.getElementById("admin-reply-message");
   const replyList = document.getElementById("admin-reply-list");
   const adminOverviewGrid = document.getElementById("admin-overview-grid");
+  const analyticsSummary = document.getElementById("admin-analytics-summary");
+  const analyticsProducts = document.getElementById("admin-analytics-products");
+  const analyticsFeed = document.getElementById("admin-analytics-feed");
+  const analyticsRefreshButton = document.getElementById("admin-analytics-refresh");
+  const analyticsClearButton = document.getElementById("admin-analytics-clear");
   const liveAuthState = document.getElementById("admin-live-auth-state");
   const liveAuthForm = document.getElementById("admin-live-auth-form");
   const liveEmailInput = document.getElementById("admin-live-email");
@@ -653,9 +693,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   let editingReplyId = null;
   let editingCategorySlug = categoryCatalog[0] ? categoryCatalog[0].slug : "";
   let activeVisualSection = "hero";
+  let activeFeaturedSlotIndex = 0;
   let uploadedImageCounter = 0;
   const uploadedImageTokenPrefix = "__uploaded_image__:";
   const uploadedImageRegistry = new Map();
+  const FEATURED_SLOT_COUNT = 4;
 
   function safeLocalStorageSetItem(key, value, label) {
     try {
@@ -673,6 +715,65 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function cleanImagePath(path) {
     return (path || "").trim();
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function getImageLabel(image) {
+    const normalized = cleanImagePath(image);
+    return normalized.split("/").pop() || normalized || "Image";
+  }
+
+  function getFilteredProjectImages(query, options) {
+    const settings = options || {};
+    const normalizedQuery = String(query || "").trim().toLowerCase();
+    const sourceImages = Array.isArray(settings.pool) && settings.pool.length ? settings.pool : availableImages;
+    const filtered = sourceImages.filter((image) => {
+      if (settings.extensions && !settings.extensions.test(image)) {
+        return false;
+      }
+
+      return !normalizedQuery || image.toLowerCase().includes(normalizedQuery);
+    });
+
+    return Number.isFinite(settings.limit) ? filtered.slice(0, settings.limit) : filtered;
+  }
+
+  function renderProjectImageLibrary(target, images, emptyTitle, emptyText) {
+    if (!target) {
+      return;
+    }
+
+    target.innerHTML = images.length
+      ? images
+        .map(
+          (image) => `
+            <article class="admin-library-item">
+              <img src="${escapeHtml(image)}" alt="${escapeHtml(getImageLabel(image))}" loading="lazy" />
+              <div class="admin-library-copy">
+                <span>${escapeHtml(getImageLabel(image))}</span>
+                <div class="admin-library-actions">
+                  <button type="button" data-action="main" data-image="${escapeHtml(image)}">Use as Main</button>
+                  <button type="button" data-action="gallery" data-image="${escapeHtml(image)}">Add to Gallery</button>
+                </div>
+              </div>
+            </article>
+          `
+        )
+        .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>${escapeHtml(emptyTitle)}</strong>
+            <p>${escapeHtml(emptyText)}</p>
+          </article>
+        `;
   }
 
   function isEmbeddedImage(path) {
@@ -1038,6 +1139,38 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join(", ");
   }
 
+  function applyGalleryImageToDraft(image, action) {
+    const normalizedImage = cleanImagePath(image);
+    if (!normalizedImage) {
+      return;
+    }
+
+    let images = getFormGalleryImages();
+
+    if (action === "main") {
+      images = dedupeImages([normalizedImage].concat(images.filter((item) => item !== normalizedImage)));
+      imageInput.value = toFormImageValue(normalizedImage);
+      temporaryMainPreviewSrc = "";
+      syncGalleryTextarea(images);
+      renderDraftPreview();
+      setStatus(`${getImageLabel(normalizedImage)} is now the main draft image.`);
+      activateAdminTab("workspace");
+      return;
+    }
+
+    if (action === "gallery") {
+      images = dedupeImages(images.concat(normalizedImage));
+      if (!imageInput.value.trim()) {
+        imageInput.value = toFormImageValue(normalizedImage);
+      }
+      temporaryMainPreviewSrc = "";
+      syncGalleryTextarea(images);
+      renderDraftPreview();
+      setStatus(`${getImageLabel(normalizedImage)} added to the draft gallery.`);
+      activateAdminTab("workspace");
+    }
+  }
+
   function syncPreviewJson() {
     if (!preview) {
       return;
@@ -1192,19 +1325,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const query = categoryImageSearchInput ? categoryImageSearchInput.value.trim().toLowerCase() : "";
-    const filteredImages = availableImages
-      .filter((image) => /\.(jpe?g|png|webp|svg)$/i.test(image))
-      .filter((image) => !query || image.toLowerCase().includes(query))
-      .slice(0, 18);
+    const filteredImages = getFilteredProjectImages(categoryImageSearchInput ? categoryImageSearchInput.value : "", {
+      extensions: /\.(jpe?g|png|webp|svg)$/i,
+      limit: 18
+    });
 
     categoryImageLibrary.innerHTML = filteredImages.length
       ? filteredImages
         .map(
           (image) => `
-            <button class="admin-category-image-option" type="button" data-category-image="${image}">
-              <img src="${image}" alt="${image.split("/").pop()}" loading="lazy" />
-              <span>${image.split("/").pop()}</span>
+            <button class="admin-category-image-option" type="button" data-category-image="${escapeHtml(image)}">
+              <img src="${escapeHtml(image)}" alt="${escapeHtml(getImageLabel(image))}" loading="lazy" />
+              <span>${escapeHtml(getImageLabel(image))}</span>
             </button>
           `
         )
@@ -1373,19 +1505,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const query = visualImageSearchInput ? visualImageSearchInput.value.trim().toLowerCase() : "";
-    const filteredImages = availableImages
-      .filter((image) => /\.(jpe?g|png|webp)$/i.test(image))
-      .filter((image) => !query || image.toLowerCase().includes(query))
-      .slice(0, 18);
+    const filteredImages = getFilteredProjectImages(visualImageSearchInput ? visualImageSearchInput.value : "", {
+      extensions: /\.(jpe?g|png|webp|svg)$/i,
+      limit: 18
+    });
 
     visualImageLibrary.innerHTML = filteredImages.length
       ? filteredImages
         .map(
           (image) => `
-            <button class="admin-category-image-option" type="button" data-visual-image="${image}">
-              <img src="${image}" alt="${image.split("/").pop()}" loading="lazy" />
-              <span>${image.split("/").pop()}</span>
+            <button class="admin-category-image-option" type="button" data-visual-image="${escapeHtml(image)}">
+              <img src="${escapeHtml(image)}" alt="${escapeHtml(getImageLabel(image))}" loading="lazy" />
+              <span>${escapeHtml(getImageLabel(image))}</span>
             </button>
           `
         )
@@ -1572,6 +1703,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       orders: "Orders",
       operations: "Delivery & Stock",
       profit: "Profit",
+      analytics: "Analytics",
       social: "Social Tools",
       replies: "Quick Replies",
       assets: "Photo Library"
@@ -1585,12 +1717,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
+    const trackedEvents = loadStorefrontAnalyticsEvents();
+    const whatsappClicks = trackedEvents.filter((event) => event.name === "whatsapp_click").length;
+
     const cards = [
       { label: "Products", value: catalog.length },
       { label: "Categories", value: categoryCatalog.length },
       { label: "Featured", value: catalog.filter((product) => product.featured).length },
       { label: "Orders", value: orders.length },
-      { label: "Delivery Areas", value: deliveryAreas.length }
+      { label: "WhatsApp Taps", value: whatsappClicks },
+      { label: "Tracked Events", value: trackedEvents.length }
     ];
 
     adminOverviewGrid.innerHTML = cards
@@ -1605,6 +1741,170 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join("");
   }
 
+  function loadStorefrontAnalyticsEvents() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(storefrontAnalyticsKey) || "[]");
+      return Array.isArray(saved) ? saved : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function formatAnalyticsTime(value) {
+    const parsed = Date.parse(value || "");
+    if (!Number.isFinite(parsed)) {
+      return "Unknown time";
+    }
+
+    const diffMinutes = Math.max(0, Math.round((Date.now() - parsed) / 60000));
+    if (diffMinutes < 1) {
+      return "Just now";
+    }
+    if (diffMinutes < 60) {
+      return `${diffMinutes} min ago`;
+    }
+
+    const diffHours = Math.round(diffMinutes / 60);
+    if (diffHours < 24) {
+      return `${diffHours} hr ago`;
+    }
+
+    const diffDays = Math.round(diffHours / 24);
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  }
+
+  function getAnalyticsEventLabel(name) {
+    const labels = {
+      page_view: "Page View",
+      product_view: "Product View",
+      add_to_cart: "Add To Cart",
+      whatsapp_click: "WhatsApp Click"
+    };
+
+    return labels[name] || String(name || "Event").replace(/_/g, " ");
+  }
+
+  function renderAnalyticsDashboard() {
+    if (!analyticsSummary || !analyticsProducts || !analyticsFeed) {
+      return;
+    }
+
+    const events = loadStorefrontAnalyticsEvents()
+      .filter((event) => event && typeof event === "object" && event.name)
+      .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""));
+
+    const eventCounts = events.reduce(
+      (totals, event) => {
+        totals.total += 1;
+        if (event.name === "product_view") totals.views += 1;
+        if (event.name === "add_to_cart") totals.carts += 1;
+        if (event.name === "whatsapp_click") totals.whatsapp += 1;
+        return totals;
+      },
+      { total: 0, views: 0, carts: 0, whatsapp: 0 }
+    );
+
+    const productStats = events.reduce((map, event) => {
+      const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
+      const productId = String(payload.product_id || "").trim();
+      const productName = String(payload.product_name || "").trim();
+      if (!productId && !productName) {
+        return map;
+      }
+
+      const key = productId || productName;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: productId,
+          name: productName || productId || "Unknown product",
+          views: 0,
+          carts: 0,
+          whatsapp: 0,
+          score: 0
+        });
+      }
+
+      const current = map.get(key);
+      if (event.name === "product_view") current.views += 1;
+      if (event.name === "add_to_cart") current.carts += 1;
+      if (event.name === "whatsapp_click") current.whatsapp += 1;
+      current.score = current.views + current.carts * 2 + current.whatsapp * 3;
+      return map;
+    }, new Map());
+
+    const topProducts = Array.from(productStats.values())
+      .sort((left, right) => right.score - left.score)
+      .slice(0, 6);
+
+    analyticsSummary.innerHTML = `
+      <article class="admin-metric-card">
+        <span>Total Events</span>
+        <strong>${eventCounts.total}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Product Views</span>
+        <strong>${eventCounts.views}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Add To Cart</span>
+        <strong>${eventCounts.carts}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>WhatsApp Clicks</span>
+        <strong>${eventCounts.whatsapp}</strong>
+      </article>
+    `;
+
+    analyticsProducts.innerHTML = topProducts.length
+      ? topProducts
+          .map(
+            (product) => `
+              <article class="admin-analytics-product-row">
+                <div class="admin-analytics-product-copy">
+                  <strong>${escapeHtml(product.name)}</strong>
+                  <span>${product.id ? escapeHtml(product.id) : "Tracked from storefront activity"}</span>
+                </div>
+                <div class="admin-analytics-product-stats">
+                  <span>${product.views} views</span>
+                  <span>${product.carts} carts</span>
+                  <span>${product.whatsapp} chats</span>
+                </div>
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No tracked product activity yet</strong>
+            <p>Open the storefront on this browser, view a product, and tap a few buttons to start filling this dashboard.</p>
+          </article>
+        `;
+
+    analyticsFeed.innerHTML = events.length
+      ? events
+          .slice(0, 14)
+          .map((event) => {
+            const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
+            const detail = String(payload.product_name || payload.button_label || payload.page_path || "Storefront action").trim();
+            return `
+              <article class="admin-analytics-event-row">
+                <div class="admin-analytics-event-copy">
+                  <strong>${escapeHtml(getAnalyticsEventLabel(event.name))}</strong>
+                  <span>${escapeHtml(detail)}</span>
+                </div>
+                <small>${escapeHtml(formatAnalyticsTime(event.timestamp))}</small>
+              </article>
+            `;
+          })
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No storefront events yet</strong>
+            <p>Visit the live store in this browser, open products, add to cart, or tap WhatsApp so activity can appear here.</p>
+          </article>
+        `;
+  }
+
   function activateAdminTab(tabName) {
     adminTabButtons.forEach((button) => {
       button.classList.toggle("is-active", button.getAttribute('data-admin-tab') === tabName);
@@ -1615,6 +1915,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     switch (tabName) {
+      case "workspace":
+        renderInlineImageLibrary();
+        break;
       case "catalog":
         renderList();
         renderFeaturedManager();
@@ -1638,6 +1941,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         break;
       case "profit":
         renderProfitDashboard();
+        break;
+      case "analytics":
+        renderAnalyticsDashboard();
         break;
       case "social":
         renderSocialCalendar();
@@ -1683,12 +1989,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       .map(
         (image, index) => `
           <article class="admin-gallery-chip ${index === 0 ? "is-main" : ""}">
-            <img src="${image}" alt="Selected gallery image ${index + 1}" />
+            <img src="${escapeHtml(image)}" alt="Selected gallery image ${index + 1}" />
             <div class="admin-gallery-chip-actions">
               <strong>${index === 0 ? "Main" : "Gallery"}</strong>
               <div>
-                ${index === 0 ? "" : `<button type="button" data-action="set-main" data-image="${image}">Set Main</button>`}
-                ${images.length > 1 ? `<button type="button" data-action="remove" data-image="${image}">Remove</button>` : ""}
+                ${index === 0 ? "" : `<button type="button" data-action="set-main" data-image="${escapeHtml(image)}">Set Main</button>`}
+                ${images.length > 1 ? `<button type="button" data-action="remove" data-image="${escapeHtml(image)}">Remove</button>` : ""}
               </div>
             </div>
           </article>
@@ -1698,34 +2004,74 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderImageLibrary() {
-    const query = imageLibrarySearch ? imageLibrarySearch.value.trim().toLowerCase() : "";
-    const filteredImages = availableImages.filter((image) => {
-      return !query || image.toLowerCase().includes(query);
+    const filteredImages = getFilteredProjectImages(imageLibrarySearch ? imageLibrarySearch.value : "", {
+      pool: curatedLibraryImages
     });
 
-    imageLibrary.innerHTML = filteredImages.length
-      ? filteredImages
-      .map(
-        (image) => `
-          <article class="admin-library-item">
-            <img src="${image}" alt="${image.split("/").pop()}" loading="lazy" />
-            <div class="admin-library-copy">
-              <span>${image.split("/").pop()}</span>
-              <div class="admin-library-actions">
-                <button type="button" data-action="main" data-image="${image}">Use as Main</button>
-                <button type="button" data-action="gallery" data-image="${image}">Add to Gallery</button>
-              </div>
-            </div>
-          </article>
-        `
-      )
-      .join("")
-      : `
-          <article class="empty-state-card">
-            <strong>No matching images</strong>
-            <p>Try a shorter file name or clear the search to see the full library again.</p>
-          </article>
-        `;
+    renderProjectImageLibrary(
+      imageLibrary,
+      filteredImages,
+      "No matching images",
+      "Try a shorter file name or clear the search to see the full project library again."
+    );
+  }
+
+  function renderInlineImageLibrary() {
+    const filteredImages = getFilteredProjectImages(inlineImageSearch ? inlineImageSearch.value : "", {
+      pool: curatedLibraryImages,
+      limit: 12
+    });
+
+    renderProjectImageLibrary(
+      inlineImageLibrary,
+      filteredImages,
+      "No matching product photos",
+      "Try part of the file name or clear the search to browse more saved product images."
+    );
+  }
+
+  async function refreshGalleryManifest() {
+    const manifestUrl = `assets/js/image-manifest.js?v=${Date.now()}`;
+    const buttons = [refreshGalleryButton, inlineRefreshGalleryButton].filter(Boolean);
+
+    buttons.forEach((button) => {
+      button.disabled = true;
+      button.textContent = "Refreshing...";
+    });
+
+    try {
+      const response = await fetch(manifestUrl, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Manifest request failed with status ${response.status}`);
+      }
+
+      const scriptText = await response.text();
+      const match = scriptText.match(/window\.SharonCraftImageManifest\s*=\s*(\[[\s\S]*\]);?/);
+      if (!match) {
+        throw new Error("Manifest file format is invalid.");
+      }
+
+      const nextManifest = JSON.parse(match[1]);
+      if (!Array.isArray(nextManifest)) {
+        throw new Error("Manifest data is not a valid image list.");
+      }
+
+      window.SharonCraftImageManifest = nextManifest.slice();
+      setAvailableImages(nextManifest);
+      renderImageLibrary();
+      renderInlineImageLibrary();
+      renderCategoryImageLibrary();
+      renderVisualImageLibrary();
+      setStatus(`Project gallery refreshed. ${curatedLibraryImages.length} product photos are ready to use.`);
+    } catch (error) {
+      console.error("Unable to refresh the image manifest.", error);
+      setStatus("Gallery refresh failed. If you added new files, run refresh-image-manifest.ps1 first, then try again.");
+    } finally {
+      buttons.forEach((button) => {
+        button.disabled = false;
+        button.textContent = "Refresh Gallery";
+      });
+    }
   }
 
   function renderDraftPreview() {
@@ -1751,7 +2097,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     totalProfitInput.value = formatPrice(currentTotalProfit);
     draftGallery.innerHTML = images
       .slice(0, 4)
-      .map((image) => `<img src="${image}" alt="Draft gallery preview" loading="lazy" />`)
+      .map((image) => `<img src="${escapeHtml(image)}" alt="Draft gallery preview" loading="lazy" />`)
       .join("");
     imagePreview.src = previewSource;
     renderSelectedGallery();
@@ -1800,30 +2146,305 @@ document.addEventListener("DOMContentLoaded", async function () {
     syncPreviewJson();
   }
 
+  function renderList() {
+    const keyword = (searchInput.value || "").trim().toLowerCase();
+    const selectedCategory = categoryFilter.value;
+    const selectedFeature = featureFilter.value;
+
+    const filtered = catalog.filter((product) => {
+      const keywordMatch =
+        !keyword ||
+        product.name.toLowerCase().includes(keyword) ||
+        product.description.toLowerCase().includes(keyword) ||
+        product.category.toLowerCase().includes(keyword);
+      const categoryMatch = !selectedCategory || product.category === selectedCategory;
+      const featureMatch =
+        !selectedFeature ||
+        (selectedFeature === "featured" && product.featured) ||
+        (selectedFeature === "new" && product.newArrival);
+      return keywordMatch && categoryMatch && featureMatch;
+    });
+
+    const visibleFeaturedCount = filtered.filter((product) => product.featured).length;
+    const visibleNewCount = filtered.filter((product) => product.newArrival).length;
+    const visibleValue = filtered.reduce((sum, product) => sum + (Number(product.price) || 0), 0);
+
+    if (catalogSummary) {
+      catalogSummary.innerHTML = `
+        <article class="admin-metric-card">
+          <span>Showing</span>
+          <strong>${filtered.length}</strong>
+        </article>
+        <article class="admin-metric-card">
+          <span>Featured In View</span>
+          <strong>${visibleFeaturedCount}</strong>
+        </article>
+        <article class="admin-metric-card">
+          <span>New In View</span>
+          <strong>${visibleNewCount}</strong>
+        </article>
+        <article class="admin-metric-card">
+          <span>Visible Value</span>
+          <strong>${formatPrice(visibleValue)}</strong>
+        </article>
+      `;
+    }
+
+    if (!filtered.length) {
+      list.innerHTML = `
+        <article class="empty-state-card admin-catalog-empty">
+          <strong>No products match these filters</strong>
+          <p>Try a shorter search, change the category, or clear the featured filter to bring products back into view.</p>
+        </article>
+      `;
+      syncPreviewJson();
+      return;
+    }
+
+    list.innerHTML = filtered
+      .map((product) => {
+        const categoryName = categoryMap.get(product.category) || product.category;
+        const statusLabel = product.featured ? "Featured" : "Standard";
+        const freshnessLabel = product.newArrival ? "New Arrival" : "Catalog";
+        const description = String(product.shortDescription || product.description || "No description yet.")
+          .trim()
+          .slice(0, 120);
+        const descriptionSuffix = description.length === 120 ? "..." : "";
+
+        return `
+          <article class="admin-item">
+            <div class="admin-item-media">
+              <img src="${product.images[0]}" alt="${product.name}" loading="lazy" />
+            </div>
+            <div class="admin-item-copy">
+              <div class="admin-item-head">
+                <div class="admin-item-title-group">
+                  <strong>${product.name}</strong>
+                  <span class="admin-item-category">${categoryName}</span>
+                </div>
+                <strong class="admin-item-price">${formatPrice(product.price)}</strong>
+              </div>
+              <p class="admin-item-description">${description}${descriptionSuffix}</p>
+              <div class="admin-item-meta-row">
+                <span class="admin-item-chip">${statusLabel}</span>
+                <span class="admin-item-chip">${freshnessLabel}</span>
+                <span class="admin-item-chip">Profit ${formatPrice(getTotalProfit(product))}</span>
+              </div>
+            </div>
+            <div class="admin-item-actions">
+              <button type="button" data-action="edit" data-id="${product.id}">Edit</button>
+              <button type="button" data-action="preview" data-id="${product.id}">Preview</button>
+              <button type="button" data-action="delete" data-id="${product.id}">Delete</button>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+    syncPreviewJson();
+  }
+
+  function getFeaturedProducts() {
+    return catalog.filter((product) => product.featured);
+  }
+
+  function getHomepageFeaturedProducts() {
+    return getFeaturedProducts().slice(0, FEATURED_SLOT_COUNT);
+  }
+
+  function swapCatalogProducts(firstId, secondId) {
+    const firstIndex = catalog.findIndex((product) => product.id === firstId);
+    const secondIndex = catalog.findIndex((product) => product.id === secondId);
+
+    if (firstIndex < 0 || secondIndex < 0 || firstIndex === secondIndex) {
+      return;
+    }
+
+    const nextCatalog = catalog.slice();
+    const firstProduct = nextCatalog[firstIndex];
+    nextCatalog[firstIndex] = nextCatalog[secondIndex];
+    nextCatalog[secondIndex] = firstProduct;
+    catalog = nextCatalog;
+  }
+
+  function moveCatalogProductToIndex(productId, targetIndex) {
+    const currentIndex = catalog.findIndex((product) => product.id === productId);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const boundedIndex = Math.max(0, Math.min(targetIndex, catalog.length - 1));
+    if (currentIndex === boundedIndex) {
+      return;
+    }
+
+    const nextCatalog = catalog.slice();
+    const [movedProduct] = nextCatalog.splice(currentIndex, 1);
+    nextCatalog.splice(boundedIndex, 0, movedProduct);
+    catalog = nextCatalog;
+  }
+
+  function setProductFeatured(productId, nextFeatured) {
+    catalog = catalog.map((product) =>
+      product.id === productId ? { ...product, featured: nextFeatured } : product
+    );
+  }
+
+  function replaceHomepageSlot(slotIndex, nextProductId) {
+    const featuredProducts = getHomepageFeaturedProducts();
+    const currentProduct = featuredProducts[slotIndex];
+    const nextProduct = catalog.find((product) => product.id === nextProductId);
+
+    if (!nextProduct) {
+      return false;
+    }
+
+    if (currentProduct && currentProduct.id === nextProductId) {
+      return false;
+    }
+
+    if (currentProduct) {
+      const currentIndex = catalog.findIndex((product) => product.id === currentProduct.id);
+      setProductFeatured(currentProduct.id, false);
+      setProductFeatured(nextProductId, true);
+      moveCatalogProductToIndex(nextProductId, currentIndex);
+    } else {
+      setProductFeatured(nextProductId, true);
+      if (slotIndex === 0) {
+        moveCatalogProductToIndex(nextProductId, 0);
+      } else {
+        const previousSlot = featuredProducts[Math.max(0, slotIndex - 1)];
+        if (previousSlot) {
+          const previousIndex = catalog.findIndex((product) => product.id === previousSlot.id);
+          moveCatalogProductToIndex(nextProductId, previousIndex + 1);
+        } else {
+          moveCatalogProductToIndex(nextProductId, slotIndex);
+        }
+      }
+    }
+
+    return true;
+  }
+
+  function moveFeaturedSlot(productId, direction) {
+    const featuredProducts = getHomepageFeaturedProducts();
+    const currentIndex = featuredProducts.findIndex((product) => product.id === productId);
+    const targetIndex = currentIndex + direction;
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= featuredProducts.length) {
+      return false;
+    }
+
+    swapCatalogProducts(featuredProducts[currentIndex].id, featuredProducts[targetIndex].id);
+    activeFeaturedSlotIndex = targetIndex;
+    return true;
+  }
+
+  function getFeaturedCategoryRepeatCount(products) {
+    const counts = products.reduce((map, product) => {
+      const key = product.category || "";
+      map.set(key, (map.get(key) || 0) + 1);
+      return map;
+    }, new Map());
+
+    return Array.from(counts.values()).reduce((total, count) => total + Math.max(0, count - 1), 0);
+  }
+
   function renderFeaturedManager() {
-    const featuredProducts = catalog.filter((product) => product.featured);
+    const featuredProducts = getFeaturedProducts();
+    const homepageFeatured = featuredProducts.slice(0, FEATURED_SLOT_COUNT);
+    const overflowCount = Math.max(0, featuredProducts.length - FEATURED_SLOT_COUNT);
+    const repeatedCategories = getFeaturedCategoryRepeatCount(homepageFeatured);
+    const newCount = homepageFeatured.filter((product) => product.newArrival).length;
+    const candidateQuery = featuredSearchInput ? featuredSearchInput.value.trim().toLowerCase() : "";
+    const candidateProducts = catalog
+      .filter((product) => !homepageFeatured.some((featuredProduct) => featuredProduct.id === product.id))
+      .filter((product) => {
+        if (!candidateQuery) {
+          return true;
+        }
+
+        return (
+          product.name.toLowerCase().includes(candidateQuery) ||
+          product.category.toLowerCase().includes(candidateQuery) ||
+          String(product.description || "").toLowerCase().includes(candidateQuery)
+        );
+      })
+      .slice(0, 12);
+
+    if (activeFeaturedSlotIndex >= FEATURED_SLOT_COUNT) {
+      activeFeaturedSlotIndex = 0;
+    }
+
     featuredSummary.innerHTML = `
-      <div class="admin-summary-pill">${featuredProducts.length} featured products selected</div>
-      ${featuredProducts
-        .slice(0, 6)
-        .map((product) => `<span class="admin-summary-tag">${product.name}</span>`)
-        .join("")}
+      <div class="admin-summary-pill">${homepageFeatured.length} of ${FEATURED_SLOT_COUNT} homepage spots used</div>
+      <div class="admin-summary-pill">${newCount} new arrivals in view</div>
+      <div class="admin-summary-pill">${repeatedCategories} repeated categories</div>
+      ${overflowCount ? `<div class="admin-summary-pill">${overflowCount} extra featured item${overflowCount === 1 ? "" : "s"} hidden from homepage</div>` : ""}
+      ${homepageFeatured.map((product) => `<span class="admin-summary-tag">${product.name}</span>`).join("")}
     `;
 
-    featuredManager.innerHTML = catalog
-      .map(
-        (product) => `
-          <label class="admin-featured-item">
-            <input type="checkbox" data-featured-id="${product.id}" ${product.featured ? "checked" : ""} />
+    featuredManager.innerHTML = Array.from({ length: FEATURED_SLOT_COUNT }, (_, slotIndex) => {
+      const product = homepageFeatured[slotIndex];
+      const isActive = slotIndex === activeFeaturedSlotIndex;
+
+      if (!product) {
+        return `
+          <article class="admin-featured-slot ${isActive ? "is-active" : ""}" data-featured-slot="${slotIndex}">
+            <button class="admin-featured-slot-select" type="button" data-featured-slot-select="${slotIndex}">
+              <span class="admin-summary-pill">Slot ${slotIndex + 1}</span>
+              <strong>Empty homepage spot</strong>
+              <p>Choose this slot, then add a product from the candidate shelf.</p>
+            </button>
+          </article>
+        `;
+      }
+
+      return `
+        <article class="admin-featured-slot ${isActive ? "is-active" : ""}" data-featured-slot="${slotIndex}">
+          <button class="admin-featured-slot-select" type="button" data-featured-slot-select="${slotIndex}">
+            <span class="admin-summary-pill">Slot ${slotIndex + 1}</span>
             <img src="${product.images[0]}" alt="${product.name}" loading="lazy" />
-            <div>
+            <div class="admin-featured-slot-copy">
               <strong>${product.name}</strong>
               <span>${categoryMap.get(product.category) || product.category}</span>
+              <span class="admin-featured-slot-price">${formatPrice(product.price)}</span>
             </div>
-          </label>
-        `
-      )
-      .join("");
+          </button>
+          <div class="admin-featured-slot-actions">
+            <button type="button" data-featured-move="${product.id}" data-direction="-1" ${slotIndex === 0 ? "disabled" : ""}>Left</button>
+            <button type="button" data-featured-move="${product.id}" data-direction="1" ${slotIndex === homepageFeatured.length - 1 ? "disabled" : ""}>Right</button>
+            <button type="button" data-featured-edit="${product.id}">Edit</button>
+            <button type="button" data-featured-remove="${product.id}">Remove</button>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    if (featuredCandidates) {
+      featuredCandidates.innerHTML = candidateProducts.length
+        ? candidateProducts
+            .map((product) => `
+              <article class="admin-featured-candidate">
+                <img src="${product.images[0]}" alt="${product.name}" loading="lazy" />
+                <div class="admin-featured-candidate-copy">
+                  <strong>${product.name}</strong>
+                  <span>${categoryMap.get(product.category) || product.category}</span>
+                  <span>${formatPrice(product.price)}</span>
+                </div>
+                <button type="button" data-featured-add="${product.id}">
+                  ${homepageFeatured[activeFeaturedSlotIndex] ? `Use In Slot ${activeFeaturedSlotIndex + 1}` : "Add To Homepage"}
+                </button>
+              </article>
+            `)
+            .join("")
+        : `
+            <article class="empty-state-card admin-featured-empty">
+              <strong>No matching candidate products</strong>
+              <p>Try a shorter search or remove a homepage slot product to make space for another choice.</p>
+            </article>
+          `;
+    }
   }
 
   function renderProfitProductSelect() {
@@ -2901,33 +3522,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 
-  imageLibrary.addEventListener("click", function (event) {
+  function handleImageLibrarySelection(event) {
     const button = event.target.closest("button");
     if (!button) {
       return;
     }
 
-    const image = button.dataset.image;
-    let images = getFormGalleryImages();
+    applyGalleryImageToDraft(button.dataset.image, button.dataset.action);
+  }
 
-    if (button.dataset.action === "main") {
-      images = dedupeImages([image].concat(images.filter((item) => item !== image)));
-      imageInput.value = toFormImageValue(image);
-      temporaryMainPreviewSrc = "";
-    }
+  if (imageLibrary) {
+    imageLibrary.addEventListener("click", handleImageLibrarySelection);
+  }
 
-    if (button.dataset.action === "gallery") {
-      images = dedupeImages(images.concat(image));
-      if (!imageInput.value.trim()) {
-        imageInput.value = image;
-      }
-    }
-
-    syncGalleryTextarea(images);
-    renderDraftPreview();
-    setStatus(`${image.split("/").pop()} added to the draft.`);
-    activateAdminTab("workspace");
-  });
+  if (inlineImageLibrary) {
+    inlineImageLibrary.addEventListener("click", handleImageLibrarySelection);
+  }
 
   [nameInput, categoryInput, priceInput, momPriceInput, deliveryChargeInput, deliveryCostInput, sourceInput, stockQtyInput, reservedQtyInput, badgeInput, imageInput, galleryInput, descriptionInput, detailsInput, featuredInput, newInput].forEach(
     (input) => {
@@ -3167,6 +3777,40 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (imageLibrarySearch) {
     imageLibrarySearch.addEventListener("input", renderImageLibrary);
     imageLibrarySearch.addEventListener("change", renderImageLibrary);
+  }
+
+  if (refreshGalleryButton) {
+    refreshGalleryButton.addEventListener("click", refreshGalleryManifest);
+  }
+
+  if (analyticsRefreshButton) {
+    analyticsRefreshButton.addEventListener("click", function () {
+      renderAnalyticsDashboard();
+      renderAdminOverview();
+      setStatus("Storefront analytics refreshed from this browser.");
+    });
+  }
+
+  if (analyticsClearButton) {
+    analyticsClearButton.addEventListener("click", function () {
+      if (!window.confirm("Clear the storefront analytics event log saved in this browser?")) {
+        return;
+      }
+
+      window.localStorage.removeItem(storefrontAnalyticsKey);
+      renderAnalyticsDashboard();
+      renderAdminOverview();
+      setStatus("Storefront analytics log cleared.");
+    });
+  }
+
+  if (inlineImageSearch) {
+    inlineImageSearch.addEventListener("input", renderInlineImageLibrary);
+    inlineImageSearch.addEventListener("change", renderInlineImageLibrary);
+  }
+
+  if (inlineRefreshGalleryButton) {
+    inlineRefreshGalleryButton.addEventListener("click", refreshGalleryManifest);
   }
 
   if (categoryImageSearchInput) {
@@ -3897,21 +4541,81 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 
-  featuredManager.addEventListener("change", function (event) {
-    const input = event.target.closest("input[data-featured-id]");
-    if (!input) {
+  if (featuredSearchInput) {
+    featuredSearchInput.addEventListener("input", renderFeaturedManager);
+  }
+
+  featuredManager.addEventListener("click", function (event) {
+    const slotButton = event.target.closest("[data-featured-slot-select]");
+    if (slotButton) {
+      activeFeaturedSlotIndex = Number(slotButton.dataset.featuredSlotSelect) || 0;
+      renderFeaturedManager();
       return;
     }
 
-    catalog = catalog.map((product) =>
-      product.id === input.dataset.featuredId ? { ...product, featured: input.checked } : product
-    );
-    if (editingId === input.dataset.featuredId) {
-      featuredInput.checked = input.checked;
+    const moveButton = event.target.closest("[data-featured-move]");
+    if (moveButton) {
+      const moved = moveFeaturedSlot(moveButton.dataset.featuredMove, Number(moveButton.dataset.direction) || 0);
+      if (moved) {
+        saveCatalogState("Homepage featured product order updated.", { publishLive: true });
+      }
+      return;
     }
-    saveCatalogState("Homepage featured products updated.", { publishLive: true });
-    renderDraftPreview();
+
+    const editButton = event.target.closest("[data-featured-edit]");
+    if (editButton) {
+      const product = catalog.find((item) => item.id === editButton.dataset.featuredEdit);
+      if (product) {
+        populateForm(product);
+        setStatus(`Editing ${product.name} from the homepage slots.`);
+        activateAdminTab("workspace");
+      }
+      return;
+    }
+
+    const removeButton = event.target.closest("[data-featured-remove]");
+    if (removeButton) {
+      const product = catalog.find((item) => item.id === removeButton.dataset.featuredRemove);
+      setProductFeatured(removeButton.dataset.featuredRemove, false);
+      if (editingId === removeButton.dataset.featuredRemove) {
+        featuredInput.checked = false;
+      }
+      activeFeaturedSlotIndex = Math.max(0, Math.min(activeFeaturedSlotIndex, FEATURED_SLOT_COUNT - 1));
+      saveCatalogState(product ? `${product.name} removed from homepage slots.` : "Homepage featured products updated.", { publishLive: true });
+      renderDraftPreview();
+    }
   });
+
+  if (featuredCandidates) {
+    featuredCandidates.addEventListener("click", function (event) {
+      const addButton = event.target.closest("[data-featured-add]");
+      if (!addButton) {
+        return;
+      }
+
+      const productId = addButton.dataset.featuredAdd;
+      const homepageFeatured = getHomepageFeaturedProducts();
+      const targetSlotIndex =
+        activeFeaturedSlotIndex < FEATURED_SLOT_COUNT ? activeFeaturedSlotIndex : Math.max(0, homepageFeatured.length - 1);
+      const updated = replaceHomepageSlot(targetSlotIndex, productId);
+      const product = catalog.find((item) => item.id === productId);
+
+      if (!updated) {
+        setStatus("That product is already in the selected homepage slot.");
+        return;
+      }
+
+      if (editingId === productId) {
+        featuredInput.checked = true;
+      }
+
+      saveCatalogState(
+        product ? `${product.name} placed into homepage slot ${targetSlotIndex + 1}.` : "Homepage featured products updated.",
+        { publishLive: true }
+      );
+      renderDraftPreview();
+    });
+  }
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -3973,6 +4677,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   populateVisualStoryForm();
   activateVisualSection(activeVisualSection);
   renderImageLibrary();
+  renderInlineImageLibrary();
   resetForm();
   updateCategoryChipSelection();
   renderList();
@@ -3995,6 +4700,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderBundles();
   resetReplyForm();
   renderReplyTemplates();
+  renderAnalyticsDashboard();
   populateSocialForm();
   renderSocialProductSelect();
   renderSocialCalendar();

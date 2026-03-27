@@ -165,6 +165,41 @@ document.addEventListener("DOMContentLoaded", async function () {
         </article>
       `;
     countLabel.textContent = `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`;
+
+    if (typeof utils.setPageMetadata === "function") {
+      const categoryName = category ? ((utils.getCategoryBySlug(category) || {}).name || "SharonCraft collection") : "handmade beadwork in Kenya";
+      utils.setPageMetadata({
+        title: category ? `${categoryName} | Shop SharonCraft` : "Shop SharonCraft | Handmade Beadwork in Kenya",
+        description: category
+          ? `Browse ${categoryName} from SharonCraft and order quickly on WhatsApp.`
+          : "Browse SharonCraft necklaces, bracelets, decor, gift sets, and occasion beadwork, then order quickly on WhatsApp.",
+        path: category ? `/shop.html?category=${encodeURIComponent(category)}` : "/shop.html",
+        image: sorted[0] && Array.isArray(sorted[0].images) && sorted[0].images[0] ? sorted[0].images[0] : "assets/images/IMG-20260226-WA0005.jpg",
+        type: "website"
+      });
+    }
+
+    if (typeof utils.setStructuredData === "function") {
+      utils.setStructuredData("shop-collection", {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: category ? `${((utils.getCategoryBySlug(category) || {}).name || "Collection")} | SharonCraft` : "Shop SharonCraft",
+        url: new URL(category ? `/shop.html?category=${encodeURIComponent(category)}` : "/shop.html", window.location.origin).href,
+        description: category
+          ? `Browse ${((utils.getCategoryBySlug(category) || {}).name || "this SharonCraft collection")} and order on WhatsApp.`
+          : "Browse SharonCraft handmade beadwork and order on WhatsApp.",
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: sorted.slice(0, 12).map((product, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href,
+            name: product.name || "SharonCraft product"
+          }))
+        }
+      });
+    }
+
     utils.refreshReveal();
   }
 

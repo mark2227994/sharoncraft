@@ -6,6 +6,8 @@
   const socialSettingsKey = "sharoncraft-social-settings";
   const categoriesSettingsKey = "sharoncraft-category-settings";
   const homeVisualsSettingsKey = "sharoncraft-home-visuals";
+  const liveCatalogCacheKey = "sharoncraft-live-catalog-cache";
+  const liveHomeVisualsCacheKey = "sharoncraft-live-home-visuals-cache";
 
   const defaultData = {
     site: {
@@ -15,6 +17,9 @@
       phone: "+254 112 222 572",
       email: "hello@sharoncraft.co.ke",
       location: "Nairobi, Kenya",
+      analytics: {
+        ga4MeasurementId: "G-J7H79PTT30"
+      },
       promo: "Free Nairobi delivery for orders above KES 3,500 this week.",
       mpesaSteps: [
         "Choose your product and confirm the total on WhatsApp.",
@@ -26,6 +31,20 @@
         { label: "Instagram", url: "#" },
         { label: "Facebook", url: "#" },
         { label: "TikTok", url: "#" }
+      ],
+      testimonials: [
+        {
+          name: "Mercy, Nairobi",
+          quote: "The beaded set looked even better in person, and ordering on WhatsApp was very smooth."
+        },
+        {
+          name: "Ann, Kiambu",
+          quote: "I needed a gift quickly and SharonCraft helped me choose fast without confusion."
+        },
+        {
+          name: "Wanjiku, Nairobi",
+          quote: "The colors were beautiful, the finishing was neat, and delivery updates were clear."
+        }
       ]
     },
     homeVisuals: {
@@ -401,6 +420,7 @@
     const favorite = visuals && typeof visuals === "object" ? visuals.favorite || {} : {};
 
     return {
+      version: String((visuals && visuals.version) || fallback.version || "").trim(),
       hero: {
         kicker: String(hero.kicker || fallbackHero.kicker || "").trim(),
         title: String(hero.title || fallbackHero.title || "").trim(),
@@ -434,16 +454,24 @@
   function loadSavedProducts() {
     try {
       const raw = window.localStorage.getItem(storageKey);
-      if (!raw) {
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map(normalizeProduct);
+        }
+      }
+
+      const cachedRaw = window.localStorage.getItem(liveCatalogCacheKey);
+      if (!cachedRaw) {
         return null;
       }
 
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) {
+      const cachedParsed = JSON.parse(cachedRaw);
+      if (!Array.isArray(cachedParsed)) {
         return null;
       }
 
-      return parsed.map(normalizeProduct);
+      return cachedParsed.map(normalizeProduct);
     } catch (error) {
       return null;
     }
@@ -509,16 +537,24 @@
   function loadSavedHomeVisuals(defaultHomeVisuals) {
     try {
       const raw = window.localStorage.getItem(homeVisualsSettingsKey);
-      if (!raw) {
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          return normalizeHomeVisuals(parsed, defaultHomeVisuals);
+        }
+      }
+
+      const cachedRaw = window.localStorage.getItem(liveHomeVisualsCacheKey);
+      if (!cachedRaw) {
         return defaultHomeVisuals;
       }
 
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") {
+      const cachedParsed = JSON.parse(cachedRaw);
+      if (!cachedParsed || typeof cachedParsed !== "object") {
         return defaultHomeVisuals;
       }
 
-      return normalizeHomeVisuals(parsed, defaultHomeVisuals);
+      return normalizeHomeVisuals(cachedParsed, defaultHomeVisuals);
     } catch (error) {
       return defaultHomeVisuals;
     }
@@ -542,6 +578,13 @@
   data.site.socials = loadSavedSocials(defaultData.site.socials);
 
   window.SharonCraftDefaultData = defaultData;
-  window.SharonCraftStorage = { storageKey, socialSettingsKey, categoriesSettingsKey, homeVisualsSettingsKey };
+  window.SharonCraftStorage = {
+    storageKey,
+    socialSettingsKey,
+    categoriesSettingsKey,
+    homeVisualsSettingsKey,
+    liveCatalogCacheKey,
+    liveHomeVisualsCacheKey
+  };
   window.SharonCraftData = data;
 })();

@@ -145,6 +145,10 @@
 
         <div class="admin-tab-group">
           <p class="admin-tab-group-label">Marketing</p>
+          <button class="admin-tab-button" type="button" data-admin-tab="analytics">
+            <span>Analytics</span>
+            <small>Views, carts, and WhatsApp taps</small>
+          </button>
           <button class="admin-tab-button" type="button" data-admin-tab="social">
             <span>Social Tools</span>
             <small>Links, captions, and posting ideas</small>
@@ -294,6 +298,19 @@
                 <div class="admin-form-group">
                   <label>Selected gallery images</label>
                   <div id="admin-selected-gallery" class="admin-selected-gallery"></div>
+                </div>
+                <div class="admin-form-group admin-gallery-picker">
+                  <div class="admin-gallery-picker-head">
+                    <div>
+                      <label for="admin-inline-image-search">Quick pick from project gallery</label>
+                      <p class="admin-field-tip">Search the saved product photos here and send them straight into the draft without leaving this step.</p>
+                    </div>
+                    <div class="admin-gallery-picker-actions">
+                      <input id="admin-inline-image-search" type="search" placeholder="Search product photos while editing" />
+                      <button class="button button-secondary" id="admin-inline-refresh-gallery" type="button">Refresh Gallery</button>
+                    </div>
+                  </div>
+                  <div id="admin-inline-image-library" class="admin-image-library admin-inline-image-library"></div>
                 </div>
               </section>
 
@@ -518,8 +535,8 @@
             <span>Feature</span>
           </div>
         </article>
-        <div class="admin-layout admin-layout-wide">
-          <section class="admin-panel">
+        <div class="admin-catalog-shell">
+          <section class="admin-panel admin-catalog-panel">
             <div class="admin-panel-header">
               <div>
                 <span class="section-kicker">Catalog</span>
@@ -558,22 +575,51 @@
                 <option value="new">New arrivals only</option>
               </select>
             </div>
-            <div id="admin-product-list"></div>
+            <div id="admin-catalog-summary" class="admin-catalog-summary"></div>
+            <div id="admin-product-list" class="admin-product-list"></div>
           </section>
 
-          <aside class="admin-side-stack">
-            <section class="admin-panel">
-              <div class="admin-panel-header">
-                <div>
-                  <span class="section-kicker">Homepage</span>
-                  <h2>Featured Products</h2>
-                </div>
+          <section class="admin-panel admin-featured-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Homepage</span>
+                <h2>Featured Products Studio</h2>
               </div>
-              <p class="admin-panel-muted">Keep homepage featuring selective so the storefront feels curated, not crowded.</p>
-              <div id="admin-featured-summary" class="admin-featured-summary"></div>
-              <div id="admin-featured-manager" class="admin-featured-manager"></div>
-            </section>
-          </aside>
+            </div>
+            <div class="admin-featured-intro">
+              <div>
+                <p class="admin-panel-muted">Use this area like a storefront window: choose the four homepage highlights, adjust their order, and keep the selection balanced.</p>
+              </div>
+              <div class="admin-featured-intro-note">
+                <span class="admin-summary-pill">Comfortable curation</span>
+                <p>Select a slot first, then pick from the candidate shelf without losing your place.</p>
+              </div>
+            </div>
+            <div id="admin-featured-summary" class="admin-featured-summary"></div>
+            <div class="admin-featured-workspace">
+              <div class="admin-featured-slots-wrap">
+                <div class="admin-featured-slots-head">
+                  <div>
+                    <span class="section-kicker">Homepage Slots</span>
+                    <h3>Arrange the first four cards visitors will see</h3>
+                  </div>
+                  <p class="admin-panel-muted">Use the slots to shape the homepage story from left to right.</p>
+                </div>
+                <div id="admin-featured-manager" class="admin-featured-manager"></div>
+              </div>
+              <div class="admin-featured-library">
+                <div class="admin-featured-library-head">
+                  <div>
+                    <span class="section-kicker">Candidate Shelf</span>
+                    <h3>Pick products to place on the homepage</h3>
+                  </div>
+                  <p class="admin-panel-muted">Search once, then add the best match into the selected slot.</p>
+                  <input id="admin-featured-search" type="search" placeholder="Search candidate products" />
+                </div>
+                <div id="admin-featured-candidates" class="admin-featured-candidates"></div>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -1410,6 +1456,59 @@
         </div>
       </section>
 
+      <section class="admin-tab-panel" data-admin-panel="analytics">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Analytics Flow</span>
+            <h2>See what shoppers are viewing, tapping, and sending to WhatsApp.</h2>
+            <p>This screen reads the storefront event log saved in this browser, so it works best for quick testing and same-device activity checks.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Product views</span>
+            <span>Add to cart</span>
+            <span>WhatsApp clicks</span>
+          </div>
+        </article>
+        <section class="admin-panel admin-analytics-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Storefront Activity</span>
+              <h2>Analytics Dashboard</h2>
+            </div>
+            <div class="admin-inline-actions">
+              <button class="button button-secondary" id="admin-analytics-refresh" type="button">Refresh Activity</button>
+              <button class="button button-secondary" id="admin-analytics-clear" type="button">Clear Event Log</button>
+            </div>
+          </div>
+          <p class="admin-panel-muted">Use this to confirm whether people are reaching product pages, adding items to cart, and tapping WhatsApp buttons before you connect full Google Analytics.</p>
+          <div id="admin-analytics-summary" class="admin-analytics-summary"></div>
+          <div class="admin-analytics-layout">
+            <section class="admin-analytics-column">
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Top Products</span>
+                    <h3>Most active products in this browser</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-products" class="admin-analytics-products"></div>
+              </div>
+            </section>
+            <section class="admin-analytics-column">
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Recent Events</span>
+                    <h3>Latest shopper actions</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-feed" class="admin-analytics-feed"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+
       <section class="admin-tab-panel" data-admin-panel="assets">
         <article class="admin-tab-intro">
           <div>
@@ -1430,7 +1529,7 @@
               <h2>Image Library</h2>
             </div>
           </div>
-          <p class="admin-panel-muted">Search by file name, then use `Use as Main` or `Add to Gallery` to speed up product setup.</p>
+          <p class="admin-panel-muted">Search by file name, then use `Use as Main` or `Add to Gallery` to speed up product setup. After updating the image manifest, tap `Refresh Gallery` here instead of reloading the whole admin page.</p>
           <div class="admin-help-grid">
             <article class="admin-help-card">
               <strong>Main image</strong>
@@ -1447,6 +1546,7 @@
           </div>
           <div class="admin-list-toolbar admin-assets-toolbar">
             <input id="admin-image-search" type="search" placeholder="Search image file names" />
+            <button class="button button-secondary" id="admin-refresh-gallery" type="button">Refresh Gallery</button>
           </div>
           <div id="admin-image-library" class="admin-image-library"></div>
         </section>
@@ -1459,6 +1559,7 @@
   <script src="supabase-config.js?v=20260327-live-fix"></script>
   <script src="supabase-catalog.js?v=20260327-live-fix"></script>
   <script src="assets/js/admin-auth.js?v=20260327-live-fix" defer></script>
+  <script src="assets/js/image-manifest.js?v=20260327-gallery"></script>
   <script src="assets/js/app.js?v=20260327-live-fix" defer></script>
   <script src="assets/js/admin.js?v=20260327-live-fix" defer></script>
 </body>
