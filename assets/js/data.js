@@ -18,7 +18,7 @@
       email: "hello@sharoncraft.co.ke",
       location: "Nairobi, Kenya",
       analytics: {
-        ga4MeasurementId: "G-J7H79PTT30"
+        ga4MeasurementId: "G-B3JW5DJ52P"
       },
       promo: "Free Nairobi delivery for orders above KES 3,500 this week.",
       mpesaSteps: [
