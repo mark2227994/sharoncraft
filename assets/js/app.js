@@ -820,10 +820,15 @@
 
     saveCart(cart);
     trackEvent("add_to_cart", {
-      product_id: product.id,
-      product_name: product.name || "Unnamed Product",
       value: Number(product.price) || 0,
-      currency: "KES"
+      currency: "KES",
+      items: [
+        buildAnalyticsItem(product, {
+          index: 1,
+          listId: "product_detail",
+          listName: "Product Detail"
+        })
+      ]
     });
 
     const message = `${product.name || "Item"} added to your cart.`;
