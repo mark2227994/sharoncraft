@@ -1481,9 +1481,26 @@
             </div>
           </div>
           <p class="admin-panel-muted">Sign in to Supabase in this admin to see shared live storefront activity across devices, or keep using the local browser log for quick testing.</p>
+          <div class="admin-analytics-toolbar">
+            <div class="admin-analytics-range" role="group" aria-label="Analytics range">
+              <button class="admin-analytics-range-button" type="button" data-analytics-range="today">Today</button>
+              <button class="admin-analytics-range-button" type="button" data-analytics-range="7d">7 Days</button>
+              <button class="admin-analytics-range-button" type="button" data-analytics-range="30d">30 Days</button>
+            </div>
+            <p id="admin-analytics-range-label" class="admin-panel-muted admin-analytics-range-copy"></p>
+          </div>
           <div id="admin-analytics-summary" class="admin-analytics-summary"></div>
           <div class="admin-analytics-layout">
             <section class="admin-analytics-column">
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Top Converting</span>
+                    <h3>Strongest buyer-intent products</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-conversions" class="admin-analytics-products"></div>
+              </div>
               <div class="admin-analytics-card">
                 <div class="admin-analytics-card-head">
                   <div>
