@@ -154,7 +154,15 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const sorted = applySort(filtered, sort);
     grid.innerHTML = sorted.length
-      ? sorted.map(utils.createProductCard).join("")
+      ? sorted
+          .map((product, index) =>
+            utils.createProductCard(product, {
+              listId: "shop_results",
+              listName: "Shop Results",
+              index: index + 1
+            })
+          )
+          .join("")
       : `
         <article class="category-feature-card reveal">
           <div class="category-feature-copy">
@@ -165,6 +173,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         </article>
       `;
     countLabel.textContent = `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`;
+    utils.trackProductListView({
+      listId: "shop_results",
+      listName: "Shop Results",
+      products: sorted
+    });
 
     if (typeof utils.setPageMetadata === "function") {
       const categoryName = category ? ((utils.getCategoryBySlug(category) || {}).name || "SharonCraft collection") : "handmade beadwork in Kenya";

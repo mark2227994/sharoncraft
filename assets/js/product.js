@@ -51,7 +51,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     mainImage.src = "assets/images/IMG-20260226-WA0005.jpg";
     mainImage.alt = "SharonCraft featured piece";
     breadcrumb.innerHTML = `<a href="index.html">Home</a><span>/</span><a href="shop.html">Shop</a><span>/</span><strong>Not found</strong>`;
-    relatedGrid.innerHTML = utils.data.products.slice(0, 4).map(utils.createProductCard).join("");
+    const fallbackProducts = utils.data.products.slice(0, 4);
+    relatedGrid.innerHTML = fallbackProducts
+      .map((item, index) =>
+        utils.createProductCard(item, {
+          listId: "related_products",
+          listName: "Related Products",
+          index: index + 1
+        })
+      )
+      .join("");
+    if (typeof utils.trackProductListView === "function") {
+      utils.trackProductListView({
+        listId: "related_products",
+        listName: "Related Products",
+        products: fallbackProducts
+      });
+    }
     return;
   }
 
@@ -242,7 +258,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     mainImage.src = button.dataset.image;
   });
 
-  relatedGrid.innerHTML = (await utils.getRelatedProducts(product)).map(utils.createProductCard).join("");
+  const relatedProducts = await utils.getRelatedProducts(product);
+  relatedGrid.innerHTML = relatedProducts
+    .map((item, index) =>
+      utils.createProductCard(item, {
+        listId: "related_products",
+        listName: "Related Products",
+        index: index + 1
+      })
+    )
+    .join("");
+  if (typeof utils.trackProductListView === "function") {
+    utils.trackProductListView({
+      listId: "related_products",
+      listName: "Related Products",
+      products: relatedProducts
+    });
+  }
   utils.ensureCartTimer();
   utils.refreshReveal();
 });

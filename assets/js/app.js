@@ -10,6 +10,7 @@
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
   const recentAnalyticsInteractions = new Map();
+  const recentListViews = new Map();
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -119,6 +120,95 @@
     });
   }
 
+  function buildAnalyticsItem(product, options) {
+    const config = options || {};
+    const category = getCategoryBySlug(product && product.category);
+
+    return {
+      item_id: normalizeText(product && product.id),
+      item_name: normalizeText((product && product.name) || "SharonCraft product"),
+      item_category: normalizeText(category && category.name) || "Collection",
+      price: Number(product && product.price) || 0,
+      currency: "KES",
+      index: Number(config.index) || 0,
+      item_list_id: normalizeText(config.listId),
+      item_list_name: normalizeText(config.listName)
+    };
+  }
+
+  function trackProductListView(config) {
+    const listId = normalizeText(config && config.listId);
+    const listName = normalizeText(config && config.listName) || listId || "product_list";
+    const products = Array.isArray(config && config.products) ? config.products : [];
+    const items = products
+      .map((product, index) => buildAnalyticsItem(product, { listId, listName, index: index + 1 }))
+      .filter((item) => item.item_id);
+
+    if (!items.length) {
+      return;
+    }
+
+    const signature = JSON.stringify(items.map((item) => item.item_id));
+    const viewKey = `${document.body.dataset.page || "unknown"}|${listId || listName}`;
+
+    if (recentListViews.get(viewKey) === signature) {
+      return;
+    }
+
+    recentListViews.set(viewKey, signature);
+
+    trackEvent("view_item_list", {
+      item_list_id: listId || listName,
+      item_list_name: listName,
+      items
+    });
+  }
+
+  function trackProductSelection(link) {
+    if (!link) {
+      return;
+    }
+
+    const productId = normalizeText(link.dataset.productId);
+    if (!productId) {
+      return;
+    }
+
+    const interactionKey = [
+      "select_item",
+      productId,
+      normalizeText(link.dataset.itemListId),
+      normalizeText(link.dataset.itemListName)
+    ].join("|");
+    const now = Date.now();
+    const lastTrackedAt = recentAnalyticsInteractions.get(interactionKey) || 0;
+
+    if (now - lastTrackedAt < 1500) {
+      return;
+    }
+
+    recentAnalyticsInteractions.set(interactionKey, now);
+
+    const product = getProductById(productId);
+    const item = buildAnalyticsItem(product || {
+      id: productId,
+      name: link.dataset.productName,
+      category: link.dataset.productCategory,
+      price: Number(link.dataset.productPrice) || 0
+    }, {
+      listId: link.dataset.itemListId,
+      listName: link.dataset.itemListName,
+      index: Number(link.dataset.itemIndex) || 0
+    });
+
+    trackEvent("select_item", {
+      item_list_id: normalizeText(link.dataset.itemListId) || normalizeText(link.dataset.itemListName),
+      item_list_name: normalizeText(link.dataset.itemListName) || normalizeText(link.dataset.itemListId),
+      items: [item],
+      transport_type: "beacon"
+    });
+  }
+
   function trackWhatsAppInteraction(link) {
     if (!link) {
       return;
@@ -170,6 +260,10 @@
       const link = event.target.closest("a[href]");
       if (!link) {
         return;
+      }
+
+      if (link.matches("[data-analytics-select-item=\"true\"]")) {
+        trackProductSelection(link);
       }
 
       trackWhatsAppInteraction(link);
@@ -484,7 +578,8 @@
     );
   }
 
-  function createProductCard(product) {
+  function createProductCard(product, options) {
+    const config = options || {};
     const productName = product.name || "Artisan Creation";
     const image = getProductImages(product)[0];
     const description = product.shortDescription || product.description || "Handmade by SharonCraft artisans.";
@@ -493,10 +588,13 @@
     const badgeMarkup = product.badge
       ? `<span class="${buildBadgeClass(product.badge)}">${product.badge}</span>`
       : "";
+    const analyticsAttributes = config.listName || config.listId
+      ? ` data-analytics-select-item="true" data-product-id="${product.id}" data-product-name="${productName}" data-product-category="${category ? category.name : "Collection"}" data-product-price="${Number(product.price) || 0}" data-item-list-id="${config.listId || ""}" data-item-list-name="${config.listName || ""}" data-item-index="${Number(config.index) || 0}"`
+      : ` data-product-id="${product.id}" data-product-name="${productName}"`;
 
     return `
       <article class="product-card reveal">
-        <a class="product-card-media" href="product.html?id=${product.id}">
+        <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes}>
           <img src="${image}" alt="${productName}" loading="lazy" />
           ${badgeMarkup}
         </a>
@@ -504,7 +602,7 @@
           <div class="product-card-head">
             <div>
               <p class="product-card-category">${category ? category.name : "Collection"}</p>
-              <h3 class="product-name"><a href="product.html?id=${product.id}">${productName}</a></h3>
+              <h3 class="product-name"><a href="product.html?id=${product.id}"${analyticsAttributes}>${productName}</a></h3>
             </div>
             <div class="product-card-icon-row">
               <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
@@ -524,7 +622,7 @@
             <a class="button button-primary product-card-order" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
               Order on WhatsApp
             </a>
-            <a class="button button-secondary product-card-view" href="product.html?id=${product.id}">
+            <a class="button button-secondary product-card-view" href="product.html?id=${product.id}"${analyticsAttributes}>
               View Details
             </a>
           </div>
@@ -1114,6 +1212,7 @@
     setPageMetadata,
     setStructuredData,
     trackEvent,
+    trackProductListView,
     getTrackedEvents: getStoredAnalyticsEvents,
     renderCategorySelect,
     refreshReveal: initReveal,
