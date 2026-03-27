@@ -6,9 +6,14 @@
   const wishlistStorageKey = "sharoncraft-wishlist";
   const timerStorageKey = "sharoncraft-cart-timer";
   const analyticsStorageKey = "sharoncraft-analytics-events";
+  const analyticsQueueStorageKey = "sharoncraft-analytics-queue";
+  const analyticsVisitorKey = "sharoncraft-analytics-visitor-id";
+  const analyticsSessionKey = "sharoncraft-analytics-session-id";
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
+  let analyticsFlushPromise = null;
+  let analyticsFlushTimer = null;
   const recentAnalyticsInteractions = new Map();
   const recentListViews = new Map();
 
@@ -47,6 +52,112 @@
     } catch (error) {
       console.warn("Unable to save analytics events locally.", error);
     }
+  }
+
+  function generateAnalyticsId(prefix) {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function getPersistentAnalyticsId(storageArea, storageKey, prefix) {
+    try {
+      const existing = normalizeText(storageArea.getItem(storageKey));
+      if (existing) {
+        return existing;
+      }
+
+      const nextValue = generateAnalyticsId(prefix);
+      storageArea.setItem(storageKey, nextValue);
+      return nextValue;
+    } catch (error) {
+      return generateAnalyticsId(prefix);
+    }
+  }
+
+  function getVisitorAnalyticsId() {
+    return getPersistentAnalyticsId(window.localStorage, analyticsVisitorKey, "visitor");
+  }
+
+  function getSessionAnalyticsId() {
+    return getPersistentAnalyticsId(window.sessionStorage, analyticsSessionKey, "session");
+  }
+
+  function getQueuedAnalyticsEvents() {
+    try {
+      const raw = window.localStorage.getItem(analyticsQueueStorageKey) || "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveQueuedAnalyticsEvents(events) {
+    try {
+      window.localStorage.setItem(analyticsQueueStorageKey, JSON.stringify(events.slice(-200)));
+    } catch (error) {
+      console.warn("Unable to cache queued analytics events.", error);
+    }
+  }
+
+  function queueAnalyticsEvent(eventEntry) {
+    const queued = getQueuedAnalyticsEvents();
+    queued.push(eventEntry);
+    saveQueuedAnalyticsEvents(queued);
+  }
+
+  async function flushAnalyticsQueue() {
+    const catalogApi = window.SharonCraftCatalog;
+    if (
+      !catalogApi ||
+      typeof catalogApi.isConfigured !== "function" ||
+      !catalogApi.isConfigured() ||
+      typeof catalogApi.saveAnalyticsEvents !== "function"
+    ) {
+      return false;
+    }
+
+    if (analyticsFlushPromise) {
+      return analyticsFlushPromise;
+    }
+
+    analyticsFlushPromise = (async function runAnalyticsFlush() {
+      let queue = getQueuedAnalyticsEvents();
+      if (!queue.length) {
+        return false;
+      }
+
+      while (queue.length) {
+        const batch = queue.slice(0, 20);
+
+        try {
+          await catalogApi.saveAnalyticsEvents(batch);
+        } catch (error) {
+          console.warn("Unable to sync storefront analytics to Supabase.", error);
+          return false;
+        }
+
+        const sentIds = new Set(batch.map((event) => normalizeText(event && event.id)).filter(Boolean));
+        queue = getQueuedAnalyticsEvents().filter((event) => !sentIds.has(normalizeText(event && event.id)));
+        saveQueuedAnalyticsEvents(queue);
+      }
+
+      return true;
+    }()).finally(function () {
+      analyticsFlushPromise = null;
+    });
+
+    return analyticsFlushPromise;
+  }
+
+  function scheduleAnalyticsFlush(delay) {
+    if (analyticsFlushTimer) {
+      window.clearTimeout(analyticsFlushTimer);
+    }
+
+    analyticsFlushTimer = window.setTimeout(function () {
+      analyticsFlushTimer = null;
+      flushAnalyticsQueue();
+    }, Math.max(0, Number(delay) || 0));
   }
 
   function loadGa4IfNeeded() {
@@ -99,19 +210,27 @@
       return;
     }
 
+    const timestamp = new Date().toISOString();
     const eventPayload = {
       page_type: document.body.dataset.page || "unknown",
       page_path: `${window.location.pathname}${window.location.search}`,
+      page_title: document.title,
+      visitor_id: getVisitorAnalyticsId(),
+      session_id: getSessionAnalyticsId(),
       ...payload
+    };
+    const eventEntry = {
+      id: generateAnalyticsId("evt"),
+      name: eventName,
+      payload: eventPayload,
+      timestamp
     };
 
     const storedEvents = getStoredAnalyticsEvents();
-    storedEvents.push({
-      name: eventName,
-      payload: eventPayload,
-      timestamp: new Date().toISOString()
-    });
+    storedEvents.push(eventEntry);
     saveAnalyticsEvents(storedEvents);
+    queueAnalyticsEvent(eventEntry);
+    scheduleAnalyticsFlush(1200);
 
     loadGa4IfNeeded().then(function (loaded) {
       if (loaded && typeof window.gtag === "function") {
@@ -1189,6 +1308,18 @@
   async function hydrateSharedShell() {
     await unregisterLegacyRootServiceWorker();
     bindAnalyticsEvents();
+    window.addEventListener("online", function () {
+      scheduleAnalyticsFlush(200);
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") {
+        scheduleAnalyticsFlush(200);
+      }
+    });
+    window.addEventListener("pagehide", function () {
+      flushAnalyticsQueue();
+    });
+    scheduleAnalyticsFlush(200);
     trackEvent("page_view", {
       page_title: document.title,
       page_location: window.location.href

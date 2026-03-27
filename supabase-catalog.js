@@ -4,6 +4,7 @@
     anonKey: "",
     productsTable: "products",
     settingsTable: "site_settings",
+    analyticsTable: "analytics_events",
     storageBucket: "product-images",
     storageFolder: "catalog",
     authStorageKey: "sharoncraft_supabase_auth",
@@ -39,6 +40,13 @@
       }
     }
     return [];
+  };
+
+  const normalizeObject = (value) => {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return value;
+    }
+    return {};
   };
 
   const getConfig = () => ({
@@ -106,6 +114,92 @@
     new_until: normalizeText(product && product.newUntil) || null,
     sort_order: index,
   });
+
+  const buildAnalyticsPayload = (payload) => {
+    const safePayload = normalizeObject(payload);
+    const items = Array.isArray(safePayload.items)
+      ? safePayload.items
+          .filter((item) => item && typeof item === "object")
+          .map((item) => ({
+            item_id: normalizeText(item.item_id),
+            item_name: normalizeText(item.item_name),
+            item_category: normalizeText(item.item_category),
+            price: Number(item.price) || 0,
+            currency: normalizeText(item.currency) || "KES",
+            index: Number(item.index) || 0,
+            item_list_id: normalizeText(item.item_list_id),
+            item_list_name: normalizeText(item.item_list_name)
+          }))
+      : [];
+    const firstItem = items[0] || {};
+
+    return {
+      page_type: normalizeText(safePayload.page_type),
+      page_path: normalizeText(safePayload.page_path),
+      page_title: normalizeText(safePayload.page_title),
+      page_location: normalizeText(safePayload.page_location),
+      product_id: normalizeText(safePayload.product_id) || normalizeText(firstItem.item_id),
+      product_name: normalizeText(safePayload.product_name) || normalizeText(firstItem.item_name),
+      category: normalizeText(safePayload.category) || normalizeText(firstItem.item_category),
+      item_list_id: normalizeText(safePayload.item_list_id) || normalizeText(firstItem.item_list_id),
+      item_list_name: normalizeText(safePayload.item_list_name) || normalizeText(firstItem.item_list_name),
+      button_label: normalizeText(safePayload.button_label),
+      destination: normalizeText(safePayload.destination),
+      value: Number(safePayload.value) || 0,
+      currency: normalizeText(safePayload.currency || firstItem.currency) || "KES",
+      visitor_id: normalizeText(safePayload.visitor_id),
+      session_id: normalizeText(safePayload.session_id),
+      transport_type: normalizeText(safePayload.transport_type),
+      items,
+    };
+  };
+
+  const mapAnalyticsEventToRow = (event) => {
+    const payload = buildAnalyticsPayload(event && event.payload);
+    return {
+      name: normalizeText(event && event.name),
+      page_type: payload.page_type,
+      page_path: payload.page_path,
+      page_title: payload.page_title,
+      product_id: payload.product_id,
+      product_name: payload.product_name,
+      item_list_id: payload.item_list_id,
+      item_list_name: payload.item_list_name,
+      button_label: payload.button_label,
+      destination: payload.destination,
+      value: payload.value,
+      currency: payload.currency,
+      visitor_id: payload.visitor_id,
+      session_id: payload.session_id,
+      event_payload: payload,
+      created_at: normalizeText(event && event.timestamp) || new Date().toISOString(),
+    };
+  };
+
+  const mapRowToAnalyticsEvent = (row) => {
+    const payload = buildAnalyticsPayload(row && row.event_payload);
+    return {
+      id: row && typeof row.id !== "undefined" ? String(row.id) : "",
+      name: normalizeText(row && row.name),
+      timestamp: normalizeText(row && row.created_at),
+      payload: {
+        ...payload,
+        page_type: payload.page_type || normalizeText(row && row.page_type),
+        page_path: payload.page_path || normalizeText(row && row.page_path),
+        page_title: payload.page_title || normalizeText(row && row.page_title),
+        product_id: payload.product_id || normalizeText(row && row.product_id),
+        product_name: payload.product_name || normalizeText(row && row.product_name),
+        item_list_id: payload.item_list_id || normalizeText(row && row.item_list_id),
+        item_list_name: payload.item_list_name || normalizeText(row && row.item_list_name),
+        button_label: payload.button_label || normalizeText(row && row.button_label),
+        destination: payload.destination || normalizeText(row && row.destination),
+        value: Number(payload.value || row && row.value) || 0,
+        currency: payload.currency || normalizeText(row && row.currency) || "KES",
+        visitor_id: payload.visitor_id || normalizeText(row && row.visitor_id),
+        session_id: payload.session_id || normalizeText(row && row.session_id)
+      }
+    };
+  };
 
   const fetchProducts = async () => {
     const supabase = getClient();
@@ -271,6 +365,75 @@
     return rows.map(mapRowToProduct);
   };
 
+  const saveAnalyticsEvents = async (events) => {
+    const supabase = getClient();
+    if (!supabase) {
+      return [];
+    }
+
+    const config = getConfig();
+    const rows = (Array.isArray(events) ? events : [])
+      .map(mapAnalyticsEventToRow)
+      .filter((row) => row.name);
+
+    if (!rows.length) {
+      return [];
+    }
+
+    const { error } = await supabase
+      .from(config.analyticsTable)
+      .insert(rows);
+
+    if (error) {
+      throw error;
+    }
+
+    return rows.map((row) => ({
+      name: row.name,
+      timestamp: row.created_at,
+      payload: buildAnalyticsPayload(row.event_payload)
+    }));
+  };
+
+  const fetchAnalyticsEvents = async (limit = 200) => {
+    const supabase = getClient();
+    if (!supabase) {
+      return [];
+    }
+
+    const config = getConfig();
+    const { data, error } = await supabase
+      .from(config.analyticsTable)
+      .select("id, name, page_type, page_path, page_title, product_id, product_name, item_list_id, item_list_name, button_label, destination, value, currency, visitor_id, session_id, event_payload, created_at")
+      .order("created_at", { ascending: false })
+      .limit(Math.max(1, Number(limit) || 200));
+
+    if (error) {
+      throw error;
+    }
+
+    return Array.isArray(data) ? data.map(mapRowToAnalyticsEvent) : [];
+  };
+
+  const clearAnalyticsEvents = async () => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    await requireUser();
+
+    const config = getConfig();
+    const { error } = await supabase
+      .from(config.analyticsTable)
+      .delete()
+      .gte("created_at", "1970-01-01T00:00:00.000Z");
+
+    if (error) {
+      throw error;
+    }
+  };
+
   const uploadProductImage = async (file) => {
     const supabase = getClient();
     if (!supabase) {
@@ -381,6 +544,9 @@
     saveProducts,
     fetchSetting,
     saveSetting,
+    saveAnalyticsEvents,
+    fetchAnalyticsEvents,
+    clearAnalyticsEvents,
     uploadProductImage,
     signInWithPassword,
     signUpWithPassword,
