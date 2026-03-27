@@ -23,6 +23,13 @@ create table if not exists public.products (
 create index if not exists products_sort_order_idx on public.products(sort_order);
 create index if not exists products_updated_at_idx on public.products(updated_at desc);
 
+-- Site settings table for small website-wide config payloads (e.g., homepage visuals).
+create table if not exists public.site_settings (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 -- Admin allow-list table: only these auth users can publish/edit products.
 create table if not exists public.admin_users (
   user_id uuid primary key references auth.users(id) on delete cascade,
@@ -31,6 +38,7 @@ create table if not exists public.admin_users (
 );
 
 alter table public.products enable row level security;
+alter table public.site_settings enable row level security;
 alter table public.admin_users enable row level security;
 
 drop policy if exists "Public read products" on public.products;
@@ -39,6 +47,59 @@ on public.products
 for select
 to anon, authenticated
 using (true);
+
+drop policy if exists "Public read site settings" on public.site_settings;
+create policy "Public read site settings"
+on public.site_settings
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Admin insert site settings" on public.site_settings;
+create policy "Admin insert site settings"
+on public.site_settings
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin update site settings" on public.site_settings;
+create policy "Admin update site settings"
+on public.site_settings
+for update
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin delete site settings" on public.site_settings;
+create policy "Admin delete site settings"
+on public.site_settings
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
 
 drop policy if exists "Admin insert products" on public.products;
 create policy "Admin insert products"

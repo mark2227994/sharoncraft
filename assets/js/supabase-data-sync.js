@@ -29,6 +29,57 @@
     }
   };
 
+  const hasLocalHomeVisualsOverride = () => {
+    try {
+      const raw = window.localStorage.getItem(storage.homeVisualsSettingsKey);
+      if (!raw) {
+        return false;
+      }
+      const parsed = JSON.parse(raw);
+      return Boolean(parsed && typeof parsed === "object");
+    } catch (error) {
+      return false;
+    }
+  };
+
+  function normalizeHomeVisuals(visuals, fallbackVisuals) {
+    const fallback = fallbackVisuals || {};
+    const fallbackHero = fallback.hero || {};
+    const fallbackFavorite = fallback.favorite || {};
+    const hero = visuals && typeof visuals === "object" ? visuals.hero || {} : {};
+    const favorite = visuals && typeof visuals === "object" ? visuals.favorite || {} : {};
+
+    return {
+      hero: {
+        kicker: String(hero.kicker || fallbackHero.kicker || "").trim(),
+        title: String(hero.title || fallbackHero.title || "").trim(),
+        description: String(hero.description || fallbackHero.description || "").trim(),
+        primaryLabel: String(hero.primaryLabel || fallbackHero.primaryLabel || "Shop Now").trim() || "Shop Now",
+        primaryHref: String(hero.primaryHref || fallbackHero.primaryHref || "shop.html").trim() || "shop.html",
+        secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
+        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
+        image:
+          String(hero.image || fallbackHero.image || "assets/images/IMG-20260226-WA0005.jpg").trim() ||
+          "assets/images/IMG-20260226-WA0005.jpg",
+        imageAlt:
+          String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
+          "SharonCraft welcoming beadwork photo",
+      },
+      favorite: {
+        kicker: String(favorite.kicker || fallbackFavorite.kicker || "Client Favorite").trim() || "Client Favorite",
+        title: String(favorite.title || fallbackFavorite.title || "").trim(),
+        description: String(favorite.description || fallbackFavorite.description || "").trim(),
+        image:
+          String(favorite.image || fallbackFavorite.image || "assets/images/IMG-20260214-WA0006.jpg").trim() ||
+          "assets/images/IMG-20260214-WA0006.jpg",
+        imageAlt:
+          String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
+          "SharonCraft favorite product photo",
+        productId: String(favorite.productId || fallbackFavorite.productId || "").trim(),
+      },
+    };
+  }
+
   const toWebsiteProduct = (product, index, repeatedMainImages) => {
     const categories = Array.isArray(data.categories) ? data.categories : [];
     const material = normalizeText(product && product.material);
@@ -114,8 +165,41 @@
     return nextProducts;
   }
 
+  async function syncHomeVisualsFromSupabase() {
+    if (hasLocalHomeVisualsOverride()) {
+      return null;
+    }
+
+    if (
+      !liveCatalog ||
+      typeof liveCatalog.fetchSetting !== "function" ||
+      typeof liveCatalog.isConfigured !== "function" ||
+      !liveCatalog.isConfigured()
+    ) {
+      return null;
+    }
+
+    const setting = await liveCatalog.fetchSetting("home_visuals");
+    if (!setting || typeof setting !== "object") {
+      return null;
+    }
+
+    const fallback =
+      (window.SharonCraftDefaultData && window.SharonCraftDefaultData.homeVisuals) ||
+      data.homeVisuals ||
+      {};
+
+    data.homeVisuals = normalizeHomeVisuals(setting, fallback);
+    return data.homeVisuals;
+  }
+
+  async function syncFromSupabase() {
+    const results = await Promise.allSettled([syncProductsFromSupabase(), syncHomeVisualsFromSupabase()]);
+    return results;
+  }
+
   window.SharonCraftLiveSync = {
-    ready: syncProductsFromSupabase().catch(function (error) {
+    ready: syncFromSupabase().catch(function (error) {
       console.error("Unable to sync storefront catalog from Supabase.", error);
       return null;
     }),

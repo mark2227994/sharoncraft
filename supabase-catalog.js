@@ -3,6 +3,7 @@
     url: "",
     anonKey: "",
     productsTable: "products",
+    settingsTable: "site_settings",
     storageBucket: "product-images",
     storageFolder: "catalog",
     authStorageKey: "sharoncraft_supabase_auth",
@@ -123,6 +124,62 @@
     }
 
     return Array.isArray(data) ? data.map(mapRowToProduct) : [];
+  };
+
+  const fetchSetting = async (key) => {
+    const supabase = getClient();
+    if (!supabase) {
+      return null;
+    }
+
+    const config = getConfig();
+    const settingKey = normalizeText(key);
+    if (!settingKey) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from(config.settingsTable)
+      .select("value")
+      .eq("key", settingKey)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data && typeof data.value !== "undefined" ? data.value : null;
+  };
+
+  const saveSetting = async (key, value) => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    await requireUser();
+
+    const config = getConfig();
+    const settingKey = normalizeText(key);
+    if (!settingKey) {
+      throw new Error("Setting key is required.");
+    }
+
+    const row = {
+      key: settingKey,
+      value: value === undefined ? null : value,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from(config.settingsTable)
+      .upsert(row, { onConflict: "key" });
+
+    if (error) {
+      throw error;
+    }
+
+    return row.value;
   };
 
   const getCurrentUser = async () => {
@@ -322,6 +379,8 @@
     getClient,
     fetchProducts,
     saveProducts,
+    fetchSetting,
+    saveSetting,
     uploadProductImage,
     signInWithPassword,
     signUpWithPassword,

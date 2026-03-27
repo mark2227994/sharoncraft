@@ -20,10 +20,12 @@ Use this setup for:
 
 This creates:
 - `public.products`
+- `public.site_settings` (website settings like homepage visuals)
 - `public.admin_users` (admin allow-list)
 - storage bucket `product-images`
 - RLS policies so:
   - public can read products/images
+  - public can read `public.site_settings`
   - only allow-listed admins can edit products/upload images
 
 ## 3. Configure Auth

@@ -1388,6 +1388,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     syncHomeVisualsRuntimeData(true);
     renderVisualPreview();
     setStatus(message);
+    publishHomeVisualsToSupabase(message).catch(function (error) {
+      console.error("Unable to publish home visuals to Supabase.", error);
+      setStatus(`${message} Saved locally only. Supabase publish failed.`);
+    });
   }
 
   if (repairedCatalogOnLoad) {
@@ -1506,6 +1510,40 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (localMessage) {
         setStatus(`${localMessage} Saved locally, but live publish failed.`);
       }
+      return false;
+    }
+  }
+
+  async function publishHomeVisualsToSupabase(localMessage) {
+    renderLiveAuthState();
+
+    if (!localMessage) {
+      localMessage = "Homepage visual story saved.";
+    }
+
+    if (!liveCatalogApi || typeof liveCatalogApi.saveSetting !== "function" || !liveCatalogApi.isConfigured()) {
+      setStatus(`${localMessage} Saved locally only because Supabase is not configured here.`);
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.saveSetting("home_visuals", homeVisuals);
+      renderLiveAuthState();
+      setStatus(`${localMessage} Supabase live visual story updated too.`);
+      return true;
+    } catch (error) {
+      console.error("Unable to publish home visuals to Supabase.", error);
+      if (error && /sign in/i.test(String(error.message || ""))) {
+        setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+        return false;
+      }
+      setStatus(`${localMessage} Saved locally only. Supabase publish failed.`);
       return false;
     }
   }
