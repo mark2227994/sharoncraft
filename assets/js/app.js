@@ -9,6 +9,7 @@
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
+  const recentAnalyticsInteractions = new Map();
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -118,6 +119,46 @@
     });
   }
 
+  function trackWhatsAppInteraction(link) {
+    if (!link) {
+      return;
+    }
+
+    const href = normalizeText(link.href);
+    if (!href || !/wa\.me\//i.test(href)) {
+      return;
+    }
+
+    const interactionKey = [
+      href,
+      normalizeText(link.dataset.analyticsLabel || link.textContent || "WhatsApp"),
+      normalizeText(link.dataset.productId),
+      normalizeText(link.dataset.productName)
+    ].join("|");
+    const now = Date.now();
+    const lastTrackedAt = recentAnalyticsInteractions.get(interactionKey) || 0;
+
+    if (now - lastTrackedAt < 1500) {
+      return;
+    }
+
+    recentAnalyticsInteractions.set(interactionKey, now);
+
+    recentAnalyticsInteractions.forEach(function (timestamp, key) {
+      if (now - timestamp > 5000) {
+        recentAnalyticsInteractions.delete(key);
+      }
+    });
+
+    trackEvent("whatsapp_click", {
+      button_label: normalizeText(link.dataset.analyticsLabel || link.textContent || "WhatsApp"),
+      destination: href,
+      product_id: normalizeText(link.dataset.productId),
+      product_name: normalizeText(link.dataset.productName),
+      transport_type: "beacon"
+    });
+  }
+
   function bindAnalyticsEvents() {
     if (analyticsEventsBound) {
       return;
@@ -125,24 +166,17 @@
 
     analyticsEventsBound = true;
 
-    document.addEventListener("click", function (event) {
+    function handleAnalyticsPointer(event) {
       const link = event.target.closest("a[href]");
       if (!link) {
         return;
       }
 
-      const href = normalizeText(link.href);
-      if (!href || !/wa\.me\//i.test(href)) {
-        return;
-      }
+      trackWhatsAppInteraction(link);
+    }
 
-      trackEvent("whatsapp_click", {
-        button_label: normalizeText(link.dataset.analyticsLabel || link.textContent || "WhatsApp"),
-        destination: href,
-        product_id: normalizeText(link.dataset.productId),
-        product_name: normalizeText(link.dataset.productName)
-      });
-    });
+    document.addEventListener("pointerdown", handleAnalyticsPointer);
+    document.addEventListener("click", handleAnalyticsPointer);
   }
 
   function setHeadValue(selector, builder, value) {
