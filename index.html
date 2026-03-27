@@ -21,12 +21,12 @@
     <section class="page-hero">
       <div class="container home-hero-grid">
         <div class="page-hero-copy">
-          <span class="section-kicker">Welcome to SharonCraft</span>
-          <h1>Clean, colorful handmade beadwork for happy homes and beautiful gifting.</h1>
-          <p>Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.</p>
+          <span id="home-hero-kicker" class="section-kicker">Welcome to SharonCraft</span>
+          <h1 id="home-hero-title">Clean, colorful handmade beadwork for happy homes and beautiful gifting.</h1>
+          <p id="home-hero-description">Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="shop.html">Shop Now</a>
-            <a class="button button-secondary" href="about.html">Our Story</a>
+            <a id="home-hero-primary" class="button button-primary" href="shop.html">Shop Now</a>
+            <a id="home-hero-secondary" class="button button-secondary" href="about.html">Our Story</a>
           </div>
           <div class="hero-note-grid">
             <article class="hero-note-card reveal">
@@ -46,14 +46,14 @@
 
         <div class="hero-media-stack">
           <div class="hero-media-main reveal">
-            <img src="assets/images/IMG-20260226-WA0005.jpg" alt="Model wearing SharonCraft occasion beadwork" />
+            <img id="home-hero-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="Model wearing SharonCraft occasion beadwork" />
           </div>
           <article class="hero-floating-card reveal">
-            <img src="assets/images/IMG-20260214-WA0006.jpg" alt="Beaded mirror from SharonCraft" />
+            <img id="home-favorite-image" src="assets/images/IMG-20260214-WA0006.jpg" alt="Beaded mirror from SharonCraft" />
             <div>
-              <span class="section-kicker">Client Favorite</span>
-              <h2>Kijani Mirror Duo</h2>
-              <p>Bright decor with a clean modern finish for bedrooms and living rooms.</p>
+              <span id="home-favorite-kicker" class="section-kicker">Client Favorite</span>
+              <h2 id="home-favorite-title">Kijani Mirror Duo</h2>
+              <p id="home-favorite-description">Bright decor with a clean modern finish for bedrooms and living rooms.</p>
             </div>
           </article>
         </div>
@@ -72,36 +72,15 @@
       </div>
     </section>
 
-    <!-- Live Supabase catalog -->
-    <section class="section" id="live-catalog">
-      <div class="container">
-        <div class="live-catalog-panel reveal">
-          <div class="live-catalog-header">
-            <div class="section-heading live-catalog-copy">
-              <span class="section-kicker">Live Catalog</span>
-              <h2>Fresh pieces pulled straight from SharonCraft Supabase.</h2>
-              <p>This shelf updates from the live product table, so new uploads can appear here without manually editing the homepage.</p>
-            </div>
-            <div class="live-catalog-meta">
-              <span class="live-status-pill" data-live-state>Checking Supabase connection...</span>
-              <strong><span data-live-count>0</span> pieces ready</strong>
-              <span data-live-updated>Waiting for live sync</span>
-            </div>
-          </div>
-          <div data-live-catalog data-limit="4" class="product-grid"></div>
-        </div>
-      </div>
-    </section>
-
     <!-- Category shortcuts -->
     <section class="section">
       <div class="container">
         <div class="section-heading">
           <span class="section-kicker">Shop by Category</span>
-          <h2>Browse in the way that feels easiest.</h2>
-          <p>Choose a category first if you already know what you want, or keep scrolling for fresh arrivals.</p>
+          <h2>Pick a lane and explore fast.</h2>
+          <p>Each circle takes you straight into one part of the collection without extra reading or clutter.</p>
         </div>
-        <div id="home-categories" class="category-grid"></div>
+        <div id="home-categories" class="category-grid category-orbit-grid"></div>
       </div>
     </section>
 
@@ -147,6 +126,5 @@
   <script src="assets/js/mobile-ux.js" defer></script>
   <script src="assets/js/supabase-data-sync.js" defer></script>
   <script src="assets/js/home.js" defer></script>
-  <script src="assets/js/live-catalog.js" defer></script>
 </body>
 </html>

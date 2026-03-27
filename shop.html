@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/shop-filters.css" />
 </head>
 <body data-page="shop">
   <div data-site-header></div>
@@ -31,46 +32,80 @@
     <!-- Filters -->
     <section class="section">
       <div class="container">
-        <div class="live-catalog-panel reveal">
-          <div class="live-catalog-header">
-            <div class="section-heading live-catalog-copy">
-              <span class="section-kicker">Live Supabase Shelf</span>
-              <h2>See what is currently in the live SharonCraft catalog.</h2>
-              <p>This row pulls directly from Supabase before the regular website collection below, so visitors can spot newly published pieces fast.</p>
+        <div class="shop-filter-hero">
+          <div class="shop-filter-hero-content">
+            <div class="shop-filter-intro">
+              <span class="section-kicker">✨ Quick Find</span>
+              <h2>Narrow down the magic</h2>
+              <p class="filter-subtitle">Tap a category or use advanced filters</p>
             </div>
-            <div class="live-catalog-meta">
-              <span class="live-status-pill" data-live-state>Checking Supabase connection...</span>
-              <strong><span data-live-count>0</span> live pieces</strong>
-              <span data-live-updated>Waiting for live sync</span>
-            </div>
+            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false">
+              <span class="shop-filter-icon">⚙️</span>
+              <span class="shop-filter-toggle-text">Filters</span>
+            </button>
           </div>
-          <div data-live-catalog data-limit="6" class="product-grid"></div>
         </div>
-        <div class="filter-card">
-          <div class="filter-banner">
-            <span class="section-kicker">Quick find</span>
-            <button id="shop-toggle-filters" class="button button-secondary">Show Filters</button>
+
+        <div class="shop-filter-chips" id="shop-chips"></div>
+
+        <div class="shop-filter-panels" id="shop-filter-grid">
+          <!-- Search Section -->
+          <div class="shop-filter-search-section">
+            <div class="shop-search-box">
+              <input id="shop-search" type="search" placeholder="Search by name or style..." aria-label="Search products" />
+              <span class="shop-search-icon">🔎</span>
+            </div>
+            <span class="search-hint">Type to find exactly what you're looking for</span>
           </div>
-          <div class="filter-chips" id="shop-chips"></div>
-          <div class="filter-grid" id="shop-filter-grid">
-            <input id="shop-search" type="search" placeholder="Search by product name or style" aria-label="Search products" />
-            <select id="shop-category" aria-label="Filter by category"></select>
-            <select id="shop-price" aria-label="Filter by price">
-              <option value="">All prices</option>
-              <option value="under-2000">Under KES 2,000</option>
-              <option value="2000-5000">KES 2,000 to 5,000</option>
-              <option value="over-5000">Above KES 5,000</option>
-            </select>
-            <select id="shop-sort" aria-label="Sort products">
-              <option value="featured">Sort by featured</option>
-              <option value="newest">Sort by new</option>
-              <option value="price-asc">Price low to high</option>
-              <option value="price-desc">Price high to low</option>
-            </select>
+
+          <!-- Filter Cards Grid -->
+          <div class="shop-filter-cards">
+            <div class="shop-filter-card">
+              <div class="filter-card-header">
+                <span class="filter-card-icon">📦</span>
+                <h3 class="filter-card-title">Category</h3>
+              </div>
+              <select id="shop-category" class="filter-card-select" aria-label="Filter by category"></select>
+              <div class="filter-card-hint">Find beads by type</div>
+            </div>
+
+            <div class="shop-filter-card">
+              <div class="filter-card-header">
+                <span class="filter-card-icon">💰</span>
+                <h3 class="filter-card-title">Price Range</h3>
+              </div>
+              <select id="shop-price" class="filter-card-select" aria-label="Filter by price">
+                <option value="">All prices</option>
+                <option value="under-2000">Under KES 2,000</option>
+                <option value="2000-5000">KES 2,000 to 5,000</option>
+                <option value="over-5000">Above KES 5,000</option>
+              </select>
+              <div class="filter-card-hint">Set your budget</div>
+            </div>
+
+            <div class="shop-filter-card">
+              <div class="filter-card-header">
+                <span class="filter-card-icon">✨</span>
+                <h3 class="filter-card-title">Sort By</h3>
+              </div>
+              <select id="shop-sort" class="filter-card-select" aria-label="Sort products">
+                <option value="featured">Featured</option>
+                <option value="newest">Newest</option>
+                <option value="price-asc">Price ↑</option>
+                <option value="price-desc">Price ↓</option>
+              </select>
+              <div class="filter-card-hint">Organize your results</div>
+            </div>
           </div>
-          <div class="filter-meta">
-            <span id="shop-count">0 products found</span>
-            <button id="clear-shop-filters" class="button button-secondary" type="button">Clear Filters</button>
+
+          <!-- Filter Footer -->
+          <div class="shop-filter-footer">
+            <div class="footer-info">
+              <span id="shop-count" class="shop-product-count">📊 0 products found</span>
+            </div>
+            <button id="clear-shop-filters" class="shop-clear-button" type="button">
+              <span>✕ Reset</span>
+            </button>
           </div>
         </div>
       </div>
@@ -94,6 +129,5 @@
   <script src="assets/js/mobile-ux.js" defer></script>
   <script src="assets/js/supabase-data-sync.js" defer></script>
   <script src="assets/js/shop.js" defer></script>
-  <script src="assets/js/live-catalog.js" defer></script>
 </body>
 </html>

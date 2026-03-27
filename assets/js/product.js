@@ -2,15 +2,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
     await window.SharonCraftLiveSync.ready;
   }
+
   const utils = window.SharonCraftUtils;
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");
 
-  // Wait for data to be loaded
   await utils.waitForData();
 
   const product = await utils.getProductById(productId);
-
   const breadcrumb = document.getElementById("product-breadcrumb");
   const title = document.getElementById("product-title");
   const price = document.getElementById("product-price");
@@ -39,18 +38,28 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   const productCategory = utils.getCategoryBySlug(product.category);
+  const productName = product.name || "Artisan Creation";
+  const productDescription = product.description || product.shortDescription || "Handmade by SharonCraft artisans.";
+  const productImages = Array.isArray(product.images) && product.images.length
+    ? product.images
+    : ["assets/images/IMG-20260226-WA0005.jpg"];
+  const productDetails = Array.isArray(product.details) && product.details.length
+    ? product.details
+    : ["Handmade in Kenya", "Shared with care by SharonCraft"];
 
-  document.title = `${product.name || 'Artisan Creation'} | SharonCraft`;
-  title.textContent = product.name || '✨ Artisan Creation';
+  document.title = `${productName} | SharonCraft`;
+  title.textContent = productName;
   price.textContent = utils.formatCurrency(product.price);
-  description.textContent = product.description;
+  description.textContent = productDescription;
   category.textContent = productCategory ? productCategory.name : "Collection";
-  mainImage.src = product.images[0];
-  mainImage.alt = product.name || 'SharonCraft artisan product';
-  mpesaCopy.textContent = `Confirm ${product.name || 'this beautiful piece'} on WhatsApp, then pay via M-Pesa after the total and delivery fee are shared.`;
+  mainImage.src = productImages[0];
+  mainImage.alt = productName;
+  mpesaCopy.textContent = `Confirm ${productName} on WhatsApp, then pay via M-Pesa after the total and delivery fee are shared.`;
+
   if (limitedCopy) {
     limitedCopy.textContent = utils.getScarcityNote(product);
   }
+
   breadcrumb.innerHTML = `
     <a href="index.html">Home</a>
     <span>/</span>
@@ -58,12 +67,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     <span>/</span>
     <a href="shop.html?category=${product.category}">${productCategory ? productCategory.name : "Collection"}</a>
     <span>/</span>
-    <strong>${product.name || '✨ Artisan Creation'}</strong>
+    <strong>${productName}</strong>
   `;
 
-  detailList.innerHTML = product.details.map((item) => `<li>${item}</li>`).join("");
+  detailList.innerHTML = productDetails.map((item) => `<li>${item}</li>`).join("");
   buyButton.href = utils.buildWhatsAppUrl(
-    `Hello SharonCraft, I would like to order the ${product.name || 'beautiful artisan piece'} for ${utils.formatCurrency(product.price)}.`
+    `Hello SharonCraft, I would like to order the ${productName} for ${utils.formatCurrency(product.price)}.`
   );
 
   if (addCartButton) {
@@ -78,11 +87,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  thumbGrid.innerHTML = product.images
+  thumbGrid.innerHTML = productImages
     .map(
       (image, index) => `
         <button class="thumb-button ${index === 0 ? "is-active" : ""}" type="button" data-image="${image}" aria-label="View image ${index + 1}">
-          <img src="${image}" alt="${product.name || 'SharonCraft product'} thumbnail ${index + 1}" loading="lazy" />
+          <img src="${image}" alt="${productName} thumbnail ${index + 1}" loading="lazy" />
         </button>
       `
     )

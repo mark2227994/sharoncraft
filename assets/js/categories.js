@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    await window.SharonCraftLiveSync.ready;
+  }
+
   const utils = window.SharonCraftUtils;
   const grid = document.getElementById("categories-grid");
 
@@ -6,13 +10,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  // Wait for data to be loaded
   await utils.waitForData();
 
-  grid.innerHTML = await Promise.all(
-    utils.data.categories.map(async (category) => {
-      const products = (await utils.getProductsByCategory(category.slug)).slice(0, 3);
-      const allProducts = await utils.getProductsByCategory(category.slug);
+  grid.innerHTML = utils.data.categories
+    .map((category) => {
+      const allProducts = utils.getProductsByCategory(category.slug);
+      const previewProducts = allProducts.slice(0, 3);
+      const previewMarkup = previewProducts.length
+        ? previewProducts.map((product) => `<span>${product.name || `${category.name} piece`}</span>`).join("")
+        : "<span>Fresh pieces coming soon</span>";
 
       return `
         <article class="category-feature-card reveal accent-${category.accent}">
@@ -22,27 +28,16 @@ document.addEventListener("DOMContentLoaded", async function () {
           <div class="category-feature-copy">
             <span class="section-kicker">${category.name}</span>
             <h2>${category.description}</h2>
-            <p>${allProducts ? allProducts.length : 'Several'} products ready to explore.</p>
+            <p>${allProducts.length} product${allProducts.length === 1 ? "" : "s"} ready to explore.</p>
             <div class="category-preview-list">
-              ${products.map((product, index) => {
-                const creativeNames = [
-                  "✨ Artisan Treasure",
-                  "🌟 Handcrafted Gem", 
-                  "🎨 Colorful Creation",
-                  "💎 Beaded Beauty",
-                  "🌈 Kenyan Craft",
-                  "🎭 Unique Piece"
-                ];
-                const displayName = product.name || `✨ ${category.name} Exclusive`;
-                return `<span>${displayName}</span>`;
-              }).join("")}
+              ${previewMarkup}
             </div>
             <a class="button button-primary" href="shop.html?category=${category.slug}">Shop ${category.name}</a>
           </div>
         </article>
       `;
     })
-  ).then(results => results.join(""));
+    .join("");
 
   utils.refreshReveal();
 });

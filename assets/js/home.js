@@ -3,22 +3,75 @@ document.addEventListener("DOMContentLoaded", async function () {
     await window.SharonCraftLiveSync.ready;
   }
   const utils = window.SharonCraftUtils;
+  const heroKicker = document.getElementById("home-hero-kicker");
+  const heroTitle = document.getElementById("home-hero-title");
+  const heroDescription = document.getElementById("home-hero-description");
+  const heroPrimary = document.getElementById("home-hero-primary");
+  const heroSecondary = document.getElementById("home-hero-secondary");
+  const heroImage = document.getElementById("home-hero-image");
+  const favoriteKicker = document.getElementById("home-favorite-kicker");
+  const favoriteTitle = document.getElementById("home-favorite-title");
+  const favoriteDescription = document.getElementById("home-favorite-description");
+  const favoriteImage = document.getElementById("home-favorite-image");
   const featuredGrid = document.getElementById("featured-products");
   const categoryGrid = document.getElementById("home-categories");
   const arrivalsGrid = document.getElementById("new-arrivals");
 
-  // Wait for data to be loaded
   await utils.waitForData();
+  const allProducts = Array.isArray(utils.data.products) ? utils.data.products : [];
+  const visuals = utils.data.homeVisuals || {};
+  const hero = visuals.hero || {};
+  const favorite = visuals.favorite || {};
+  const favoriteProduct = allProducts.find((product) => product.id === favorite.productId);
+  const favoriteFallbackImage =
+    favoriteProduct && Array.isArray(favoriteProduct.images) && favoriteProduct.images[0]
+      ? favoriteProduct.images[0]
+      : "assets/images/IMG-20260214-WA0006.jpg";
+
+  if (heroKicker) {
+    heroKicker.textContent = hero.kicker || "Welcome to SharonCraft";
+  }
+  if (heroTitle) {
+    heroTitle.textContent = hero.title || "Clean, colorful handmade beadwork for happy homes and beautiful gifting.";
+  }
+  if (heroDescription) {
+    heroDescription.textContent =
+      hero.description ||
+      "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.";
+  }
+  if (heroPrimary) {
+    heroPrimary.textContent = hero.primaryLabel || "Shop Now";
+    heroPrimary.href = hero.primaryHref || "shop.html";
+  }
+  if (heroSecondary) {
+    heroSecondary.textContent = hero.secondaryLabel || "Our Story";
+    heroSecondary.href = hero.secondaryHref || "about.html";
+  }
+  if (heroImage) {
+    heroImage.src = hero.image || "assets/images/IMG-20260226-WA0005.jpg";
+    heroImage.alt = hero.imageAlt || "Model wearing SharonCraft occasion beadwork";
+  }
+  if (favoriteKicker) {
+    favoriteKicker.textContent = favorite.kicker || "Client Favorite";
+  }
+  if (favoriteTitle) {
+    favoriteTitle.textContent = favorite.title || (favoriteProduct && favoriteProduct.name) || "Client Favorite";
+  }
+  if (favoriteDescription) {
+    favoriteDescription.textContent =
+      favorite.description ||
+      (favoriteProduct && (favoriteProduct.shortDescription || favoriteProduct.description)) ||
+      "A well-loved SharonCraft piece chosen for everyday beauty and easy gifting.";
+  }
+  if (favoriteImage) {
+    favoriteImage.src = favorite.image || favoriteFallbackImage;
+    favoriteImage.alt = favorite.imageAlt || (favoriteProduct && favoriteProduct.name) || "SharonCraft favorite product photo";
+  }
 
   if (featuredGrid) {
-    // For Supabase products, show spotlight items or first 4 products
-    const allProducts = utils.data.products;
-    const featuredProducts = allProducts.filter((product) => product.spotlightUntil || product.spotlightText).slice(0, 4);
-    if (featuredProducts.length === 0) {
-      // Fallback to first 4 products if no spotlight items
-      featuredProducts.push(...allProducts.slice(0, 4));
-    }
-    featuredGrid.innerHTML = featuredProducts.map(utils.createProductCard).join("");
+    const featuredProducts = allProducts.filter((product) => product.featured).slice(0, 4);
+    const visibleProducts = featuredProducts.length ? featuredProducts : allProducts.slice(0, 4);
+    featuredGrid.innerHTML = visibleProducts.map(utils.createProductCard).join("");
   }
 
   if (categoryGrid) {
@@ -26,11 +79,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   if (arrivalsGrid) {
-    // Show products marked as new (with new_until date) or recent updates
-    const newItems = utils.data.products
-      .filter((product) => product.newUntil || (product.updatedAt && new Date(product.updatedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)))
-      .slice(0, 3);
-    arrivalsGrid.innerHTML = newItems.map(utils.createProductCard).join("");
+    const newItems = allProducts.filter((product) => product.newArrival).slice(0, 3);
+    const visibleNewItems = newItems.length ? newItems : allProducts.slice(0, 3);
+    arrivalsGrid.innerHTML = visibleNewItems.map(utils.createProductCard).join("");
   }
 
   utils.refreshReveal();

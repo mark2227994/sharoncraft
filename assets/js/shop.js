@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  // Wait for data to be loaded
   await utils.waitForData();
 
   utils.renderCategorySelect(categorySelect);
@@ -57,12 +56,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!filterGrid) return;
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
-      toggleFiltersButton.textContent = open ? "Hide Filters" : "Show Filters";
+      toggleFiltersButton.setAttribute("aria-expanded", open);
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filters";
     }
   }
 
   if (toggleFiltersButton) {
-    toggleFiltersButton.addEventListener("click", () => setFilterOpen(!filterGrid.classList.contains("is-open")));
+    toggleFiltersButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      const isOpen = filterGrid.classList.contains("is-open");
+      setFilterOpen(!isOpen);
+    });
   }
 
   if (chipContainer) {
@@ -108,21 +112,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (value === "newest") {
       return copy.sort((left, right) => {
-        // Sort by new_until date or updated_at for Supabase products
-        const leftDate = left.newUntil ? new Date(left.newUntil) : new Date(left.updatedAt || 0);
-        const rightDate = right.newUntil ? new Date(right.newUntil) : new Date(right.updatedAt || 0);
-        return rightDate - leftDate;
+        const leftScore = left.newArrival ? 1 : 0;
+        const rightScore = right.newArrival ? 1 : 0;
+        return rightScore - leftScore;
       });
     }
 
     return copy.sort((left, right) => {
-      // Sort by spotlight first, then by sort_order
-      const leftSpotlight = Boolean(left.spotlightUntil || left.spotlightText);
-      const rightSpotlight = Boolean(right.spotlightUntil || right.spotlightText);
-      if (leftSpotlight !== rightSpotlight) {
-        return rightSpotlight ? 1 : -1;
+      const leftFeatured = left.featured ? 1 : 0;
+      const rightFeatured = right.featured ? 1 : 0;
+      if (leftFeatured !== rightFeatured) {
+        return rightFeatured - leftFeatured;
       }
-      return (left.sortOrder || 0) - (right.sortOrder || 0);
+
+      const leftNew = left.newArrival ? 1 : 0;
+      const rightNew = right.newArrival ? 1 : 0;
+      return rightNew - leftNew;
     });
   }
 
@@ -135,18 +140,30 @@ document.addEventListener("DOMContentLoaded", async function () {
     buildChips();
 
     const filtered = utils.data.products.filter((product) => {
+      const categoryLabel = (utils.getCategoryBySlug(product.category) || {}).name || "";
       const textMatch =
         !keyword ||
         product.name.toLowerCase().includes(keyword) ||
-        (product.story || "").toLowerCase().includes(keyword) ||
-        (product.material || "").toLowerCase().includes(keyword);
+        (product.shortDescription || "").toLowerCase().includes(keyword) ||
+        (product.description || "").toLowerCase().includes(keyword) ||
+        categoryLabel.toLowerCase().includes(keyword);
       const categoryMatch = !category || product.category === category;
       const priceMatch = matchesPrice(product, price);
       return textMatch && categoryMatch && priceMatch;
     });
 
     const sorted = applySort(filtered, sort);
-    grid.innerHTML = sorted.map(utils.createProductCard).join("");
+    grid.innerHTML = sorted.length
+      ? sorted.map(utils.createProductCard).join("")
+      : `
+        <article class="category-feature-card reveal">
+          <div class="category-feature-copy">
+            <span class="section-kicker">No matches yet</span>
+            <h2>Try a different filter combination.</h2>
+            <p>Clear the search or category filters to see more SharonCraft products.</p>
+          </div>
+        </article>
+      `;
     countLabel.textContent = `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`;
     utils.refreshReveal();
   }
@@ -156,13 +173,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     element.addEventListener("change", renderProducts);
   });
 
-  clearButton.addEventListener("click", function () {
-    searchInput.value = "";
-    categorySelect.value = "";
-    priceSelect.value = "";
-    sortSelect.value = "featured";
-    renderProducts();
-  });
+  if (clearButton) {
+    clearButton.addEventListener("click", function () {
+      searchInput.value = "";
+      categorySelect.value = "";
+      priceSelect.value = "";
+      sortSelect.value = "featured";
+      renderProducts();
+    });
+  }
 
   renderProducts();
 });

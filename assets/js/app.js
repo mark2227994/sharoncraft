@@ -1,57 +1,51 @@
 (function () {
   // Shared storefront helpers for layout, formatting, cart state, and reusable rendering.
-  const staticData = window.SharonCraftData;
-  let data = staticData; // Start with static data as fallback
-  let productsLoaded = false;
-  const categoryMap = new Map(staticData.categories.map((category) => [category.slug, category]));
+  const data = window.SharonCraftData;
+  const categoryMap = new Map((data.categories || []).map((category) => [category.slug, category]));
   const cartStorageKey = "sharoncraft-cart";
+  const wishlistStorageKey = "sharoncraft-wishlist";
   const timerStorageKey = "sharoncraft-cart-timer";
   let cartTimerInterval = null;
 
-  // Initialize Supabase data
-  async function initializeData() {
-    if (window.SharonCraftCatalog && window.SharonCraftCatalog.isConfigured()) {
-      try {
-        const supabaseProducts = await window.SharonCraftCatalog.fetchProducts();
-        if (supabaseProducts && supabaseProducts.length > 0) {
-          // Merge Supabase products with static categories
-          data = {
-            ...staticData,
-            products: supabaseProducts.map(product => ({
-              ...product,
-              category: product.material || 'bracelets', // Map material to category
-              badge: product.spotlightText || (product.newUntil ? 'New' : ''),
-              images: [product.image, ...product.gallery].filter(Boolean)
-            }))
-          };
-          productsLoaded = true;
-          console.log('Loaded products from Supabase:', data.products.length);
-        }
-      } catch (error) {
-        console.warn('Failed to load Supabase products, using static data:', error);
-      }
-    }
+  function normalizeText(value) {
+    return String(value || "").trim();
   }
 
-  // Wait for data to be loaded
-  async function waitForData() {
-    if (!productsLoaded) {
-      await initializeData();
-    }
-    return data;
+  function getProductImages(product) {
+    const imageList = []
+      .concat(Array.isArray(product && product.images) ? product.images : [])
+      .concat(normalizeText(product && product.image))
+      .concat(Array.isArray(product && product.gallery) ? product.gallery : [])
+      .map(normalizeText)
+      .filter(Boolean);
+
+    const uniqueImages = imageList.filter((image, index) => imageList.indexOf(image) === index);
+    return uniqueImages.length ? uniqueImages : ["assets/images/IMG-20260226-WA0005.jpg"];
   }
 
   function formatCurrency(value) {
-    return isNaN(value) ? "KSH 0.00" : `KSH ${value.toFixed(2)}`;
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) {
+      return "KES 0";
+    }
+
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: "KES",
+      maximumFractionDigits: 0,
+    }).format(amount);
   }
 
   function buildWhatsAppUrl(message) {
     return `https://wa.me/${data.site.whatsapp}?text=${encodeURIComponent(message)}`;
   }
 
-  async function getProductById(id) {
-    const currentData = await waitForData();
-    return currentData.products.find((product) => product.id === id);
+  function waitForData() {
+    return Promise.resolve(data);
+  }
+
+  function getProductById(id) {
+    return (data.products || []).find((product) => product.id === id);
   }
 
   function findProductById(id) {
@@ -62,14 +56,12 @@
     return categoryMap.get(slug);
   }
 
-  async function getProductsByCategory(slug) {
-    const currentData = await waitForData();
-    return currentData.products.filter((product) => product.category === slug);
+  function getProductsByCategory(slug) {
+    return (data.products || []).filter((product) => product.category === slug);
   }
 
-  async function getRelatedProducts(product, limit = 4) {
-    const currentData = await waitForData();
-    return currentData.products
+  function getRelatedProducts(product, limit = 4) {
+    return (data.products || [])
       .filter((item) => item.id !== product.id)
       .sort((left, right) => {
         const leftScore = left.category === product.category ? 0 : 1;
@@ -101,6 +93,14 @@
         <path d="M3 4h2l2.3 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 7H7.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
         <circle cx="10" cy="19" r="1.5" fill="currentColor"></circle>
         <circle cx="17" cy="19" r="1.5" fill="currentColor"></circle>
+      </svg>
+    `;
+  }
+
+  function heartIconMarkup() {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 20.3 4.8 13.4A4.7 4.7 0 0 1 11.7 7l.3.4.3-.4a4.7 4.7 0 0 1 6.9 6.4L12 20.3Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
       </svg>
     `;
   }
@@ -152,8 +152,65 @@
     `;
   }
 
+  function getWishlist() {
+    try {
+      const stored = window.localStorage.getItem(wishlistStorageKey) || "[]";
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed.map(normalizeText).filter(Boolean) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveWishlist(wishlist) {
+    window.localStorage.setItem(wishlistStorageKey, JSON.stringify(wishlist));
+  }
+
+  function isWishlisted(productId) {
+    return getWishlist().includes(productId);
+  }
+
+  function syncWishlistButtons(productId) {
+    const active = isWishlisted(productId);
+    document.querySelectorAll(`[data-toggle-wishlist="${productId}"]`).forEach((button) => {
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+      button.setAttribute("aria-label", active ? "Remove from wishlist" : "Save to wishlist");
+    });
+  }
+
+  function toggleWishlist(productId) {
+    const wishlist = getWishlist();
+    const nextWishlist = wishlist.includes(productId)
+      ? wishlist.filter((id) => id !== productId)
+      : wishlist.concat(productId);
+    const added = nextWishlist.length > wishlist.length;
+
+    saveWishlist(nextWishlist);
+    syncWishlistButtons(productId);
+
+    const product = getProductById(productId);
+    const productName = product && product.name ? product.name : "Item";
+    const message = added ? `${productName} saved to wishlist.` : `${productName} removed from wishlist.`;
+
+    if (typeof window.showToast === "function") {
+      window.showToast(message, added ? "success" : "info");
+    }
+  }
+
+  function buildProductOrderUrl(product) {
+    const productName = product && product.name ? product.name : "this SharonCraft piece";
+    const productPrice = product && Number.isFinite(Number(product.price)) ? formatCurrency(product.price) : "the listed price";
+    return buildWhatsAppUrl(
+      `Hello SharonCraft, I would like to order ${productName} for ${productPrice}.`
+    );
+  }
+
   function createProductCard(product) {
-    const category = getCategoryBySlug(product.category);
+    const productName = product.name || "Artisan Creation";
+    const image = getProductImages(product)[0];
+    const description = product.shortDescription || product.description || "Handmade by SharonCraft artisans.";
+    const wishlisted = isWishlisted(product.id);
     const badgeMarkup = product.badge
       ? `<span class="${buildBadgeClass(product.badge)}">${product.badge}</span>`
       : "";
@@ -161,24 +218,29 @@
     return `
       <article class="product-card reveal">
         <a class="product-card-media" href="product.html?id=${product.id}">
-          <img src="${product.images[0]}" alt="${product.name || 'SharonCraft artisan product'}" loading="lazy" />
+          <img src="${image}" alt="${productName}" loading="lazy" />
           ${badgeMarkup}
         </a>
         <div class="product-card-body">
-          <div class="product-card-topline">
-            <p class="product-card-category">${category ? category.name : "Collection"}</p>
-            <button class="cart-icon-button" type="button" data-add-to-cart="${product.id}" aria-label="Add ${product.name || 'this beautiful piece'} to cart">
-              ${cartIconMarkup()}
-            </button>
+          <div class="product-card-head">
+            <h3 class="product-name"><a href="product.html?id=${product.id}">${productName}</a></h3>
+            <div class="product-card-icon-row">
+              <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
+                ${heartIconMarkup()}
+              </button>
+              <button class="icon-action-button cart-icon-button" type="button" data-add-to-cart="${product.id}" aria-label="Add ${productName} to cart">
+                ${cartIconMarkup()}
+              </button>
+            </div>
           </div>
-          <h3><a href="product.html?id=${product.id}">${product.name || '✨ Artisan Creation'}</a></h3>
-          <div class="product-card-meta">
-            <strong>${formatCurrency(product.price)}</strong>
-            <span>Handmade</span>
+          <p class="product-card-text product-story">${description}</p>
+          <div class="product-card-price-row">
+            <strong class="product-price">${formatCurrency(product.price)}</strong>
           </div>
           <div class="product-card-actions">
-            <a class="button button-secondary" href="product.html?id=${product.id}">View Product</a>
-            <button class="button button-primary" type="button" data-add-to-cart="${product.id}">Add to Cart</button>
+            <a class="button button-primary product-card-order" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer">
+              Order on WhatsApp
+            </a>
           </div>
         </div>
       </article>
@@ -186,19 +248,22 @@
   }
 
   function createCategoryCard(category) {
-    const count = getProductsByCategory(category.slug).length;
+    const suggestion = normalizeText(category.tip) || "Explore";
 
     return `
       <article class="category-card reveal accent-${category.accent}">
         <a href="shop.html?category=${category.slug}" class="category-card-link">
-          <div class="category-card-media">
-            <img src="${category.image}" alt="${category.name}" loading="lazy" />
+          <div class="category-card-orbit" aria-hidden="true">
+            <span class="category-card-ring"></span>
+            <span class="category-card-ring category-card-ring-secondary"></span>
+            <div class="category-card-media">
+              <img src="${category.image}" alt="${category.name}" loading="lazy" />
+            </div>
           </div>
           <div class="category-card-body">
-            <span class="section-kicker">Shop ${category.name}</span>
             <h3>${category.name}</h3>
-            <p>${category.description}</p>
-            <span class="category-count">${count} products</span>
+            <p class="category-card-tip">${suggestion}</p>
+            <span class="category-card-cta">Open <span aria-hidden="true">&rarr;</span></span>
           </div>
         </a>
       </article>
@@ -324,7 +389,7 @@
     }
 
     const lines = items.map(
-      (item, index) => `${index + 1}. ${item.product.name} x${item.quantity} - ${formatCurrency(item.lineTotal)}`
+      (item, index) => `${index + 1}. ${item.productName} x${item.quantity} - ${formatCurrency(item.lineTotal)}`
     );
     const total = items.reduce((sum, item) => sum + item.lineTotal, 0);
     return buildWhatsAppUrl(
@@ -348,8 +413,8 @@
     }
   }
 
-  async function addToCart(productId) {
-    const product = await getProductById(productId);
+  function addToCart(productId) {
+    const product = getProductById(productId);
     if (!product) {
       console.error("addToCart: product not found", productId);
       return;
@@ -370,7 +435,14 @@
     }
 
     saveCart(cart);
-    alert(`✅ ${product.name || "Item"} has been added to your cart`);
+
+    const message = `${product.name || "Item"} added to your cart.`;
+    if (typeof window.showToast === "function") {
+      window.showToast(message, "success");
+      return;
+    }
+
+    window.alert(message);
   }
 
   function updateCartQuantity(productId, nextQuantity) {
@@ -395,12 +467,13 @@
     const cartSummary = cart
       .map((item) => {
         const product = data.products.find((p) => p.id === item.productId) || {};
+        const displayPrice = Number(item.productPrice) || Number(product.price) || 0;
         return {
           ...item,
           product,
-          lineTotal: (item.productPrice || 0) * item.quantity,
+          lineTotal: displayPrice * item.quantity,
           displayName: item.productName || product.name || "Artisan item",
-          displayPrice: Number(item.productPrice) || Number(product.price) || 0,
+          displayPrice,
         };
       });
 
@@ -648,12 +721,16 @@
   function bindCartEvents() {
     document.addEventListener("click", function (event) {
       const addButton = event.target.closest("[data-add-to-cart]");
+      const wishlistButton = event.target.closest("[data-toggle-wishlist]");
       const increaseButton = event.target.closest("[data-cart-increase]");
       const decreaseButton = event.target.closest("[data-cart-decrease]");
 
       if (addButton) {
         addToCart(addButton.dataset.addToCart);
-        openCart();
+      }
+
+      if (wishlistButton) {
+        toggleWishlist(wishlistButton.dataset.toggleWishlist);
       }
 
       if (increaseButton) {

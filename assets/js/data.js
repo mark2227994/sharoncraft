@@ -4,6 +4,8 @@
 (function () {
   const storageKey = "sharoncraft-admin-catalog";
   const socialSettingsKey = "sharoncraft-social-settings";
+  const categoriesSettingsKey = "sharoncraft-category-settings";
+  const homeVisualsSettingsKey = "sharoncraft-home-visuals";
 
   const defaultData = {
     site: {
@@ -26,12 +28,35 @@
         { label: "TikTok", url: "#" }
       ]
     },
+    homeVisuals: {
+      hero: {
+        kicker: "Welcome to SharonCraft",
+        title: "Clean, colorful handmade beadwork for happy homes and beautiful gifting.",
+        description:
+          "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.",
+        primaryLabel: "Shop Now",
+        primaryHref: "shop.html",
+        secondaryLabel: "Our Story",
+        secondaryHref: "about.html",
+        image: "assets/images/IMG-20260226-WA0005.jpg",
+        imageAlt: "Model wearing SharonCraft occasion beadwork"
+      },
+      favorite: {
+        kicker: "Client Favorite",
+        title: "Kijani Mirror Duo",
+        description: "Bright decor with a clean modern finish for bedrooms and living rooms.",
+        image: "assets/images/IMG-20260214-WA0006.jpg",
+        imageAlt: "Beaded mirror from SharonCraft",
+        productId: "kijani-mirror-duo"
+      }
+    },
     categories: [
       {
         slug: "necklaces",
         name: "Necklaces",
         description: "Colorful collars and layered statement pieces for daily wear and special days.",
         image: "assets/images/IMG-20260304-WA0001.jpg",
+        tip: "Statement style",
         accent: "coral"
       },
       {
@@ -39,6 +64,7 @@
         name: "Bracelets",
         description: "Easy-to-wear beaded bands with bright Kenyan color stories.",
         image: "assets/images/WhatsApp Image 2026-03-21 at 14.22.49.jpeg",
+        tip: "Easy gifting",
         accent: "teal"
       },
       {
@@ -46,6 +72,7 @@
         name: "Home Decor",
         description: "Mirrors, table pieces, and wall styling made to warm up your space.",
         image: "assets/images/IMG-20260214-WA0005.jpg",
+        tip: "Warm spaces",
         accent: "ochre"
       },
       {
@@ -53,6 +80,7 @@
         name: "Bags & Accessories",
         description: "Hand-beaded carry pieces and tassel styles with everyday personality.",
         image: "assets/images/IMG_20250606_113910.jpg",
+        tip: "Daily carry",
         accent: "terracotta"
       },
       {
@@ -60,6 +88,7 @@
         name: "Gift Sets",
         description: "Matching pieces that make gifting feel thoughtful and easy.",
         image: "assets/images/IMG-20260317-WA0003.jpg",
+        tip: "Ready gifts",
         accent: "teal"
       },
       {
@@ -67,6 +96,7 @@
         name: "Bridal & Occasion",
         description: "Celebration-ready beadwork for events, brides, and standout moments.",
         image: "assets/images/IMG-20260226-WA0005.jpg",
+        tip: "Event glow",
         accent: "coral"
       }
     ],
@@ -346,6 +376,61 @@
     };
   }
 
+  function normalizeCategory(category, fallbackCategory) {
+    const fallback = fallbackCategory || {};
+    const allowedAccents = ["coral", "teal", "ochre", "terracotta"];
+    const accent = String(category.accent || fallback.accent || "coral").trim().toLowerCase();
+
+    return {
+      slug: String(category.slug || fallback.slug || "").trim(),
+      name: String(category.name || fallback.name || "Category").trim() || "Category",
+      description: String(category.description || fallback.description || "").trim(),
+      image:
+        String(category.image || fallback.image || "assets/images/IMG-20260226-WA0005.jpg").trim() ||
+        "assets/images/IMG-20260226-WA0005.jpg",
+      tip: String(category.tip || category.homeTip || fallback.tip || "").trim(),
+      accent: allowedAccents.includes(accent) ? accent : "coral"
+    };
+  }
+
+  function normalizeHomeVisuals(visuals, fallbackVisuals) {
+    const fallback = fallbackVisuals || {};
+    const fallbackHero = fallback.hero || {};
+    const fallbackFavorite = fallback.favorite || {};
+    const hero = visuals && typeof visuals === "object" ? visuals.hero || {} : {};
+    const favorite = visuals && typeof visuals === "object" ? visuals.favorite || {} : {};
+
+    return {
+      hero: {
+        kicker: String(hero.kicker || fallbackHero.kicker || "").trim(),
+        title: String(hero.title || fallbackHero.title || "").trim(),
+        description: String(hero.description || fallbackHero.description || "").trim(),
+        primaryLabel: String(hero.primaryLabel || fallbackHero.primaryLabel || "Shop Now").trim() || "Shop Now",
+        primaryHref: String(hero.primaryHref || fallbackHero.primaryHref || "shop.html").trim() || "shop.html",
+        secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
+        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
+        image:
+          String(hero.image || fallbackHero.image || "assets/images/IMG-20260226-WA0005.jpg").trim() ||
+          "assets/images/IMG-20260226-WA0005.jpg",
+        imageAlt:
+          String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
+          "SharonCraft welcoming beadwork photo"
+      },
+      favorite: {
+        kicker: String(favorite.kicker || fallbackFavorite.kicker || "Client Favorite").trim() || "Client Favorite",
+        title: String(favorite.title || fallbackFavorite.title || "").trim(),
+        description: String(favorite.description || fallbackFavorite.description || "").trim(),
+        image:
+          String(favorite.image || fallbackFavorite.image || "assets/images/IMG-20260214-WA0006.jpg").trim() ||
+          "assets/images/IMG-20260214-WA0006.jpg",
+        imageAlt:
+          String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
+          "SharonCraft favorite product photo",
+        productId: String(favorite.productId || fallbackFavorite.productId || "").trim()
+      }
+    };
+  }
+
   function loadSavedProducts() {
     try {
       const raw = window.localStorage.getItem(storageKey);
@@ -396,16 +481,67 @@
     }
   }
 
+  function loadSavedCategories(defaultCategories) {
+    try {
+      const raw = window.localStorage.getItem(categoriesSettingsKey);
+      if (!raw) {
+        return defaultCategories;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return defaultCategories;
+      }
+
+      const savedMap = new Map(
+        parsed
+          .map((category) => normalizeCategory(category))
+          .filter((category) => category.slug)
+          .map((category) => [category.slug, category])
+      );
+
+      return defaultCategories.map((category) => normalizeCategory(savedMap.get(category.slug) || category, category));
+    } catch (error) {
+      return defaultCategories;
+    }
+  }
+
+  function loadSavedHomeVisuals(defaultHomeVisuals) {
+    try {
+      const raw = window.localStorage.getItem(homeVisualsSettingsKey);
+      if (!raw) {
+        return defaultHomeVisuals;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        return defaultHomeVisuals;
+      }
+
+      return normalizeHomeVisuals(parsed, defaultHomeVisuals);
+    } catch (error) {
+      return defaultHomeVisuals;
+    }
+  }
+
   const savedProducts = loadSavedProducts();
   const data = clone(defaultData);
+  const savedCategories = loadSavedCategories(defaultData.categories);
+  const savedHomeVisuals = loadSavedHomeVisuals(defaultData.homeVisuals);
 
   if (savedProducts && savedProducts.length) {
     data.products = savedProducts;
   }
 
+  if (savedCategories && savedCategories.length) {
+    data.categories = savedCategories;
+  }
+
+  data.homeVisuals = normalizeHomeVisuals(savedHomeVisuals, defaultData.homeVisuals);
+
   data.site.socials = loadSavedSocials(defaultData.site.socials);
 
   window.SharonCraftDefaultData = defaultData;
-  window.SharonCraftStorage = { storageKey, socialSettingsKey };
+  window.SharonCraftStorage = { storageKey, socialSettingsKey, categoriesSettingsKey, homeVisualsSettingsKey };
   window.SharonCraftData = data;
 })();

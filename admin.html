@@ -31,6 +31,7 @@
         </div>
         <div class="admin-hero-actions">
           <button class="button button-primary" id="admin-save" type="button">Save All Product Changes</button>
+          <button class="button button-secondary" id="admin-repair-images" type="button">Repair Product Images</button>
           <button class="button button-secondary" id="admin-reset" type="button">Restore Default Catalog</button>
           <button class="button button-secondary" id="admin-reset-sales" type="button">Reset Sales Dashboard</button>
           <a class="button button-secondary" href="index.html" target="_blank" rel="noreferrer">Open Storefront</a>
@@ -107,6 +108,14 @@
           <button class="admin-tab-button" type="button" data-admin-tab="catalog">
             <span>Product List</span>
             <small>Search and manage the catalog</small>
+          </button>
+          <button class="admin-tab-button" type="button" data-admin-tab="categories">
+            <span>Categories</span>
+            <small>Edit names, tips, and home icons</small>
+          </button>
+          <button class="admin-tab-button" type="button" data-admin-tab="visuals">
+            <span>Visual Story</span>
+            <small>Change the home welcome and favorite photos</small>
           </button>
           <button class="admin-tab-button" type="button" data-admin-tab="preview">
             <span>Phone Preview</span>
@@ -205,8 +214,10 @@
                   </div>
                   <p class="admin-field-tip">The helper gives you a starter name from the category, description, details, and badge. You can always edit the result.</p>
                 </div>
-                <div class="admin-inline">
-                  <select id="admin-category">
+                <div class="admin-form-group">
+                  <label>Choose Category</label>
+                  <p class="admin-field-tip">Pick where this product belongs. This helps customers find it in the shop.</p>
+                  <select id="admin-category" class="admin-category-hidden-select">
                     <option value="necklaces">Necklaces</option>
                     <option value="bracelets">Bracelets</option>
                     <option value="home-decor">Home Decor</option>
@@ -214,6 +225,28 @@
                     <option value="gift-sets">Gift Sets</option>
                     <option value="bridal-occasion">Bridal & Occasion</option>
                   </select>
+                  <div id="admin-category-visual-selector" class="admin-category-visual-selector">
+                    <button type="button" class="admin-category-chip" data-category="necklaces">
+                      <span>👑</span> Necklaces
+                    </button>
+                    <button type="button" class="admin-category-chip" data-category="bracelets">
+                      <span>💍</span> Bracelets
+                    </button>
+                    <button type="button" class="admin-category-chip" data-category="home-decor">
+                      <span>🏡</span> Home Decor
+                    </button>
+                    <button type="button" class="admin-category-chip" data-category="bags-accessories">
+                      <span>👜</span> Bags & Accessories
+                    </button>
+                    <button type="button" class="admin-category-chip" data-category="gift-sets">
+                      <span>🎁</span> Gift Sets
+                    </button>
+                    <button type="button" class="admin-category-chip" data-category="bridal-occasion">
+                      <span>💐</span> Bridal & Occasion
+                    </button>
+                  </div>
+                </div>
+                <div class="admin-inline">
                   <input id="admin-price" type="number" min="0" placeholder="Price in KES" required />
                 </div>
                 <div class="admin-inline">
@@ -384,13 +417,29 @@
                     <img id="admin-draft-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="Draft product preview" />
                   </div>
                   <div class="admin-draft-body">
-                    <p id="admin-draft-category" class="product-card-category">Necklaces</p>
-                    <h3 id="admin-draft-title">Your product title</h3>
-                    <p id="admin-draft-description" class="product-card-text">Your short product description will appear here as you type.</p>
-                    <div class="product-card-meta">
-                      <strong id="admin-draft-price">KES 0</strong>
-                      <span>Handmade</span>
+                    <div class="product-card-head">
+                      <h3 id="admin-draft-title">Your product title</h3>
+                      <div class="product-card-icon-row">
+                        <button class="icon-action-button wishlist-icon-button" type="button" aria-label="Wishlist preview">
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 20.3 4.8 13.4A4.7 4.7 0 0 1 11.7 7l.3.4.3-.4a4.7 4.7 0 0 1 6.9 6.4L12 20.3Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+                          </svg>
+                        </button>
+                        <button class="icon-action-button cart-icon-button" type="button" aria-label="Cart preview">
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 4h2l2.3 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 7H7.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+                            <circle cx="10" cy="19" r="1.5" fill="currentColor"></circle>
+                            <circle cx="17" cy="19" r="1.5" fill="currentColor"></circle>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
+                    <p id="admin-draft-category" class="product-card-category">Necklaces</p>
+                    <p id="admin-draft-description" class="product-card-text">Your short product description will appear here as you type.</p>
+                    <div class="product-card-price-row">
+                      <strong id="admin-draft-price" class="product-price">KES 0</strong>
+                    </div>
+                    <a class="button button-primary product-card-order admin-draft-order-button" href="javascript:void(0)">Order on WhatsApp</a>
                     <div id="admin-draft-profit" class="admin-draft-profit">Profit snapshot will appear here.</div>
                     <div id="admin-draft-gallery" class="admin-draft-gallery"></div>
                   </div>
@@ -523,6 +572,321 @@
               <p class="admin-panel-muted">Keep homepage featuring selective so the storefront feels curated, not crowded.</p>
               <div id="admin-featured-summary" class="admin-featured-summary"></div>
               <div id="admin-featured-manager" class="admin-featured-manager"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="categories">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Category Styling</span>
+            <h2>Organize products and edit each category in one calm space.</h2>
+            <p>Use the Categorizer to move products between categories easily, then Style to update names, colors, and icons that appear on the homepage.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Organize products</span>
+            <span>Pick category</span>
+            <span>Change icon</span>
+            <span>Save style</span>
+          </div>
+        </article>
+
+        <!-- Product Categorizer -->
+        <section class="admin-category-organizer">
+          <div class="admin-organizer-header">
+            <div>
+              <span class="section-kicker">Product Categorizer</span>
+              <h2>Organize Products</h2>
+            </div>
+            <p class="admin-panel-muted">Drag products to move them, or click a product then select a category. Changes save automatically.</p>
+          </div>
+          <div id="admin-category-kanban" class="admin-category-kanban"></div>
+        </section>
+
+        <div class="admin-layout admin-layout-wide admin-category-layout">
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Category Menu</span>
+                  <h2>Edit By Category</h2>
+                </div>
+              </div>
+              <p class="admin-panel-muted">Tap a category to load it into the editor. The save button will keep the same category slug, so your products stay connected.</p>
+              <div id="admin-category-list" class="admin-category-list"></div>
+            </section>
+          </aside>
+
+          <section class="admin-panel admin-category-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Home Category Card</span>
+                <h2>Category Editor</h2>
+              </div>
+            </div>
+            <div class="admin-help-grid">
+              <article class="admin-help-card">
+                <strong>1. Keep the name short</strong>
+                <p>The category name should be easy to scan on mobile without wrapping too much.</p>
+              </article>
+              <article class="admin-help-card">
+                <strong>2. Use a photo like an icon</strong>
+                <p>Pick one simple image that still looks strong inside the round homepage shape.</p>
+              </article>
+              <article class="admin-help-card">
+                <strong>3. Make the tip tiny</strong>
+                <p>Use just two or three words so the category section stays light and elegant.</p>
+              </article>
+            </div>
+
+            <form id="admin-category-form" class="admin-form">
+              <section class="admin-form-section">
+                <div class="admin-section-label">
+                  <strong>Category words and color</strong>
+                  <p>These details shape the category label, the small homepage tip, and the accent ring around the icon.</p>
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-category-name" type="text" placeholder="Category name" />
+                  <select id="admin-category-accent">
+                    <option value="coral">Coral ring</option>
+                    <option value="teal">Teal ring</option>
+                    <option value="ochre">Ochre ring</option>
+                    <option value="terracotta">Terracotta ring</option>
+                  </select>
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-category-tip">Small homepage tip</label>
+                  <input id="admin-category-tip" type="text" maxlength="28" placeholder="For example: Easy gifting" />
+                  <p class="admin-field-tip">Keep this very short so the round category card still feels airy on smaller screens.</p>
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-category-description">Category description</label>
+                  <textarea id="admin-category-description" placeholder="What this category includes and why it feels useful or beautiful"></textarea>
+                </div>
+              </section>
+
+              <section class="admin-form-section">
+                <div class="admin-section-label">
+                  <strong>Shop by Category icon image</strong>
+                  <p>Choose the round homepage image here. You can paste a file path or tap a quick option from the image picker below.</p>
+                </div>
+                <div class="admin-category-editor-grid">
+                  <div class="admin-category-image-tools">
+                    <div class="admin-form-group">
+                      <label for="admin-category-image">Category icon image</label>
+                      <input id="admin-category-image" type="text" placeholder="assets/images/..." />
+                    </div>
+                    <div class="admin-form-group">
+                      <label for="admin-category-image-search">Quick icon search</label>
+                      <input id="admin-category-image-search" type="search" placeholder="Search the image library" />
+                    </div>
+                  </div>
+
+                  <div class="admin-category-preview-wrap">
+                    <div id="admin-category-preview-card" class="admin-category-preview-card category-card accent-coral">
+                      <div class="category-card-orbit admin-category-preview-orbit" aria-hidden="true">
+                        <span class="category-card-ring"></span>
+                        <span class="category-card-ring category-card-ring-secondary"></span>
+                        <div class="category-card-media">
+                          <img id="admin-category-preview-image" src="assets/images/IMG-20260304-WA0001.jpg" alt="Category preview" />
+                        </div>
+                      </div>
+                      <div class="category-card-body">
+                        <h3 id="admin-category-preview-name">Necklaces</h3>
+                        <p id="admin-category-preview-tip" class="category-card-tip">Statement style</p>
+                        <span class="category-card-cta">Open <span aria-hidden="true">&rarr;</span></span>
+                      </div>
+                    </div>
+                    <p id="admin-category-preview-count" class="admin-panel-muted">0 products in this category</p>
+                  </div>
+                </div>
+
+                <div id="admin-category-image-library" class="admin-category-image-library"></div>
+              </section>
+
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Category Changes</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="visuals">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Homepage Visual Story</span>
+            <h2>Change the welcoming photo and the client-favorite spotlight in one calm place.</h2>
+            <p>This section is for the visual mood of the homepage, not product setup. Pick the image first, keep the text short, then check the preview before you save.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Welcome photo</span>
+            <span>Favorite spotlight</span>
+            <span>Mobile-first preview</span>
+            <span>Save visual story</span>
+          </div>
+        </article>
+        <div class="admin-layout admin-layout-wide admin-visual-story-layout">
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Visual Nav</span>
+                  <h2>Sections</h2>
+                </div>
+              </div>
+              <div class="admin-visual-nav">
+                <button class="admin-visual-nav-item is-active" type="button" data-visual-section="hero">
+                  <strong>Welcome</strong>
+                  <span>Main photo, headline, and action buttons</span>
+                </button>
+                <button class="admin-visual-nav-item" type="button" data-visual-section="favorite">
+                  <strong>Client Favorite</strong>
+                  <span>Spotlight photo and small text card</span>
+                </button>
+                <button class="admin-visual-nav-item" type="button" data-visual-section="preview">
+                  <strong>Live Preview</strong>
+                  <span>Check how both blocks feel together</span>
+                </button>
+              </div>
+              <div class="admin-help-grid admin-help-grid-compact">
+                <article class="admin-help-card">
+                  <strong>Best recommendation</strong>
+                  <p>Use one strong portrait-style welcome image and one simpler favorite product photo so the two visuals do not compete.</p>
+                </article>
+              </div>
+            </section>
+          </aside>
+
+          <section class="admin-panel admin-visual-story-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Visual Story</span>
+                <h2>Homepage Wallpapers</h2>
+              </div>
+            </div>
+
+            <form id="admin-visual-story-form" class="admin-form">
+              <section class="admin-form-section admin-visual-section is-active" data-visual-panel="hero">
+                <div class="admin-section-label">
+                  <strong>Welcome hero</strong>
+                  <p>This is the first photo and message people see on the homepage, so keep it warm, clear, and not too busy.</p>
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-hero-kicker" type="text" placeholder="Small top label" />
+                  <input id="admin-hero-image-alt" type="text" placeholder="Image alt text" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-hero-title">Welcome headline</label>
+                  <input id="admin-hero-title" type="text" placeholder="Homepage welcome headline" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-hero-description">Welcome description</label>
+                  <textarea id="admin-hero-description" placeholder="Short welcoming text for the homepage"></textarea>
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-hero-primary-label" type="text" placeholder="Primary button label" />
+                  <input id="admin-hero-primary-href" type="text" placeholder="Primary button link" />
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-hero-secondary-label" type="text" placeholder="Secondary button label" />
+                  <input id="admin-hero-secondary-href" type="text" placeholder="Secondary button link" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-hero-image">Welcome photo</label>
+                  <div class="admin-image-upload-wrapper">
+                    <input id="admin-hero-image" type="text" placeholder="assets/images/..." />
+                    <input id="admin-hero-image-upload" type="file" accept="image/*" class="admin-file-input" />
+                    <label for="admin-hero-image-upload" class="admin-upload-button">📁 Upload from computer</label>
+                  </div>
+                  <div id="admin-hero-image-preview" class="admin-image-preview"></div>
+                </div>
+              </section>
+
+              <section class="admin-form-section admin-visual-section" data-visual-panel="favorite">
+                <div class="admin-section-label">
+                  <strong>Client favorite spotlight</strong>
+                  <p>Use this smaller card to highlight one item shoppers already love. A short line works better here than a full sales paragraph.</p>
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-favorite-kicker" type="text" placeholder="Small favorite label" />
+                  <input id="admin-favorite-image-alt" type="text" placeholder="Favorite image alt text" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-favorite-product">Favorite product link</label>
+                  <select id="admin-favorite-product"></select>
+                  <p class="admin-field-tip">Pick a product first, then adjust the title, description, or image if you want the card to feel more curated.</p>
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-favorite-title">Favorite title</label>
+                  <input id="admin-favorite-title" type="text" placeholder="Favorite product title" />
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-favorite-description">Favorite description</label>
+                  <textarea id="admin-favorite-description" placeholder="Short note about why clients love it"></textarea>
+                </div>
+                <div class="admin-form-group">
+                  <label for="admin-favorite-image">Favorite photo</label>
+                  <div class="admin-image-upload-wrapper">
+                    <input id="admin-favorite-image" type="text" placeholder="assets/images/..." />
+                    <input id="admin-favorite-image-upload" type="file" accept="image/*" class="admin-file-input" />
+                    <label for="admin-favorite-image-upload" class="admin-upload-button">📁 Upload from computer</label>
+                  </div>
+                  <div id="admin-favorite-image-preview" class="admin-image-preview"></div>
+                </div>
+              </section>
+
+              <section class="admin-form-section admin-visual-section" data-visual-panel="preview">
+                <div class="admin-section-label">
+                  <strong>Image picker and live preview</strong>
+                  <p>Tap an image to fill the currently active wallpaper field, then check the preview to see how the homepage atmosphere changes.</p>
+                </div>
+                <div class="admin-inline">
+                  <input id="admin-visual-image-search" type="search" placeholder="Search image library for wallpapers" />
+                </div>
+                <div id="admin-visual-image-library" class="admin-category-image-library admin-visual-image-library"></div>
+              </section>
+
+              <div class="admin-actions">
+                <button class="button button-primary" type="submit">Save Homepage Visuals</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Live Preview</span>
+                  <h2>Homepage Mood</h2>
+                </div>
+              </div>
+              <div class="admin-visual-preview">
+                <article class="admin-visual-preview-hero">
+                  <div class="admin-visual-preview-copy">
+                    <span id="admin-visual-preview-kicker" class="section-kicker">Welcome to SharonCraft</span>
+                    <h3 id="admin-visual-preview-title">Clean, colorful handmade beadwork for happy homes and beautiful gifting.</h3>
+                    <p id="admin-visual-preview-description">Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit.</p>
+                    <div class="hero-actions">
+                      <span id="admin-visual-preview-primary" class="button button-primary">Shop Now</span>
+                      <span id="admin-visual-preview-secondary" class="button button-secondary">Our Story</span>
+                    </div>
+                  </div>
+                  <div class="admin-visual-preview-media">
+                    <img id="admin-visual-preview-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="Hero preview" />
+                  </div>
+                </article>
+
+                <article class="hero-floating-card admin-visual-preview-favorite">
+                  <img id="admin-visual-favorite-preview-image" src="assets/images/IMG-20260214-WA0006.jpg" alt="Favorite preview" />
+                  <div>
+                    <span id="admin-visual-favorite-preview-kicker" class="section-kicker">Client Favorite</span>
+                    <h2 id="admin-visual-favorite-preview-title">Kijani Mirror Duo</h2>
+                    <p id="admin-visual-favorite-preview-description">Bright decor with a clean modern finish for bedrooms and living rooms.</p>
+                  </div>
+                </article>
+              </div>
             </section>
           </aside>
         </div>
@@ -1096,9 +1460,6 @@
   <script src="supabase-catalog.js"></script>
   <script src="assets/js/admin-auth.js" defer></script>
   <script src="assets/js/app.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="supabase-config.js" defer></script>
-  <script src="supabase-catalog.js" defer></script>
   <script src="assets/js/admin.js" defer></script>
 </body>
 </html>

@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const storageKey = (window.SharonCraftStorage && window.SharonCraftStorage.storageKey) || "sharoncraft-admin-catalog";
   const socialSettingsKey =
     (window.SharonCraftStorage && window.SharonCraftStorage.socialSettingsKey) || "sharoncraft-social-settings";
+  const categoriesSettingsKey =
+    (window.SharonCraftStorage && window.SharonCraftStorage.categoriesSettingsKey) || "sharoncraft-category-settings";
+  const homeVisualsSettingsKey =
+    (window.SharonCraftStorage && window.SharonCraftStorage.homeVisualsSettingsKey) || "sharoncraft-home-visuals";
   const socialPlannerKey = "sharoncraft-social-planner";
   const ordersKey = "sharoncraft-orders";
   const deliveryAreasKey = "sharoncraft-delivery-areas";
@@ -14,7 +18,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Wait for data to be loaded
   await utils.waitForData();
   const liveCatalogApi = window.SharonCraftCatalog || null;
-  const categoryMap = new Map(utils.data.categories.map((category) => [category.slug, category.name]));
   const availableImages = [
     "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.jpeg",
     "assets/images/d2801c4b-e113-440b-8eaf-fa52ac5703a8_0_watermark.jpeg",
@@ -71,10 +74,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     "assets/images/WhatsApp Image 2026-03-21 at 15.48.32 (1).jpeg",
     "assets/images/WhatsApp Image 2026-03-21 at 15.48.32.jpeg"
   ];
-
-  const defaultProducts = ((window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || utils.data.products).map(
-    (product, index) => normalizeProduct(product, index)
+  const fallbackImage = "assets/images/IMG-20260226-WA0005.jpg";
+  const defaultCategorySource =
+    (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
+  const defaultHomeVisualSource =
+    (window.SharonCraftDefaultData && window.SharonCraftDefaultData.homeVisuals) || utils.data.homeVisuals || {};
+  const defaultProductSource = (window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || utils.data.products;
+  const curatedLibraryImages = availableImages.filter(
+    (image) => /\.(jpe?g|png|webp)$/i.test(image) && !/logo|favicon/i.test(image)
   );
+  let categoryCatalog = (utils.data.categories || []).map((category) => normalizeCategory(category));
+  let categoryMap = new Map(categoryCatalog.map((category) => [category.slug, category.name]));
+
+  const defaultProducts = defaultProductSource.map((product, index) => normalizeProduct(product, index));
+  const defaultProductImageMap = new Map(defaultProducts.map((product) => [product.id, product.images]));
+  let defaultCategoryImageMap = buildDefaultCategoryImageMap(categoryCatalog);
 
   function defaultAnalytics(product, index) {
     const unitsSold = (index + 2) * (product.featured ? 4 : 2);
@@ -87,8 +101,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function normalizeProduct(product, index) {
-    const mainImage = product.images && product.images.length ? product.images[0] : "assets/images/IMG-20260226-WA0005.jpg";
-    const gallery = dedupeImages([mainImage].concat(product.images || []));
+    const rawImages = Array.isArray(product.images) ? product.images : [];
+    const rawGallery = Array.isArray(product.gallery) ? product.gallery : [];
+    const mainImage =
+      cleanImagePath(product.image) ||
+      cleanImagePath(rawImages[0]) ||
+      cleanImagePath(rawGallery[0]) ||
+      fallbackImage;
+    const gallery = dedupeImages([mainImage].concat(rawImages, rawGallery));
     return {
       id: product.id,
       name: product.name,
@@ -103,12 +123,162 @@ document.addEventListener("DOMContentLoaded", async function () {
       badge: product.badge || "",
       featured: Boolean(product.featured),
       newArrival: Boolean(product.newArrival),
-      shortDescription: product.shortDescription || product.description || "",
-      description: product.description || product.shortDescription || "",
-      details: Array.isArray(product.details) ? product.details : [],
+      shortDescription: product.shortDescription || product.description || product.story || "",
+      description: product.description || product.shortDescription || product.story || "",
+      details: Array.isArray(product.details) ? product.details : Array.isArray(product.specs) ? product.specs : [],
       images: gallery,
       analytics: product.analytics || defaultAnalytics(product, index)
     };
+  }
+
+  function normalizeCategory(category) {
+    const allowedAccents = ["coral", "teal", "ochre", "terracotta"];
+    const slug = String(category.slug || "").trim();
+    const fallbackCategory = (defaultCategorySource || []).find((item) => item.slug === slug) || {};
+    const accent = String(category.accent || fallbackCategory.accent || "coral").trim().toLowerCase();
+
+    return {
+      slug,
+      name: String(category.name || fallbackCategory.name || "Category").trim() || "Category",
+      description: String(category.description || fallbackCategory.description || "").trim(),
+      image:
+        cleanImagePath(category.image) ||
+        cleanImagePath(fallbackCategory.image) ||
+        fallbackImage,
+      tip: String(category.tip || category.homeTip || fallbackCategory.tip || "").trim(),
+      accent: allowedAccents.includes(accent) ? accent : "coral"
+    };
+  }
+
+  function normalizeHomeVisuals(visuals) {
+    const fallback = defaultHomeVisualSource || {};
+    const fallbackHero = fallback.hero || {};
+    const fallbackFavorite = fallback.favorite || {};
+    const hero = visuals && typeof visuals === "object" ? visuals.hero || {} : {};
+    const favorite = visuals && typeof visuals === "object" ? visuals.favorite || {} : {};
+
+    return {
+      hero: {
+        kicker: String(hero.kicker || fallbackHero.kicker || "Welcome to SharonCraft").trim() || "Welcome to SharonCraft",
+        title:
+          String(hero.title || fallbackHero.title || "Clean, colorful handmade beadwork for happy homes and beautiful gifting.").trim() ||
+          "Clean, colorful handmade beadwork for happy homes and beautiful gifting.",
+        description:
+          String(
+            hero.description ||
+              fallbackHero.description ||
+              "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit."
+          ).trim() || "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit.",
+        primaryLabel: String(hero.primaryLabel || fallbackHero.primaryLabel || "Shop Now").trim() || "Shop Now",
+        primaryHref: String(hero.primaryHref || fallbackHero.primaryHref || "shop.html").trim() || "shop.html",
+        secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
+        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
+        image: cleanImagePath(hero.image) || cleanImagePath(fallbackHero.image) || fallbackImage,
+        imageAlt:
+          String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming photo").trim() ||
+          "SharonCraft welcoming photo"
+      },
+      favorite: {
+        kicker: String(favorite.kicker || fallbackFavorite.kicker || "Client Favorite").trim() || "Client Favorite",
+        title: String(favorite.title || fallbackFavorite.title || "").trim(),
+        description: String(favorite.description || fallbackFavorite.description || "").trim(),
+        image: cleanImagePath(favorite.image) || cleanImagePath(fallbackFavorite.image) || fallbackImage,
+        imageAlt:
+          String(favorite.imageAlt || fallbackFavorite.imageAlt || "Favorite product photo").trim() ||
+          "Favorite product photo",
+        productId: String(favorite.productId || fallbackFavorite.productId || "").trim()
+      }
+    };
+  }
+
+  function buildDefaultCategoryImageMap(categories) {
+    return new Map(
+      (categories || []).map((category) => [
+        category.slug,
+        dedupeImages(
+          defaultProducts
+            .filter((product) => product.category === category.slug)
+            .flatMap((product) => product.images)
+            .concat(category.image || [])
+        ),
+      ])
+    );
+  }
+
+  function getImageSeed(value, fallback = 0) {
+    return String(value || fallback)
+      .split("")
+      .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  }
+
+  function rotateImagePool(pool, seed, count = 3) {
+    if (!pool.length) {
+      return [fallbackImage];
+    }
+
+    const start = seed % pool.length;
+    const ordered = pool.slice(start).concat(pool.slice(0, start));
+    return ordered.slice(0, Math.min(count, ordered.length));
+  }
+
+  function hasLikelyRepeatedImageIssue(products) {
+    const mainImages = products.map((product) => cleanImagePath(product.images && product.images[0])).filter(Boolean);
+    if (!mainImages.length) {
+      return false;
+    }
+
+    const counts = mainImages.reduce((map, image) => {
+      map.set(image, (map.get(image) || 0) + 1);
+      return map;
+    }, new Map());
+    const repeatedCount = Math.max(...counts.values());
+    const uniqueCount = counts.size;
+    const fallbackCount = mainImages.filter((image) => image === fallbackImage).length;
+
+    return repeatedCount >= Math.ceil(mainImages.length / 2) || fallbackCount >= Math.ceil(mainImages.length / 3) || uniqueCount <= Math.max(2, Math.floor(mainImages.length / 3));
+  }
+
+  function getRepairImagePool(product, index) {
+    const currentImages = dedupeImages([].concat(product.images || []).filter(Boolean));
+    const defaultImages = defaultProductImageMap.get(product.id) || [];
+    const categoryImages = defaultCategoryImageMap.get(product.category) || [];
+    const pool = dedupeImages(
+      defaultImages
+        .concat(currentImages.filter((image) => image !== fallbackImage))
+        .concat(categoryImages)
+        .concat(curatedLibraryImages)
+    );
+
+    return rotateImagePool(pool, getImageSeed(product.id, index), 3);
+  }
+
+  function repairCatalogImages(products) {
+    const normalizedProducts = products.map((product, index) => normalizeProduct(product, index));
+    const mainImageCounts = normalizedProducts.reduce((map, product) => {
+      const image = cleanImagePath(product.images && product.images[0]) || fallbackImage;
+      map.set(image, (map.get(image) || 0) + 1);
+      return map;
+    }, new Map());
+
+    return normalizedProducts.map((product, index) => {
+      const currentMain = cleanImagePath(product.images && product.images[0]) || fallbackImage;
+      const hasDefaultMapping = defaultProductImageMap.has(product.id);
+      const currentImages = dedupeImages((product.images || []).filter(Boolean));
+      const needsRepair =
+        hasDefaultMapping ||
+        currentImages.length < 2 ||
+        currentMain === fallbackImage ||
+        (mainImageCounts.get(currentMain) || 0) > 1;
+
+      if (!needsRepair) {
+        return product;
+      }
+
+      return {
+        ...product,
+        images: getRepairImagePool(product, index),
+      };
+    });
   }
 
   async function loadCatalog() {
@@ -134,6 +304,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   let catalog = await loadCatalog();
+  const repairedCatalogOnLoad = hasLikelyRepeatedImageIssue(catalog);
+  if (repairedCatalogOnLoad) {
+    catalog = repairCatalogImages(catalog);
+    window.localStorage.setItem(storageKey, JSON.stringify(catalog));
+  }
   let editingId = null;
   let temporaryMainPreviewSrc = "";
   const socialDefaults = utils.data.site.socials.map((social) => ({ label: social.label, url: social.url }));
@@ -205,6 +380,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const preview = document.getElementById("admin-json-preview");
   const addButton = document.getElementById("admin-add-product");
   const resetButton = document.getElementById("admin-reset");
+  const repairImagesButton = document.getElementById("admin-repair-images");
   const saveButton = document.getElementById("admin-save");
   const previewPageSelect = document.getElementById("admin-preview-page");
   const previewReloadButton = document.getElementById("admin-preview-reload");
@@ -212,6 +388,54 @@ document.addEventListener("DOMContentLoaded", async function () {
   const previewFrame = document.getElementById("admin-preview-frame");
   const searchInput = document.getElementById("admin-product-search");
   const categoryFilter = document.getElementById("admin-product-filter");
+  const categoryList = document.getElementById("admin-category-list");
+  const categoryEditorForm = document.getElementById("admin-category-form");
+  const categoryNameInput = document.getElementById("admin-category-name");
+  const categoryAccentInput = document.getElementById("admin-category-accent");
+  const categoryTipInput = document.getElementById("admin-category-tip");
+  const categoryDescriptionInput = document.getElementById("admin-category-description");
+  const categoryImageInput = document.getElementById("admin-category-image");
+  const categoryImageSearchInput = document.getElementById("admin-category-image-search");
+  const categoryImageLibrary = document.getElementById("admin-category-image-library");
+  const categoryPreviewCard = document.getElementById("admin-category-preview-card");
+  const categoryPreviewImage = document.getElementById("admin-category-preview-image");
+  const categoryPreviewName = document.getElementById("admin-category-preview-name");
+  const categoryPreviewTip = document.getElementById("admin-category-preview-tip");
+  const categoryPreviewCount = document.getElementById("admin-category-preview-count");
+  const visualStoryForm = document.getElementById("admin-visual-story-form");
+  const visualNavButtons = document.querySelectorAll("[data-visual-section]");
+  const visualPanels = document.querySelectorAll("[data-visual-panel]");
+  const heroKickerInput = document.getElementById("admin-hero-kicker");
+  const heroTitleInput = document.getElementById("admin-hero-title");
+  const heroDescriptionInput = document.getElementById("admin-hero-description");
+  const heroPrimaryLabelInput = document.getElementById("admin-hero-primary-label");
+  const heroPrimaryHrefInput = document.getElementById("admin-hero-primary-href");
+  const heroSecondaryLabelInput = document.getElementById("admin-hero-secondary-label");
+  const heroSecondaryHrefInput = document.getElementById("admin-hero-secondary-href");
+  const heroImageInput = document.getElementById("admin-hero-image");
+  const heroImageAltInput = document.getElementById("admin-hero-image-alt");
+  const heroImageUploadInput = document.getElementById("admin-hero-image-upload");
+  const heroImagePreview = document.getElementById("admin-hero-image-preview");
+  const favoriteKickerInput = document.getElementById("admin-favorite-kicker");
+  const favoriteProductSelect = document.getElementById("admin-favorite-product");
+  const favoriteTitleInput = document.getElementById("admin-favorite-title");
+  const favoriteDescriptionInput = document.getElementById("admin-favorite-description");
+  const favoriteImageInput = document.getElementById("admin-favorite-image");
+  const favoriteImageAltInput = document.getElementById("admin-favorite-image-alt");
+  const favoriteImageUploadInput = document.getElementById("admin-favorite-image-upload");
+  const favoriteImagePreview = document.getElementById("admin-favorite-image-preview");
+  const visualImageSearchInput = document.getElementById("admin-visual-image-search");
+  const visualImageLibrary = document.getElementById("admin-visual-image-library");
+  const visualPreviewKicker = document.getElementById("admin-visual-preview-kicker");
+  const visualPreviewTitle = document.getElementById("admin-visual-preview-title");
+  const visualPreviewDescription = document.getElementById("admin-visual-preview-description");
+  const visualPreviewPrimary = document.getElementById("admin-visual-preview-primary");
+  const visualPreviewSecondary = document.getElementById("admin-visual-preview-secondary");
+  const visualPreviewImage = document.getElementById("admin-visual-preview-image");
+  const visualFavoritePreviewImage = document.getElementById("admin-visual-favorite-preview-image");
+  const visualFavoritePreviewKicker = document.getElementById("admin-visual-favorite-preview-kicker");
+  const visualFavoritePreviewTitle = document.getElementById("admin-visual-favorite-preview-title");
+  const visualFavoritePreviewDescription = document.getElementById("admin-visual-favorite-preview-description");
   const featureFilter = document.getElementById("admin-feature-filter");
   const featuredSummary = document.getElementById("admin-featured-summary");
   const featuredManager = document.getElementById("admin-featured-manager");
@@ -395,6 +619,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function loadHomeVisuals() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(homeVisualsSettingsKey) || "null");
+      return normalizeHomeVisuals(saved || defaultHomeVisualSource);
+    } catch (error) {
+      return normalizeHomeVisuals(defaultHomeVisualSource);
+    }
+  }
+
   function loadReplyTemplates() {
     try {
       const saved = JSON.parse(window.localStorage.getItem(replyTemplatesKey) || "null");
@@ -408,6 +641,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   let socialSettings = loadSocialSettings();
+  let homeVisuals = loadHomeVisuals();
   let socialPlanner = loadSocialPlanner();
   let orders = loadOrders();
   let deliveryAreas = loadDeliveryAreas();
@@ -417,6 +651,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   let kioskGoal = loadGoal();
   let editingBundleId = null;
   let editingReplyId = null;
+  let editingCategorySlug = categoryCatalog[0] ? categoryCatalog[0].slug : "";
+  let activeVisualSection = "hero";
   let uploadedImageCounter = 0;
   const uploadedImageTokenPrefix = "__uploaded_image__:";
   const uploadedImageRegistry = new Map();
@@ -818,6 +1054,346 @@ document.addEventListener("DOMContentLoaded", async function () {
     status.textContent = message;
   }
 
+  function syncCategoryRuntimeData(saveToStorage) {
+    categoryCatalog = categoryCatalog.map((category) => normalizeCategory(category));
+    categoryMap = new Map(categoryCatalog.map((category) => [category.slug, category.name]));
+    defaultCategoryImageMap = buildDefaultCategoryImageMap(categoryCatalog);
+    utils.data.categories = categoryCatalog.map((category) => ({ ...category }));
+
+    if (saveToStorage) {
+      window.localStorage.setItem(categoriesSettingsKey, JSON.stringify(categoryCatalog));
+    }
+  }
+
+  function renderCategorySelectControls() {
+    const currentCategoryValue = categoryInput ? categoryInput.value : "";
+    const currentFilterValue = categoryFilter ? categoryFilter.value : "";
+    const options = categoryCatalog
+      .map((category) => `<option value="${category.slug}">${category.name}</option>`)
+      .join("");
+
+    if (categoryInput) {
+      categoryInput.innerHTML = options;
+      categoryInput.value = categoryCatalog.some((category) => category.slug === currentCategoryValue)
+        ? currentCategoryValue
+        : (categoryCatalog[0] || {}).slug || "";
+    }
+
+    if (categoryFilter) {
+      categoryFilter.innerHTML = `<option value="">All categories</option>${options}`;
+      categoryFilter.value = categoryCatalog.some((category) => category.slug === currentFilterValue)
+        ? currentFilterValue
+        : "";
+    }
+  }
+
+  function getCategoryProductCount(slug) {
+    return catalog.filter((product) => product.category === slug).length;
+  }
+
+  function getEditingCategory() {
+    return categoryCatalog.find((category) => category.slug === editingCategorySlug) || categoryCatalog[0] || null;
+  }
+
+  function renderCategoryList() {
+    if (!categoryList) {
+      return;
+    }
+
+    categoryList.innerHTML = categoryCatalog
+      .map((category) => {
+        const productCount = getCategoryProductCount(category.slug);
+        const activeClass = category.slug === editingCategorySlug ? "is-active" : "";
+        const tip = category.tip || "Homepage label";
+
+        return `
+          <button class="admin-category-item ${activeClass}" type="button" data-category-edit="${category.slug}">
+            <img src="${category.image}" alt="${category.name}" loading="lazy" />
+            <div class="admin-category-item-copy">
+              <strong>${category.name}</strong>
+              <span>${tip}</span>
+            </div>
+            <small>${productCount} product${productCount === 1 ? "" : "s"}</small>
+          </button>
+        `;
+      })
+      .join("");
+  }
+
+  function renderCategoryPreview() {
+    if (!categoryPreviewCard || !categoryPreviewImage || !categoryPreviewName || !categoryPreviewTip) {
+      return;
+    }
+
+    const category = getEditingCategory();
+    const previewName = categoryNameInput && categoryNameInput.value.trim()
+      ? categoryNameInput.value.trim()
+      : (category && category.name) || "Category";
+    const previewTip = categoryTipInput && categoryTipInput.value.trim()
+      ? categoryTipInput.value.trim()
+      : (category && category.tip) || "Explore";
+    const previewImage = cleanImagePath(categoryImageInput && categoryImageInput.value) || (category && category.image) || fallbackImage;
+    const previewAccent = (categoryAccentInput && categoryAccentInput.value) || (category && category.accent) || "coral";
+    const previewCount = category ? getCategoryProductCount(category.slug) : 0;
+
+    categoryPreviewCard.className = `admin-category-preview-card category-card accent-${previewAccent}`;
+    categoryPreviewImage.src = previewImage;
+    categoryPreviewName.textContent = previewName;
+    categoryPreviewTip.textContent = previewTip;
+
+    if (categoryPreviewCount) {
+      categoryPreviewCount.textContent = `${previewCount} product${previewCount === 1 ? "" : "s"} in this category`;
+    }
+  }
+
+  function populateCategoryForm(categorySlug) {
+    const category = categoryCatalog.find((item) => item.slug === categorySlug) || categoryCatalog[0];
+    if (!category) {
+      return;
+    }
+
+    editingCategorySlug = category.slug;
+
+    if (categoryNameInput) {
+      categoryNameInput.value = category.name;
+    }
+    if (categoryAccentInput) {
+      categoryAccentInput.value = category.accent;
+    }
+    if (categoryTipInput) {
+      categoryTipInput.value = category.tip || "";
+    }
+    if (categoryDescriptionInput) {
+      categoryDescriptionInput.value = category.description || "";
+    }
+    if (categoryImageInput) {
+      categoryImageInput.value = category.image || fallbackImage;
+    }
+
+    renderCategoryList();
+    renderCategoryPreview();
+    renderCategoryImageLibrary();
+  }
+
+  function renderCategoryImageLibrary() {
+    if (!categoryImageLibrary) {
+      return;
+    }
+
+    const query = categoryImageSearchInput ? categoryImageSearchInput.value.trim().toLowerCase() : "";
+    const filteredImages = availableImages
+      .filter((image) => /\.(jpe?g|png|webp|svg)$/i.test(image))
+      .filter((image) => !query || image.toLowerCase().includes(query))
+      .slice(0, 18);
+
+    categoryImageLibrary.innerHTML = filteredImages.length
+      ? filteredImages
+        .map(
+          (image) => `
+            <button class="admin-category-image-option" type="button" data-category-image="${image}">
+              <img src="${image}" alt="${image.split("/").pop()}" loading="lazy" />
+              <span>${image.split("/").pop()}</span>
+            </button>
+          `
+        )
+        .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No matching icon images</strong>
+            <p>Try a shorter search or clear it to browse more category image options.</p>
+          </article>
+        `;
+  }
+
+  function saveCategoryState(message) {
+    syncCategoryRuntimeData(true);
+    renderCategorySelectControls();
+    renderCategoryList();
+    renderCategoryPreview();
+    renderFavoriteProductSelect();
+    renderVisualPreview();
+    renderList();
+    renderFeaturedManager();
+    renderSalesDashboard();
+    renderProfitDashboard();
+    renderOrders();
+    renderCustomerDashboard();
+    renderStockList();
+    renderSocialMedia();
+    renderSocialTracker();
+    renderAdminOverview();
+    renderDraftPreview();
+    setStatus(message);
+  }
+
+  function syncHomeVisualsRuntimeData(saveToStorage) {
+    homeVisuals = normalizeHomeVisuals(homeVisuals);
+    utils.data.homeVisuals = JSON.parse(JSON.stringify(homeVisuals));
+
+    if (saveToStorage) {
+      window.localStorage.setItem(homeVisualsSettingsKey, JSON.stringify(homeVisuals));
+    }
+  }
+
+  function renderFavoriteProductSelect() {
+    if (!favoriteProductSelect) {
+      return;
+    }
+
+    const currentValue = favoriteProductSelect.value || homeVisuals.favorite.productId || "";
+    favoriteProductSelect.innerHTML = [`<option value="">Choose favorite product</option>`]
+      .concat(catalog.map((product) => `<option value="${product.id}">${product.name}</option>`))
+      .join("");
+    favoriteProductSelect.value = catalog.some((product) => product.id === currentValue) ? currentValue : "";
+  }
+
+  function activateVisualSection(sectionName) {
+    activeVisualSection = sectionName;
+    visualNavButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.visualSection === sectionName);
+    });
+    visualPanels.forEach((panel) => {
+      panel.classList.toggle("is-active", panel.dataset.visualPanel === sectionName);
+    });
+  }
+
+  function populateVisualStoryForm() {
+    const hero = homeVisuals.hero || {};
+    const favorite = homeVisuals.favorite || {};
+
+    if (heroKickerInput) heroKickerInput.value = hero.kicker || "";
+    if (heroTitleInput) heroTitleInput.value = hero.title || "";
+    if (heroDescriptionInput) heroDescriptionInput.value = hero.description || "";
+    if (heroPrimaryLabelInput) heroPrimaryLabelInput.value = hero.primaryLabel || "";
+    if (heroPrimaryHrefInput) heroPrimaryHrefInput.value = hero.primaryHref || "";
+    if (heroSecondaryLabelInput) heroSecondaryLabelInput.value = hero.secondaryLabel || "";
+    if (heroSecondaryHrefInput) heroSecondaryHrefInput.value = hero.secondaryHref || "";
+    if (heroImageInput) heroImageInput.value = hero.image || "";
+    if (heroImageAltInput) heroImageAltInput.value = hero.imageAlt || "";
+    if (favoriteKickerInput) favoriteKickerInput.value = favorite.kicker || "";
+    if (favoriteTitleInput) favoriteTitleInput.value = favorite.title || "";
+    if (favoriteDescriptionInput) favoriteDescriptionInput.value = favorite.description || "";
+    if (favoriteImageInput) favoriteImageInput.value = favorite.image || "";
+    if (favoriteImageAltInput) favoriteImageAltInput.value = favorite.imageAlt || "";
+
+    renderFavoriteProductSelect();
+    if (favoriteProductSelect) {
+      favoriteProductSelect.value = favorite.productId || "";
+    }
+
+    renderVisualPreview();
+  }
+
+  function getSelectedFavoriteProduct() {
+    return catalog.find((product) => product.id === (favoriteProductSelect && favoriteProductSelect.value)) || null;
+  }
+
+  function renderVisualPreview() {
+    const selectedProduct = getSelectedFavoriteProduct();
+    const previewHeroImage = cleanImagePath(heroImageInput && heroImageInput.value) || homeVisuals.hero.image || fallbackImage;
+    const previewFavoriteImage =
+      cleanImagePath(favoriteImageInput && favoriteImageInput.value) ||
+      (selectedProduct && selectedProduct.images && selectedProduct.images[0]) ||
+      homeVisuals.favorite.image ||
+      fallbackImage;
+
+    if (visualPreviewKicker) {
+      visualPreviewKicker.textContent =
+        (heroKickerInput && heroKickerInput.value.trim()) || homeVisuals.hero.kicker || "Welcome to SharonCraft";
+    }
+    if (visualPreviewTitle) {
+      visualPreviewTitle.textContent =
+        (heroTitleInput && heroTitleInput.value.trim()) ||
+        homeVisuals.hero.title ||
+        "Clean, colorful handmade beadwork for happy homes and beautiful gifting.";
+    }
+    if (visualPreviewDescription) {
+      visualPreviewDescription.textContent =
+        (heroDescriptionInput && heroDescriptionInput.value.trim()) ||
+        homeVisuals.hero.description ||
+        "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit.";
+    }
+    if (visualPreviewPrimary) {
+      visualPreviewPrimary.textContent =
+        (heroPrimaryLabelInput && heroPrimaryLabelInput.value.trim()) || homeVisuals.hero.primaryLabel || "Shop Now";
+    }
+    if (visualPreviewSecondary) {
+      visualPreviewSecondary.textContent =
+        (heroSecondaryLabelInput && heroSecondaryLabelInput.value.trim()) || homeVisuals.hero.secondaryLabel || "Our Story";
+    }
+    if (visualPreviewImage) {
+      visualPreviewImage.src = previewHeroImage;
+      visualPreviewImage.alt =
+        (heroImageAltInput && heroImageAltInput.value.trim()) || homeVisuals.hero.imageAlt || "Hero preview";
+    }
+    if (visualFavoritePreviewKicker) {
+      visualFavoritePreviewKicker.textContent =
+        (favoriteKickerInput && favoriteKickerInput.value.trim()) || homeVisuals.favorite.kicker || "Client Favorite";
+    }
+    if (visualFavoritePreviewTitle) {
+      visualFavoritePreviewTitle.textContent =
+        (favoriteTitleInput && favoriteTitleInput.value.trim()) ||
+        (selectedProduct && selectedProduct.name) ||
+        homeVisuals.favorite.title ||
+        "Client Favorite";
+    }
+    if (visualFavoritePreviewDescription) {
+      visualFavoritePreviewDescription.textContent =
+        (favoriteDescriptionInput && favoriteDescriptionInput.value.trim()) ||
+        (selectedProduct && (selectedProduct.shortDescription || selectedProduct.description)) ||
+        homeVisuals.favorite.description ||
+        "A well-loved SharonCraft piece chosen for everyday beauty and easy gifting.";
+    }
+    if (visualFavoritePreviewImage) {
+      visualFavoritePreviewImage.src = previewFavoriteImage;
+      visualFavoritePreviewImage.alt =
+        (favoriteImageAltInput && favoriteImageAltInput.value.trim()) ||
+        homeVisuals.favorite.imageAlt ||
+        (selectedProduct && selectedProduct.name) ||
+        "Favorite preview";
+    }
+  }
+
+  function renderVisualImageLibrary() {
+    if (!visualImageLibrary) {
+      return;
+    }
+
+    const query = visualImageSearchInput ? visualImageSearchInput.value.trim().toLowerCase() : "";
+    const filteredImages = availableImages
+      .filter((image) => /\.(jpe?g|png|webp)$/i.test(image))
+      .filter((image) => !query || image.toLowerCase().includes(query))
+      .slice(0, 18);
+
+    visualImageLibrary.innerHTML = filteredImages.length
+      ? filteredImages
+        .map(
+          (image) => `
+            <button class="admin-category-image-option" type="button" data-visual-image="${image}">
+              <img src="${image}" alt="${image.split("/").pop()}" loading="lazy" />
+              <span>${image.split("/").pop()}</span>
+            </button>
+          `
+        )
+        .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No matching wallpaper images</strong>
+            <p>Try a shorter search or clear it to browse the full project image library.</p>
+          </article>
+        `;
+  }
+
+  function saveHomeVisualState(message) {
+    syncHomeVisualsRuntimeData(true);
+    renderVisualPreview();
+    setStatus(message);
+  }
+
+  if (repairedCatalogOnLoad) {
+    setStatus("Repeated product images were repaired from the photo library. Save once to publish the refreshed pictures live.");
+  }
+
   function setLiveAuthState(message, tone) {
     if (!liveAuthState) {
       return;
@@ -865,7 +1441,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         material: categoryMap.get(product.category) || product.category || "Handmade",
         story: product.description || product.shortDescription || "Handmade by SharonCraft artisans.",
         specs: Array.isArray(product.details) ? product.details : [],
-        gallery: Array.isArray(product.images) ? product.images : [],
+        gallery: Array.isArray(product.images) ? product.images.slice(1) : [],
         soldOut: hasTrackedStock ? reservedStock >= trackedStock : false,
         spotlightUntil: product.featured ? new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString() : "",
         spotlightText: product.badge || "Featured",
@@ -938,6 +1514,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const labels = {
       workspace: "Add Product",
       catalog: "Product List",
+      categories: "Categories",
+      visuals: "Visual Story",
       preview: "Phone Preview",
       orders: "Orders",
       operations: "Delivery & Stock",
@@ -957,10 +1535,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const cards = [
       { label: "Products", value: catalog.length },
+      { label: "Categories", value: categoryCatalog.length },
       { label: "Featured", value: catalog.filter((product) => product.featured).length },
       { label: "Orders", value: orders.length },
-      { label: "Delivery Areas", value: deliveryAreas.length },
-      { label: "Replies", value: replyTemplates.length }
+      { label: "Delivery Areas", value: deliveryAreas.length }
     ];
 
     adminOverviewGrid.innerHTML = cards
@@ -988,6 +1566,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       case "catalog":
         renderList();
         renderFeaturedManager();
+        break;
+      case "categories":
+        renderCategoryList();
+        renderCategoryPreview();
+        renderCategoryImageLibrary();
+        renderCategoryKanban();
+        break;
+      case "visuals":
+        renderFavoriteProductSelect();
+        renderVisualImageLibrary();
+        renderVisualPreview();
         break;
       case "preview":
         syncLivePreviewFrame();
@@ -2060,6 +2649,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   async function saveCatalogState(message, options = {}) {
     window.localStorage.setItem(storageKey, JSON.stringify(catalog));
+    renderCategoryList();
+    renderCategoryPreview();
     renderList();
     renderFeaturedManager();
     renderSalesDashboard();
@@ -2082,6 +2673,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (message) {
       setStatus(message);
     }
+  }
+
+  async function repairCatalogImagesFromLibrary() {
+    catalog = repairCatalogImages(catalog);
+    await saveCatalogState("Product images refreshed from the photo library.", { publishLive: true });
   }
 
   function resetSalesDashboard() {
@@ -2149,7 +2745,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     form.reset();
     editingId = null;
     formTitle.textContent = "Add Product";
-    categoryInput.value = "necklaces";
+    categoryInput.value = (categoryCatalog[0] || {}).slug || "necklaces";
+    updateCategoryChipSelection();
     momPriceInput.value = "";
     deliveryChargeInput.value = "";
     deliveryCostInput.value = "";
@@ -2171,6 +2768,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     formTitle.textContent = `Edit ${product.name}`;
     nameInput.value = product.name;
     categoryInput.value = product.category;
+    updateCategoryChipSelection();
     priceInput.value = product.price;
     momPriceInput.value = product.momPrice || "";
     deliveryChargeInput.value = product.deliveryCharge || "";
@@ -2286,6 +2884,196 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   );
 
+  // Visual category chip selector
+  document.querySelectorAll(".admin-category-chip").forEach((chip) => {
+    chip.addEventListener("click", function (e) {
+      e.preventDefault();
+      const categoryValue = this.dataset.category;
+      categoryInput.value = categoryValue;
+      
+      // Update visual state
+      document.querySelectorAll(".admin-category-chip").forEach((c) => {
+        c.classList.remove("is-selected");
+      });
+      this.classList.add("is-selected");
+      
+      renderDraftPreview();
+      setStatus(`Category set to ${this.textContent.trim()}`);
+    });
+  });
+
+  // Set initial selected category chip
+  function updateCategoryChipSelection() {
+    const currentCategory = categoryInput.value;
+    document.querySelectorAll(".admin-category-chip").forEach((chip) => {
+      if (chip.dataset.category === currentCategory) {
+        chip.classList.add("is-selected");
+      } else {
+        chip.classList.remove("is-selected");
+      }
+    });
+  }
+
+  // Kanban board for product categorization
+  function renderCategoryKanban() {
+    const kanbanContainer = document.getElementById("admin-category-kanban");
+    if (!kanbanContainer) return;
+
+    const categoryEmojis = {
+      "necklaces": "👑",
+      "bracelets": "💍",
+      "home-decor": "🏡",
+      "bags-accessories": "👜",
+      "gift-sets": "🎁",
+      "bridal-occasion": "💐"
+    };
+
+    const categoryNames = {
+      "necklaces": "Necklaces",
+      "bracelets": "Bracelets",
+      "home-decor": "Home Decor",
+      "bags-accessories": "Bags & Accessories",
+      "gift-sets": "Gift Sets",
+      "bridal-occasion": "Bridal & Occasion"
+    };
+
+    const validCategories = Object.keys(categoryEmojis);
+    const uncategorizedProducts = catalog.filter((p) => !validCategories.includes(p.category));
+    const totalProducts = catalog.length;
+
+    // Build uncategorized column first
+    let html = `
+      <div class="admin-kanban-column admin-kanban-column-inbox" data-category="uncategorized">
+        <div class="admin-kanban-header">
+          <h3 class="admin-kanban-title">
+            <span>📥</span>
+            Inbox
+          </h3>
+          <span class="admin-kanban-badge admin-kanban-badge-warning">${uncategorizedProducts.length}</span>
+        </div>
+        <div class="admin-kanban-items">
+          ${
+            uncategorizedProducts.length > 0
+              ? uncategorizedProducts
+                  .map(
+                    (product) => `
+                  <div class="admin-kanban-item admin-kanban-item-inbox" draggable="true" data-product-id="${product.id}">
+                    <div class="admin-kanban-item-meta">
+                      <p class="admin-kanban-item-name">${product.name}</p>
+                      <p class="admin-kanban-item-price">${formatPrice(product.price)}</p>
+                    </div>
+                    <span class="admin-kanban-item-icon">⭐</span>
+                  </div>
+                `
+                  )
+                  .join("")
+              : '<div class="admin-kanban-empty admin-kanban-inbox-empty">✓ All products organized!</div>'
+          }
+        </div>
+      </div>
+    `;
+
+    // Add categorized columns
+    html += defaultCategorySource.map((category) => {
+      const productsInCategory = catalog.filter((p) => p.category === category.slug);
+      return `
+        <div class="admin-kanban-column" data-category="${category.slug}">
+          <div class="admin-kanban-header">
+            <h3 class="admin-kanban-title">
+              <span>${categoryEmojis[category.slug] || "📦"}</span>
+              ${categoryNames[category.slug] || category.slug}
+            </h3>
+            <span class="admin-kanban-badge">${productsInCategory.length}</span>
+          </div>
+          <div class="admin-kanban-items">
+            ${
+              productsInCategory.length > 0
+                ? productsInCategory
+                    .map(
+                      (product) => `
+                    <div class="admin-kanban-item" draggable="true" data-product-id="${product.id}">
+                      <div class="admin-kanban-item-meta">
+                        <p class="admin-kanban-item-name">${product.name}</p>
+                        <p class="admin-kanban-item-price">${formatPrice(product.price)}</p>
+                      </div>
+                      <span class="admin-kanban-item-icon">move</span>
+                    </div>
+                  `
+                    )
+                    .join("")
+                : '<div class="admin-kanban-empty">-</div>'
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    kanbanContainer.innerHTML = html;
+
+    // Add drag and drop functionality
+    setTimeout(() => {
+      setupKanbanDragDrop();
+    }, 0);
+  }
+
+  function setupKanbanDragDrop() {
+    let draggedItem = null;
+
+    document.querySelectorAll(".admin-kanban-item").forEach((item) => {
+      item.addEventListener("dragstart", function () {
+        draggedItem = this;
+        this.style.opacity = "0.5";
+      });
+
+      item.addEventListener("dragend", function () {
+        this.style.opacity = "1";
+        draggedItem = null;
+        document.querySelectorAll(".admin-kanban-column").forEach((col) => {
+          col.classList.remove("is-dragging-over");
+        });
+      });
+    });
+
+    document.querySelectorAll(".admin-kanban-column").forEach((column) => {
+      column.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        this.classList.add("is-dragging-over");
+      });
+
+      column.addEventListener("dragleave", function () {
+        this.classList.remove("is-dragging-over");
+      });
+
+      column.addEventListener("drop", function (e) {
+        e.preventDefault();
+        this.classList.remove("is-dragging-over");
+
+        if (!draggedItem) return;
+
+        const productId = draggedItem.dataset.productId;
+        const newCategory = this.dataset.category;
+
+        // Find and update the product
+        catalog = catalog.map((p) =>
+          p.id === productId ? { ...p, category: newCategory } : p
+        );
+
+        const categoryNames = {
+          "necklaces": "Necklaces",
+          "bracelets": "Bracelets",
+          "home-decor": "Home Decor",
+          "bags-accessories": "Bags & Accessories",
+          "gift-sets": "Gift Sets",
+          "bridal-occasion": "Bridal & Occasion"
+        };
+
+        saveCatalogState(`Product moved to ${categoryNames[newCategory] || newCategory}.`, { publishLive: true });
+        updateCategoryChipSelection();
+        renderCategoryKanban();
+      });
+    });
+  }
+
   if (suggestNameButton) {
     suggestNameButton.addEventListener("click", function () {
       const suggestedName = buildSuggestedProductName();
@@ -2329,9 +3117,205 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageLibrarySearch.addEventListener("change", renderImageLibrary);
   }
 
+  if (categoryImageSearchInput) {
+    categoryImageSearchInput.addEventListener("input", renderCategoryImageLibrary);
+    categoryImageSearchInput.addEventListener("change", renderCategoryImageLibrary);
+  }
+
+  if (visualImageSearchInput) {
+    visualImageSearchInput.addEventListener("input", renderVisualImageLibrary);
+    visualImageSearchInput.addEventListener("change", renderVisualImageLibrary);
+  }
+
+  if (categoryList) {
+    categoryList.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-category-edit]");
+      if (!button) {
+        return;
+      }
+
+      populateCategoryForm(button.dataset.categoryEdit);
+      setStatus(`${categoryMap.get(button.dataset.categoryEdit) || "Category"} loaded into the category editor.`);
+    });
+  }
+
+  if (categoryImageLibrary) {
+    categoryImageLibrary.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-category-image]");
+      if (!button || !categoryImageInput) {
+        return;
+      }
+
+      categoryImageInput.value = button.dataset.categoryImage;
+      renderCategoryPreview();
+      setStatus("Category icon image updated in the preview.");
+    });
+  }
+
+  [categoryNameInput, categoryAccentInput, categoryTipInput, categoryDescriptionInput, categoryImageInput].forEach((input) => {
+    if (!input) {
+      return;
+    }
+
+    input.addEventListener("input", renderCategoryPreview);
+    input.addEventListener("change", renderCategoryPreview);
+  });
+
+  visualNavButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      activateVisualSection(button.dataset.visualSection);
+      setStatus(`${button.querySelector("strong") ? button.querySelector("strong").textContent : "Visual section"} opened.`);
+    });
+  });
+
+  if (visualImageLibrary) {
+    visualImageLibrary.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-visual-image]");
+      if (!button) {
+        return;
+      }
+
+      if (activeVisualSection === "favorite" && favoriteImageInput) {
+        favoriteImageInput.value = button.dataset.visualImage;
+      } else if (heroImageInput) {
+        heroImageInput.value = button.dataset.visualImage;
+      }
+
+      renderVisualPreview();
+      setStatus("Wallpaper image updated in the homepage preview.");
+    });
+  }
+
+  [heroKickerInput, heroTitleInput, heroDescriptionInput, heroPrimaryLabelInput, heroPrimaryHrefInput, heroSecondaryLabelInput, heroSecondaryHrefInput, heroImageInput, heroImageAltInput, favoriteKickerInput, favoriteTitleInput, favoriteDescriptionInput, favoriteImageInput, favoriteImageAltInput].forEach((input) => {
+    if (!input) {
+      return;
+    }
+
+    input.addEventListener("input", renderVisualPreview);
+    input.addEventListener("change", renderVisualPreview);
+  });
+
+  if (favoriteProductSelect) {
+    favoriteProductSelect.addEventListener("change", function () {
+      const selectedProduct = getSelectedFavoriteProduct();
+      if (!selectedProduct) {
+        renderVisualPreview();
+        return;
+      }
+
+      if (favoriteTitleInput && !favoriteTitleInput.value.trim()) {
+        favoriteTitleInput.value = selectedProduct.name;
+      }
+      if (favoriteDescriptionInput && !favoriteDescriptionInput.value.trim()) {
+        favoriteDescriptionInput.value = selectedProduct.shortDescription || selectedProduct.description || "";
+      }
+      if (favoriteImageInput && !favoriteImageInput.value.trim()) {
+        favoriteImageInput.value = (selectedProduct.images && selectedProduct.images[0]) || "";
+      }
+
+      renderVisualPreview();
+      setStatus(`${selectedProduct.name} linked to the client favorite spotlight.`);
+    });
+  }
+
+  if (categoryEditorForm) {
+    categoryEditorForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const currentCategory = getEditingCategory();
+      if (!currentCategory) {
+        setStatus("Choose a category before saving.");
+        return;
+      }
+
+      const updatedCategory = normalizeCategory({
+        ...currentCategory,
+        name: categoryNameInput ? categoryNameInput.value : currentCategory.name,
+        accent: categoryAccentInput ? categoryAccentInput.value : currentCategory.accent,
+        tip: categoryTipInput ? categoryTipInput.value : currentCategory.tip,
+        description: categoryDescriptionInput ? categoryDescriptionInput.value : currentCategory.description,
+        image: categoryImageInput ? categoryImageInput.value : currentCategory.image
+      });
+
+      categoryCatalog = categoryCatalog.map((category) =>
+        category.slug === currentCategory.slug ? updatedCategory : category
+      );
+
+      populateCategoryForm(updatedCategory.slug);
+      saveCategoryState(`${updatedCategory.name} category saved. Refresh the homepage preview to see the new category icon there too.`);
+      activateAdminTab("categories");
+    });
+  }
+
+  if (visualStoryForm) {
+    visualStoryForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      homeVisuals = normalizeHomeVisuals({
+        hero: {
+          kicker: heroKickerInput ? heroKickerInput.value : "",
+          title: heroTitleInput ? heroTitleInput.value : "",
+          description: heroDescriptionInput ? heroDescriptionInput.value : "",
+          primaryLabel: heroPrimaryLabelInput ? heroPrimaryLabelInput.value : "",
+          primaryHref: heroPrimaryHrefInput ? heroPrimaryHrefInput.value : "",
+          secondaryLabel: heroSecondaryLabelInput ? heroSecondaryLabelInput.value : "",
+          secondaryHref: heroSecondaryHrefInput ? heroSecondaryHrefInput.value : "",
+          image: heroImageInput ? heroImageInput.value : "",
+          imageAlt: heroImageAltInput ? heroImageAltInput.value : ""
+        },
+        favorite: {
+          kicker: favoriteKickerInput ? favoriteKickerInput.value : "",
+          title: favoriteTitleInput ? favoriteTitleInput.value : "",
+          description: favoriteDescriptionInput ? favoriteDescriptionInput.value : "",
+          image: favoriteImageInput ? favoriteImageInput.value : "",
+          imageAlt: favoriteImageAltInput ? favoriteImageAltInput.value : "",
+          productId: favoriteProductSelect ? favoriteProductSelect.value : ""
+        }
+      });
+
+      saveHomeVisualState("Homepage visual story saved. Refresh the home preview or homepage tab to see the new welcome and favorite photos.");
+      activateAdminTab("visuals");
+    });
+  }
+
+  // File upload handlers for visual story
+  function handleImageUpload(fileInput, textInput, previewElement) {
+    if (!fileInput) return;
+    
+    fileInput.addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        // Show preview
+        if (previewElement) {
+          previewElement.classList.add("is-visible");
+          previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview" />`;
+        }
+
+        // Save as data URL in the text input
+        if (textInput) {
+          textInput.value = e.target.result;
+          textInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        setStatus(`Image uploaded: ${file.name}`);
+      };
+
+      reader.onerror = function () {
+        setStatus("Error reading image file.", "error");
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  handleImageUpload(heroImageUploadInput, heroImageInput, heroImagePreview);
+  handleImageUpload(favoriteImageUploadInput, favoriteImageInput, favoriteImagePreview);
+
   adminTabButtons.forEach((button) => {
     button.addEventListener("click", function () {
-      alert(`Switching to ${button.dataset.adminTab}`);
       activateAdminTab(button.dataset.adminTab);
     });
   });
@@ -2781,6 +3765,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     saveCatalogState("Default catalog restored.", { publishLive: true });
   });
 
+  if (repairImagesButton) {
+    repairImagesButton.addEventListener("click", function () {
+      repairCatalogImagesFromLibrary();
+    });
+  }
+
   saveButton.addEventListener("click", function () {
     saveCatalogState("Catalog saved. Storefront pages in this browser now use the updated products.", { publishLive: true });
   });
@@ -2882,8 +3872,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     resetForm();
   });
 
+  syncCategoryRuntimeData(false);
+  syncHomeVisualsRuntimeData(false);
+  renderCategorySelectControls();
+  renderCategoryImageLibrary();
+  populateCategoryForm(editingCategorySlug);
+  renderFavoriteProductSelect();
+  renderVisualImageLibrary();
+  populateVisualStoryForm();
+  activateVisualSection(activeVisualSection);
   renderImageLibrary();
   resetForm();
+  updateCategoryChipSelection();
   renderList();
   renderFeaturedManager();
   renderSalesDashboard();
@@ -2930,5 +3930,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   } else {
     activateAdminTab("workspace");
   }
-  setStatus("Admin panel ready. Saved catalog changes now drive the storefront in this browser.");
+  if (!repairedCatalogOnLoad) {
+    setStatus("Admin panel ready. Saved catalog changes now drive the storefront in this browser.");
+  }
 });
