@@ -557,20 +557,25 @@ document.addEventListener("DOMContentLoaded", async function () {
   const replyList = document.getElementById("admin-reply-list");
   const adminOverviewGrid = document.getElementById("admin-overview-grid");
   const analyticsSummary = document.getElementById("admin-analytics-summary");
+  const analyticsConversions = document.getElementById("admin-analytics-conversions");
   const analyticsProductsTitle = document.getElementById("admin-analytics-products-title");
   const analyticsProducts = document.getElementById("admin-analytics-products");
   const analyticsFeed = document.getElementById("admin-analytics-feed");
+  const analyticsRangeLabel = document.getElementById("admin-analytics-range-label");
   const analyticsRefreshButton = document.getElementById("admin-analytics-refresh");
   const analyticsClearButton = document.getElementById("admin-analytics-clear");
+  const analyticsRangeButtons = document.querySelectorAll("[data-analytics-range]");
   const liveAuthState = document.getElementById("admin-live-auth-state");
   const liveAuthForm = document.getElementById("admin-live-auth-form");
   const liveEmailInput = document.getElementById("admin-live-email");
   const livePasswordInput = document.getElementById("admin-live-password");
   const liveSignOutButton = document.getElementById("admin-live-sign-out");
   const adminTabStorageKey = "sharoncraft-admin-active-tab";
+  const analyticsRangeStorageKey = "sharoncraft-admin-analytics-range";
   let currentLiveUser = null;
   let remoteStorefrontAnalyticsEvents = [];
   let analyticsDataSource = "browser";
+  let analyticsRange = String(window.localStorage.getItem(analyticsRangeStorageKey) || "7d").trim() || "7d";
 
   function loadSocialSettings() {
     try {
@@ -1762,6 +1767,51 @@ document.addEventListener("DOMContentLoaded", async function () {
     return analyticsDataSource === "supabase" ? "Supabase live" : "This browser";
   }
 
+  function getAnalyticsRangeLabel() {
+    const labels = {
+      today: "Today",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    };
+
+    return labels[analyticsRange] || "Last 7 days";
+  }
+
+  function getAnalyticsRangeCutoff() {
+    const now = Date.now();
+
+    if (analyticsRange === "today") {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      return start.getTime();
+    }
+
+    if (analyticsRange === "30d") {
+      return now - 30 * 24 * 60 * 60 * 1000;
+    }
+
+    return now - 7 * 24 * 60 * 60 * 1000;
+  }
+
+  function filterAnalyticsEventsByRange(events) {
+    const cutoff = getAnalyticsRangeCutoff();
+
+    return (Array.isArray(events) ? events : []).filter((event) => {
+      const timestamp = Date.parse(event && event.timestamp);
+      return Number.isFinite(timestamp) && timestamp >= cutoff;
+    });
+  }
+
+  function syncAnalyticsRangeUi() {
+    analyticsRangeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.analyticsRange === analyticsRange);
+    });
+
+    if (analyticsRangeLabel) {
+      analyticsRangeLabel.textContent = `${getAnalyticsRangeLabel()} from ${getAnalyticsSourceLabel().toLowerCase()} activity.`;
+    }
+  }
+
   function isStorefrontAnalyticsEvent(event) {
     if (!event || typeof event !== "object" || !event.name) {
       return false;
@@ -1873,13 +1923,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderAnalyticsDashboard() {
-    if (!analyticsSummary || !analyticsProducts || !analyticsFeed) {
+    if (!analyticsSummary || !analyticsConversions || !analyticsProducts || !analyticsFeed) {
       return;
     }
 
-    const events = getStorefrontAnalyticsEvents()
+    const events = filterAnalyticsEventsByRange(
+      getStorefrontAnalyticsEvents()
       .filter((event) => event && typeof event === "object" && event.name)
-      .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""));
+      .sort((left, right) => Date.parse(right.timestamp || "") - Date.parse(left.timestamp || ""))
+    );
 
     const eventCounts = events.reduce(
       (totals, event) => {
@@ -1891,6 +1943,42 @@ document.addEventListener("DOMContentLoaded", async function () {
       },
       { total: 0, views: 0, carts: 0, whatsapp: 0 }
     );
+
+    const conversionStats = events.reduce((map, event) => {
+      const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
+      const productDetails = getAnalyticsEventProduct(payload);
+      const productId = productDetails.id;
+      const productName = productDetails.name;
+      if (!productId && !productName) {
+        return map;
+      }
+
+      const key = productId || productName;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: productId,
+          name: productName || productId || "Unknown product",
+          views: 0,
+          carts: 0,
+          whatsapp: 0,
+          intentActions: 0,
+          actionRate: 0
+        });
+      }
+
+      const current = map.get(key);
+      if (event.name === "product_view") current.views += 1;
+      if (event.name === "add_to_cart") {
+        current.carts += 1;
+        current.intentActions += 1;
+      }
+      if (event.name === "whatsapp_click") {
+        current.whatsapp += 1;
+        current.intentActions += 1;
+      }
+      current.actionRate = current.views ? Math.round((current.intentActions / current.views) * 100) : 0;
+      return map;
+    }, new Map());
 
     const productStats = events.reduce((map, event) => {
       const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
@@ -1924,11 +2012,32 @@ document.addEventListener("DOMContentLoaded", async function () {
     const topProducts = Array.from(productStats.values())
       .sort((left, right) => right.score - left.score)
       .slice(0, 6);
+    const topConversions = Array.from(conversionStats.values())
+      .filter((product) => product.intentActions > 0 || product.views > 0)
+      .sort((left, right) => {
+        if (right.intentActions !== left.intentActions) {
+          return right.intentActions - left.intentActions;
+        }
+        if (right.whatsapp !== left.whatsapp) {
+          return right.whatsapp - left.whatsapp;
+        }
+        if (right.carts !== left.carts) {
+          return right.carts - left.carts;
+        }
+        if (right.actionRate !== left.actionRate) {
+          return right.actionRate - left.actionRate;
+        }
+        return right.views - left.views;
+      })
+      .slice(0, 6);
 
     if (analyticsProductsTitle) {
       analyticsProductsTitle.textContent =
-        analyticsDataSource === "supabase" ? "Most active products across live traffic" : "Most active products in this browser";
+        analyticsDataSource === "supabase"
+          ? `Most active products across ${getAnalyticsRangeLabel().toLowerCase()}`
+          : `Most active products in this browser for ${getAnalyticsRangeLabel().toLowerCase()}`;
     }
+    syncAnalyticsRangeUi();
 
     analyticsSummary.innerHTML = `
       <article class="admin-metric-card">
@@ -1953,6 +2062,33 @@ document.addEventListener("DOMContentLoaded", async function () {
       </article>
     `;
 
+    analyticsConversions.innerHTML = topConversions.length
+      ? topConversions
+          .map(
+            (product) => `
+              <article class="admin-analytics-product-row is-conversion">
+                <div class="admin-analytics-product-copy">
+                  <strong>${escapeHtml(product.name)}</strong>
+                  <span>${product.id ? escapeHtml(product.id) : "Tracked from storefront activity"}</span>
+                </div>
+                <div class="admin-analytics-product-stats">
+                  <strong>${product.intentActions} intent action${product.intentActions === 1 ? "" : "s"}</strong>
+                  <span>${product.views} views</span>
+                  <span>${product.carts} carts</span>
+                  <span>${product.whatsapp} chats</span>
+                  <span>${product.actionRate}% action rate</span>
+                </div>
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No conversion signals in this range</strong>
+            <p>Try a wider date range or drive a few product views, cart adds, and WhatsApp taps from the live store.</p>
+          </article>
+        `;
+
     analyticsProducts.innerHTML = topProducts.length
       ? topProducts
           .map(
@@ -1974,7 +2110,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       : `
           <article class="empty-state-card">
             <strong>No tracked product activity yet</strong>
-            <p>Open the storefront and tap through products, or sign in to Supabase here to load live cross-device activity.</p>
+            <p>Open the storefront and tap through products, or widen the date range to pull in more live activity.</p>
           </article>
         `;
 
@@ -1999,7 +2135,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       : `
           <article class="empty-state-card">
             <strong>No storefront events yet</strong>
-            <p>Visit the live store, or sign in to Supabase here so this admin can load shared live activity instead of only local browser events.</p>
+            <p>Visit the live store, or widen the date range to pull in older shared activity from Supabase.</p>
           </article>
         `;
   }
@@ -3887,6 +4023,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       await refreshStorefrontAnalytics({ showStatus: true });
     });
   }
+
+  analyticsRangeButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const nextRange = String(button.dataset.analyticsRange || "").trim();
+      if (!nextRange || nextRange === analyticsRange) {
+        return;
+      }
+
+      analyticsRange = nextRange;
+      window.localStorage.setItem(analyticsRangeStorageKey, analyticsRange);
+      renderAnalyticsDashboard();
+      renderAdminOverview();
+    });
+  });
 
   if (analyticsClearButton) {
     analyticsClearButton.addEventListener("click", async function () {
