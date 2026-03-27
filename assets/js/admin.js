@@ -560,6 +560,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const analyticsConversions = document.getElementById("admin-analytics-conversions");
   const analyticsProductsTitle = document.getElementById("admin-analytics-products-title");
   const analyticsProducts = document.getElementById("admin-analytics-products");
+  const analyticsSources = document.getElementById("admin-analytics-sources");
   const analyticsPages = document.getElementById("admin-analytics-pages");
   const analyticsFeed = document.getElementById("admin-analytics-feed");
   const analyticsRangeLabel = document.getElementById("admin-analytics-range-label");
@@ -1886,6 +1887,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     return rawLabel;
   }
 
+  function formatAnalyticsSourceLabel(payload) {
+    const safePayload = payload && typeof payload === "object" ? payload : {};
+    const source = String(safePayload.traffic_source || "").trim() || "Direct";
+    const medium = String(safePayload.traffic_medium || "").trim() || "direct";
+    const campaign = String(safePayload.traffic_campaign || "").trim();
+
+    return {
+      label: source,
+      detail: campaign ? `${medium} - ${campaign}` : medium
+    };
+  }
+
   async function refreshStorefrontAnalytics(options) {
     const config = options || {};
     remoteStorefrontAnalyticsEvents = [];
@@ -1961,7 +1974,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderAnalyticsDashboard() {
-    if (!analyticsSummary || !analyticsConversions || !analyticsProducts || !analyticsPages || !analyticsFeed) {
+    if (!analyticsSummary || !analyticsConversions || !analyticsProducts || !analyticsSources || !analyticsPages || !analyticsFeed) {
       return;
     }
 
@@ -2003,6 +2016,27 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
 
       map.get(key).views += 1;
+      return map;
+    }, new Map());
+
+    const sourceStats = events.reduce((map, event) => {
+      if (event.name !== "page_view") {
+        return map;
+      }
+
+      const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
+      const sourceInfo = formatAnalyticsSourceLabel(payload);
+      const key = `${sourceInfo.label}|${sourceInfo.detail}`;
+
+      if (!map.has(key)) {
+        map.set(key, {
+          label: sourceInfo.label,
+          detail: sourceInfo.detail,
+          visits: 0
+        });
+      }
+
+      map.get(key).visits += 1;
       return map;
     }, new Map());
 
@@ -2073,6 +2107,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const topProducts = Array.from(productStats.values())
       .sort((left, right) => right.score - left.score)
+      .slice(0, 6);
+    const topSources = Array.from(sourceStats.values())
+      .sort((left, right) => right.visits - left.visits)
       .slice(0, 6);
     const topPages = Array.from(pageStats.values())
       .sort((left, right) => right.views - left.views)
@@ -2176,6 +2213,29 @@ document.addEventListener("DOMContentLoaded", async function () {
           <article class="empty-state-card">
             <strong>No tracked product activity yet</strong>
             <p>Open the storefront and tap through products, or widen the date range to pull in more live activity.</p>
+          </article>
+        `;
+
+    analyticsSources.innerHTML = topSources.length
+      ? topSources
+          .map(
+            (source) => `
+              <article class="admin-analytics-product-row">
+                <div class="admin-analytics-product-copy">
+                  <strong>${escapeHtml(source.label)}</strong>
+                  <span>${escapeHtml(source.detail)}</span>
+                </div>
+                <div class="admin-analytics-product-stats">
+                  <strong>${source.visits} visit${source.visits === 1 ? "" : "s"}</strong>
+                </div>
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No source data in this range</strong>
+            <p>Share the live website link in a few places or open it from another channel to start seeing source patterns.</p>
           </article>
         `;
 
