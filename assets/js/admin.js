@@ -557,6 +557,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const replyList = document.getElementById("admin-reply-list");
   const adminOverviewGrid = document.getElementById("admin-overview-grid");
   const analyticsSummary = document.getElementById("admin-analytics-summary");
+  const analyticsProductsTitle = document.getElementById("admin-analytics-products-title");
   const analyticsProducts = document.getElementById("admin-analytics-products");
   const analyticsFeed = document.getElementById("admin-analytics-feed");
   const analyticsRefreshButton = document.getElementById("admin-analytics-refresh");
@@ -1753,11 +1754,37 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function getStorefrontAnalyticsEvents() {
-    return analyticsDataSource === "supabase" ? remoteStorefrontAnalyticsEvents : loadLocalStorefrontAnalyticsEvents();
+    const sourceEvents = analyticsDataSource === "supabase" ? remoteStorefrontAnalyticsEvents : loadLocalStorefrontAnalyticsEvents();
+    return sourceEvents.filter(isStorefrontAnalyticsEvent);
   }
 
   function getAnalyticsSourceLabel() {
     return analyticsDataSource === "supabase" ? "Supabase live" : "This browser";
+  }
+
+  function isStorefrontAnalyticsEvent(event) {
+    if (!event || typeof event !== "object" || !event.name) {
+      return false;
+    }
+
+    const payload = event.payload && typeof event.payload === "object" ? event.payload : {};
+    const pagePath = String(payload.page_path || "").trim().toLowerCase();
+    const pageLocation = String(payload.page_location || "").trim().toLowerCase();
+    const pathValue = pagePath || pageLocation;
+
+    if (!pathValue) {
+      return true;
+    }
+
+    if (pathValue.startsWith("/c:/") || pathValue.startsWith("file:/") || /^[a-z]:\\/i.test(pathValue)) {
+      return false;
+    }
+
+    if (pathValue.includes("admin.html")) {
+      return false;
+    }
+
+    return true;
   }
 
   function getAnalyticsEventProduct(payload) {
@@ -1897,6 +1924,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const topProducts = Array.from(productStats.values())
       .sort((left, right) => right.score - left.score)
       .slice(0, 6);
+
+    if (analyticsProductsTitle) {
+      analyticsProductsTitle.textContent =
+        analyticsDataSource === "supabase" ? "Most active products across live traffic" : "Most active products in this browser";
+    }
 
     analyticsSummary.innerHTML = `
       <article class="admin-metric-card">
