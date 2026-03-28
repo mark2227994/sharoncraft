@@ -1,0 +1,25 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <rect width="600" height="400" fill="#006600"/>
+  <rect width="600" height="266" y="0" fill="#000000"/>
+  <rect width="600" height="134" y="133" fill="#BB0000"/>
+  <rect width="600" height="10" y="123" fill="#FFFFFF"/>
+  <rect width="600" height="10" y="267" fill="#FFFFFF"/>
+
+  <g transform="translate(300 200)">
+    <g transform="translate(0 0)">
+      <path d="M-110 -130 L-150 -170 L-155 -160 L-120 -120 Z" fill="#C0C0C0"/>
+      <path d="M110 -130 L150 -170 L155 -160 L120 -120 Z" fill="#C0C0C0"/>
+      <rect x="-7" y="-170" width="14" height="340" fill="#C0C0C0" transform="rotate(-20)"/>
+      <rect x="-7" y="-170" width="14" height="340" fill="#C0C0C0" transform="rotate(20)"/>
+    </g>
+
+    <g>
+      <ellipse cx="0" cy="0" rx="78" ry="140" fill="#FFFFFF"/>
+      <ellipse cx="0" cy="0" rx="62" ry="122" fill="#000000"/>
+      <ellipse cx="0" cy="0" rx="50" ry="104" fill="#BB0000"/>
+      <ellipse cx="0" cy="0" rx="35" ry="85" fill="#000000"/>
+      <ellipse cx="0" cy="0" rx="22" ry="70" fill="#FFFFFF"/>
+      <ellipse cx="0" cy="0" rx="14" ry="55" fill="#BB0000"/>
+    </g>
+  </g>
+</svg>
