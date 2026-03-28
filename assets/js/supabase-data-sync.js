@@ -159,6 +159,7 @@
       name: normalizeText(product && product.name) || "SharonCraft Product",
       category: categoryMatch.slug,
       price: Number(product && product.price) || 0,
+      soldOut: Boolean(product && product.soldOut),
       material,
       story,
       spotlightUntil: normalizeText(product && product.spotlightUntil),

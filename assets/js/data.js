@@ -379,6 +379,7 @@
       name: product.name || "",
       category: product.category || "",
       price: Number(product.price) || 0,
+      soldOut: Boolean(product.soldOut),
       momPrice: Number(product.momPrice) || 0,
       deliveryCharge: Number(product.deliveryCharge) || 0,
       deliveryCost: Number(product.deliveryCost) || 0,

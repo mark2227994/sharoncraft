@@ -80,6 +80,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   const productDetails = Array.isArray(product.details) && product.details.length
     ? product.details
     : ["Handmade in Kenya", "Shared with care by SharonCraft"];
+  const site = utils.data && utils.data.site ? utils.data.site : {};
+  const siteName = site.name || "SharonCraft";
+  const siteUrl = new URL("/", window.location.origin).href;
+  const productUrl = new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href;
+  const socialLinks = (Array.isArray(site.socials) ? site.socials : [])
+    .map((item) => String(item && item.url || "").trim())
+    .filter((url) => url && url !== "#");
+  const availabilityUrl = product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
 
   document.title = `${productName} | SharonCraft`;
   title.textContent = productName;
@@ -140,7 +148,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     utils.setStructuredData("product-page", {
       "@context": "https://schema.org",
       "@type": "Product",
+      "@id": `${productUrl}#product`,
       name: productName,
+      url: productUrl,
+      mainEntityOfPage: productUrl,
       image: productImages.map((image) => new URL(image, window.location.origin).href),
       description: productDescription,
       sku: product.id,
@@ -153,11 +164,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         "@type": "Offer",
         priceCurrency: "KES",
         price: String(Number(product.price) || 0),
-        availability: "https://schema.org/InStock",
-        url: new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href,
+        availability: availabilityUrl,
+        itemCondition: "https://schema.org/NewCondition",
+        url: productUrl,
         seller: {
           "@type": "Organization",
-          name: "SharonCraft"
+          name: siteName,
+          url: siteUrl,
+          telephone: site.phone || "",
+          email: site.email || "",
+          sameAs: socialLinks
         }
       }
     });
@@ -188,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           "@type": "ListItem",
           position: 4,
           name: productName,
-          item: new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href
+          item: productUrl
         }
       ]
     });
