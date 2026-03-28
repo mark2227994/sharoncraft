@@ -57,6 +57,41 @@
     }
   };
 
+  const hasLocalSocialsOverride = () => {
+    try {
+      const raw = window.localStorage.getItem(storage.socialSettingsKey);
+      if (!raw) {
+        return false;
+      }
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.length > 0;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  function normalizeSocials(socials, fallbackSocials) {
+    const fallback = Array.isArray(fallbackSocials) ? fallbackSocials : [];
+    const savedMap = new Map(
+      (Array.isArray(socials) ? socials : [])
+        .map((social) => ({
+          label: String(social && social.label || "").trim(),
+          url: String(social && social.url || "").trim()
+        }))
+        .filter((social) => social.label)
+        .map((social) => [social.label.toLowerCase(), social])
+    );
+
+    return fallback.map((social) => {
+      const label = String(social && social.label || "").trim();
+      const match = savedMap.get(label.toLowerCase());
+      return {
+        label,
+        url: String((match && match.url) || social.url || "#").trim() || "#"
+      };
+    });
+  }
+
   function normalizeHomeVisuals(visuals, fallbackVisuals) {
     const fallback = fallbackVisuals || {};
     const fallbackHero = fallback.hero || {};
@@ -242,8 +277,55 @@
     return data.homeVisuals;
   }
 
+  async function syncSocialsFromSupabase() {
+    if (isLocalPreview && hasLocalSocialsOverride()) {
+      return null;
+    }
+
+    if (
+      !liveCatalog ||
+      typeof liveCatalog.fetchSetting !== "function" ||
+      typeof liveCatalog.isConfigured !== "function" ||
+      !liveCatalog.isConfigured()
+    ) {
+      return null;
+    }
+
+    const setting = await liveCatalog.fetchSetting("social_links");
+    if (!Array.isArray(setting)) {
+      return null;
+    }
+
+    const fallbackSocials =
+      (window.SharonCraftDefaultData && window.SharonCraftDefaultData.site && window.SharonCraftDefaultData.site.socials) ||
+      data.site.socials ||
+      [];
+
+    data.site.socials = normalizeSocials(setting, fallbackSocials);
+
+    if (!isLocalPreview) {
+      try {
+        window.localStorage.removeItem(storage.socialSettingsKey);
+      } catch (error) {
+        console.warn("Unable to clear stale local social override.", error);
+      }
+
+      try {
+        window.localStorage.setItem(storage.liveSocialSettingsCacheKey, JSON.stringify(data.site.socials));
+      } catch (error) {
+        console.warn("Unable to cache the latest live social links.", error);
+      }
+    }
+
+    return data.site.socials;
+  }
+
   async function syncFromSupabase() {
-    const results = await Promise.allSettled([syncProductsFromSupabase(), syncHomeVisualsFromSupabase()]);
+    const results = await Promise.allSettled([
+      syncProductsFromSupabase(),
+      syncHomeVisualsFromSupabase(),
+      syncSocialsFromSupabase()
+    ]);
     return results;
   }
 

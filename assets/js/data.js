@@ -8,6 +8,7 @@
   const homeVisualsSettingsKey = "sharoncraft-home-visuals";
   const liveCatalogCacheKey = "sharoncraft-live-catalog-cache";
   const liveHomeVisualsCacheKey = "sharoncraft-live-home-visuals-cache";
+  const liveSocialSettingsCacheKey = "sharoncraft-live-social-settings-cache";
 
   const defaultData = {
     site: {
@@ -477,33 +478,43 @@
     }
   }
 
+  function normalizeSavedSocials(rawSocials, defaultSocials) {
+    if (!Array.isArray(rawSocials)) {
+      return defaultSocials;
+    }
+
+    const fallbackMap = new Map(defaultSocials.map((social) => [String(social.label || "").toLowerCase(), social]));
+    return rawSocials
+      .map((social) => {
+        const label = String(social.label || "").trim();
+        if (!label) {
+          return null;
+        }
+
+        const fallback = fallbackMap.get(label.toLowerCase()) || {};
+        return {
+          label,
+          url: String(social.url || fallback.url || "#").trim() || "#"
+        };
+      })
+      .filter(Boolean);
+  }
+
   function loadSavedSocials(defaultSocials) {
     try {
       const raw = window.localStorage.getItem(socialSettingsKey);
       if (!raw) {
-        return defaultSocials;
+        const cachedRaw = window.localStorage.getItem(liveSocialSettingsCacheKey);
+        if (!cachedRaw) {
+          return defaultSocials;
+        }
+
+        const cachedParsed = JSON.parse(cachedRaw);
+        return normalizeSavedSocials(cachedParsed, defaultSocials);
       }
 
       const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) {
-        return defaultSocials;
-      }
-
-      const fallbackMap = new Map(defaultSocials.map((social) => [String(social.label || "").toLowerCase(), social]));
-      return parsed
-        .map((social) => {
-          const label = String(social.label || "").trim();
-          if (!label) {
-            return null;
-          }
-
-          const fallback = fallbackMap.get(label.toLowerCase()) || {};
-          return {
-            label,
-            url: String(social.url || fallback.url || "#").trim() || "#"
-          };
-        })
-        .filter(Boolean);
+      return normalizeSavedSocials(parsed, defaultSocials);
     } catch (error) {
       return defaultSocials;
     }
@@ -584,7 +595,8 @@
     categoriesSettingsKey,
     homeVisualsSettingsKey,
     liveCatalogCacheKey,
-    liveHomeVisualsCacheKey
+    liveHomeVisualsCacheKey,
+    liveSocialSettingsCacheKey
   };
   window.SharonCraftData = data;
 })();
