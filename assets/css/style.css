@@ -16,6 +16,7 @@
   --radius-md: 22px;
   --radius-sm: 16px;
   --max-width: 1180px;
+  --focus-ring: rgba(217, 108, 72, 0.32);
 }
 
 *,
@@ -62,6 +63,35 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+a,
+button,
+input,
+select,
+textarea,
+summary,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+summary:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 12px;
 }
 
 .container {
