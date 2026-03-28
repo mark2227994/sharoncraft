@@ -10,6 +10,7 @@
   const analyticsVisitorKey = "sharoncraft-analytics-visitor-id";
   const analyticsSessionKey = "sharoncraft-analytics-session-id";
   const analyticsAcquisitionKey = "sharoncraft-analytics-acquisition";
+  const analyticsDebugKey = "sharoncraft-ga-debug";
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
@@ -17,6 +18,16 @@
   let analyticsFlushTimer = null;
   const recentAnalyticsInteractions = new Map();
   const recentListViews = new Map();
+  const analyticsDebugState = {
+    enabled: false,
+    panel: null,
+    status: "idle",
+    note: "",
+    lastEvent: "",
+    lastEventAt: "",
+    lastGtagHit: "",
+    lastGtagHitAt: ""
+  };
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -25,6 +36,51 @@
   function absoluteUrl(path) {
     const normalized = normalizeText(path);
     return new URL(normalized || window.location.pathname, window.location.origin).href;
+  }
+
+  function isTruthyFlag(value) {
+    const normalized = normalizeText(value).toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
+  }
+
+  function isFalsyFlag(value) {
+    const normalized = normalizeText(value).toLowerCase();
+    return normalized === "0" || normalized === "false" || normalized === "no" || normalized === "off";
+  }
+
+  function setAnalyticsDebugEnabled(enabled) {
+    analyticsDebugState.enabled = !!enabled;
+
+    try {
+      if (enabled) {
+        window.sessionStorage.setItem(analyticsDebugKey, "1");
+      } else {
+        window.sessionStorage.removeItem(analyticsDebugKey);
+      }
+    } catch (error) {
+      // Ignore session storage limitations.
+    }
+  }
+
+  function shouldShowAnalyticsDebug() {
+    const url = new URL(window.location.href);
+    const debugParam = normalizeText(url.searchParams.get("ga_debug"));
+
+    if (isTruthyFlag(debugParam)) {
+      setAnalyticsDebugEnabled(true);
+      return true;
+    }
+
+    if (isFalsyFlag(debugParam)) {
+      setAnalyticsDebugEnabled(false);
+      return false;
+    }
+
+    try {
+      return normalizeText(window.sessionStorage.getItem(analyticsDebugKey)) === "1";
+    } catch (error) {
+      return analyticsDebugState.enabled;
+    }
   }
 
   function getAnalyticsConfig() {
@@ -299,13 +355,107 @@
     return true;
   }
 
+  function getAnalyticsBlockReason() {
+    if (window.location.protocol === "file:") {
+      return "Blocked on local file previews. Use the live website URL.";
+    }
+
+    const pathname = normalizeText(window.location.pathname).toLowerCase();
+    const pageType = normalizeText(document.body && document.body.dataset && document.body.dataset.page).toLowerCase();
+
+    if (pathname.endsWith("/admin.html") || pathname === "/admin.html" || pageType === "admin") {
+      return "Blocked on admin pages by design.";
+    }
+
+    return "Tracking allowed on this page.";
+  }
+
+  function formatDebugTime(value) {
+    const time = normalizeText(value);
+    if (!time) {
+      return "Not yet";
+    }
+
+    try {
+      return new Date(time).toLocaleTimeString("en-KE", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    } catch (error) {
+      return time;
+    }
+  }
+
+  function buildAnalyticsDebugRow(label, value) {
+    return `<div class="analytics-debug-row"><span>${label}</span><strong>${value}</strong></div>`;
+  }
+
+  function updateAnalyticsDebugPanel() {
+    if (!analyticsDebugState.enabled || !analyticsDebugState.panel) {
+      return;
+    }
+
+    const config = getAnalyticsConfig();
+    const trackingAllowed = shouldTrackAnalytics();
+    const queueSize = getQueuedAnalyticsEvents().length;
+    const dataLayerSize = Array.isArray(window.dataLayer) ? window.dataLayer.length : 0;
+    const protocol = normalizeText(window.location.protocol || "").replace(":", "") || "unknown";
+    const pageType = normalizeText(document.body && document.body.dataset && document.body.dataset.page) || "unknown";
+    const reason = trackingAllowed ? "Tracking allowed on this page." : getAnalyticsBlockReason();
+
+    analyticsDebugState.panel.innerHTML = `
+      <div class="analytics-debug-head">
+        <strong>GA Debug</strong>
+        <span class="analytics-debug-badge analytics-debug-badge-${trackingAllowed ? "ok" : "warn"}">${trackingAllowed ? "Tracking On" : "Tracking Off"}</span>
+      </div>
+      <div class="analytics-debug-grid">
+        ${buildAnalyticsDebugRow("Measurement ID", normalizeText(config.ga4MeasurementId) || "Missing")}
+        ${buildAnalyticsDebugRow("GA Script", analyticsDebugState.status || "idle")}
+        ${buildAnalyticsDebugRow("Page Type", pageType)}
+        ${buildAnalyticsDebugRow("Protocol", protocol)}
+        ${buildAnalyticsDebugRow("Queue", String(queueSize))}
+        ${buildAnalyticsDebugRow("dataLayer", String(dataLayerSize))}
+        ${buildAnalyticsDebugRow("Last Event", analyticsDebugState.lastEvent || "Not yet")}
+        ${buildAnalyticsDebugRow("Last Event Time", formatDebugTime(analyticsDebugState.lastEventAt))}
+        ${buildAnalyticsDebugRow("Last GA Hit", analyticsDebugState.lastGtagHit || "Not yet")}
+        ${buildAnalyticsDebugRow("Last GA Hit Time", formatDebugTime(analyticsDebugState.lastGtagHitAt))}
+      </div>
+      <p class="analytics-debug-note">${analyticsDebugState.note || reason}</p>
+      <p class="analytics-debug-hint">Append <code>?ga_debug=0</code> to hide this panel.</p>
+    `;
+  }
+
+  function ensureAnalyticsDebugPanel() {
+    if (!shouldShowAnalyticsDebug() || !document.body) {
+      return;
+    }
+
+    analyticsDebugState.enabled = true;
+
+    if (!analyticsDebugState.panel) {
+      const panel = document.createElement("aside");
+      panel.className = "analytics-debug-panel";
+      document.body.appendChild(panel);
+      analyticsDebugState.panel = panel;
+    }
+
+    updateAnalyticsDebugPanel();
+  }
+
   function loadGa4IfNeeded() {
     const config = getAnalyticsConfig();
     if (!config.ga4MeasurementId) {
+      analyticsDebugState.status = "missing_id";
+      analyticsDebugState.note = "No GA4 measurement ID is configured for this page.";
+      updateAnalyticsDebugPanel();
       return Promise.resolve(false);
     }
 
     if (typeof window.gtag === "function") {
+      analyticsDebugState.status = "ready";
+      analyticsDebugState.note = "GA is already available on this page.";
+      updateAnalyticsDebugPanel();
       return Promise.resolve(true);
     }
 
@@ -326,15 +476,24 @@
       };
       window.gtag("js", new Date());
       window.gtag("config", config.ga4MeasurementId);
+      analyticsDebugState.status = "loading";
+      analyticsDebugState.note = `Loading Google Analytics for ${config.ga4MeasurementId}.`;
+      updateAnalyticsDebugPanel();
 
       const script = document.createElement("script");
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(config.ga4MeasurementId)}`;
       script.setAttribute("data-ga4-loader", "true");
       script.addEventListener("load", function () {
+        analyticsDebugState.status = "loaded";
+        analyticsDebugState.note = `GA script loaded for ${config.ga4MeasurementId}.`;
+        updateAnalyticsDebugPanel();
         resolve(true);
       });
       script.addEventListener("error", function () {
+        analyticsDebugState.status = "error";
+        analyticsDebugState.note = "GA script failed to load. This can happen with ad blockers or privacy settings.";
+        updateAnalyticsDebugPanel();
         resolve(false);
       });
       document.head.appendChild(script);
@@ -346,6 +505,12 @@
   function trackEvent(name, payload) {
     const eventName = normalizeText(name);
     if (!eventName || !shouldTrackAnalytics()) {
+      if (eventName) {
+        analyticsDebugState.lastEvent = `${eventName} (blocked)`;
+        analyticsDebugState.lastEventAt = new Date().toISOString();
+        analyticsDebugState.note = getAnalyticsBlockReason();
+        updateAnalyticsDebugPanel();
+      }
       return;
     }
 
@@ -369,6 +534,10 @@
       payload: eventPayload,
       timestamp
     };
+    analyticsDebugState.lastEvent = eventName;
+    analyticsDebugState.lastEventAt = timestamp;
+    analyticsDebugState.note = `Queued ${eventName} for local + Supabase analytics.`;
+    updateAnalyticsDebugPanel();
 
     const storedEvents = getStoredAnalyticsEvents();
     storedEvents.push(eventEntry);
@@ -379,9 +548,20 @@
     loadGa4IfNeeded().then(function (loaded) {
       if (loaded && typeof window.gtag === "function") {
         if (eventName === "page_view") {
+          analyticsDebugState.lastGtagHit = "page_view (auto config)";
+          analyticsDebugState.lastGtagHitAt = new Date().toISOString();
+          analyticsDebugState.note = "GA page view should be sent by the GA config call on this page.";
+          updateAnalyticsDebugPanel();
           return;
         }
         window.gtag("event", eventName, eventPayload);
+        analyticsDebugState.lastGtagHit = eventName;
+        analyticsDebugState.lastGtagHitAt = new Date().toISOString();
+        analyticsDebugState.note = `Sent ${eventName} to Google Analytics.`;
+        updateAnalyticsDebugPanel();
+      } else {
+        analyticsDebugState.note = "The site queued the event, but GA was not available to receive it.";
+        updateAnalyticsDebugPanel();
       }
     });
   }
@@ -1455,13 +1635,18 @@
 
   async function hydrateSharedShell() {
     await unregisterLegacyRootServiceWorker();
+    ensureAnalyticsDebugPanel();
     bindAnalyticsEvents();
     window.addEventListener("online", function () {
       scheduleAnalyticsFlush(200);
+      analyticsDebugState.note = "Browser is online. Retrying queued analytics sync.";
+      updateAnalyticsDebugPanel();
     });
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") {
         scheduleAnalyticsFlush(200);
+        analyticsDebugState.note = "Page became visible. Checking queued analytics again.";
+        updateAnalyticsDebugPanel();
       }
     });
     window.addEventListener("pagehide", function () {
