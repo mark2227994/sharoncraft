@@ -3442,6 +3442,81 @@ body.cart-open .scroll-top {
   padding: 1rem;
 }
 
+.admin-social-links-preview {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.admin-social-link-row {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(26, 188, 156, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.admin-social-link-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-social-link-row strong {
+  color: var(--deep-brown);
+}
+
+.admin-social-link-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-social-link-status.live {
+  background: rgba(26, 188, 156, 0.12);
+  color: #0a7d69;
+}
+
+.admin-social-link-status.missing {
+  background: rgba(216, 90, 48, 0.12);
+  color: var(--terracotta);
+}
+
+.admin-social-link-url {
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-social-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.admin-social-link-actions button,
+.admin-social-link-actions a {
+  width: fit-content;
+  border: 1px solid rgba(26, 188, 156, 0.2);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: rgba(239, 255, 249, 0.96);
+  color: #0a7d69;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.footer-social-placeholder {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
 .admin-social-day {
   display: grid;
   gap: 0.7rem;

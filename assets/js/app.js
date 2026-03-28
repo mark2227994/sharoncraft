@@ -1437,7 +1437,10 @@
       return;
     }
 
-    const socialMarkup = data.site.socials
+    const visibleSocials = (Array.isArray(data.site.socials) ? data.site.socials : [])
+      .filter((social) => normalizeText(social && social.url) && normalizeText(social && social.url) !== "#");
+
+    const socialMarkup = visibleSocials
       .map(
         (social) =>
           `<a href="${social.url}" ${social.url !== "#" ? 'target="_blank" rel="noreferrer"' : ""}>${social.label}</a>`
@@ -1472,7 +1475,7 @@
           <section>
             <h3>Social</h3>
             <div class="footer-socials">
-              ${socialMarkup}
+              ${socialMarkup || '<span class="footer-social-placeholder">Add Facebook and Instagram links in the admin social section.</span>'}
             </div>
           </section>
         </div>
@@ -1634,6 +1637,14 @@
   }
 
   async function hydrateSharedShell() {
+    if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+      try {
+        await window.SharonCraftLiveSync.ready;
+      } catch (error) {
+        console.warn("Unable to finish live storefront sync before rendering.", error);
+      }
+    }
+
     await unregisterLegacyRootServiceWorker();
     ensureAnalyticsDebugPanel();
     bindAnalyticsEvents();

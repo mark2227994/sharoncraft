@@ -826,6 +826,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const generateCaptionButton = document.getElementById("admin-generate-caption");
   const copyCaptionButton = document.getElementById("admin-copy-caption");
   const socialCalendar = document.getElementById("admin-social-calendar");
+  const socialLinksPreview = document.getElementById("admin-social-links-preview");
   const socialMedia = document.getElementById("admin-social-media");
   const socialTracker = document.getElementById("admin-social-tracker");
   const goalForm = document.getElementById("admin-goal-form");
@@ -1527,6 +1528,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function saveSocialSettings(message) {
+    utils.data.site.socials = socialSettings.map((social) => ({ ...social }));
     const saved = safeLocalStorageSetItem(socialSettingsKey, JSON.stringify(socialSettings), "social settings");
     if (message) {
       setStatus(saved ? message : `${message} Local save failed because browser storage is full.`);
@@ -2070,6 +2072,40 @@ document.addEventListener("DOMContentLoaded", async function () {
       return true;
     } catch (error) {
       console.error("Unable to publish home visuals to Supabase.", error);
+      if (error && /sign in/i.test(String(error.message || ""))) {
+        setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+        return false;
+      }
+      setStatus(`${localMessage} Saved locally only. Supabase publish failed.`);
+      return false;
+    }
+  }
+
+  async function publishSocialSettingsToSupabase(localMessage) {
+    renderLiveAuthState();
+
+    if (!localMessage) {
+      localMessage = "Social links saved.";
+    }
+
+    if (!liveCatalogApi || typeof liveCatalogApi.saveSetting !== "function" || !liveCatalogApi.isConfigured()) {
+      setStatus(`${localMessage} Saved locally only because Supabase is not configured here.`);
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.saveSetting("social_links", socialSettings);
+      renderLiveAuthState();
+      setStatus(`${localMessage} Supabase live social links updated too.`);
+      return true;
+    } catch (error) {
+      console.error("Unable to publish social links to Supabase.", error);
       if (error && /sign in/i.test(String(error.message || ""))) {
         setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
         return false;
@@ -4232,6 +4268,36 @@ document.addEventListener("DOMContentLoaded", async function () {
     socialTiktokInput.value = map.get("TikTok") || "";
   }
 
+  function isLiveSocialUrl(url) {
+    const normalized = String(url || "").trim();
+    return normalized && normalized !== "#";
+  }
+
+  function renderSocialLinksPreview() {
+    if (!socialLinksPreview) {
+      return;
+    }
+
+    socialLinksPreview.innerHTML = socialSettings
+      .map((social) => {
+        const liveUrl = isLiveSocialUrl(social.url);
+        return `
+          <article class="admin-social-link-row">
+            <div class="admin-social-link-head">
+              <strong>${social.label}</strong>
+              <span class="admin-social-link-status ${liveUrl ? "live" : "missing"}">${liveUrl ? "Ready" : "Missing"}</span>
+            </div>
+            <div class="admin-social-link-url">${liveUrl ? social.url : `Add your ${social.label} URL above to show it on the website.`}</div>
+            <div class="admin-social-link-actions">
+              ${liveUrl ? `<a href="${social.url}" target="_blank" rel="noreferrer">Open ${social.label}</a>` : ""}
+              ${liveUrl ? `<button type="button" data-social-copy-link="${social.label}">Copy Link</button>` : ""}
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
   function renderSocialProductSelect() {
     if (!socialProductSelect) {
       return;
@@ -4290,7 +4356,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       return leftScore - rightScore;
     });
 
-    socialMedia.innerHTML = featuredFirst
+    socialMedia.innerHTML = featuredFirst.length
+      ? featuredFirst
       .slice(0, 6)
       .map(
         (product) => `
@@ -4304,7 +4371,8 @@ document.addEventListener("DOMContentLoaded", async function () {
           </article>
         `
       )
-      .join("");
+      .join("")
+      : `<article class="admin-social-media-card"><div><strong>No products yet</strong><span>Add products first, then this section will help you create Facebook and Instagram posts faster.</span></div></article>`;
   }
 
   function renderSocialTracker() {
@@ -4316,7 +4384,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       .sort((left, right) => (right.analytics.whatsappClicks || 0) - (left.analytics.whatsappClicks || 0))
       .slice(0, 4);
 
-    socialTracker.innerHTML = topChatProducts
+    socialTracker.innerHTML = topChatProducts.length
+      ? topChatProducts
       .map(
         (product, index) => `
           <article class="admin-social-track-row">
@@ -4328,7 +4397,15 @@ document.addEventListener("DOMContentLoaded", async function () {
           </article>
         `
       )
-      .join("");
+      .join("")
+      : `
+          <article class="admin-social-track-row">
+            <div>
+              <strong>No chat history yet</strong>
+              <span>Once customers start tapping WhatsApp from the storefront, this panel will highlight your best social media candidates.</span>
+            </div>
+          </article>
+        `;
   }
 
   function renderSalesDashboard() {
@@ -5226,7 +5303,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   );
 
   if (socialForm) {
-    socialForm.addEventListener("submit", function (event) {
+    socialForm.addEventListener("submit", async function (event) {
       event.preventDefault();
       socialSettings = [
         { label: "WhatsApp", url: socialWhatsappInput.value.trim() || "#" },
@@ -5234,7 +5311,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         { label: "Facebook", url: socialFacebookInput.value.trim() || "#" },
         { label: "TikTok", url: socialTiktokInput.value.trim() || "#" }
       ];
-      saveSocialSettings("Social links saved. Refresh the storefront preview to see footer link updates.");
+      saveSocialSettings("Social links saved locally.");
+      renderSocialLinksPreview();
+      await publishSocialSettingsToSupabase("Social links saved.");
       activateAdminTab("social");
     });
   }
@@ -5549,6 +5628,28 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (orderSaveButton) {
           orderSaveButton.disabled = false;
         }
+      }
+    });
+  }
+
+  if (socialLinksPreview) {
+    socialLinksPreview.addEventListener("click", async function (event) {
+      const button = event.target.closest("[data-social-copy-link]");
+      if (!button) {
+        return;
+      }
+
+      const social = socialSettings.find((item) => item.label === button.dataset.socialCopyLink);
+      if (!social || !isLiveSocialUrl(social.url)) {
+        setStatus("That social link is still empty.");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(social.url);
+        setStatus(`${social.label} link copied.`);
+      } catch (error) {
+        setStatus(`Unable to copy the ${social.label} link right now.`);
       }
     });
   }
@@ -6006,6 +6107,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderReplyTemplates();
   renderAnalyticsDashboard();
   populateSocialForm();
+  renderSocialLinksPreview();
   renderSocialProductSelect();
   renderSocialCalendar();
   renderSocialMedia();
