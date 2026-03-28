@@ -325,7 +325,7 @@
         window.dataLayer.push(arguments);
       };
       window.gtag("js", new Date());
-      window.gtag("config", config.ga4MeasurementId, { send_page_view: false });
+      window.gtag("config", config.ga4MeasurementId);
 
       const script = document.createElement("script");
       script.async = true;
@@ -378,6 +378,9 @@
 
     loadGa4IfNeeded().then(function (loaded) {
       if (loaded && typeof window.gtag === "function") {
+        if (eventName === "page_view") {
+          return;
+        }
         window.gtag("event", eventName, eventPayload);
       }
     });
@@ -1276,6 +1279,7 @@
             <ul class="footer-list">
               <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
               <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
+              <li><a href="order.html">Track an order</a></li>
               <li>${data.site.location}</li>
             </ul>
           </section>

@@ -219,6 +219,288 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
 
+  function normalizeOrderStatus(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    return ["new", "confirmed", "paid", "delivered", "cancelled"].includes(normalized) ? normalized : "new";
+  }
+
+  function isPublicOrderId(value) {
+    return /^ORD-\d{8}-[A-Z0-9]{4}$/i.test(String(value || "").trim());
+  }
+
+  function formatOrderDateSegment(value) {
+    const parsed = value ? new Date(value) : new Date();
+    const safeDate = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+    const year = safeDate.getFullYear();
+    const month = String(safeDate.getMonth() + 1).padStart(2, "0");
+    const day = String(safeDate.getDate()).padStart(2, "0");
+    return `${year}${month}${day}`;
+  }
+
+  function hashText(value) {
+    return String(value || "")
+      .split("")
+      .reduce((hash, char) => ((hash * 31 + char.charCodeAt(0)) | 0), 7);
+  }
+
+  function buildOrderId(existingIds, createdAt, seedText) {
+    const reservedIds = existingIds instanceof Set ? existingIds : new Set();
+    const dateSegment = formatOrderDateSegment(createdAt);
+    let counter = 0;
+    let candidate = "";
+
+    do {
+      const suffixSource = Math.abs(hashText(`${seedText || createdAt || dateSegment}:${counter}`))
+        .toString(36)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+      const suffix = (suffixSource + "0000").slice(0, 4);
+      candidate = `ORD-${dateSegment}-${suffix}`;
+      counter += 1;
+    } while (reservedIds.has(candidate));
+
+    reservedIds.add(candidate);
+    return candidate;
+  }
+
+  function buildTrackOrderUrl(orderId) {
+    return new URL(`order.html?id=${encodeURIComponent(orderId)}`, window.location.href).href;
+  }
+
+  function getOrderTotal(product, quantity, area) {
+    return Math.max(0, (Number(product && product.price) || 0) * Math.max(1, Number(quantity) || 1) + (Number(area && area.clientCharge) || 0));
+  }
+
+  function normalizeOrderCompareValue(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getOrderDraftSignature(order) {
+    return [
+      normalizeOrderCompareValue(order && order.customer),
+      normalizeOrderCompareValue(order && order.phone),
+      normalizeOrderCompareValue(order && order.productId),
+      String(Math.max(1, Number(order && order.quantity) || 1)),
+      normalizeOrderCompareValue(order && order.areaId),
+      String(Math.max(0, Number(order && order.orderTotal) || 0))
+    ].join("|");
+  }
+
+  function findRecentDuplicateOrder(draftOrder) {
+    const draftSignature = getOrderDraftSignature(draftOrder);
+    const now = Date.now();
+    const duplicateWindowMs = 2 * 60 * 1000;
+
+    return orders.find((order) => {
+      const createdTime = new Date(order.createdAt || 0).getTime();
+      if (!createdTime || now - createdTime > duplicateWindowMs) {
+        return false;
+      }
+      return getOrderDraftSignature(order) === draftSignature;
+    }) || null;
+  }
+
+  function getOrderStatusLabel(statusValue) {
+    return (ORDER_STATUS_OPTIONS.find((status) => status.value === normalizeOrderStatus(statusValue)) || ORDER_STATUS_OPTIONS[0]).label;
+  }
+
+  function getOrderStatusClass(statusValue) {
+    return `is-${normalizeOrderStatus(statusValue)}`;
+  }
+
+  function getVisibleOrders() {
+    const normalizedSearch = String(orderSearchTerm || "").trim().toLowerCase();
+    const normalizedFilter = normalizeOrderStatus(orderStatusFilter === "all" ? "" : orderStatusFilter);
+
+    return orders.filter((order) => {
+      if (orderStatusFilter !== "all" && normalizeOrderStatus(order.status) !== normalizedFilter) {
+        return false;
+      }
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      const haystack = [
+        order.orderId,
+        order.customer,
+        order.phone,
+        order.productName,
+        order.areaName,
+      ]
+        .map((value) => String(value || "").toLowerCase())
+        .join(" ");
+
+      return haystack.includes(normalizedSearch);
+    });
+  }
+
+  function clearOrderFeedback() {
+    if (!orderFeedback) {
+      return;
+    }
+
+    orderFeedback.hidden = true;
+    orderFeedback.innerHTML = "";
+  }
+
+  function renderOrderFeedback(order, mode = "saved") {
+    if (!orderFeedback || !order) {
+      return;
+    }
+
+    const actionLabel = mode === "updated" ? "Order updated" : "Order saved";
+    orderFeedback.hidden = false;
+    orderFeedback.innerHTML = `
+      <strong>${actionLabel}: ${order.orderId || order.id}</strong>
+      <p>${order.customer || "Customer"} can now track this order with the link below.</p>
+      <div class="admin-order-feedback-actions">
+        <button type="button" data-order-feedback-copy="${order.id}">Copy Tracking Link</button>
+        <button type="button" data-order-feedback-open="${order.id}">Open Tracking Page</button>
+      </div>
+    `;
+  }
+
+  function resetOrderFormState() {
+    editingOrderId = null;
+    if (orderForm) {
+      orderForm.reset();
+    }
+    if (orderQuantityInput) {
+      orderQuantityInput.value = 1;
+    }
+    if (orderStatusSelect) {
+      orderStatusSelect.value = "new";
+    }
+    if (orderProductSelect && orderProductSelect.options.length) {
+      orderProductSelect.selectedIndex = 0;
+    }
+    if (orderAreaSelect) {
+      orderAreaSelect.value = "";
+    }
+    if (orderSaveButton) {
+      orderSaveButton.textContent = "Save Order";
+    }
+    if (orderCancelEditButton) {
+      orderCancelEditButton.hidden = true;
+    }
+  }
+
+  function loadOrderIntoForm(orderId) {
+    const order = orders.find((item) => item.id === orderId);
+    if (!order) {
+      return;
+    }
+
+    editingOrderId = order.id;
+    orderCustomerInput.value = order.customer || "";
+    orderPhoneInput.value = order.phone || "";
+    orderProductSelect.value = order.productId || "";
+    orderAreaSelect.value = order.areaId || "";
+    orderQuantityInput.value = Math.max(1, Number(order.quantity) || 1);
+    orderStatusSelect.value = normalizeOrderStatus(order.status);
+    orderNoteInput.value = order.note || "";
+    if (orderSaveButton) {
+      orderSaveButton.textContent = "Update Order";
+    }
+    if (orderCancelEditButton) {
+      orderCancelEditButton.hidden = false;
+    }
+    clearOrderFeedback();
+    orderForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function normalizeOrder(order, reservedIds) {
+    const createdAt = String((order && (order.createdAt || order.date)) || "").trim() || new Date().toISOString();
+    const updatedAt = String((order && order.updatedAt) || "").trim() || createdAt;
+    const seedText = String(
+      (order && (order.orderId || order.id)) ||
+      (order && order.phone) ||
+      (order && order.customer) ||
+      createdAt
+    ).trim();
+    let orderId = String((order && (order.orderId || order.id)) || "").trim();
+
+    if (!isPublicOrderId(orderId) || (reservedIds instanceof Set && reservedIds.has(orderId))) {
+      orderId = buildOrderId(reservedIds, createdAt, seedText);
+    } else if (reservedIds instanceof Set) {
+      reservedIds.add(orderId);
+    }
+
+    return {
+      id: orderId,
+      orderId,
+      customer: String((order && (order.customer || order.customerName)) || "").trim() || "Walk-in customer",
+      phone: String((order && order.phone) || "").trim(),
+      productId: String((order && order.productId) || "").trim(),
+      productName: String((order && (order.productName || order.product)) || "").trim(),
+      quantity: Math.max(1, Number(order && (order.quantity || order.qty)) || 1),
+      areaId: String((order && order.areaId) || "").trim(),
+      areaName: String((order && (order.areaName || order.area || order.deliveryArea)) || "").trim(),
+      status: normalizeOrderStatus(order && order.status),
+      note: String((order && (order.note || order.adminNote)) || "").trim(),
+      totalProfit: Math.max(0, Number(order && order.totalProfit) || 0),
+      orderTotal: Math.max(0, Number(order && (order.orderTotal || order.total || order.price)) || 0),
+      createdAt,
+      updatedAt
+    };
+  }
+
+  function loadLocalOrders() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(ordersKey) || "[]");
+      if (!Array.isArray(saved)) {
+        return [];
+      }
+      const reservedIds = new Set();
+      return saved.map((order) => normalizeOrder(order, reservedIds));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function mergeOrders(remoteOrders, localOrders) {
+    const merged = new Map();
+    const reservedIds = new Set();
+
+    remoteOrders.map((order) => normalizeOrder(order, reservedIds)).forEach((order) => {
+      merged.set(order.id, order);
+    });
+
+    localOrders.map((order) => normalizeOrder(order, reservedIds)).forEach((order) => {
+      const existing = merged.get(order.id);
+      if (!existing) {
+        merged.set(order.id, order);
+        return;
+      }
+
+      const existingTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+      const nextTime = new Date(order.updatedAt || order.createdAt || 0).getTime();
+      if (nextTime >= existingTime) {
+        merged.set(order.id, order);
+      }
+    });
+
+    return Array.from(merged.values()).sort(
+      (left, right) => new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime()
+    );
+  }
+
+  function needsRemoteOrderSync(remoteOrders, mergedOrders) {
+    const remoteMap = new Map(
+      (remoteOrders || []).map((order) => [
+        String(order.id || "").trim(),
+        String(order.updatedAt || order.createdAt || "").trim()
+      ])
+    );
+
+    if (remoteMap.size !== mergedOrders.length) {
+      return true;
+    }
+
+    return mergedOrders.some((order) => remoteMap.get(order.id) !== String(order.updatedAt || order.createdAt || "").trim());
+  }
+
   function buildDefaultCategoryImageMap(categories) {
     return new Map(
       (categories || []).map((category) => [
@@ -353,6 +635,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     { day: "Thursday", theme: "Gift reminder", note: "Push gifting, birthdays, weddings, and thank-you moments." },
     { day: "Friday", theme: "Weekend feature", note: "Highlight your boldest product and invite WhatsApp orders." }
   ];
+  const ORDER_STATUS_OPTIONS = [
+    { value: "new", label: "New" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "paid", label: "Paid" },
+    { value: "delivered", label: "Delivered" },
+    { value: "cancelled", label: "Cancelled" }
+  ];
   const defaultReplyTemplates = [
     {
       id: "reply-new-inquiry",
@@ -479,6 +768,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const salesTable = document.getElementById("admin-sales-table");
   const resetSalesButton = document.getElementById("admin-reset-sales");
   const orderForm = document.getElementById("admin-order-form");
+  const orderSaveButton = orderForm ? orderForm.querySelector('button[type="submit"]') : null;
   const orderCustomerInput = document.getElementById("admin-order-customer");
   const orderPhoneInput = document.getElementById("admin-order-phone");
   const orderProductSelect = document.getElementById("admin-order-product");
@@ -486,8 +776,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   const orderQuantityInput = document.getElementById("admin-order-quantity");
   const orderStatusSelect = document.getElementById("admin-order-status");
   const orderNoteInput = document.getElementById("admin-order-note");
+  const orderFeedback = document.getElementById("admin-order-feedback");
   const orderMetrics = document.getElementById("admin-order-metrics");
+  const orderSearchInput = document.getElementById("admin-order-search");
+  const orderFilterSelect = document.getElementById("admin-order-filter");
   const orderList = document.getElementById("admin-order-list");
+  const orderClearButton = document.getElementById("admin-order-clear");
+  const orderCancelEditButton = document.getElementById("admin-order-cancel-edit");
   const deliveryForm = document.getElementById("admin-delivery-form");
   const deliveryNameInput = document.getElementById("admin-delivery-name");
   const deliveryClientChargeInput = document.getElementById("admin-delivery-client-charge");
@@ -575,6 +870,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const adminTabStorageKey = "sharoncraft-admin-active-tab";
   const analyticsRangeStorageKey = "sharoncraft-admin-analytics-range";
   let currentLiveUser = null;
+  let isSavingOrder = false;
+  let editingOrderId = null;
+  let orderSearchTerm = "";
+  let orderStatusFilter = "all";
+  let expandedOrderId = null;
   let remoteStorefrontAnalyticsEvents = [];
   let analyticsDataSource = "browser";
   let analyticsRange = String(window.localStorage.getItem(analyticsRangeStorageKey) || "7d").trim() || "7d";
@@ -616,12 +916,33 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
-  function loadOrders() {
+  async function loadOrders() {
+    const localOrders = loadLocalOrders();
+
+    if (
+      !liveCatalogApi ||
+      typeof liveCatalogApi.isConfigured !== "function" ||
+      typeof liveCatalogApi.fetchOrders !== "function" ||
+      typeof liveCatalogApi.saveOrders !== "function" ||
+      !liveCatalogApi.isConfigured()
+    ) {
+      return localOrders;
+    }
+
+    const user = await refreshLiveUser();
+    if (!user) {
+      return localOrders;
+    }
+
     try {
-      const saved = JSON.parse(window.localStorage.getItem(ordersKey) || "[]");
-      return Array.isArray(saved) ? saved : [];
+      const remoteOrders = (await liveCatalogApi.fetchOrders()).map((order) => normalizeOrder(order));
+      const mergedOrders = mergeOrders(remoteOrders, localOrders);
+      safeLocalStorageSetItem(ordersKey, JSON.stringify(mergedOrders), "orders");
+
+      return mergedOrders;
     } catch (error) {
-      return [];
+      console.error("Unable to load live orders from Supabase.", error);
+      return localOrders;
     }
   }
 
@@ -693,7 +1014,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   let socialSettings = loadSocialSettings();
   let homeVisuals = loadHomeVisuals();
   let socialPlanner = loadSocialPlanner();
-  let orders = loadOrders();
+  let orders = await loadOrders();
   let deliveryAreas = loadDeliveryAreas();
   let expenses = loadExpenses();
   let bundles = loadBundles();
@@ -827,6 +1148,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function formatPrice(value) {
     return utils.formatCurrency(Number(value) || 0);
+  }
+
+  function formatDate(value) {
+    if (!value) {
+      return "No date";
+    }
+
+    try {
+      return new Date(value).toLocaleDateString("en-KE", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+    } catch (error) {
+      return String(value);
+    }
   }
 
   function toTitleCase(value) {
@@ -1628,6 +1965,45 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     renderLiveAuthState();
     return currentLiveUser;
+  }
+
+  async function refreshOrdersFromLive(options = {}) {
+    if (
+      !liveCatalogApi ||
+      typeof liveCatalogApi.isConfigured !== "function" ||
+      typeof liveCatalogApi.fetchOrders !== "function" ||
+      !liveCatalogApi.isConfigured()
+    ) {
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      return false;
+    }
+
+    try {
+      const remoteOrders = (await liveCatalogApi.fetchOrders()).map((order) => normalizeOrder(order));
+      const mergedOrders = mergeOrders(remoteOrders, loadLocalOrders());
+      orders = mergedOrders;
+      safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
+
+      renderOrders();
+      renderCustomerDashboard();
+      renderGoalCard();
+      renderAdminOverview();
+
+      if (options.showStatus) {
+        setStatus("Live orders refreshed from Supabase.");
+      }
+      return true;
+    } catch (error) {
+      console.error("Unable to refresh live orders.", error);
+      if (options.showStatus) {
+        setStatus("Could not refresh live orders from Supabase.");
+      }
+      return false;
+    }
   }
 
   async function publishCatalogToSupabase(localMessage) {
@@ -2967,14 +3343,141 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderProfitBreakdown();
   }
 
-  function saveOrders(message) {
-    window.localStorage.setItem(ordersKey, JSON.stringify(orders));
+  async function saveOrders(message) {
+    const savedLocally = safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
     renderOrders();
     renderCustomerDashboard();
     renderGoalCard();
     renderAdminOverview();
-    if (message) {
-      setStatus(message);
+
+    if (
+      !liveCatalogApi ||
+      typeof liveCatalogApi.isConfigured !== "function" ||
+      typeof liveCatalogApi.saveOrders !== "function" ||
+      !liveCatalogApi.isConfigured()
+    ) {
+      if (message) {
+        setStatus(savedLocally ? `${message} Saved locally only because Supabase order sync is not configured here.` : `${message} Local save failed because browser storage is full.`);
+      }
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      if (message) {
+        const prefix = savedLocally ? message : `${message} Local save failed because browser storage is full.`;
+        setStatus(`${prefix} Sign in to Supabase so customers can track this order online.`);
+      }
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.saveOrders(orders);
+      if (message) {
+        setStatus(`${message} Customer tracking is live too.`);
+      }
+      return true;
+    } catch (error) {
+      console.error("Unable to sync orders to Supabase.", error);
+      if (error && /sign in/i.test(String(error.message || ""))) {
+        currentLiveUser = null;
+        renderLiveAuthState();
+      } else {
+        setLiveAuthState("Signed in, but live order sync failed. Check Supabase order tables or permissions.", "error");
+      }
+      if (message) {
+        const prefix = savedLocally ? message : `${message} Local save failed because browser storage is full.`;
+        setStatus(`${prefix} Online order tracking did not sync.`);
+      }
+      return false;
+    }
+  }
+
+  async function removeOrder(orderId, message) {
+    const savedLocally = safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
+    renderOrders();
+    renderCustomerDashboard();
+    renderGoalCard();
+    renderAdminOverview();
+
+    if (
+      !liveCatalogApi ||
+      typeof liveCatalogApi.isConfigured !== "function" ||
+      typeof liveCatalogApi.deleteOrder !== "function" ||
+      !liveCatalogApi.isConfigured()
+    ) {
+      if (message) {
+        setStatus(savedLocally ? `${message} Removed locally only because Supabase order sync is not configured here.` : `${message} Local save failed because browser storage is full.`);
+      }
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      if (message) {
+        const prefix = savedLocally ? message : `${message} Local save failed because browser storage is full.`;
+        setStatus(`${prefix} Sign in to Supabase so the live tracking record can be removed too.`);
+      }
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.deleteOrder(orderId);
+      if (message) {
+        setStatus(`${message} Live tracking record removed too.`);
+      }
+      return true;
+    } catch (error) {
+      console.error("Unable to delete order from Supabase.", error);
+      if (message) {
+        const prefix = savedLocally ? message : `${message} Local save failed because browser storage is full.`;
+        setStatus(`${prefix} The live tracking record could not be removed.`);
+      }
+      return false;
+    }
+  }
+
+  async function clearAllOrders(message) {
+    const savedLocally = safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
+    renderOrders();
+    renderCustomerDashboard();
+    renderGoalCard();
+    renderAdminOverview();
+
+    if (
+      !liveCatalogApi ||
+      typeof liveCatalogApi.isConfigured !== "function" ||
+      typeof liveCatalogApi.clearOrders !== "function" ||
+      !liveCatalogApi.isConfigured()
+    ) {
+      if (message) {
+        setStatus(savedLocally ? `${message} Cleared locally only because Supabase order sync is not configured here.` : `${message} Local save failed because browser storage is full.`);
+      }
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      if (message) {
+        const prefix = savedLocally ? message : `${message} Local save failed because browser storage is full.`;
+        setStatus(`${prefix} Sign in to Supabase to clear the live order list too.`);
+      }
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.clearOrders();
+      if (message) {
+        setStatus(`${message} Live order tracking was cleared too.`);
+      }
+      return true;
+    } catch (error) {
+      console.error("Unable to clear orders from Supabase.", error);
+      if (message) {
+        const prefix = savedLocally ? message : `${message} Local save failed because browser storage is full.`;
+        setStatus(`${prefix} The live order list could not be cleared.`);
+      }
+      return false;
     }
   }
 
@@ -3042,7 +3545,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join("");
   }
 
-  function renderOrders() {
+  function renderOrdersOld() {
     if (!orderList || !orderMetrics) {
       return;
     }
@@ -3105,6 +3608,202 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div>
               <strong>No orders yet</strong>
               <span>Orders you save here will help you track customers, profit, and delivery progress.</span>
+            </div>
+          </article>
+        `;
+  }
+
+  function renderOrdersLegacy() {
+    if (!orderList || !orderMetrics) {
+      return;
+    }
+
+    const totals = orders.reduce(
+      (accumulator, order) => {
+        accumulator.count += 1;
+        accumulator.profit += Number(order.totalProfit) || 0;
+        if (order.status === "delivered") {
+          accumulator.delivered += 1;
+        } else if (order.status === "cancelled") {
+          accumulator.cancelled += 1;
+        } else {
+          accumulator.active += 1;
+        }
+        return accumulator;
+      },
+      { count: 0, delivered: 0, active: 0, cancelled: 0, profit: 0 }
+    );
+
+    orderMetrics.innerHTML = `
+      <article class="admin-metric-card">
+        <span>Orders</span>
+        <strong>${totals.count}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Active</span>
+        <strong>${totals.active}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Order Profit</span>
+        <strong>${formatPrice(totals.profit)}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Delivered</span>
+        <strong>${totals.delivered}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Cancelled</span>
+        <strong>${totals.cancelled}</strong>
+      </article>
+    `;
+
+    orderList.innerHTML = orders.length
+      ? orders
+          .map(
+            (order) => `
+              <article class="admin-order-row">
+                <div>
+                  <strong>${order.customer}</strong>
+                  <span>${order.productName} x${order.quantity}</span>
+                  <span>Order ID: ${order.orderId || order.id}</span>
+                  <span>${order.areaName || "No area"} · ${order.phone || "No phone"}</span>
+                  <span>${formatDate(order.createdAt)} · ${order.orderTotal ? formatPrice(order.orderTotal) : "Total not set"}</span>
+                  <div class="admin-inline-actions">
+                    <button type="button" data-order-copy-id="${order.id}">Copy ID</button>
+                    <button type="button" data-order-copy-link="${order.id}">Copy Track Link</button>
+                    <button type="button" data-order-open-link="${order.id}">Open Tracking</button>
+                  </div>
+                </div>
+                <span>${formatPrice(order.totalProfit)}</span>
+                <select data-order-status="${order.id}">
+                  ${ORDER_STATUS_OPTIONS.map(
+                    (status) => `<option value="${status.value}" ${order.status === status.value ? "selected" : ""}>${status.label}</option>`
+                  ).join("")}
+                </select>
+                <button type="button" data-order-delete="${order.id}">Delete</button>
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="admin-order-row">
+            <div>
+              <strong>No orders yet</strong>
+              <span>Orders you save here will help you track customers, profit, and delivery progress.</span>
+            </div>
+          </article>
+        `;
+  }
+
+  function renderOrders() {
+    if (!orderList || !orderMetrics) {
+      return;
+    }
+
+    const totals = orders.reduce(
+      (accumulator, order) => {
+        accumulator.count += 1;
+        accumulator.profit += Number(order.totalProfit) || 0;
+        if (order.status === "delivered") {
+          accumulator.delivered += 1;
+        } else if (order.status === "cancelled") {
+          accumulator.cancelled += 1;
+        } else {
+          accumulator.active += 1;
+        }
+        return accumulator;
+      },
+      { count: 0, delivered: 0, active: 0, cancelled: 0, profit: 0 }
+    );
+    const visibleOrders = getVisibleOrders();
+
+    orderMetrics.innerHTML = `
+      <article class="admin-metric-card">
+        <span>Orders</span>
+        <strong>${totals.count}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Active</span>
+        <strong>${totals.active}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Order Profit</span>
+        <strong>${formatPrice(totals.profit)}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Delivered</span>
+        <strong>${totals.delivered}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Cancelled</span>
+        <strong>${totals.cancelled}</strong>
+      </article>
+    `;
+
+    orderList.innerHTML = visibleOrders.length
+      ? visibleOrders
+          .map(
+            (order) => `
+              <article class="admin-order-row">
+                <div class="admin-order-main">
+                  <div class="admin-order-summary">
+                    <strong>${order.productName} x${order.quantity}</strong>
+                    <span>${order.customer || "Walk-in customer"}</span>
+                  </div>
+                  <div class="admin-order-meta">
+                    <span>Order ID: ${order.orderId || order.id}</span>
+                    <span>${order.phone || "No phone"}</span>
+                    <span>${formatDate(order.createdAt)}</span>
+                    <span>${order.orderTotal ? formatPrice(order.orderTotal) : "Total not set"}</span>
+                  </div>
+                </div>
+                <div class="admin-order-status-cell">
+                  <span class="admin-order-chip ${getOrderStatusClass(order.status)}">${getOrderStatusLabel(order.status)}</span>
+                  <select data-order-status="${order.id}">
+                    ${ORDER_STATUS_OPTIONS.map(
+                      (status) => `<option value="${status.value}" ${order.status === status.value ? "selected" : ""}>${status.label}</option>`
+                    ).join("")}
+                  </select>
+                </div>
+                <div class="admin-order-actions">
+                  <button type="button" data-order-track="${order.id}">Track</button>
+                  <button type="button" data-order-edit="${order.id}">Edit</button>
+                  <button type="button" data-order-toggle="${order.id}">${expandedOrderId === order.id ? "Hide Details" : "Details"}</button>
+                  <button type="button" data-order-delete="${order.id}">Delete</button>
+                </div>
+                ${expandedOrderId === order.id ? `
+                  <div class="admin-order-detail-grid">
+                    <div class="admin-order-detail-card">
+                      <label>Customer</label>
+                      <strong>${order.customer || "Walk-in customer"}</strong>
+                      <span>${order.phone || "No phone saved"}</span>
+                    </div>
+                    <div class="admin-order-detail-card">
+                      <label>Delivery</label>
+                      <strong>${order.areaName || "No area selected"}</strong>
+                      <span>Quantity ${order.quantity}</span>
+                    </div>
+                    <div class="admin-order-detail-card">
+                      <label>Money</label>
+                      <strong>${order.orderTotal ? formatPrice(order.orderTotal) : "Total not set"}</strong>
+                      <span>Profit ${formatPrice(order.totalProfit)}</span>
+                    </div>
+                    <div class="admin-order-detail-card">
+                      <label>Tracking Note</label>
+                      <strong>${order.note || "No customer note"}</strong>
+                      <span>Updated ${formatDate(order.updatedAt || order.createdAt)}</span>
+                    </div>
+                  </div>
+                ` : ""}
+              </article>
+            `
+          )
+          .join("")
+      : `
+          <article class="admin-order-row admin-order-empty">
+            <div>
+              <strong>${orders.length ? "No matching orders" : "No orders yet"}</strong>
+              <span>${orders.length ? "Try a different search term or switch the status filter." : "Orders you save here will help you track customers, profit, and delivery progress."}</span>
             </div>
           </article>
         `;
@@ -4727,8 +5426,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   if (orderForm) {
-    orderForm.addEventListener("submit", function (event) {
+    orderForm.addEventListener("submit", async function (event) {
       event.preventDefault();
+      if (isSavingOrder) {
+        return;
+      }
+
       const product = catalog.find((item) => item.id === orderProductSelect.value);
       const area = deliveryAreas.find((item) => item.id === orderAreaSelect.value);
       if (!product) {
@@ -4740,9 +5443,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       const productProfit = getProductProfit(product, quantity);
       const deliveryProfit = area ? Math.max(0, Number(area.clientCharge || 0) - Number(area.realCost || 0)) : 0;
       const totalProfit = productProfit + deliveryProfit;
-
-      orders.unshift({
-        id: `order-${Date.now()}`,
+      const orderTotal = getOrderTotal(product, quantity, area);
+      const createdAt = new Date().toISOString();
+      const draftOrder = {
         customer: orderCustomerInput.value.trim() || "Walk-in customer",
         phone: orderPhoneInput.value.trim(),
         productId: product.id,
@@ -4750,38 +5453,223 @@ document.addEventListener("DOMContentLoaded", async function () {
         quantity,
         areaId: area ? area.id : "",
         areaName: area ? area.name : "",
-        status: orderStatusSelect.value,
+        status: normalizeOrderStatus(orderStatusSelect.value),
         note: orderNoteInput.value.trim(),
         totalProfit,
-        createdAt: new Date().toISOString()
-      });
+        orderTotal,
+        createdAt,
+        updatedAt: createdAt
+      };
+      const recentDuplicate = editingOrderId ? null : findRecentDuplicateOrder(draftOrder);
 
-      orderForm.reset();
-      orderQuantityInput.value = 1;
-      saveOrders("Order saved.");
-      activateAdminTab("orders");
+      if (recentDuplicate) {
+        orders = orders.map((order) =>
+          order.id === recentDuplicate.id
+            ? {
+                ...order,
+                status: draftOrder.status,
+                note: draftOrder.note,
+                totalProfit: draftOrder.totalProfit,
+                orderTotal: draftOrder.orderTotal,
+                updatedAt: createdAt
+              }
+            : order
+        );
+        renderOrderFeedback({ ...recentDuplicate, ...draftOrder, updatedAt: createdAt }, "updated");
+        await saveOrders(`A matching order was already saved as ${recentDuplicate.id}. I updated that order instead of creating another copy.`);
+        resetOrderFormState();
+        activateAdminTab("orders");
+        return;
+      }
+
+      isSavingOrder = true;
+      if (orderSaveButton) {
+        orderSaveButton.disabled = true;
+        orderSaveButton.textContent = "Saving...";
+      }
+
+      try {
+        if (editingOrderId) {
+          orders = orders.map((order) =>
+            order.id === editingOrderId
+              ? {
+                  ...order,
+                  customer: draftOrder.customer,
+                  phone: draftOrder.phone,
+                  productId: draftOrder.productId,
+                  productName: draftOrder.productName,
+                  quantity: draftOrder.quantity,
+                  areaId: draftOrder.areaId,
+                  areaName: draftOrder.areaName,
+                  status: draftOrder.status,
+                  note: draftOrder.note,
+                  totalProfit: draftOrder.totalProfit,
+                  orderTotal: draftOrder.orderTotal,
+                  updatedAt: createdAt
+                }
+              : order
+          );
+          const updatedOrder = orders.find((order) => order.id === editingOrderId);
+          renderOrderFeedback(updatedOrder, "updated");
+          await saveOrders(`Order ${editingOrderId} updated.`);
+        } else {
+          const orderId = buildOrderId(
+            new Set(orders.map((order) => order.id)),
+            createdAt,
+            `${orderPhoneInput.value.trim()}:${product.id}:${createdAt}`
+          );
+
+          const nextOrder = {
+            id: orderId,
+            orderId,
+            customer: draftOrder.customer,
+            phone: draftOrder.phone,
+            productId: draftOrder.productId,
+            productName: draftOrder.productName,
+            quantity: draftOrder.quantity,
+            areaId: draftOrder.areaId,
+            areaName: draftOrder.areaName,
+            status: draftOrder.status,
+            note: draftOrder.note,
+            totalProfit: draftOrder.totalProfit,
+            orderTotal: draftOrder.orderTotal,
+            createdAt: draftOrder.createdAt,
+            updatedAt: draftOrder.updatedAt
+          };
+
+          orders.unshift(nextOrder);
+          renderOrderFeedback(nextOrder, "saved");
+          await saveOrders(`Order ${orderId} saved.`);
+        }
+
+        resetOrderFormState();
+        activateAdminTab("orders");
+      } finally {
+        isSavingOrder = false;
+        if (orderSaveButton) {
+          orderSaveButton.disabled = false;
+        }
+      }
     });
   }
 
   if (orderList) {
-    orderList.addEventListener("change", function (event) {
+    orderList.addEventListener("change", async function (event) {
       const select = event.target.closest("[data-order-status]");
       if (!select) {
         return;
       }
 
-      orders = orders.map((order) => (order.id === select.dataset.orderStatus ? { ...order, status: select.value } : order));
-      saveOrders("Order status updated.");
+      orders = orders.map((order) =>
+        order.id === select.dataset.orderStatus
+          ? { ...order, status: normalizeOrderStatus(select.value), updatedAt: new Date().toISOString() }
+          : order
+      );
+      await saveOrders("Order status updated.");
     });
 
-    orderList.addEventListener("click", function (event) {
+    orderList.addEventListener("click", async function (event) {
+      const trackButton = event.target.closest("[data-order-track]");
+      const editButton = event.target.closest("[data-order-edit]");
+      const toggleButton = event.target.closest("[data-order-toggle]");
       const button = event.target.closest("[data-order-delete]");
+
+      if (trackButton) {
+        const orderId = trackButton.dataset.orderTrack;
+        window.open(buildTrackOrderUrl(orderId), "_blank", "noopener");
+        setStatus(`Opened the tracking page for ${orderId}.`);
+        return;
+      }
+
+      if (editButton) {
+        loadOrderIntoForm(editButton.dataset.orderEdit);
+        setStatus(`Editing order ${editButton.dataset.orderEdit}.`);
+        return;
+      }
+
+      if (toggleButton) {
+        expandedOrderId = expandedOrderId === toggleButton.dataset.orderToggle ? null : toggleButton.dataset.orderToggle;
+        renderOrders();
+        return;
+      }
+
       if (!button) {
         return;
       }
 
+      if (editingOrderId === button.dataset.orderDelete) {
+        resetOrderFormState();
+      }
+      clearOrderFeedback();
+      expandedOrderId = expandedOrderId === button.dataset.orderDelete ? null : expandedOrderId;
       orders = orders.filter((order) => order.id !== button.dataset.orderDelete);
-      saveOrders("Order removed.");
+      await removeOrder(button.dataset.orderDelete, "Order removed.");
+    });
+  }
+
+  if (orderSearchInput) {
+    orderSearchInput.addEventListener("input", function () {
+      orderSearchTerm = orderSearchInput.value || "";
+      renderOrders();
+    });
+  }
+
+  if (orderFilterSelect) {
+    orderFilterSelect.addEventListener("change", function () {
+      orderStatusFilter = orderFilterSelect.value || "all";
+      renderOrders();
+    });
+  }
+
+  if (orderCancelEditButton) {
+    orderCancelEditButton.addEventListener("click", function () {
+      resetOrderFormState();
+      clearOrderFeedback();
+      setStatus("Order edit cancelled.");
+    });
+  }
+
+  if (orderFeedback) {
+    orderFeedback.addEventListener("click", async function (event) {
+      const copyButton = event.target.closest("[data-order-feedback-copy]");
+      const openButton = event.target.closest("[data-order-feedback-open]");
+
+      if (copyButton) {
+        const orderId = copyButton.dataset.orderFeedbackCopy;
+        const trackingUrl = buildTrackOrderUrl(orderId);
+        try {
+          await navigator.clipboard.writeText(trackingUrl);
+          setStatus(`Tracking link for ${orderId} copied.`);
+        } catch (error) {
+          setStatus(`Could not copy the tracking link for ${orderId}.`);
+        }
+      }
+
+      if (openButton) {
+        const orderId = openButton.dataset.orderFeedbackOpen;
+        window.open(buildTrackOrderUrl(orderId), "_blank", "noopener");
+        setStatus(`Opened the tracking page for ${orderId}.`);
+      }
+    });
+  }
+
+  if (orderClearButton) {
+    orderClearButton.addEventListener("click", async function () {
+      if (!orders.length) {
+        setStatus("There are no saved orders to clear.");
+        return;
+      }
+
+      const confirmed = window.confirm("Clear the entire saved order list? This will also remove live tracking records for those orders.");
+      if (!confirmed) {
+        return;
+      }
+
+      resetOrderFormState();
+      clearOrderFeedback();
+      expandedOrderId = null;
+      orders = [];
+      await clearAllOrders("Order list cleared.");
     });
   }
 
@@ -5106,6 +5994,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderProfitDashboard();
   renderOrderProductSelect();
   renderOrderAreaSelect();
+  resetOrderFormState();
   renderOrders();
   renderCustomerDashboard();
   renderDeliveryAreas();
@@ -5128,9 +6017,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     liveCatalogApi.onAuthStateChange(async function (user) {
       currentLiveUser = user || null;
       renderLiveAuthState();
+      if (user) {
+        await refreshOrdersFromLive();
+      }
       await refreshStorefrontAnalytics();
     });
-    refreshLiveUser().then(function () {
+    refreshLiveUser().then(async function () {
+      await refreshOrdersFromLive();
       refreshStorefrontAnalytics();
     });
   } else {
