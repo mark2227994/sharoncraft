@@ -136,6 +136,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     const category = categorySelect.value;
     const price = priceSelect.value;
     const sort = sortSelect.value;
+    const site = utils.data && utils.data.site ? utils.data.site : {};
+    const siteName = site.name || "SharonCraft";
+    const siteUrl = new URL("/", window.location.origin).href;
+    const socialLinks = (Array.isArray(site.socials) ? site.socials : [])
+      .map((item) => String(item && item.url || "").trim())
+      .filter((url) => url && url !== "#");
 
     buildChips();
 
@@ -193,23 +199,94 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     if (typeof utils.setStructuredData === "function") {
+      const categoryName = ((utils.getCategoryBySlug(category) || {}).name || "Collection");
+      const collectionUrl = new URL(category ? `/shop.html?category=${encodeURIComponent(category)}` : "/shop.html", window.location.origin).href;
+      const visibleItems = sorted.slice(0, 12).map((product, index) => {
+        const productCategory = utils.getCategoryBySlug(product.category);
+        const productImages = Array.isArray(product.images) && product.images.length
+          ? product.images
+          : ["assets/images/IMG-20260226-WA0005.jpg"];
+        const productUrl = new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href;
+
+        return {
+          "@type": "ListItem",
+          position: index + 1,
+          url: productUrl,
+          item: {
+            "@type": "Product",
+            "@id": `${productUrl}#product`,
+            name: product.name || "SharonCraft product",
+            url: productUrl,
+            image: productImages.map((image) => new URL(image, window.location.origin).href),
+            description: product.description || product.shortDescription || "Handmade by SharonCraft artisans.",
+            sku: product.id,
+            category: productCategory ? productCategory.name : "Collection",
+            brand: {
+              "@type": "Brand",
+              name: siteName
+            },
+            offers: {
+              "@type": "Offer",
+              priceCurrency: "KES",
+              price: String(Number(product.price) || 0),
+              availability: product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+              itemCondition: "https://schema.org/NewCondition",
+              url: productUrl,
+              seller: {
+                "@type": "Organization",
+                name: siteName,
+                url: siteUrl,
+                telephone: site.phone || "",
+                email: site.email || "",
+                sameAs: socialLinks
+              }
+            }
+          }
+        };
+      });
+
       utils.setStructuredData("shop-collection", {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        name: category ? `${((utils.getCategoryBySlug(category) || {}).name || "Collection")} | SharonCraft` : "Shop SharonCraft",
-        url: new URL(category ? `/shop.html?category=${encodeURIComponent(category)}` : "/shop.html", window.location.origin).href,
+        "@id": `${collectionUrl}#collection`,
+        name: category ? `${categoryName} | SharonCraft` : "Shop SharonCraft",
+        url: collectionUrl,
         description: category
-          ? `Browse ${((utils.getCategoryBySlug(category) || {}).name || "this SharonCraft collection")} and order on WhatsApp.`
+          ? `Browse ${categoryName} from SharonCraft and order on WhatsApp.`
           : "Browse SharonCraft handmade beadwork and order on WhatsApp.",
         mainEntity: {
           "@type": "ItemList",
-          itemListElement: sorted.slice(0, 12).map((product, index) => ({
-            "@type": "ListItem",
-            position: index + 1,
-            url: new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href,
-            name: product.name || "SharonCraft product"
-          }))
+          numberOfItems: sorted.length,
+          itemListOrder: "https://schema.org/ItemListOrderAscending",
+          itemListElement: visibleItems
         }
+      });
+
+      utils.setStructuredData("shop-breadcrumb", {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteUrl
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Shop",
+            item: new URL("/shop.html", window.location.origin).href
+          },
+          ...(category
+            ? [{
+                "@type": "ListItem",
+                position: 3,
+                name: categoryName,
+                item: collectionUrl
+              }]
+            : [])
+        ]
       });
     }
 
