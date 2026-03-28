@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sharoncraft.co.ke/sitemap.xml
+Sitemap: https://www.sharoncraft.co.ke/sitemap.xml
