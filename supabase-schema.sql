@@ -1,5 +1,6 @@
 -- SharonCraft Supabase schema
 -- Run this whole script in Supabase SQL Editor.
+-- Safe to re-run: it uses create-if-missing and replace-style policies.
 
 -- Core products table used by storefront + publishing flows.
 create table if not exists public.products (
@@ -62,10 +63,54 @@ create table if not exists public.admin_users (
   created_at timestamptz not null default now()
 );
 
+-- Full admin orders table. This keeps customer details private to admins.
+create table if not exists public.orders (
+  id text primary key,
+  customer_name text not null default '',
+  customer_phone text not null default '',
+  product_id text not null default '',
+  product_name text not null default '',
+  quantity integer not null default 1 check (quantity > 0),
+  delivery_area_id text not null default '',
+  delivery_area text not null default '',
+  status text not null default 'new' check (
+    status = any (array['new', 'confirmed', 'paid', 'delivered', 'cancelled'])
+  ),
+  note text not null default '',
+  total_profit integer not null default 0 check (total_profit >= 0),
+  order_total integer not null default 0 check (order_total >= 0),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists orders_created_at_idx on public.orders(created_at desc);
+create index if not exists orders_customer_phone_idx on public.orders(customer_phone);
+create index if not exists orders_status_idx on public.orders(status);
+
+-- Public-safe tracking table. Customers can look up status by order ID without seeing private contact data.
+create table if not exists public.order_tracking (
+  id text primary key references public.orders(id) on delete cascade,
+  product_name text not null default '',
+  quantity integer not null default 1 check (quantity > 0),
+  delivery_area text not null default '',
+  status text not null default 'new' check (
+    status = any (array['new', 'confirmed', 'paid', 'delivered', 'cancelled'])
+  ),
+  note text not null default '',
+  order_total integer not null default 0 check (order_total >= 0),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists order_tracking_status_idx on public.order_tracking(status);
+create index if not exists order_tracking_updated_at_idx on public.order_tracking(updated_at desc);
+
 alter table public.products enable row level security;
 alter table public.site_settings enable row level security;
 alter table public.analytics_events enable row level security;
 alter table public.admin_users enable row level security;
+alter table public.orders enable row level security;
+alter table public.order_tracking enable row level security;
 
 drop policy if exists "Public read products" on public.products;
 create policy "Public read products"
@@ -77,6 +122,13 @@ using (true);
 drop policy if exists "Public read site settings" on public.site_settings;
 create policy "Public read site settings"
 on public.site_settings
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Public read order tracking" on public.order_tracking;
+create policy "Public read order tracking"
+on public.order_tracking
 for select
 to anon, authenticated
 using (true);
@@ -223,6 +275,124 @@ on public.admin_users
 for select
 to authenticated
 using (user_id = auth.uid());
+
+drop policy if exists "Admin read orders" on public.orders;
+create policy "Admin read orders"
+on public.orders
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin insert orders" on public.orders;
+create policy "Admin insert orders"
+on public.orders
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin update orders" on public.orders;
+create policy "Admin update orders"
+on public.orders
+for update
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin delete orders" on public.orders;
+create policy "Admin delete orders"
+on public.orders
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin read order tracking" on public.order_tracking;
+create policy "Admin read order tracking"
+on public.order_tracking
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin insert order tracking" on public.order_tracking;
+create policy "Admin insert order tracking"
+on public.order_tracking
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin update order tracking" on public.order_tracking;
+create policy "Admin update order tracking"
+on public.order_tracking
+for update
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin delete order tracking" on public.order_tracking;
+create policy "Admin delete order tracking"
+on public.order_tracking
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
 
 -- Public image bucket used by product image uploads.
 insert into storage.buckets (id, name, public)

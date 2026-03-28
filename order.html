@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Status | SharonCraft</title>
+  <meta name="description" content="Track your SharonCraft order from confirmed to delivered." />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260327-live-fix" />
+  <style>
+    :root {
+      --sc-coral:#d85a30;--sc-coral-lt:#faeee8;--sc-coral-mid:#f0997b;
+      --sc-teal:#1d9e75;--sc-teal-lt:#e1f5ee;
+      --sc-ochre:#ba7517;--sc-ochre-lt:#faeeda;
+      --sc-sand:#faf9f6;--sc-border:#ede8df;
+      --sc-text:#1a1a18;--sc-muted:#6b6860;--sc-surface:#ffffff;
+      --sc-green:#085041;--sc-green-lt:#e1f5ee;
+      --r-card:18px;--r-inner:12px;--r-pill:999px;
+    }
+    .os-shell{max-width:660px;margin:0 auto;padding:0 1rem 5rem}
+
+    /* lookup card */
+    .os-lookup{background:var(--sc-surface);border:1.5px solid var(--sc-border);border-radius:var(--r-card);padding:2rem;margin-bottom:1.75rem;animation:sc-rise .45s cubic-bezier(.22,.68,0,1.2) both}
+    .os-kicker{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sc-coral);margin-bottom:.4rem}
+    .os-lookup h2{font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:700;color:var(--sc-text);margin:0 0 .35rem}
+    .os-lookup p{font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--sc-muted);margin:0 0 1.25rem;line-height:1.55}
+    .os-row{display:flex;gap:.65rem;flex-wrap:wrap}
+    .os-row input{flex:1;min-width:180px;padding:.75rem 1rem;border:1.5px solid var(--sc-border);border-radius:var(--r-inner);font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:600;background:var(--sc-sand);color:var(--sc-text);outline:none;transition:border-color .2s,box-shadow .2s}
+    .os-row input::placeholder{color:#b0aa9f;font-weight:400}
+    .os-row input:focus{border-color:var(--sc-coral);box-shadow:0 0 0 3px rgba(216,90,48,.12)}
+
+    /* spinner */
+    .os-loading{display:flex;align-items:center;justify-content:center;gap:.75rem;padding:3rem 1rem;font-family:'Nunito',sans-serif;font-size:.92rem;color:var(--sc-muted)}
+    .os-spinner{width:22px;height:22px;border:2.5px solid var(--sc-border);border-top-color:var(--sc-coral);border-radius:50%;animation:sc-spin .65s linear infinite}
+
+    /* result card */
+    .os-card{background:var(--sc-surface);border:1.5px solid var(--sc-border);border-radius:var(--r-card);overflow:hidden;animation:sc-rise .45s cubic-bezier(.22,.68,0,1.2) both}
+    .os-bar{height:4px;background:var(--sc-coral);transform-origin:left;animation:sc-bar .7s cubic-bezier(.22,.68,0,1.2) .05s both}
+    .os-bar.teal{background:var(--sc-teal)}
+    .os-bar.grey{background:#d3d1c7}
+    .os-body{padding:1.75rem 1.75rem 0}
+    @media(max-width:500px){.os-body{padding:1.25rem 1.25rem 0}}
+
+    /* header */
+    .os-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+    .os-id-lbl{font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--sc-muted);display:block;margin-bottom:3px}
+    .os-id{font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:700;color:var(--sc-text)}
+    .os-date{font-family:'Nunito',sans-serif;font-size:.8rem;color:var(--sc-muted);text-align:right;line-height:1.5}
+
+    /* badge */
+    .os-badge{display:inline-flex;align-items:center;gap:6px;padding:.3rem .85rem;border-radius:var(--r-pill);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:.04em;margin-bottom:1.5rem;animation:sc-pop .4s cubic-bezier(.22,.68,0,1.4) .2s both}
+    .os-dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:sc-pulse 2s ease-in-out infinite}
+    .b-new{background:#f1efe8;color:#5f5e5a}.b-new .os-dot{animation:none}
+    .b-confirmed{background:var(--sc-ochre-lt);color:#633806}
+    .b-paid{background:var(--sc-teal-lt);color:var(--sc-green)}
+    .b-delivered{background:var(--sc-teal-lt);color:var(--sc-green)}
+    .b-cancelled{background:#fdecea;color:#791f1f}
+
+    /* progress */
+    .os-prog-lbl{font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sc-muted);margin-bottom:1rem}
+    .os-steps{display:flex;align-items:flex-start;margin-bottom:1.75rem}
+    .os-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+    .os-step:not(:last-child)::after{content:'';position:absolute;top:16px;left:calc(50% + 17px);right:calc(-50% + 17px);height:2px;background:var(--sc-border)}
+    .os-step.done:not(:last-child)::after{background:var(--sc-teal);animation:sc-line .5s ease both}
+    .os-sdot{width:34px;height:34px;border-radius:50%;border:2px solid var(--sc-border);background:var(--sc-sand);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;margin-bottom:.45rem;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;transition:border-color .3s,background .3s;color:var(--sc-muted)}
+    .os-step.done .os-sdot{background:var(--sc-teal);border-color:var(--sc-teal);color:#fff;animation:sc-dot-done .4s cubic-bezier(.22,.68,0,1.4) both}
+    .os-step.active .os-sdot{background:var(--sc-coral);border-color:var(--sc-coral);color:#fff;animation:sc-dot-active .4s cubic-bezier(.22,.68,0,1.4) both,sc-ring 2.5s ease-in-out .5s infinite}
+    .os-sname{font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;text-align:center;color:var(--sc-muted);line-height:1.3}
+    .os-step.done .os-sname{color:var(--sc-teal)}
+    .os-step.active .os-sname{color:var(--sc-coral);font-weight:800}
+
+    /* step animation delays */
+    .os-step:nth-child(1) .os-sdot{animation-delay:.1s}
+    .os-step:nth-child(2) .os-sdot{animation-delay:.25s}
+    .os-step:nth-child(3) .os-sdot{animation-delay:.4s}
+    .os-step:nth-child(4) .os-sdot{animation-delay:.55s}
+    .os-step:nth-child(1):not(:last-child)::after{animation-delay:.2s}
+    .os-step:nth-child(2):not(:last-child)::after{animation-delay:.35s}
+    .os-step:nth-child(3):not(:last-child)::after{animation-delay:.5s}
+
+    /* message */
+    .os-msg{border-left:3px solid var(--sc-coral);background:var(--sc-coral-lt);border-radius:0 var(--r-inner) var(--r-inner) 0;padding:.9rem 1.1rem;font-family:'Nunito',sans-serif;font-size:.9rem;color:#712b13;line-height:1.6;margin-bottom:1.5rem;animation:sc-rise .4s ease .3s both}
+    .os-msg.teal{border-color:var(--sc-teal);background:var(--sc-teal-lt);color:var(--sc-green)}
+    .os-msg.grey{border-color:#ccc;background:#f7f5f2;color:var(--sc-muted)}
+
+    /* note */
+    .os-note{background:var(--sc-ochre-lt);border:1px solid #f0d090;border-radius:var(--r-inner);padding:.8rem 1rem;font-family:'Nunito',sans-serif;font-size:.87rem;color:#633806;margin-bottom:1.5rem;line-height:1.55;display:none}
+    .os-note.show{display:block}
+    .os-note strong{display:block;font-weight:800;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+
+    /* details */
+    .os-details{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.75rem;animation:sc-rise .4s ease .15s both}
+    @media(max-width:440px){.os-details{grid-template-columns:1fr}}
+    .os-det{background:var(--sc-sand);border:1px solid var(--sc-border);border-radius:var(--r-inner);padding:.8rem 1rem}
+    .os-det label{font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sc-muted);display:block;margin-bottom:3px}
+    .os-det strong{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;color:var(--sc-text)}
+
+    /* actions */
+    .os-actions{display:flex;gap:.65rem;flex-wrap:wrap;padding:1.25rem 1.75rem 1.75rem;border-top:1px solid var(--sc-border);background:var(--sc-sand);border-radius:0 0 var(--r-card) var(--r-card)}
+    @media(max-width:500px){.os-actions{padding:1rem 1.25rem 1.25rem}}
+
+    /* state card */
+    .os-state{background:var(--sc-surface);border:1.5px solid var(--sc-border);border-radius:var(--r-card);padding:3rem 2rem;text-align:center;animation:sc-rise .4s cubic-bezier(.22,.68,0,1.2) both}
+    .os-state-ico{width:52px;height:52px;border-radius:50%;background:var(--sc-coral-lt);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+    .os-state-ico svg{width:22px;height:22px;stroke:var(--sc-coral);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .os-state h3{font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:700;color:var(--sc-text);margin:0 0 .4rem}
+    .os-state p{font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--sc-muted);margin:0 0 1.25rem;line-height:1.6;max-width:360px;margin-left:auto;margin-right:auto}
+
+    /* celebration confetti */
+    .os-confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+    .os-piece{position:absolute;top:-10px;width:8px;height:8px;border-radius:2px;opacity:0;animation:sc-fall 1.8s ease-in both}
+
+    /* keyframes */
+    @keyframes sc-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes sc-pop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    @keyframes sc-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    @keyframes sc-dot-done{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+    @keyframes sc-dot-active{0%{transform:scale(.7)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+    @keyframes sc-ring{0%,100%{box-shadow:0 0 0 5px rgba(216,90,48,.13)}50%{box-shadow:0 0 0 9px rgba(216,90,48,.06)}}
+    @keyframes sc-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+    @keyframes sc-line{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+    @keyframes sc-spin{to{transform:rotate(360deg)}}
+    @keyframes sc-fall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(240px) rotate(540deg)}}
+  </style>
+</head>
+<body data-page="order">
+  <div data-site-header></div>
+
+  <main>
+    <section class="page-hero" style="padding-bottom:.5rem">
+      <div class="container">
+        <div class="page-hero-copy">
+          <span class="section-kicker">Order Tracking</span>
+          <h1>Check your order status.</h1>
+          <p>Enter the order ID from your WhatsApp confirmation to see exactly where your order is.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:1.5rem">
+      <div class="container">
+        <div class="os-shell">
+
+          <div class="os-lookup">
+            <p class="os-kicker">Track your order</p>
+            <h2>Find your order</h2>
+            <p>Paste the order ID SharonCraft sent you on WhatsApp. It looks like <strong>ORD-20260327-A3K</strong>.</p>
+            <div class="os-row">
+              <input id="os-input" type="text" placeholder="e.g. ORD-20260327-A3K" autocomplete="off" spellcheck="false" />
+              <button class="button button-primary" id="os-btn" type="button">Track Order</button>
+            </div>
+          </div>
+
+          <div id="os-result"></div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="assets/js/data.js?v=20260327-live-fix" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js?v=20260327-live-fix" defer></script>
+  <script src="supabase-catalog.js?v=20260327-live-fix" defer></script>
+  <script src="assets/js/app.js?v=20260327-live-fix" defer></script>
+  <script src="assets/js/order-status.js?v=20260327-live-fix" defer></script>
+</body>
+</html>

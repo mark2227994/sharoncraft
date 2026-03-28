@@ -5,6 +5,8 @@
     productsTable: "products",
     settingsTable: "site_settings",
     analyticsTable: "analytics_events",
+    ordersTable: "orders",
+    orderTrackingTable: "order_tracking",
     storageBucket: "product-images",
     storageFolder: "catalog",
     authStorageKey: "sharoncraft_supabase_auth",
@@ -47,6 +49,13 @@
       return value;
     }
     return {};
+  };
+
+  const ORDER_STATUSES = ["new", "confirmed", "paid", "delivered", "cancelled"];
+
+  const normalizeOrderStatus = (value) => {
+    const normalized = normalizeText(value).toLowerCase();
+    return ORDER_STATUSES.includes(normalized) ? normalized : "new";
   };
 
   const getConfig = () => ({
@@ -209,6 +218,59 @@
     };
   };
 
+  const mapRowToOrder = (row) => ({
+    id: normalizeText(row && row.id),
+    orderId: normalizeText(row && row.id),
+    customer: normalizeText(row && (row.customer_name || row.customer)),
+    phone: normalizeText(row && (row.customer_phone || row.phone)),
+    productId: normalizeText(row && (row.product_id || row.productId)),
+    productName: normalizeText(row && (row.product_name || row.product)),
+    quantity: Math.max(1, Number(row && row.quantity) || 1),
+    areaId: normalizeText(row && (row.delivery_area_id || row.area_id || row.areaId)),
+    areaName: normalizeText(row && (row.delivery_area || row.area_name || row.area)),
+    status: normalizeOrderStatus(row && row.status),
+    note: normalizeText(row && (row.note || row.admin_note)),
+    totalProfit: Math.max(0, Number(row && (row.total_profit || row.totalProfit)) || 0),
+    orderTotal: Math.max(0, Number(row && (row.order_total || row.total || row.price)) || 0),
+    createdAt: normalizeText(row && row.created_at),
+    updatedAt: normalizeText(row && row.updated_at),
+  });
+
+  const mapOrderToAdminRow = (order) => {
+    const normalizedId = normalizeText(order && (order.orderId || order.id));
+    return {
+      id: normalizedId,
+      customer_name: normalizeText(order && order.customer),
+      customer_phone: normalizeText(order && order.phone),
+      product_id: normalizeText(order && order.productId),
+      product_name: normalizeText(order && order.productName),
+      quantity: Math.max(1, Number(order && order.quantity) || 1),
+      delivery_area_id: normalizeText(order && order.areaId),
+      delivery_area: normalizeText(order && order.areaName),
+      status: normalizeOrderStatus(order && order.status),
+      note: normalizeText(order && order.note),
+      total_profit: Math.max(0, Number(order && order.totalProfit) || 0),
+      order_total: Math.max(0, Number(order && order.orderTotal) || 0),
+      created_at: normalizeText(order && order.createdAt) || new Date().toISOString(),
+      updated_at: normalizeText(order && order.updatedAt) || new Date().toISOString(),
+    };
+  };
+
+  const mapOrderToTrackingRow = (order) => {
+    const adminRow = mapOrderToAdminRow(order);
+    return {
+      id: adminRow.id,
+      product_name: adminRow.product_name,
+      quantity: adminRow.quantity,
+      delivery_area: adminRow.delivery_area,
+      status: adminRow.status,
+      note: adminRow.note,
+      order_total: adminRow.order_total,
+      created_at: adminRow.created_at,
+      updated_at: adminRow.updated_at,
+    };
+  };
+
   const fetchProducts = async () => {
     const supabase = getClient();
     if (!supabase) {
@@ -226,6 +288,53 @@
     }
 
     return Array.isArray(data) ? data.map(mapRowToProduct) : [];
+  };
+
+  const fetchOrders = async () => {
+    const supabase = getClient();
+    if (!supabase) {
+      return [];
+    }
+
+    await requireUser();
+
+    const config = getConfig();
+    const { data, error } = await supabase
+      .from(config.ordersTable)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return Array.isArray(data) ? data.map(mapRowToOrder) : [];
+  };
+
+  const fetchPublicOrder = async (orderId) => {
+    const supabase = getClient();
+    if (!supabase) {
+      return null;
+    }
+
+    const config = getConfig();
+    const normalizedId = normalizeText(orderId);
+    if (!normalizedId) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from(config.orderTrackingTable)
+      .select("id, product_name, quantity, delivery_area, status, note, order_total, created_at, updated_at")
+      .eq("id", normalizedId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data ? mapRowToOrder(data) : null;
   };
 
   const fetchSetting = async (key) => {
@@ -371,6 +480,103 @@
     }
 
     return rows.map(mapRowToProduct);
+  };
+
+  const saveOrders = async (orders) => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    await requireUser();
+
+    const config = getConfig();
+    const adminRows = (Array.isArray(orders) ? orders : [])
+      .map(mapOrderToAdminRow)
+      .filter((row) => row.id);
+    const trackingRows = adminRows.map((row) =>
+      mapOrderToTrackingRow({
+        id: row.id,
+        productName: row.product_name,
+        quantity: row.quantity,
+        areaName: row.delivery_area,
+        status: row.status,
+        note: row.note,
+        orderTotal: row.order_total,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      })
+    );
+
+    if (!adminRows.length) {
+      return [];
+    }
+
+    const { error: orderError } = await supabase
+      .from(config.ordersTable)
+      .upsert(adminRows, { onConflict: "id" });
+
+    if (orderError) {
+      throw orderError;
+    }
+
+    const { error: trackingError } = await supabase
+      .from(config.orderTrackingTable)
+      .upsert(trackingRows, { onConflict: "id" });
+
+    if (trackingError) {
+      throw trackingError;
+    }
+
+    return adminRows.map(mapRowToOrder);
+  };
+
+  const saveOrder = async (order) => {
+    const savedOrders = await saveOrders([order]);
+    return savedOrders[0] || null;
+  };
+
+  const deleteOrder = async (orderId) => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    await requireUser();
+
+    const config = getConfig();
+    const normalizedId = normalizeText(orderId);
+    if (!normalizedId) {
+      throw new Error("Order ID is required.");
+    }
+
+    const { error } = await supabase
+      .from(config.ordersTable)
+      .delete()
+      .eq("id", normalizedId);
+
+    if (error) {
+      throw error;
+    }
+  };
+
+  const clearOrders = async () => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    await requireUser();
+
+    const config = getConfig();
+    const { error } = await supabase
+      .from(config.ordersTable)
+      .delete()
+      .gte("created_at", "1970-01-01T00:00:00.000Z");
+
+    if (error) {
+      throw error;
+    }
   };
 
   const saveAnalyticsEvents = async (events) => {
@@ -550,6 +756,12 @@
     getClient,
     fetchProducts,
     saveProducts,
+    fetchOrders,
+    saveOrders,
+    saveOrder,
+    fetchPublicOrder,
+    deleteOrder,
+    clearOrders,
     fetchSetting,
     saveSetting,
     saveAnalyticsEvents,

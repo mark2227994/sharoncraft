@@ -1019,7 +1019,7 @@
                 <li>Choose the customer and the product first.</li>
                 <li>Set the quantity and current order status.</li>
                 <li>Add one short note only if it helps later.</li>
-                <li>Save the order, then review it in the list below.</li>
+                <li>Save the order, then share the generated order ID with the customer for tracking.</li>
               </ol>
             </div>
             <form id="admin-order-form" class="admin-form">
@@ -1040,7 +1040,7 @@
               <section class="admin-form-section">
                 <div class="admin-section-label">
                   <strong>Status and note</strong>
-                  <p>Save the current stage of the order and anything important you should remember.</p>
+                  <p>Save the current stage of the order and one short customer-facing note if it will help on the tracking page.</p>
                 </div>
                 <div class="admin-inline">
                   <input id="admin-order-quantity" type="number" min="1" value="1" placeholder="Quantity" />
@@ -1049,14 +1049,17 @@
                     <option value="confirmed">Confirmed</option>
                     <option value="paid">Paid</option>
                     <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
-                <textarea id="admin-order-note" placeholder="Short order note"></textarea>
+                <textarea id="admin-order-note" placeholder="Optional tracking note visible to the customer"></textarea>
               </section>
               <div class="admin-actions">
                 <button class="button button-primary" type="submit">Save Order</button>
+                <button id="admin-order-cancel-edit" class="button button-secondary" type="button" hidden>Cancel Edit</button>
               </div>
             </form>
+            <div id="admin-order-feedback" class="admin-order-feedback" hidden></div>
           </section>
 
           <aside class="admin-side-stack">
@@ -1077,8 +1080,25 @@
               <span class="section-kicker">Saved Orders</span>
               <h2>Order List</h2>
             </div>
+            <button id="admin-order-clear" class="button button-secondary" type="button">Clear Order List</button>
           </div>
-          <p class="admin-panel-muted">Keep this list for updates, not for adding new information. Edit the order form above when a new sale comes in.</p>
+          <p class="admin-panel-muted">Use search and status filters to find an order fast. Use the form above only for brand-new sales or when you intentionally edit an order.</p>
+          <div class="admin-order-toolbar">
+            <input id="admin-order-search" type="search" placeholder="Search by order ID, customer, phone, or product" />
+            <select id="admin-order-filter">
+              <option value="all">All statuses</option>
+              <option value="new">New</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="paid">Paid</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="admin-order-head" aria-hidden="true">
+            <span>Order</span>
+            <span>Status</span>
+            <span>Actions</span>
+          </div>
           <div id="admin-order-list" class="admin-order-list"></div>
         </section>
 

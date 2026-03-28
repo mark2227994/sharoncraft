@@ -3371,6 +3371,49 @@ body.cart-open .scroll-top {
   .admin-gallery-picker-actions {
     grid-template-columns: 1fr;
   }
+
+  .admin-order-toolbar {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    align-items: center;
+  }
+
+  .admin-order-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.9fr) 220px 260px;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0 0.5rem;
+    color: var(--text-dark);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .admin-order-row {
+    grid-template-columns: minmax(0, 1.9fr) 220px 260px;
+    align-items: start;
+  }
+
+  .admin-order-main {
+    grid-column: 1;
+  }
+
+  .admin-order-status-cell {
+    grid-column: 2;
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .admin-order-actions {
+    grid-column: 3;
+    justify-content: flex-end;
+  }
+
+  .admin-order-detail-grid {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .admin-social-intro {
@@ -3602,6 +3645,167 @@ body.cart-open .scroll-top {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+}
+
+.admin-order-feedback {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(26, 188, 156, 0.18);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(239, 255, 249, 0.96), rgba(255, 250, 243, 0.98));
+}
+
+.admin-order-feedback strong {
+  color: var(--deep-brown);
+}
+
+.admin-order-feedback p {
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.admin-order-feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.admin-order-feedback-actions button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: rgba(255, 255, 255, 0.98);
+  color: var(--deep-brown);
+  font-weight: 800;
+}
+
+.admin-order-toolbar {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-order-toolbar input,
+.admin-order-toolbar select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.admin-order-head {
+  display: none;
+}
+
+.admin-order-row {
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+}
+
+.admin-order-main {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.admin-order-summary {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.admin-order-summary strong {
+  font-size: 1rem;
+}
+
+.admin-order-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+}
+
+.admin-order-meta span,
+.admin-order-detail-grid span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-order-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.admin-order-chip.is-new {
+  background: rgba(95, 94, 90, 0.1);
+  color: #5f5e5a;
+}
+
+.admin-order-chip.is-confirmed {
+  background: rgba(186, 117, 23, 0.14);
+  color: #7b4b08;
+}
+
+.admin-order-chip.is-paid,
+.admin-order-chip.is-delivered {
+  background: rgba(26, 188, 156, 0.12);
+  color: #0a7d69;
+}
+
+.admin-order-chip.is-cancelled {
+  background: rgba(255, 111, 97, 0.14);
+  color: #8f2f2f;
+}
+
+.admin-order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.admin-order-actions button {
+  min-width: 0;
+}
+
+.admin-order-detail-grid {
+  display: grid;
+  gap: 0.7rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(88, 59, 39, 0.1);
+}
+
+.admin-order-detail-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 18px;
+  background: rgba(255, 250, 243, 0.96);
+}
+
+.admin-order-detail-card label {
+  color: var(--text-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-order-detail-card strong,
+.admin-order-detail-card span {
+  color: var(--deep-brown);
+}
+
+.admin-order-empty {
+  padding: 1rem 1.05rem;
 }
 
 .admin-inline-actions button {
