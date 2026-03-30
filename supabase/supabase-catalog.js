@@ -464,6 +464,28 @@
     };
   };
 
+  const invokeFunction = async (functionName, body) => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    const normalizedName = normalizeText(functionName);
+    if (!normalizedName) {
+      throw new Error("Function name is required.");
+    }
+
+    const { data, error } = await supabase.functions.invoke(normalizedName, {
+      body: normalizeObject(body),
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };
+
   const getCurrentUser = async () => {
     const supabase = getClient();
     if (!supabase) {
@@ -503,6 +525,20 @@
       return false;
     }
     return !!data;
+  };
+
+  const startMpesaCheckout = async (payload) => {
+    const config = getConfig();
+    const response = await invokeFunction(config.mpesaCheckoutFunction, payload);
+    return normalizeObject(response);
+  };
+
+  const fetchMpesaCheckoutStatus = async (reference) => {
+    const config = getConfig();
+    const response = await invokeFunction(config.mpesaCheckoutStatusFunction, {
+      reference: normalizeText(reference),
+    });
+    return normalizeObject(response);
   };
 
   const saveProducts = async (products) => {
@@ -863,6 +899,8 @@
     signOut,
     getCurrentUser,
     isAdmin,
+    startMpesaCheckout,
+    fetchMpesaCheckoutStatus,
     onAuthStateChange,
   };
 }());

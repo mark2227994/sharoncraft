@@ -16,6 +16,10 @@
   let gaLoadPromise = null;
   let analyticsFlushPromise = null;
   let analyticsFlushTimer = null;
+  let mpesaProfilePromise = null;
+  let mpesaStatusPollTimer = null;
+  let mpesaStatusPollStartedAt = 0;
+  let mpesaLastReference = "";
   const recentAnalyticsInteractions = new Map();
   const recentListViews = new Map();
   const analyticsDebugState = {
@@ -961,7 +965,8 @@
           <circle cx="12" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
           <path d="M5.2 19.2c1.4-3.2 3.8-4.8 6.8-4.8s5.4 1.6 6.8 4.8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
           <path d="M18.4 7.2h1.4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
-        `
+        </svg>
+      `
       };
 
     return icons[name] || "";
@@ -972,6 +977,15 @@
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M12 4.2a7.8 7.8 0 0 0-6.7 11.8L4 20l4.2-1.2A7.8 7.8 0 1 0 12 4.2Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
         <path d="M9.2 9.1c.2-.4.4-.4.6-.4h.5c.2 0 .4 0 .5.4l.6 1.5c.1.2.1.4 0 .6l-.4.6c-.1.1-.1.3 0 .4.4.8 1 1.4 1.8 1.8.1.1.3.1.4 0l.6-.4c.2-.1.4-.1.6 0l1.5.6c.4.1.4.3.4.5v.5c0 .2 0 .4-.4.6-.5.2-1 .4-1.5.3-1.1-.1-2.1-.6-3.1-1.6s-1.5-2-1.6-3.1c-.1-.5.1-1 .3-1.5Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"></path>
+      </svg>
+    `;
+  }
+
+  function viewPieceIconMarkup() {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 12s2.8-4.8 8-4.8 8 4.8 8 4.8-2.8 4.8-8 4.8S4 12 4 12Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"></path>
+        <circle cx="12" cy="12" r="2.3" fill="none" stroke="currentColor" stroke-width="1.7"></circle>
       </svg>
     `;
   }
@@ -1034,7 +1048,6 @@
     const config = options || {};
     const productName = product.name || "Artisan Creation";
     const image = getProductImages(product)[0];
-    const description = product.shortDescription || product.description || "Handmade by SharonCraft artisans.";
     const wishlisted = isWishlisted(product.id);
     const category = getCategoryBySlug(product.category);
     const badgeMarkup = product.badge
@@ -1049,33 +1062,29 @@
         <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes}>
           <img src="${image}" alt="${productName}" loading="lazy" />
           ${badgeMarkup}
+          <div class="product-card-media-actions">
+            <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
+              ${heartIconMarkup()}
+            </button>
+          </div>
         </a>
         <div class="product-card-body">
-          <div class="product-card-head">
-            <div>
-              <p class="product-card-category">${category ? category.name : "Collection"}</p>
-              <h3 class="product-name"><a href="product.html?id=${product.id}"${analyticsAttributes}>${productName}</a></h3>
-            </div>
-            <div class="product-card-icon-row">
-              <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
-                ${heartIconMarkup()}
-              </button>
-              <button class="icon-action-button cart-icon-button" type="button" data-add-to-cart="${product.id}" aria-label="Add ${productName} to cart">
-                ${cartIconMarkup()}
-              </button>
-            </div>
+          <div class="product-card-copy">
+            <p class="product-card-category">${category ? category.name : "Collection"}</p>
+            <h3 class="product-name"><a href="product.html?id=${product.id}"${analyticsAttributes}>${productName}</a></h3>
+            <p class="product-card-caption">Handmade in Kenya</p>
           </div>
-          <p class="product-card-text product-story">${description}</p>
           <div class="product-card-price-row">
-            <strong class="product-price">${formatCurrency(product.price)}</strong>
-            <span class="product-card-stock">${getScarcityNote(product)}</span>
+            <strong class="product-price product-price-pill">${formatCurrency(product.price)}</strong>
           </div>
           <div class="product-card-actions">
-            <a class="button button-primary product-card-order" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
-              Order on WhatsApp
+            <a class="button button-primary product-card-view" href="product.html?id=${product.id}"${analyticsAttributes}>
+              <span class="product-card-action-icon" aria-hidden="true">${viewPieceIconMarkup()}</span>
+              <span class="product-card-action-label">View Piece</span>
             </a>
-            <a class="button button-secondary product-card-view" href="product.html?id=${product.id}"${analyticsAttributes}>
-              View Details
+            <a class="product-card-order-link" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
+              <span class="product-card-action-icon product-card-action-icon-whatsapp" aria-hidden="true">${whatsappIconMarkup()}</span>
+              <span class="product-card-action-label">Quick WhatsApp Order</span>
             </a>
           </div>
         </div>
@@ -1233,6 +1242,293 @@
     );
   }
 
+  function getCartCheckoutSnapshot() {
+    const items = getCartSummary().map((item) => ({
+      productId: item.productId,
+      productName: item.productName,
+      quantity: item.quantity,
+      unitPrice: item.productPrice,
+      lineTotal: item.lineTotal,
+    }));
+
+    return {
+      items,
+      itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+      total: items.reduce((sum, item) => sum + item.lineTotal, 0),
+    };
+  }
+
+  function clearCart() {
+    saveCart([]);
+  }
+
+  function getCheckoutSourcePath() {
+    if (/^https?:$/i.test(window.location.protocol)) {
+      return window.location.pathname || "/";
+    }
+
+    const pageKey = normalizeText(document.body && document.body.dataset && document.body.dataset.page) || "storefront";
+    return `/${pageKey}.html`;
+  }
+
+  function getFriendlyMpesaStatusMessage(status, resultCode, resultDesc, receiptNumber) {
+    const normalizedStatus = normalizeText(status).toLowerCase();
+    const code = Number(resultCode);
+
+    if (normalizedStatus === "paid") {
+      return `Payment received${normalizeText(receiptNumber) ? ` - receipt ${normalizeText(receiptNumber)}` : ""}. Your order is now in SharonCraft admin and tracking.`;
+    }
+
+    if (normalizedStatus === "cancelled" || code === 1032) {
+      return "You cancelled the M-Pesa prompt. You can try again whenever you're ready.";
+    }
+
+    if (code === 1037) {
+      return "The M-Pesa prompt timed out because there was no response. Please try again and approve the prompt quickly.";
+    }
+
+    if (normalizedStatus === "failed") {
+      return normalizeText(resultDesc) || "M-Pesa could not complete this payment. Please try again.";
+    }
+
+    if (normalizedStatus === "prompted") {
+      return "The M-Pesa prompt has been sent. Please check your phone and enter your PIN.";
+    }
+
+    return normalizeText(resultDesc) || "We are still checking your M-Pesa payment status.";
+  }
+
+  function stopMpesaStatusPolling() {
+    if (mpesaStatusPollTimer) {
+      window.clearTimeout(mpesaStatusPollTimer);
+      mpesaStatusPollTimer = null;
+    }
+  }
+
+  async function pollMpesaCheckoutStatus(reference) {
+    const normalizedReference = normalizeText(reference);
+    const catalog = window.SharonCraftCatalog;
+
+    if (!normalizedReference || !catalog || typeof catalog.fetchMpesaCheckoutStatus !== "function") {
+      return;
+    }
+
+    mpesaLastReference = normalizedReference;
+    mpesaStatusPollStartedAt = Date.now();
+    stopMpesaStatusPolling();
+
+    const runCheck = async () => {
+      try {
+        const result = await catalog.fetchMpesaCheckoutStatus(normalizedReference);
+        if (!result || result.ok === false) {
+          throw new Error(normalizeText(result && result.error) || "Unable to read M-Pesa payment status.");
+        }
+
+        const message = getFriendlyMpesaStatusMessage(
+          result.status,
+          result.resultCode,
+          result.resultDesc,
+          result.mpesaReceiptNumber
+        );
+
+        if (result.status === "paid") {
+          setMpesaCheckoutStatus(message, "success");
+          clearCart();
+          stopMpesaStatusPolling();
+          return;
+        }
+
+        if (result.status === "failed" || result.status === "cancelled") {
+          setMpesaCheckoutStatus(message, "error");
+          stopMpesaStatusPolling();
+          return;
+        }
+
+        setMpesaCheckoutStatus(message, "info");
+
+        if (Date.now() - mpesaStatusPollStartedAt > 120000) {
+          setMpesaCheckoutStatus(
+            "We haven't received the final payment result yet. If you approved the prompt, check again shortly or contact SharonCraft on WhatsApp.",
+            "info"
+          );
+          stopMpesaStatusPolling();
+          return;
+        }
+
+        mpesaStatusPollTimer = window.setTimeout(runCheck, 5000);
+      } catch (error) {
+        setMpesaCheckoutStatus(
+          normalizeText(error && error.message) || "Unable to confirm the M-Pesa result right now.",
+          "error"
+        );
+        stopMpesaStatusPolling();
+      }
+    };
+
+    runCheck();
+  }
+
+  function setMpesaCheckoutStatus(message, tone) {
+    const statusNode = document.getElementById("cart-mpesa-status");
+    if (!statusNode) {
+      return;
+    }
+
+    statusNode.textContent = normalizeText(message);
+    statusNode.hidden = !normalizeText(message);
+    statusNode.classList.remove("is-success", "is-error", "is-info");
+
+    if (!statusNode.hidden) {
+      statusNode.classList.add(tone === "success" ? "is-success" : tone === "error" ? "is-error" : "is-info");
+    }
+  }
+
+  async function prefillMpesaCheckoutForm() {
+    const form = document.getElementById("cart-mpesa-form");
+    if (!form || form.dataset.prefilled === "true") {
+      return;
+    }
+
+    const catalog = window.SharonCraftCatalog;
+    if (!catalog || typeof catalog.fetchCustomerProfile !== "function") {
+      return;
+    }
+
+    if (!mpesaProfilePromise) {
+      mpesaProfilePromise = catalog.fetchCustomerProfile().catch(() => null);
+    }
+
+    const profile = await mpesaProfilePromise;
+    if (!profile) {
+      return;
+    }
+
+    const nameInput = form.querySelector("#cart-mpesa-name");
+    const phoneInput = form.querySelector("#cart-mpesa-phone");
+    const emailInput = form.querySelector("#cart-mpesa-email");
+    const areaInput = form.querySelector("#cart-mpesa-area");
+
+    if (nameInput && !normalizeText(nameInput.value)) {
+      nameInput.value = normalizeText(profile.fullName);
+    }
+    if (phoneInput && !normalizeText(phoneInput.value)) {
+      phoneInput.value = normalizeText(profile.phone);
+    }
+    if (emailInput && !normalizeText(emailInput.value)) {
+      emailInput.value = normalizeText(profile.email);
+    }
+    if (areaInput && !normalizeText(areaInput.value)) {
+      areaInput.value = normalizeText(profile.deliveryArea);
+    }
+
+    form.dataset.prefilled = "true";
+  }
+
+  async function openMpesaCheckoutPanel() {
+    const panel = document.getElementById("cart-mpesa-panel");
+    if (!panel) {
+      return;
+    }
+
+    panel.hidden = false;
+    await prefillMpesaCheckoutForm();
+
+    const firstEmpty =
+      panel.querySelector("#cart-mpesa-name") ||
+      panel.querySelector("#cart-mpesa-phone") ||
+      panel.querySelector("input");
+    if (firstEmpty && typeof firstEmpty.focus === "function") {
+      firstEmpty.focus();
+    }
+  }
+
+  function closeMpesaCheckoutPanel() {
+    const panel = document.getElementById("cart-mpesa-panel");
+    const submitButton = document.getElementById("cart-mpesa-submit");
+
+    if (panel) {
+      panel.hidden = true;
+    }
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Send STK Push";
+    }
+    stopMpesaStatusPolling();
+    setMpesaCheckoutStatus("", "info");
+  }
+
+  async function handleMpesaCheckoutSubmit(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const submitButton = document.getElementById("cart-mpesa-submit");
+    const checkout = getCartCheckoutSnapshot();
+    const catalog = window.SharonCraftCatalog;
+
+    if (!checkout.items.length) {
+      setMpesaCheckoutStatus("Add at least one product before paying with M-Pesa.", "error");
+      return;
+    }
+
+    if (!catalog || typeof catalog.startMpesaCheckout !== "function") {
+      setMpesaCheckoutStatus("M-Pesa is not ready on this site yet. Finish the Supabase function setup first.", "error");
+      return;
+    }
+
+    const nameInput = form.querySelector("#cart-mpesa-name");
+    const phoneInput = form.querySelector("#cart-mpesa-phone");
+    const emailInput = form.querySelector("#cart-mpesa-email");
+    const areaInput = form.querySelector("#cart-mpesa-area");
+
+    const payload = {
+      amount: checkout.total,
+      currency: "KES",
+      items: checkout.items,
+      sourcePage: getCheckoutSourcePath(),
+      customer: {
+        name: normalizeText(nameInput && nameInput.value),
+        phone: normalizeText(phoneInput && phoneInput.value),
+        email: normalizeText(emailInput && emailInput.value),
+        deliveryArea: normalizeText(areaInput && areaInput.value),
+      },
+    };
+
+    if (!payload.customer.name || !payload.customer.phone || !payload.customer.deliveryArea) {
+      setMpesaCheckoutStatus("Please add your name, Safaricom phone number, and delivery area.", "error");
+      return;
+    }
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+    }
+
+    setMpesaCheckoutStatus("Requesting your M-Pesa prompt...", "info");
+
+    try {
+      const result = await catalog.startMpesaCheckout(payload);
+      if (!result || result.ok === false) {
+        throw new Error(normalizeText(result && result.error) || "M-Pesa did not accept the payment request.");
+      }
+
+      setMpesaCheckoutStatus(
+        `${normalizeText(result.customerMessage) || "Check your phone for the M-Pesa prompt."} Reference: ${normalizeText(result.reference)}.`,
+        "success"
+      );
+      await pollMpesaCheckoutStatus(result.reference);
+    } catch (error) {
+      setMpesaCheckoutStatus(
+        normalizeText(error && error.message) || "Unable to start M-Pesa right now. Please try again or use WhatsApp checkout.",
+        "error"
+      );
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Send STK Push";
+      }
+    }
+  }
+
   function openCart() {
     document.body.classList.add("cart-open");
     const drawer = document.getElementById("cart-drawer");
@@ -1247,6 +1543,7 @@
     if (drawer) {
       drawer.setAttribute("aria-hidden", "true");
     }
+    closeMpesaCheckoutPanel();
   }
 
   function addToCart(productId) {
@@ -1310,33 +1607,29 @@
     const cartTotalNode = document.getElementById("cart-total-price");
     const cartEmptyNode = document.getElementById("cart-empty");
     const cartCountNodes = document.querySelectorAll("[data-cart-count]");
-
-    const cartSummary = cart
-      .map((item) => {
-        const product = data.products.find((p) => p.id === item.productId) || {};
-        const displayPrice = Number(item.productPrice) || Number(product.price) || 0;
-        return {
-          ...item,
-          product,
-          lineTotal: displayPrice * item.quantity,
-          displayName: item.productName || product.name || "Artisan item",
-          displayPrice,
-        };
-      });
+    const cartSummary = getCartSummary().map((item) => ({
+      ...item,
+      displayName: item.productName || "Artisan item",
+      displayPrice: Number(item.productPrice) || 0,
+    }));
 
     if (cartItemsNode) {
       cartItemsNode.innerHTML = cartSummary
         .map(
           (item) => `
             <article class="cart-item">
-              <strong>${item.displayName}</strong>
-              <span>${formatCurrency(item.displayPrice)} each</span>
-              <div class="cart-quantity-controls">
-                <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce quantity">-</button>
-                <span>${item.quantity}</span>
-                <button type="button" data-cart-increase="${item.productId}" aria-label="Increase quantity">+</button>
+              <div class="cart-item-main">
+                <strong class="cart-item-name">${item.displayName}</strong>
+                <span class="cart-item-meta">${formatCurrency(item.displayPrice)} each</span>
               </div>
-              <strong>${formatCurrency(item.lineTotal)}</strong>
+              <div class="cart-item-side">
+                <div class="cart-quantity-controls">
+                  <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce quantity">-</button>
+                  <span>${item.quantity}</span>
+                  <button type="button" data-cart-increase="${item.productId}" aria-label="Increase quantity">+</button>
+                </div>
+                <strong class="cart-item-total">${formatCurrency(item.lineTotal)}</strong>
+              </div>
             </article>
           `
         )
@@ -1360,6 +1653,35 @@
     const checkoutNode = document.getElementById("cart-checkout");
     if (checkoutNode) {
       checkoutNode.href = buildCartMessage();
+    }
+
+    const mpesaOpenNode = document.getElementById("cart-mpesa-open");
+    if (mpesaOpenNode) {
+      mpesaOpenNode.disabled = cart.length === 0;
+    }
+
+    const mpesaMetaNode = document.getElementById("cart-mpesa-meta");
+    if (mpesaMetaNode) {
+      const { itemCount } = getCartCheckoutSnapshot();
+      mpesaMetaNode.textContent = itemCount
+        ? `${itemCount} item${itemCount === 1 ? "" : "s"} ready for STK push`
+        : "Add a few favorites before you pay";
+    }
+
+    const mpesaPanel = document.getElementById("cart-mpesa-panel");
+    const mpesaStatusNode = document.getElementById("cart-mpesa-status");
+    const hasSuccessState = Boolean(
+      mpesaStatusNode && !mpesaStatusNode.hidden && mpesaStatusNode.classList.contains("is-success")
+    );
+    if (mpesaPanel && cart.length === 0 && !hasSuccessState) {
+      mpesaPanel.hidden = true;
+      setMpesaCheckoutStatus("", "info");
+    }
+    if (mpesaPanel && cart.length === 0 && hasSuccessState) {
+      mpesaPanel.hidden = false;
+    }
+    if (mpesaMetaNode && cart.length === 0 && hasSuccessState) {
+      mpesaMetaNode.textContent = "Payment complete";
     }
   }
 
@@ -1474,11 +1796,12 @@
               <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
               <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
               <li><a href="order.html">Track an order</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
               <li>${data.site.location}</li>
             </ul>
           </section>
           <section>
-            <h3>M-Pesa Guide</h3>
+            <h3>M-Pesa</h3>
             <ol class="footer-list footer-steps">
               ${mpesaMarkup}
             </ol>
@@ -1511,8 +1834,46 @@
             <span>Total</span>
             <strong id="cart-total-price">${formatCurrency(0)}</strong>
           </div>
-          <a id="cart-checkout" class="button button-primary" href="${buildCartMessage()}" target="_blank" rel="noreferrer" data-analytics-label="Cart Checkout WhatsApp">Checkout on WhatsApp</a>
+          <div class="cart-summary-actions">
+            <button id="cart-mpesa-open" class="button button-primary" type="button">Pay with M-Pesa</button>
+            <a id="cart-checkout" class="button button-secondary" href="${buildCartMessage()}" target="_blank" rel="noreferrer" data-analytics-label="Cart Checkout WhatsApp">Checkout on WhatsApp</a>
+          </div>
         </div>
+        <section id="cart-mpesa-panel" class="cart-mpesa-panel" hidden>
+          <div class="cart-mpesa-head">
+            <div>
+              <span class="section-kicker">Quick M-Pesa</span>
+              <h4>Approve the STK prompt on your phone</h4>
+            </div>
+            <strong id="cart-mpesa-meta">Add a few favorites before you pay</strong>
+          </div>
+          <p class="cart-mpesa-copy">Use the Safaricom number that should receive the prompt. We keep the flow simple: name, phone, area, then send.</p>
+          <form id="cart-mpesa-form" class="cart-mpesa-form" novalidate>
+            <div class="auth-grid">
+              <div class="form-group">
+                <label for="cart-mpesa-name">Full Name</label>
+                <input id="cart-mpesa-name" type="text" autocomplete="name" required />
+              </div>
+              <div class="form-group">
+                <label for="cart-mpesa-phone">Safaricom Phone</label>
+                <input id="cart-mpesa-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="07..., 01..., or 254..." required />
+              </div>
+              <div class="form-group">
+                <label for="cart-mpesa-area">Delivery Area</label>
+                <input id="cart-mpesa-area" type="text" autocomplete="address-level2" placeholder="Nairobi, Westlands, Kiambu..." required />
+              </div>
+              <div class="form-group">
+                <label for="cart-mpesa-email">Email</label>
+                <input id="cart-mpesa-email" type="email" autocomplete="email" placeholder="Optional" />
+              </div>
+            </div>
+            <div class="cart-mpesa-actions">
+              <button id="cart-mpesa-submit" class="button button-primary" type="submit">Send STK Push</button>
+              <button id="cart-mpesa-cancel" class="button button-secondary" type="button">Close</button>
+            </div>
+            <p id="cart-mpesa-status" class="cart-mpesa-status" hidden></p>
+          </form>
+        </section>
       </aside>
       <a class="floating-whatsapp" href="${buildWhatsAppUrl("Hello SharonCraft, I would like to chat about your products.")}" target="_blank" rel="noreferrer" data-analytics-label="Floating WhatsApp">
         WhatsApp
@@ -1523,6 +1884,9 @@
     const scrollButton = target.querySelector(".scroll-top");
     const closeButton = target.querySelector("#cart-close-button");
     const backdrop = target.querySelector("#cart-backdrop");
+    const mpesaOpenButton = target.querySelector("#cart-mpesa-open");
+    const mpesaCancelButton = target.querySelector("#cart-mpesa-cancel");
+    const mpesaForm = target.querySelector("#cart-mpesa-form");
 
     if (scrollButton) {
       scrollButton.addEventListener("click", function () {
@@ -1540,6 +1904,20 @@
 
     if (backdrop) {
       backdrop.addEventListener("click", closeCart);
+    }
+
+    if (mpesaOpenButton) {
+      mpesaOpenButton.addEventListener("click", function () {
+        openMpesaCheckoutPanel();
+      });
+    }
+
+    if (mpesaCancelButton) {
+      mpesaCancelButton.addEventListener("click", closeMpesaCheckoutPanel);
+    }
+
+    if (mpesaForm) {
+      mpesaForm.addEventListener("submit", handleMpesaCheckoutSubmit);
     }
   }
 

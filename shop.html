@@ -28,68 +28,60 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260327-live-fix" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260331-cart-list" />
   <link rel="stylesheet" href="assets/css/shop-filters.css" />
 </head>
 <body data-page="shop">
   <div data-site-header></div>
 
   <main>
-    <!-- Shop intro -->
     <section class="page-hero">
       <div class="container">
         <div class="page-hero-copy">
           <span class="section-kicker">Shop SharonCraft</span>
           <h1>Find beadwork you can scan quickly and order with confidence.</h1>
-          <p>Use the search bar, category filter, and price filter to narrow down the collection. Every product card leads to a simple detail page with WhatsApp buying support.</p>
+          <p>Browse the collection first, then refine only if you need to narrow things down.</p>
         </div>
       </div>
     </section>
 
-    <!-- Filters -->
     <section class="section">
       <div class="container">
-        <div class="shop-filter-hero">
-          <div class="shop-filter-hero-content">
-            <div class="shop-filter-intro">
-              <span class="section-kicker">✨ Quick Find</span>
-              <h2>Narrow down the magic</h2>
-              <p class="filter-subtitle">Tap a category or use advanced filters</p>
-            </div>
-            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false">
-              <span class="shop-filter-icon">⚙️</span>
-              <span class="shop-filter-toggle-text">Filters</span>
+        <div class="shop-refine-bar">
+          <div class="shop-refine-copy">
+            <span class="section-kicker">Browse & Refine</span>
+            <h2>See the pieces first. Fine-tune only when needed.</h2>
+          </div>
+          <div class="shop-refine-tools">
+            <span id="shop-count" class="shop-product-count">0 pieces</span>
+            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
+              <span class="shop-filter-toggle-text">Refine</span>
             </button>
+            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
           </div>
         </div>
 
         <div class="shop-filter-chips" id="shop-chips"></div>
 
         <div class="shop-filter-panels" id="shop-filter-grid">
-          <!-- Search Section -->
           <div class="shop-filter-search-section">
             <div class="shop-search-box">
-              <input id="shop-search" type="search" placeholder="Search by name or style..." aria-label="Search products" />
-              <span class="shop-search-icon">🔎</span>
+              <input id="shop-search" type="search" placeholder="Search pieces..." aria-label="Search products" />
+              <span class="shop-search-icon">Search</span>
             </div>
-            <span class="search-hint">Type to find exactly what you're looking for</span>
           </div>
 
-          <!-- Filter Cards Grid -->
           <div class="shop-filter-cards">
             <div class="shop-filter-card">
               <div class="filter-card-header">
-                <span class="filter-card-icon">📦</span>
                 <h3 class="filter-card-title">Category</h3>
               </div>
               <select id="shop-category" class="filter-card-select" aria-label="Filter by category"></select>
-              <div class="filter-card-hint">Find beads by type</div>
             </div>
 
             <div class="shop-filter-card">
               <div class="filter-card-header">
-                <span class="filter-card-icon">💰</span>
-                <h3 class="filter-card-title">Price Range</h3>
+                <h3 class="filter-card-title">Price</h3>
               </div>
               <select id="shop-price" class="filter-card-select" aria-label="Filter by price">
                 <option value="">All prices</option>
@@ -97,40 +89,22 @@
                 <option value="2000-5000">KES 2,000 to 5,000</option>
                 <option value="over-5000">Above KES 5,000</option>
               </select>
-              <div class="filter-card-hint">Set your budget</div>
             </div>
 
             <div class="shop-filter-card">
               <div class="filter-card-header">
-                <span class="filter-card-icon">✨</span>
-                <h3 class="filter-card-title">Sort By</h3>
+                <h3 class="filter-card-title">Sort</h3>
               </div>
               <select id="shop-sort" class="filter-card-select" aria-label="Sort products">
                 <option value="featured">Featured</option>
                 <option value="newest">Newest</option>
-                <option value="price-asc">Price ↑</option>
-                <option value="price-desc">Price ↓</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
               </select>
-              <div class="filter-card-hint">Organize your results</div>
             </div>
-          </div>
-
-          <!-- Filter Footer -->
-          <div class="shop-filter-footer">
-            <div class="footer-info">
-              <span id="shop-count" class="shop-product-count">📊 0 products found</span>
-            </div>
-            <button id="clear-shop-filters" class="shop-clear-button" type="button">
-              <span>✕ Reset</span>
-            </button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Product grid -->
-    <section class="section">
-      <div class="container">
         <div id="shop-grid" class="product-grid"></div>
       </div>
     </section>
@@ -152,12 +126,12 @@
 
   <div data-site-footer></div>
 
-  <script src="assets/js/data.js?v=20260327-live-fix" defer></script>
+  <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
   <script src="supabase/supabase-catalog.js?v=20260330-folder-reorg" defer></script>
   <script src="assets/js/supabase-data-sync.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/app.js?v=20260327-live-fix" defer></script>
+  <script src="assets/js/app.js?v=20260331-cart-list" defer></script>
   <script src="assets/js/mobile-ux.js?v=20260327-live-fix" defer></script>
   <script src="assets/js/shop.js?v=20260327-live-fix" defer></script>
 </body>

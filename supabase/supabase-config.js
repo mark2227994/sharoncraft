@@ -6,7 +6,10 @@ window.SUPABASE_CONFIG = {
   analyticsTable: "analytics_events",
   ordersTable: "orders",
   orderTrackingTable: "order_tracking",
+  mpesaCheckoutsTable: "mpesa_checkouts",
   storageBucket: "product-images",
   storageFolder: "catalog",
   authStorageKey: "sharoncraft_supabase_auth",
+  mpesaCheckoutFunction: "mpesa-stk-push",
+  mpesaCheckoutStatusFunction: "mpesa-checkout-status",
 };

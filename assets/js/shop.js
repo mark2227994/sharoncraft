@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filters";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Refine";
     }
   }
 
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           </div>
         </article>
       `;
-    countLabel.textContent = `${sorted.length} product${sorted.length === 1 ? "" : "s"} found`;
+    countLabel.textContent = `${sorted.length} piece${sorted.length === 1 ? "" : "s"}`;
     utils.trackProductListView({
       listId: "shop_results",
       listName: "Shop Results",
