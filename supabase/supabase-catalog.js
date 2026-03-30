@@ -58,6 +58,16 @@
     return ORDER_STATUSES.includes(normalized) ? normalized : "new";
   };
 
+  const normalizeProfileInput = (profile, fallbackEmail) => {
+    const source = normalizeObject(profile);
+    return {
+      email: normalizeText(source.email || fallbackEmail),
+      fullName: normalizeText(source.fullName || source.full_name || source.name),
+      phone: normalizeText(source.phone),
+      deliveryArea: normalizeText(source.deliveryArea || source.delivery_area || source.location),
+    };
+  };
+
   const getConfig = () => ({
     ...defaultConfig,
     ...(window.SUPABASE_CONFIG || {}),
@@ -393,6 +403,67 @@
     return row.value;
   };
 
+  const fetchCustomerProfile = async () => {
+    const supabase = getClient();
+    if (!supabase) {
+      return null;
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
+      return null;
+    }
+
+    const fallbackProfile = normalizeProfileInput(user.user_metadata, user.email);
+    return {
+      userId: normalizeText(user.id),
+      email: normalizeText(user.email),
+      fullName: fallbackProfile.fullName,
+      phone: fallbackProfile.phone,
+      deliveryArea: fallbackProfile.deliveryArea,
+      createdAt: "",
+      updatedAt: "",
+    };
+  };
+
+  const saveCustomerProfile = async (profile) => {
+    const supabase = getClient();
+    if (!supabase) {
+      throw new Error("Supabase is not configured yet.");
+    }
+
+    const user = await requireUser();
+    const normalized = normalizeProfileInput(profile, user.email);
+
+    const { error: authError } = await supabase.auth.updateUser({
+      data: {
+        full_name: normalized.fullName,
+        phone: normalized.phone,
+        delivery_area: normalized.deliveryArea,
+      },
+    });
+
+    if (authError) {
+      throw authError;
+    }
+
+    const refreshedUser = await getCurrentUser();
+    const nextProfile = normalizeProfileInput(
+      refreshedUser && refreshedUser.user_metadata,
+      refreshedUser && refreshedUser.email ? refreshedUser.email : user.email
+    );
+
+    return {
+      userId: normalizeText((refreshedUser && refreshedUser.id) || user.id),
+      email: normalizeText((refreshedUser && refreshedUser.email) || user.email),
+      fullName: nextProfile.fullName,
+      phone: nextProfile.phone,
+      deliveryArea: nextProfile.deliveryArea,
+      createdAt: "",
+      updatedAt: new Date().toISOString(),
+    };
+  };
+
   const getCurrentUser = async () => {
     const supabase = getClient();
     if (!supabase) {
@@ -706,9 +777,12 @@
     if (!supabase) {
       throw new Error("Supabase is not configured yet.");
     }
-    const metadata = profile && typeof profile === "object"
-      ? profile
-      : {};
+    const normalizedProfile = normalizeProfileInput(profile, email);
+    const metadata = {
+      full_name: normalizedProfile.fullName,
+      phone: normalizedProfile.phone,
+      delivery_area: normalizedProfile.deliveryArea,
+    };
     const { data, error } = await supabase.auth.signUp({
       email: normalizeText(email),
       password: String(password || ""),
@@ -719,6 +793,20 @@
     if (error) {
       throw error;
     }
+
+    if (data && data.session && data.user) {
+      try {
+        await saveCustomerProfile({
+          email: normalizeText(data.user.email),
+          fullName: normalizedProfile.fullName,
+          phone: normalizedProfile.phone,
+          deliveryArea: normalizedProfile.deliveryArea,
+        });
+      } catch (profileError) {
+        console.warn("Customer signup succeeded, but profile sync did not complete.", profileError);
+      }
+    }
+
     return data;
   };
 
@@ -764,6 +852,8 @@
     clearOrders,
     fetchSetting,
     saveSetting,
+    fetchCustomerProfile,
+    saveCustomerProfile,
     saveAnalyticsEvents,
     fetchAnalyticsEvents,
     clearAnalyticsEvents,

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account | SharonCraft</title>
+  <meta
+    name="description"
+    content="Create your SharonCraft account, save your contact details, and return faster when you are ready to order."
+  />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260330-account" />
+</head>
+<body data-page="account">
+  <div data-site-header></div>
+
+  <main>
+    <section class="account-auth-section">
+      <div class="container">
+        <div class="account-shell">
+          <aside class="account-story reveal">
+            <span class="account-kicker">SharonCraft Circle</span>
+            <h1>Sign in once. Shop brighter every time.</h1>
+            <p>
+              Create your SharonCraft account to save your details, move faster on future orders,
+              and keep your favorite handmade finds one step closer.
+            </p>
+
+            <div class="account-stat-strip" aria-hidden="true">
+              <article class="account-stat">
+                <strong>1 tap</strong>
+                <span>Back into your saved details</span>
+              </article>
+              <article class="account-stat">
+                <strong>Private</strong>
+                <span>Your profile stays tied to your account</span>
+              </article>
+              <article class="account-stat">
+                <strong>Ready</strong>
+                <span>Made for quick WhatsApp ordering</span>
+              </article>
+            </div>
+
+            <ul class="account-promise-list">
+              <li>Save your name, phone number, and delivery area when you register.</li>
+              <li>Come back later and sign in without filling everything from scratch again.</li>
+              <li>Use the same account whenever you want to order or ask for a custom piece.</li>
+            </ul>
+          </aside>
+
+          <section class="account-card reveal" aria-labelledby="account-card-title">
+            <div class="account-card-head">
+              <div>
+                <h2 id="account-card-title">Your SharonCraft account</h2>
+                <p>Join as a customer or sign back in to view the details already saved for you.</p>
+              </div>
+
+              <div class="account-switcher" role="tablist" aria-label="Account forms">
+                <button type="button" class="auth-switch is-active" id="auth-switch-register" data-auth-target="register" role="tab" aria-selected="true">
+                  Register
+                </button>
+                <button type="button" class="auth-switch" id="auth-switch-login" data-auth-target="login" role="tab" aria-selected="false">
+                  Login
+                </button>
+              </div>
+            </div>
+
+            <div id="account-status" class="account-status"></div>
+
+            <section class="auth-panel is-active" id="auth-panel-register" aria-labelledby="auth-switch-register">
+              <form id="register-form" class="login-form" novalidate>
+                <div class="auth-grid">
+                  <div class="form-group">
+                    <label for="register-full-name">Full Name</label>
+                    <input type="text" id="register-full-name" name="full_name" autocomplete="name" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="register-phone">Phone Number</label>
+                    <input type="tel" id="register-phone" name="phone" autocomplete="tel" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" autocomplete="email" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="register-delivery-area">Delivery Area</label>
+                    <input type="text" id="register-delivery-area" name="delivery_area" autocomplete="address-level2" placeholder="Nairobi, Kiambu, Westlands..." required />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" autocomplete="new-password" required minlength="6" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="register-password-confirm">Confirm Password</label>
+                    <input type="password" id="register-password-confirm" name="password_confirm" autocomplete="new-password" required minlength="6" />
+                  </div>
+                </div>
+
+                <p class="form-help">Your saved details help SharonCraft respond faster when you come back to order or ask for a custom piece.</p>
+
+                <div class="account-actions">
+                  <button type="submit" class="button button-primary">Create My Account</button>
+                  <a class="button button-secondary" href="shop.html">Keep Browsing</a>
+                </div>
+              </form>
+            </section>
+
+            <section class="auth-panel" id="auth-panel-login" aria-labelledby="auth-switch-login">
+              <form id="customer-login-form" class="login-form" novalidate>
+                <div class="form-group">
+                  <label for="login-email">Email</label>
+                  <input type="email" id="login-email" name="email" autocomplete="email" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="login-password">Password</label>
+                  <input type="password" id="login-password" name="password" autocomplete="current-password" required />
+                </div>
+
+                <div class="account-actions">
+                  <button type="submit" class="button button-primary">Login</button>
+                  <button type="button" class="button button-secondary" id="switch-to-register">New Here? Register</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="auth-panel" id="auth-panel-summary" aria-live="polite">
+              <div class="account-summary">
+                <article class="account-summary-card">
+                  <h3 id="account-summary-greeting">Welcome back</h3>
+                  <p>Your details are saved privately for faster future orders. This page keeps your personal information out of view unless you choose to update it.</p>
+                  <div class="account-chip-row">
+                    <span class="account-chip">Details saved privately</span>
+                    <span class="account-chip">Ready for future orders</span>
+                    <span class="account-chip">Simple, quiet account</span>
+                  </div>
+                </article>
+
+                <div class="account-inline-links">
+                  <a class="account-quiet-link" href="shop.html">Continue shopping</a>
+                  <a class="account-quiet-link" href="order.html">Track an order</a>
+                  <button type="button" class="button button-secondary" id="account-edit-toggle">Update Saved Details</button>
+                  <button type="button" class="button button-secondary" id="account-logout">Log Out</button>
+                </div>
+
+                <div class="account-manage-panel" id="account-manage-panel" hidden>
+                  <form id="profile-form" class="login-form" novalidate>
+                    <div class="auth-grid">
+                      <div class="form-group">
+                        <label for="profile-full-name">Full Name</label>
+                        <input type="text" id="profile-full-name" name="full_name" autocomplete="name" required />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="profile-phone">Phone Number</label>
+                        <input type="tel" id="profile-phone" name="phone" autocomplete="tel" required />
+                      </div>
+
+                      <div class="form-group form-group-full">
+                        <label for="profile-delivery-area">Delivery Area</label>
+                        <input type="text" id="profile-delivery-area" name="delivery_area" autocomplete="address-level2" required />
+                      </div>
+                    </div>
+
+                    <div class="account-actions">
+                      <button type="submit" class="button button-primary">Save Privately</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </section>
+
+            <p class="account-admin-link">
+              Need the back office instead?
+              <a href="login.html?redirect=admin.html">Open admin login</a>
+            </p>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="assets/js/data.js?v=20260327-live-fix" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
+  <script src="supabase/supabase-catalog.js?v=20260330-folder-reorg" defer></script>
+  <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/password-reset.js?v=20260330-auth" defer></script>
+  <script src="assets/js/supabase-data-sync.js?v=20260330-account" defer></script>
+  <script src="assets/js/app.js?v=20260330-account" defer></script>
+  <script src="assets/js/account.js?v=20260330-auth" defer></script>
+</body>
+</html>

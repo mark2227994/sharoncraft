@@ -14,7 +14,7 @@ Use this setup for:
 
 ## 2. Run schema
 
-1. Open [supabase-schema.sql](/c:/Users/USER/Desktop/projects/beads/supabase-schema.sql).
+1. Open [supabase-schema.sql](/c:/Users/USER/Desktop/projects/bead%20VN2/supabase/supabase-schema.sql).
 2. Copy all SQL.
 3. In Supabase `SQL Editor`, paste and run.
 
@@ -23,6 +23,7 @@ This creates:
 - `public.site_settings` (website settings like homepage visuals)
 - `public.analytics_events` (shared storefront activity across devices)
 - `public.admin_users` (admin allow-list)
+- customer details stored privately in Supabase Auth metadata
 - storage bucket `product-images`
 - RLS policies so:
   - public can read products/images
@@ -60,7 +61,7 @@ Without this, a logged-in user can still create a client account but cannot publ
 
 ## 5. Update local config
 
-In [supabase-config.js](/c:/Users/USER/Desktop/projects/beads/supabase-config.js):
+In [supabase-config.js](/c:/Users/USER/Desktop/projects/bead%20VN2/supabase/supabase-config.js):
 - set `url`
 - set `anonKey`
 
@@ -70,11 +71,12 @@ Current project already has these fields; just verify values match your Supabase
 
 Deploy these files:
 - `index.html`
-- `style.css`
-- `script.js`
-- `supabase-config.js`
-- `supabase-catalog.js`
-- `supabase-schema.sql`
+- `account.html`
+- `assets/css/style.css`
+- `assets/js/app.js`
+- `supabase/supabase-config.js`
+- `supabase/supabase-catalog.js`
+- `supabase/supabase-schema.sql`
 
 ## 7. Test checklist
 
@@ -89,7 +91,7 @@ Deploy these files:
 ## Troubleshooting
 
 - `Supabase is not configured yet.`
-  - Check `supabase-config.js` URL/key and that scripts are deployed.
+  - Check `supabase/supabase-config.js` URL/key and that scripts are deployed.
 
 - `Email not confirmed`
   - Confirm email or disable confirmation while testing.
