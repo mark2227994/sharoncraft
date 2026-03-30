@@ -1579,11 +1579,11 @@
   }
 
   function openCart() {
-    document.body.classList.add("cart-open");
-    const drawer = document.getElementById("cart-drawer");
-    if (drawer) {
-      drawer.setAttribute("aria-hidden", "false");
+    if (document.body.dataset.page !== "cart") {
+      window.location.href = "cart.html";
+      return;
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function closeCart() {
