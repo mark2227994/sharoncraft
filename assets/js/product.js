@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   category.textContent = productCategory ? productCategory.name : "Collection";
   mainImage.src = productImages[0];
   mainImage.alt = productName;
-  mpesaCopy.textContent = `Confirm ${productName} on WhatsApp, then pay via M-Pesa after the total and delivery fee are shared.`;
+  mpesaCopy.textContent = `Add ${productName} to cart, open the cart, and pay by M-Pesa with the STK prompt sent to your phone.`;
   if (stickyBar) {
     stickyBar.hidden = false;
   }

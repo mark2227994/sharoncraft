@@ -23,9 +23,9 @@
       },
       promo: "Free Nairobi delivery for orders above KES 3,500 this week.",
       mpesaSteps: [
-        "Choose your product and confirm the total on WhatsApp.",
-        "Send payment to the SharonCraft M-Pesa number after confirmation.",
-        "Share the M-Pesa message so your order can be packed and dispatched."
+        "Add your favorite pieces to cart and tap Pay with M-Pesa.",
+        "Enter your name, Safaricom phone number, and delivery area.",
+        "Approve the STK prompt on your phone, then wait for SharonCraft to confirm your order."
       ],
       socials: [
         { label: "WhatsApp", url: "https://wa.me/254112222572?text=Hello%20SharonCraft%2C%20I%20would%20like%20to%20shop%20your%20beadwork." },

@@ -110,12 +110,45 @@ create table if not exists public.order_tracking (
 create index if not exists order_tracking_status_idx on public.order_tracking(status);
 create index if not exists order_tracking_updated_at_idx on public.order_tracking(updated_at desc);
 
+-- M-Pesa checkout requests created from the storefront.
+create table if not exists public.mpesa_checkouts (
+  id uuid primary key default gen_random_uuid(),
+  reference text not null unique,
+  customer_name text not null default '',
+  customer_email text not null default '',
+  customer_phone text not null default '',
+  delivery_area text not null default '',
+  amount integer not null check (amount > 0),
+  currency text not null default 'KES',
+  items jsonb not null default '[]'::jsonb,
+  status text not null default 'initiated' check (
+    status = any (array['initiated', 'prompted', 'paid', 'failed', 'cancelled'])
+  ),
+  merchant_request_id text not null default '',
+  checkout_request_id text not null default '',
+  mpesa_receipt_number text not null default '',
+  result_code integer,
+  result_desc text not null default '',
+  request_payload jsonb not null default '{}'::jsonb,
+  response_payload jsonb not null default '{}'::jsonb,
+  callback_payload jsonb not null default '{}'::jsonb,
+  paid_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists mpesa_checkouts_created_at_idx on public.mpesa_checkouts(created_at desc);
+create index if not exists mpesa_checkouts_reference_idx on public.mpesa_checkouts(reference);
+create index if not exists mpesa_checkouts_status_idx on public.mpesa_checkouts(status);
+create index if not exists mpesa_checkouts_checkout_request_idx on public.mpesa_checkouts(checkout_request_id);
+
 alter table public.products enable row level security;
 alter table public.site_settings enable row level security;
 alter table public.analytics_events enable row level security;
 alter table public.admin_users enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_tracking enable row level security;
+alter table public.mpesa_checkouts enable row level security;
 
 drop policy if exists "Public read products" on public.products;
 create policy "Public read products"
@@ -392,6 +425,39 @@ on public.order_tracking
 for delete
 to authenticated
 using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin read mpesa checkouts" on public.mpesa_checkouts;
+create policy "Admin read mpesa checkouts"
+on public.mpesa_checkouts
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin update mpesa checkouts" on public.mpesa_checkouts;
+create policy "Admin update mpesa checkouts"
+on public.mpesa_checkouts
+for update
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+)
+with check (
   exists (
     select 1
     from public.admin_users au
