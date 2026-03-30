@@ -1262,6 +1262,55 @@
     saveCart([]);
   }
 
+  function createCartItemNode(item) {
+    const article = document.createElement("article");
+    article.className = "cart-item";
+
+    const main = document.createElement("div");
+    main.className = "cart-item-main";
+
+    const name = document.createElement("strong");
+    name.className = "cart-item-name";
+    name.textContent = item.displayName;
+
+    const meta = document.createElement("span");
+    meta.className = "cart-item-meta";
+    meta.textContent = `${formatCurrency(item.displayPrice)} each`;
+
+    main.append(name, meta);
+
+    const side = document.createElement("div");
+    side.className = "cart-item-side";
+
+    const controls = document.createElement("div");
+    controls.className = "cart-quantity-controls";
+
+    const decreaseButton = document.createElement("button");
+    decreaseButton.type = "button";
+    decreaseButton.dataset.cartDecrease = item.productId;
+    decreaseButton.setAttribute("aria-label", "Reduce quantity");
+    decreaseButton.textContent = "-";
+
+    const quantity = document.createElement("span");
+    quantity.textContent = String(item.quantity);
+
+    const increaseButton = document.createElement("button");
+    increaseButton.type = "button";
+    increaseButton.dataset.cartIncrease = item.productId;
+    increaseButton.setAttribute("aria-label", "Increase quantity");
+    increaseButton.textContent = "+";
+
+    controls.append(decreaseButton, quantity, increaseButton);
+
+    const total = document.createElement("strong");
+    total.className = "cart-item-total";
+    total.textContent = formatCurrency(item.lineTotal);
+
+    side.append(controls, total);
+    article.append(main, side);
+    return article;
+  }
+
   function getCheckoutSourcePath() {
     if (/^https?:$/i.test(window.location.protocol)) {
       return window.location.pathname || "/";
@@ -1614,26 +1663,12 @@
     }));
 
     if (cartItemsNode) {
-      cartItemsNode.innerHTML = cartSummary
-        .map(
-          (item) => `
-            <article class="cart-item">
-              <div class="cart-item-main">
-                <strong class="cart-item-name">${item.displayName}</strong>
-                <span class="cart-item-meta">${formatCurrency(item.displayPrice)} each</span>
-              </div>
-              <div class="cart-item-side">
-                <div class="cart-quantity-controls">
-                  <button type="button" data-cart-decrease="${item.productId}" aria-label="Reduce quantity">-</button>
-                  <span>${item.quantity}</span>
-                  <button type="button" data-cart-increase="${item.productId}" aria-label="Increase quantity">+</button>
-                </div>
-                <strong class="cart-item-total">${formatCurrency(item.lineTotal)}</strong>
-              </div>
-            </article>
-          `
-        )
-        .join("");
+      cartItemsNode.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+      cartSummary.forEach((item) => {
+        fragment.appendChild(createCartItemNode(item));
+      });
+      cartItemsNode.appendChild(fragment);
     }
 
     const totalPrice = cartSummary.reduce((sum, item) => sum + item.lineTotal, 0);
