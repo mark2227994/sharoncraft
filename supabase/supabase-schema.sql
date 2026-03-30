@@ -2,6 +2,11 @@
 -- Run this whole script in Supabase SQL Editor.
 -- Safe to re-run: it uses create-if-missing and replace-style policies.
 
+-- Cleanup from the older customer_profiles approach.
+drop trigger if exists sync_customer_profile_from_auth on auth.users;
+drop function if exists public.sync_customer_profile_from_auth();
+drop table if exists public.customer_profiles;
+
 -- Core products table used by storefront + publishing flows.
 create table if not exists public.products (
   id text primary key,

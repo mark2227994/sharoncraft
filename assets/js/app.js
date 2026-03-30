@@ -955,8 +955,14 @@
           <path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9A1.5 1.5 0 0 1 18.5 18h-13A1.5 1.5 0 0 1 4 16.5z" fill="none" stroke="currentColor" stroke-width="1.8"></path>
           <path d="m5 8 7 5 7-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
         </svg>
-      `
-    };
+      `,
+      account: `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+          <path d="M5.2 19.2c1.4-3.2 3.8-4.8 6.8-4.8s5.4 1.6 6.8 4.8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+          <path d="M18.4 7.2h1.4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+        `
+      };
 
     return icons[name] || "";
   }
@@ -1386,11 +1392,13 @@
             </span>
           </a>
           <nav id="site-nav" class="site-nav" aria-label="Main navigation">
-            <a href="index.html" class="${currentPage === "home" ? "is-active" : ""}">${navIconMarkup("home")}<span>Home</span></a>
-            <a href="shop.html" class="${isShopFamilyPage ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
-            <a href="categories.html" class="${currentPage === "categories" ? "is-active" : ""}">${navIconMarkup("categories")}<span>Categories</span></a>
-            <a href="about.html" class="${currentPage === "about" ? "is-active" : ""}">${navIconMarkup("about")}<span>About</span></a>
-            <a href="contact.html" class="${currentPage === "contact" ? "is-active" : ""}">${navIconMarkup("contact")}<span>Contact</span></a>
+            <div class="site-nav-links">
+              <a href="index.html" class="${currentPage === "home" ? "is-active" : ""}">${navIconMarkup("home")}<span>Home</span></a>
+              <a href="shop.html" class="${isShopFamilyPage ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
+              <a href="categories.html" class="${currentPage === "categories" ? "is-active" : ""}">${navIconMarkup("categories")}<span>Categories</span></a>
+              <a href="about.html" class="${currentPage === "about" ? "is-active" : ""}">${navIconMarkup("about")}<span>About</span></a>
+              <a href="contact.html" class="${currentPage === "contact" ? "is-active" : ""}">${navIconMarkup("contact")}<span>Contact</span></a>
+            </div>
             <a class="button button-primary nav-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer" data-analytics-label="Header WhatsApp">
               <span class="nav-cta-icon">
                 ${whatsappIconMarkup()}
@@ -1401,6 +1409,9 @@
             </a>
           </nav>
           <div class="header-actions">
+            <a class="account-header-button ${currentPage === "account" ? "is-active" : ""}" href="account.html" aria-label="Open your SharonCraft account">
+              ${navIconMarkup("account")}
+            </a>
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
               Menu
             </button>

@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login | SharonCraft</title>
-  <meta name="description" content="Login to SharonCraft admin panel." />
+  <title>Admin Login | SharonCraft</title>
+  <meta name="description" content="Sign in to the SharonCraft admin panel." />
   <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
   <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
   <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260327-live-fix" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260330-account" />
 </head>
 <body data-page="login">
   <div data-site-header></div>
@@ -23,27 +23,29 @@
           <div class="login-form-header">
             <img src="assets/images/sharoncraft-logo-transparent.png" alt="SharonCraft" class="login-logo" />
             <h1>Admin Login</h1>
-            <p>Access the SharonCraft admin panel to manage products and orders.</p>
+            <p>Access the SharonCraft admin dashboard to manage products, orders, and live storefront settings.</p>
           </div>
 
-          <form id="login-form" class="login-form">
+          <form id="login-form" class="login-form" novalidate>
             <div class="form-group">
               <label for="email">Email</label>
-              <input type="email" id="email" name="email" required />
+              <input type="email" id="email" name="email" autocomplete="email" required />
             </div>
 
             <div class="form-group">
               <label for="password">Password</label>
-              <input type="password" id="password" name="password" required />
+              <input type="password" id="password" name="password" autocomplete="current-password" required />
             </div>
 
-            <button type="submit" class="button button-primary">Login</button>
+            <button type="submit" class="button button-primary">Login to Admin</button>
           </form>
 
           <div id="login-status" class="login-status"></div>
 
           <div class="login-links">
-            <a href="index.html">← Back to Store</a>
+            <a href="index.html">Back to Store</a>
+            <span> | </span>
+            <a href="account.html">Customer Account</a>
           </div>
         </div>
       </div>
@@ -54,10 +56,12 @@
 
   <script src="assets/js/data.js?v=20260327-live-fix" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js?v=20260327-live-fix" defer></script>
-  <script src="supabase-catalog.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/app.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/login.js" defer></script>
+  <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
+  <script src="supabase/supabase-catalog.js?v=20260330-folder-reorg" defer></script>
+  <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
+  <script src="assets/js/app.js?v=20260330-account" defer></script>
+  <script src="assets/js/login.js?v=20260330-auth" defer></script>
 </body>
-</html></content>
-<parameter name="filePath">c:\Users\USER\Desktop\projects\bead VN2\login.html
+</html>
