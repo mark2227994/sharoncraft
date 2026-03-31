@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const bundlesKey = "sharoncraft-bundles";
   const replyTemplatesKey = "sharoncraft-reply-templates";
   const goalKey = "sharoncraft-kiosk-goal";
+  const mpesaDashboardKey = "sharoncraft-mpesa-dashboard";
   const storefrontAnalyticsKey = "sharoncraft-analytics-events";
   const utils = window.SharonCraftUtils;
   // Wait for data to be loaded
@@ -805,6 +806,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   const draftGallery = document.getElementById("admin-draft-gallery");
   const adminTabButtons = document.querySelectorAll("[data-admin-tab]");
   const adminTabPanels = document.querySelectorAll("[data-admin-panel]");
+  const adminTabGroups = document.querySelectorAll("[data-admin-group]");
+  const adminGroupToggleButtons = document.querySelectorAll("[data-admin-group-toggle]");
+  const adminTabSearchInput = document.getElementById("admin-tab-search");
+  const adminSearchResults = document.getElementById("admin-search-results");
+  const adminToggleGuidanceButton = document.getElementById("admin-toggle-guidance");
+  const adminCollapsePanelsButton = document.getElementById("admin-collapse-panels");
+  const adminExpandPanelsButton = document.getElementById("admin-expand-panels");
   const profitMetrics = document.getElementById("admin-profit-metrics");
   const profitTable = document.getElementById("admin-profit-table");
   const resetProfitButton = document.getElementById("admin-reset-profit");
@@ -836,9 +844,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const goalCard = document.getElementById("admin-goal-card");
   const growthMetrics = document.getElementById("admin-growth-metrics");
   const growthMonthly = document.getElementById("admin-growth-monthly");
+  const customerSearchInput = document.getElementById("admin-customer-search");
   const customerMetrics = document.getElementById("admin-customer-metrics");
   const customerList = document.getElementById("admin-customer-list");
   const customerHighlight = document.getElementById("admin-customer-highlight");
+  const customerFollowups = document.getElementById("admin-customer-followups");
   const bundleForm = document.getElementById("admin-bundle-form");
   const bundleNameInput = document.getElementById("admin-bundle-name");
   const bundlePriceInput = document.getElementById("admin-bundle-price");
@@ -846,12 +856,26 @@ document.addEventListener("DOMContentLoaded", async function () {
   const bundleProductPicker = document.getElementById("admin-bundle-product-picker");
   const bundleMetrics = document.getElementById("admin-bundle-metrics");
   const bundleList = document.getElementById("admin-bundle-list");
+  const deliveryMetrics = document.getElementById("admin-delivery-metrics");
+  const deliveryBoard = document.getElementById("admin-delivery-board");
+  const deliveryFocus = document.getElementById("admin-delivery-focus");
   const replyForm = document.getElementById("admin-reply-form");
   const replyTitleInput = document.getElementById("admin-reply-title");
   const replyCategoryInput = document.getElementById("admin-reply-category");
   const replyMessageInput = document.getElementById("admin-reply-message");
   const replyList = document.getElementById("admin-reply-list");
   const adminOverviewGrid = document.getElementById("admin-overview-grid");
+  const adminCommandSummary = document.getElementById("admin-command-summary");
+  const adminGlobalSearchInput = document.getElementById("admin-global-search");
+  const adminGlobalResults = document.getElementById("admin-global-results");
+  const adminLowStockList = document.getElementById("admin-low-stock-list");
+  const mpesaClearAllButton = document.getElementById("admin-mpesa-clear-all");
+  const mpesaOverview = document.getElementById("admin-mpesa-overview");
+  const mpesaQueue = document.getElementById("admin-mpesa-queue");
+  const mpesaLog = document.getElementById("admin-mpesa-log");
+  const mpesaRecon = document.getElementById("admin-mpesa-recon");
+  const mpesaReconNote = document.getElementById("admin-mpesa-recon-note");
+  const mpesaReconActions = document.getElementById("admin-mpesa-recon-actions");
   const analyticsSummary = document.getElementById("admin-analytics-summary");
   const analyticsConversions = document.getElementById("admin-analytics-conversions");
   const analyticsProductsTitle = document.getElementById("admin-analytics-products-title");
@@ -870,15 +894,32 @@ document.addEventListener("DOMContentLoaded", async function () {
   const liveSignOutButton = document.getElementById("admin-live-sign-out");
   const adminTabStorageKey = "sharoncraft-admin-active-tab";
   const analyticsRangeStorageKey = "sharoncraft-admin-analytics-range";
+  const adminGuidanceStorageKey = "sharoncraft-admin-guidance-hidden";
+  const adminCollapsedPanelsStorageKey = "sharoncraft-admin-collapsed-panels";
+  const adminCollapsedGroupsStorageKey = "sharoncraft-admin-collapsed-groups";
+  const defaultMpesaMarkup = {
+    overview: mpesaOverview ? mpesaOverview.innerHTML : "",
+    queue: mpesaQueue ? mpesaQueue.innerHTML : "",
+    log: mpesaLog ? mpesaLog.innerHTML : "",
+    recon: mpesaRecon ? mpesaRecon.innerHTML : "",
+    reconNote: mpesaReconNote ? mpesaReconNote.textContent : ""
+  };
   let currentLiveUser = null;
   let isSavingOrder = false;
   let editingOrderId = null;
   let orderSearchTerm = "";
   let orderStatusFilter = "all";
   let expandedOrderId = null;
+  let customerSearchTerm = "";
+  let selectedCustomerKey = "";
+  let selectedDeliveryOrderId = "";
   let remoteStorefrontAnalyticsEvents = [];
   let analyticsDataSource = "browser";
   let analyticsRange = String(window.localStorage.getItem(analyticsRangeStorageKey) || "7d").trim() || "7d";
+  let mpesaDashboard = loadMpesaDashboard();
+  let adminGuidanceHidden = loadStoredFlag(adminGuidanceStorageKey, true);
+  let collapsedAdminPanels = loadStoredStringArray(adminCollapsedPanelsStorageKey);
+  let collapsedAdminGroups = loadStoredStringArray(adminCollapsedGroupsStorageKey);
 
   function loadSocialSettings() {
     try {
@@ -1388,6 +1429,69 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
   }
 
+  function getFilteredCustomerRecords() {
+    const normalizedQuery = String(customerSearchTerm || "").trim().toLowerCase();
+    const customers = getCustomerRecords();
+    if (!normalizedQuery) {
+      return customers;
+    }
+
+    return customers.filter((customer) =>
+      [
+        customer.customer,
+        customer.phone,
+        customer.products.join(" "),
+        formatDateLabel(customer.lastOrderAt)
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery)
+    );
+  }
+
+  function getOrdersForCustomer(customerKey) {
+    return orders
+      .filter((order) => getCustomerKey(order) === customerKey)
+      .sort((left, right) => new Date(right.updatedAt || right.createdAt || 0).getTime() - new Date(left.updatedAt || left.createdAt || 0).getTime());
+  }
+
+  function buildWhatsappLink(phone) {
+    const digits = String(phone || "").replace(/[^\d]/g, "");
+    return digits ? `https://wa.me/${digits}` : "";
+  }
+
+  const deliveryStatusFlow = ["new", "confirmed", "paid", "delivered"];
+
+  function getNextOrderStatusValue(statusValue) {
+    const normalized = normalizeOrderStatus(statusValue);
+    const currentIndex = deliveryStatusFlow.indexOf(normalized);
+    if (currentIndex < 0 || currentIndex === deliveryStatusFlow.length - 1) {
+      return normalized;
+    }
+    return deliveryStatusFlow[currentIndex + 1];
+  }
+
+  function getPreviousOrderStatusValue(statusValue) {
+    const normalized = normalizeOrderStatus(statusValue);
+    const currentIndex = deliveryStatusFlow.indexOf(normalized);
+    if (currentIndex <= 0) {
+      return normalized;
+    }
+    return deliveryStatusFlow[currentIndex - 1];
+  }
+
+  function getOrderPriorityWeight(order) {
+    const normalized = normalizeOrderStatus(order && order.status);
+    const weights = {
+      paid: 0,
+      confirmed: 1,
+      new: 2,
+      delivered: 3,
+      cancelled: 4
+    };
+    return weights[normalized] != null ? weights[normalized] : 5;
+  }
+
   function getMonthlyGrowthData() {
     const monthMap = new Map();
 
@@ -1544,6 +1648,267 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function setStatus(message) {
     status.textContent = message;
+  }
+
+  function loadStoredFlag(key, fallbackValue) {
+    try {
+      const value = window.localStorage.getItem(key);
+      if (value === null) {
+        return fallbackValue;
+      }
+      return value === "1";
+    } catch (error) {
+      return fallbackValue;
+    }
+  }
+
+  function loadStoredStringArray(key) {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(key) || "[]");
+      return Array.isArray(saved) ? saved.map((item) => String(item || "").trim()).filter(Boolean) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveStoredStringArray(key, values) {
+    safeLocalStorageSetItem(key, JSON.stringify(Array.from(new Set(values))), key);
+  }
+
+  function saveStoredFlag(key, value) {
+    safeLocalStorageSetItem(key, value ? "1" : "0", key);
+  }
+
+  function applyGuidanceMode() {
+    document.body.classList.toggle("admin-guidance-hidden", adminGuidanceHidden);
+    if (adminToggleGuidanceButton) {
+      adminToggleGuidanceButton.textContent = adminGuidanceHidden ? "Show Guidance" : "Hide Guidance";
+    }
+  }
+
+  function updateGroupToggleLabel(button, expanded) {
+    if (!button) {
+      return;
+    }
+
+    button.setAttribute("aria-expanded", expanded ? "true" : "false");
+    button.classList.toggle("is-collapsed", !expanded);
+  }
+
+  function setAdminGroupCollapsed(groupName, collapsed) {
+    const group = Array.from(adminTabGroups).find((item) => item.dataset.adminGroup === groupName);
+    if (!group) {
+      return;
+    }
+
+    group.classList.toggle("is-collapsed", collapsed);
+    const toggle = group.querySelector("[data-admin-group-toggle]");
+    updateGroupToggleLabel(toggle, !collapsed);
+
+    collapsedAdminGroups = collapsed
+      ? collapsedAdminGroups.concat(groupName)
+      : collapsedAdminGroups.filter((item) => item !== groupName);
+    saveStoredStringArray(adminCollapsedGroupsStorageKey, collapsedAdminGroups);
+  }
+
+  function revealAdminGroupForTab(tabName) {
+    const button = Array.from(adminTabButtons).find((item) => item.dataset.adminTab === tabName);
+    if (!button) {
+      return;
+    }
+
+    const group = button.closest("[data-admin-group]");
+    if (!group) {
+      return;
+    }
+
+    const groupName = group.dataset.adminGroup;
+    if (groupName) {
+      setAdminGroupCollapsed(groupName, false);
+    }
+  }
+
+  function setPanelCollapsed(panel, collapsed) {
+    const panelId = panel.dataset.panelId;
+    panel.classList.toggle("is-collapsed", collapsed);
+    const toggle = panel.querySelector(".admin-panel-toggle");
+    if (toggle) {
+      toggle.textContent = collapsed ? "Open" : "Hide";
+      toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    }
+
+    collapsedAdminPanels = collapsed
+      ? collapsedAdminPanels.concat(panelId)
+      : collapsedAdminPanels.filter((item) => item !== panelId);
+    saveStoredStringArray(adminCollapsedPanelsStorageKey, collapsedAdminPanels);
+  }
+
+  function setupPanelCollapsing() {
+    document.querySelectorAll(".admin-panel").forEach((panel, index) => {
+      const header = Array.from(panel.children).find(
+        (child) => child.classList && child.classList.contains("admin-panel-header")
+      );
+      if (!header || panel.dataset.panelReady === "1" || panel.classList.contains("admin-comfort-bar")) {
+        return;
+      }
+
+      panel.dataset.panelReady = "1";
+      panel.dataset.panelId = panel.dataset.panelId || `admin-panel-${index + 1}`;
+      panel.classList.add("is-collapsible");
+
+      const body = document.createElement("div");
+      body.className = "admin-panel-body";
+
+      while (header.nextSibling) {
+        body.appendChild(header.nextSibling);
+      }
+
+      panel.appendChild(body);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "admin-panel-toggle";
+      header.appendChild(toggle);
+
+      const shouldCollapse = collapsedAdminPanels.includes(panel.dataset.panelId);
+      toggle.addEventListener("click", function () {
+        setPanelCollapsed(panel, !panel.classList.contains("is-collapsed"));
+      });
+
+      setPanelCollapsed(panel, shouldCollapse);
+    });
+  }
+
+  function renderAdminSearchResults(query) {
+    if (!adminSearchResults) {
+      return;
+    }
+
+    const normalizedQuery = String(query || "").trim().toLowerCase();
+    const matches = Array.from(adminTabButtons).filter((button) => {
+      const content = `${button.textContent || ""} ${button.dataset.adminTab || ""}`.toLowerCase();
+      return normalizedQuery && content.includes(normalizedQuery);
+    });
+
+    if (!normalizedQuery || !matches.length) {
+      adminSearchResults.hidden = true;
+      adminSearchResults.innerHTML = "";
+      return;
+    }
+
+    adminSearchResults.hidden = false;
+    adminSearchResults.innerHTML = matches
+      .map((button) => {
+        const tabName = button.dataset.adminTab || "";
+        return `
+          <button class="admin-search-result" type="button" data-admin-search-jump="${tabName}">
+            <strong>${getAdminTabLabel(tabName)}</strong>
+            <span>${button.querySelector("small") ? button.querySelector("small").textContent : "Open section"}</span>
+          </button>
+        `;
+      })
+      .join("");
+  }
+
+  function filterAdminTabs(query) {
+    const normalizedQuery = String(query || "").trim().toLowerCase();
+
+    adminTabButtons.forEach((button) => {
+      const content = `${button.textContent || ""} ${button.dataset.adminTab || ""}`.toLowerCase();
+      const matches = !normalizedQuery || content.includes(normalizedQuery);
+      button.classList.toggle("is-filtered-out", !matches);
+    });
+
+    adminTabGroups.forEach((group) => {
+      const visibleButtons = group.querySelectorAll(".admin-tab-button:not(.is-filtered-out)");
+      group.classList.toggle("is-empty", visibleButtons.length === 0);
+
+      if (normalizedQuery && visibleButtons.length > 0) {
+        setAdminGroupCollapsed(group.dataset.adminGroup, false);
+      }
+    });
+
+    renderAdminSearchResults(normalizedQuery);
+  }
+
+  function loadMpesaDashboard() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(mpesaDashboardKey) || "null");
+      if (saved && typeof saved === "object") {
+        return {
+          cleared: Boolean(saved.cleared)
+        };
+      }
+    } catch (error) {
+      // Ignore bad local state and rebuild from defaults.
+    }
+
+    return {
+      cleared: false
+    };
+  }
+
+  function saveMpesaDashboard(message) {
+    const saved = safeLocalStorageSetItem(mpesaDashboardKey, JSON.stringify(mpesaDashboard), "m-pesa dashboard");
+    if (message) {
+      setStatus(saved ? message : `${message} Local save failed because browser storage is full.`);
+    }
+  }
+
+  function renderMpesaDashboard() {
+    if (!mpesaOverview || !mpesaQueue || !mpesaLog || !mpesaRecon) {
+      return;
+    }
+
+    if (mpesaDashboard.cleared) {
+      mpesaOverview.innerHTML = `
+        <article class="empty-state-card">
+          <strong>M-Pesa overview cleared</strong>
+          <p>No payment totals are showing in this browser right now.</p>
+        </article>
+      `;
+      mpesaQueue.innerHTML = `
+        <article class="empty-state-card">
+          <strong>No pending confirmations</strong>
+          <p>The M-Pesa queue has been cleared. New payment items can be added again whenever you are ready.</p>
+        </article>
+      `;
+      mpesaLog.innerHTML = `
+        <article class="empty-state-card">
+          <strong>No transaction log</strong>
+          <p>The recent activity list has been cleared from this browser.</p>
+        </article>
+      `;
+      mpesaRecon.innerHTML = `
+        <article class="empty-state-card">
+          <strong>No reconciliation figures</strong>
+          <p>The balance check has been cleared from this browser.</p>
+        </article>
+      `;
+
+      if (mpesaReconNote) {
+        mpesaReconNote.textContent = "All M-Pesa reconciliation data has been cleared from this browser.";
+      }
+
+      if (mpesaReconActions) {
+        mpesaReconActions.hidden = true;
+      }
+
+      return;
+    }
+
+    mpesaOverview.innerHTML = defaultMpesaMarkup.overview;
+    mpesaQueue.innerHTML = defaultMpesaMarkup.queue;
+    mpesaLog.innerHTML = defaultMpesaMarkup.log;
+    mpesaRecon.innerHTML = defaultMpesaMarkup.recon;
+
+    if (mpesaReconNote) {
+      mpesaReconNote.textContent = defaultMpesaMarkup.reconNote;
+    }
+
+    if (mpesaReconActions) {
+      mpesaReconActions.hidden = false;
+    }
   }
 
   function syncCategoryRuntimeData(saveToStorage) {
@@ -2123,8 +2488,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       visuals: "Visual Story",
       preview: "Phone Preview",
       orders: "Orders",
+      customers: "Customers",
+      delivery: "Delivery Desk",
+      mpesa: "M-Pesa",
       operations: "Delivery & Stock",
       profit: "Profit",
+      bundles: "Bundles & Growth",
       analytics: "Analytics",
       social: "Social Tools",
       replies: "Quick Replies",
@@ -2134,32 +2503,372 @@ document.addEventListener("DOMContentLoaded", async function () {
     return labels[tabName] || tabName;
   }
 
+  function calculatePercentDelta(currentValue, previousValue) {
+    const current = Number(currentValue) || 0;
+    const previous = Number(previousValue) || 0;
+
+    if (!previous) {
+      return current > 0 ? 100 : 0;
+    }
+
+    return ((current - previous) / previous) * 100;
+  }
+
+  function formatTrendPercent(value) {
+    const rounded = Math.round((Number(value) || 0) * 10) / 10;
+    const normalized = Object.is(rounded, -0) ? 0 : rounded;
+    const hasDecimal = Math.abs(normalized % 1) > 0;
+    const prefix = normalized > 0 ? "+" : "";
+    return `${prefix}${normalized.toFixed(hasDecimal ? 1 : 0)}%`;
+  }
+
+  function buildAdminOverviewIcon(type) {
+    const icons = {
+      products: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 7.5A2.5 2.5 0 0 1 7.5 5h9A2.5 2.5 0 0 1 19 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 16.5z" fill="none" stroke="currentColor" stroke-width="1.8"></path>
+          <path d="M8 10h8M8 13h8M8 16h5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+        </svg>
+      `,
+      orders: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 6h13l-1.2 6.2a2 2 0 0 1-2 1.8H10a2 2 0 0 1-2-1.6L6 4H3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+          <circle cx="10" cy="19" r="1.6" fill="currentColor"></circle>
+          <circle cx="17" cy="19" r="1.6" fill="currentColor"></circle>
+        </svg>
+      `,
+      revenue: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5 1.8 3 5 3 5 1.2 5 3.5-2.2 4-5 4-5-1.7-5-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+        </svg>
+      `,
+      growth: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 16l5-5 3 3 6-7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          <path d="M14 7h5v5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      `
+    };
+
+    return icons[type] || icons.products;
+  }
+
   function renderAdminOverview() {
     if (!adminOverviewGrid) {
       return;
     }
 
     const trackedEvents = getStorefrontAnalyticsEvents();
+    const paidStatuses = new Set(["paid", "delivered"]);
+    const thirtyDayWindow = 1000 * 60 * 60 * 24 * 30;
+    const now = Date.now();
+    const recentOrders = orders.filter((order) => now - new Date(order.createdAt || order.updatedAt || 0).getTime() <= thirtyDayWindow);
+    const previousOrders = orders.filter((order) => {
+      const orderTime = new Date(order.createdAt || order.updatedAt || 0).getTime();
+      return now - orderTime > thirtyDayWindow && now - orderTime <= thirtyDayWindow * 2;
+    });
+    const paidRevenue = orders.reduce((sum, order) => {
+      return paidStatuses.has(normalizeOrderStatus(order.status)) ? sum + (Number(order.orderTotal) || 0) : sum;
+    }, 0);
+    const recentRevenue = recentOrders.reduce((sum, order) => {
+      return paidStatuses.has(normalizeOrderStatus(order.status)) ? sum + (Number(order.orderTotal) || 0) : sum;
+    }, 0);
+    const previousRevenue = previousOrders.reduce((sum, order) => {
+      return paidStatuses.has(normalizeOrderStatus(order.status)) ? sum + (Number(order.orderTotal) || 0) : sum;
+    }, 0);
+    const featuredShare = catalog.length ? (catalog.filter((product) => product.featured).length / catalog.length) * 100 : 0;
+    const ordersGrowth = calculatePercentDelta(recentOrders.length, previousOrders.length);
+    const revenueGrowth = calculatePercentDelta(recentRevenue, previousRevenue);
+    const blendedGrowth = Math.round(((ordersGrowth + revenueGrowth) / 2) * 10) / 10;
     const whatsappClicks = trackedEvents.filter((event) => event.name === "whatsapp_click").length;
 
     const cards = [
-      { label: "Products", value: catalog.length },
-      { label: "Categories", value: categoryCatalog.length },
-      { label: "Featured", value: catalog.filter((product) => product.featured).length },
-      { label: "Orders", value: orders.length },
-      { label: "WhatsApp Taps", value: whatsappClicks },
-      { label: "Tracked Events", value: trackedEvents.length }
+      {
+        label: "Total Products",
+        value: catalog.length,
+        change: formatTrendPercent(featuredShare),
+        positive: true,
+        meta: `${catalog.filter((product) => getAvailableProductStock(product) > 0).length} ready to sell`,
+        icon: buildAdminOverviewIcon("products")
+      },
+      {
+        label: "Total Orders",
+        value: orders.length,
+        change: formatTrendPercent(ordersGrowth),
+        positive: ordersGrowth >= 0,
+        meta: `${recentOrders.length} in the last 30 days`,
+        icon: buildAdminOverviewIcon("orders")
+      },
+      {
+        label: "Revenue",
+        value: formatPrice(paidRevenue),
+        change: formatTrendPercent(revenueGrowth),
+        positive: revenueGrowth >= 0,
+        meta: `${formatPrice(recentRevenue)} recent paid revenue`,
+        icon: buildAdminOverviewIcon("revenue")
+      },
+      {
+        label: "Growth %",
+        value: formatTrendPercent(blendedGrowth),
+        change: formatTrendPercent(trackedEvents.length ? (whatsappClicks / trackedEvents.length) * 100 : 0),
+        positive: blendedGrowth >= 0,
+        meta: `${whatsappClicks} WhatsApp taps`,
+        icon: buildAdminOverviewIcon("growth")
+      }
     ];
 
     adminOverviewGrid.innerHTML = cards
       .map(
         (card) => `
           <article class="admin-overview-card">
+            <div class="admin-overview-card-head">
+              <div class="admin-overview-card-copy">
+                <span class="admin-overview-card-label">${card.label}</span>
+                <strong>${card.value}</strong>
+              </div>
+              <span class="admin-overview-icon">${card.icon}</span>
+            </div>
+            <div class="admin-overview-card-foot">
+              <span class="admin-overview-change ${card.positive ? "is-positive" : "is-negative"}">${card.change}</span>
+              <small class="admin-overview-meta">${card.meta}</small>
+            </div>
+          </article>
+        `
+      )
+      .join("");
+
+    renderAdminCommandSummary();
+    renderAdminLowStockWatch();
+    renderAdminGlobalSearchResults(adminGlobalSearchInput ? adminGlobalSearchInput.value : "");
+    window.dispatchEvent(new CustomEvent("sharoncraft:admin-refresh"));
+  }
+
+  function getAvailableProductStock(product) {
+    return Math.max(0, (Number(product && product.stockQty) || 0) - (Number(product && product.reservedQty) || 0));
+  }
+
+  function getLowStockProducts(limit) {
+    const lowStockProducts = catalog
+      .map((product) => ({
+        ...product,
+        availableStock: getAvailableProductStock(product)
+      }))
+      .filter((product) => product.availableStock <= 3)
+      .sort((firstProduct, secondProduct) => {
+        if (firstProduct.availableStock !== secondProduct.availableStock) {
+          return firstProduct.availableStock - secondProduct.availableStock;
+        }
+
+        return firstProduct.name.localeCompare(secondProduct.name);
+      });
+
+    return typeof limit === "number" ? lowStockProducts.slice(0, limit) : lowStockProducts;
+  }
+
+  function renderAdminCommandSummary() {
+    if (!adminCommandSummary) {
+      return;
+    }
+
+    const paidStatuses = new Set(["paid", "delivered"]);
+    const pendingStatuses = new Set(["new", "confirmed"]);
+    const paidRevenue = orders.reduce((sum, order) => {
+      return paidStatuses.has(normalizeOrderStatus(order.status)) ? sum + (Number(order.orderTotal) || 0) : sum;
+    }, 0);
+    const pendingOrders = orders.filter((order) => pendingStatuses.has(normalizeOrderStatus(order.status))).length;
+    const readyDispatch = orders.filter((order) => normalizeOrderStatus(order.status) === "paid").length;
+    const totalExpenses = expenses.reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+
+    const cards = [
+      { label: "Paid Revenue", value: formatPrice(paidRevenue) },
+      { label: "Pending Orders", value: pendingOrders },
+      { label: "Ready To Deliver", value: readyDispatch },
+      { label: "Expenses Logged", value: formatPrice(totalExpenses) }
+    ];
+
+    adminCommandSummary.innerHTML = cards
+      .map(
+        (card) => `
+          <article class="admin-command-card">
             <span>${card.label}</span>
             <strong>${card.value}</strong>
           </article>
         `
       )
+      .join("");
+  }
+
+  function buildAdminSearchResults(query) {
+    const normalizedQuery = String(query || "").trim().toLowerCase();
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    const matches = [];
+
+    catalog.forEach((product) => {
+      const categoryName = categoryMap.get(product.category) || product.category;
+      const haystack = [product.name, categoryName, product.description, product.badge].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedQuery)) {
+        return;
+      }
+
+      matches.push({
+        type: "Product",
+        title: product.name,
+        meta: `${categoryName} | ${formatPrice(product.price)}`,
+        tab: "catalog",
+        targetId: "admin-product-search",
+        targetValue: product.name
+      });
+    });
+
+    orders.forEach((order) => {
+      const haystack = [order.orderId, order.customer, order.phone, order.productName, order.areaName].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedQuery)) {
+        return;
+      }
+
+      matches.push({
+        type: "Order",
+        title: order.orderId || order.id,
+        meta: `${order.customer || "Customer"} | ${order.productName || "Product"} | ${getOrderStatusLabel(order.status)}`,
+        tab: "orders",
+        targetId: "admin-order-search",
+        targetValue: order.orderId || order.customer || order.phone || ""
+      });
+    });
+
+    categoryCatalog.forEach((category) => {
+      const haystack = [category.name, category.tip, category.description].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedQuery)) {
+        return;
+      }
+
+      matches.push({
+        type: "Category",
+        title: category.name,
+        meta: category.tip || category.description || "Open category editor",
+        tab: "categories"
+      });
+    });
+
+    deliveryAreas.forEach((area) => {
+      const haystack = [area.name, area.id].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedQuery)) {
+        return;
+      }
+
+      matches.push({
+        type: "Delivery",
+        title: area.name,
+        meta: `Client ${formatPrice(area.clientCharge)} | Real cost ${formatPrice(area.realCost)}`,
+        tab: "operations"
+      });
+    });
+
+    replyTemplates.forEach((template) => {
+      const haystack = [template.title, template.category, template.message].join(" ").toLowerCase();
+      if (!haystack.includes(normalizedQuery)) {
+        return;
+      }
+
+      matches.push({
+        type: "Reply",
+        title: template.title,
+        meta: template.category || "Quick reply template",
+        tab: "replies"
+      });
+    });
+
+    return matches.slice(0, 8);
+  }
+
+  function renderAdminGlobalSearchResults(query) {
+    if (!adminGlobalResults) {
+      return;
+    }
+
+    const normalizedQuery = String(query || "").trim();
+    if (!normalizedQuery) {
+      adminGlobalResults.innerHTML = `
+        <article class="empty-state-card">
+          <strong>Search the whole admin from here</strong>
+          <p>Try a product name, order ID, customer phone, category, area, or quick reply title.</p>
+        </article>
+      `;
+      return;
+    }
+
+    const matches = buildAdminSearchResults(normalizedQuery);
+    if (!matches.length) {
+      adminGlobalResults.innerHTML = `
+        <article class="empty-state-card">
+          <strong>No matching admin result</strong>
+          <p>Try a shorter name, a phone number, or part of the order ID.</p>
+        </article>
+      `;
+      return;
+    }
+
+    adminGlobalResults.innerHTML = matches
+      .map(
+        (match) => `
+          <button
+            class="admin-command-result"
+            type="button"
+            data-admin-command-open="${escapeHtml(match.tab)}"
+            ${match.targetId ? `data-admin-command-query-target="${escapeHtml(match.targetId)}"` : ""}
+            ${match.targetValue ? `data-admin-command-query-value="${escapeHtml(match.targetValue)}"` : ""}
+          >
+            <div class="admin-command-result-head">
+              <strong>${escapeHtml(match.title)}</strong>
+              <span class="admin-command-tag">${escapeHtml(match.type)}</span>
+            </div>
+            <p>${escapeHtml(match.meta)}</p>
+          </button>
+        `
+      )
+      .join("");
+  }
+
+  function renderAdminLowStockWatch() {
+    if (!adminLowStockList) {
+      return;
+    }
+
+    const riskyProducts = getLowStockProducts(6);
+    if (!riskyProducts.length) {
+      adminLowStockList.innerHTML = `
+        <article class="empty-state-card">
+          <strong>No urgent stock warning</strong>
+          <p>Everything with tracked stock is above the low-stock line right now.</p>
+        </article>
+      `;
+      return;
+    }
+
+    adminLowStockList.innerHTML = riskyProducts
+      .map((product) => {
+        const badgeClass = product.availableStock === 0 ? "is-out" : "is-low";
+        const badgeLabel = product.availableStock === 0 ? "Out" : `Only ${product.availableStock} left`;
+
+        return `
+          <button
+            class="admin-stock-watch-row"
+            type="button"
+            data-admin-command-open="catalog"
+            data-admin-command-query-target="admin-product-search"
+            data-admin-command-query-value="${escapeHtml(product.name)}"
+          >
+            <div class="admin-stock-watch-copy">
+              <strong>${escapeHtml(product.name)}</strong>
+              <p>${escapeHtml(categoryMap.get(product.category) || product.category)} | Stock ${product.stockQty || 0} | Reserved ${product.reservedQty || 0}</p>
+            </div>
+            <span class="admin-stock-watch-badge ${badgeClass}">${escapeHtml(badgeLabel)}</span>
+          </button>
+        `;
+      })
       .join("");
   }
 
@@ -2701,6 +3410,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function activateAdminTab(tabName) {
+    revealAdminGroupForTab(tabName);
+
     adminTabButtons.forEach((button) => {
       button.classList.toggle("is-active", button.getAttribute('data-admin-tab') === tabName);
     });
@@ -2731,6 +3442,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       case "preview":
         syncLivePreviewFrame();
         break;
+      case "customers":
+        renderCustomerDashboard();
+        break;
+      case "delivery":
+        renderDeliveryDesk();
+        break;
       case "sales":
         renderSalesDashboard();
         break;
@@ -2747,6 +3464,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         break;
       case "bundles":
         renderBundles();
+        renderGoalCard();
         break;
       default:
         break;
@@ -3383,6 +4101,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const savedLocally = safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
     renderOrders();
     renderCustomerDashboard();
+    renderDeliveryDesk();
     renderGoalCard();
     renderAdminOverview();
 
@@ -3433,6 +4152,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const savedLocally = safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
     renderOrders();
     renderCustomerDashboard();
+    renderDeliveryDesk();
     renderGoalCard();
     renderAdminOverview();
 
@@ -3477,6 +4197,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const savedLocally = safeLocalStorageSetItem(ordersKey, JSON.stringify(orders), "orders");
     renderOrders();
     renderCustomerDashboard();
+    renderDeliveryDesk();
     renderGoalCard();
     renderAdminOverview();
 
@@ -3521,6 +4242,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.localStorage.setItem(deliveryAreasKey, JSON.stringify(deliveryAreas));
     renderDeliveryAreas();
     renderOrderAreaSelect();
+    renderDeliveryDesk();
     if (message) {
       setStatus(message);
     }
@@ -3850,20 +4572,46 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const customers = getCustomerRecords();
-    const repeatCustomers = customers.filter((customer) => customer.orders > 1);
-    const topCustomer = customers[0];
+    const allCustomers = getCustomerRecords();
+    const customers = getFilteredCustomerRecords();
+    const repeatCustomers = allCustomers.filter((customer) => customer.orders > 1);
+    const defaultCustomer = customers[0] || allCustomers[0] || null;
+    if (customers.length && !customers.some((customer) => customer.key === selectedCustomerKey)) {
+      selectedCustomerKey = customers[0].key;
+    } else if (!selectedCustomerKey || !allCustomers.some((customer) => customer.key === selectedCustomerKey)) {
+      selectedCustomerKey = defaultCustomer ? defaultCustomer.key : "";
+    }
+
+    const selectedCustomer =
+      allCustomers.find((customer) => customer.key === selectedCustomerKey) ||
+      defaultCustomer;
+    const selectedCustomerOrders = selectedCustomer ? getOrdersForCustomer(selectedCustomer.key) : [];
     const repeatOrderCount = repeatCustomers.reduce((sum, customer) => sum + customer.orders, 0);
     const repeatRate = orders.length ? Math.round((repeatOrderCount / orders.length) * 100) : 0;
+    const followupCustomers = allCustomers
+      .filter((customer) => customer.phone || customer.orders > 1)
+      .sort((left, right) => {
+        const leftAge = new Date(left.lastOrderAt || 0).getTime();
+        const rightAge = new Date(right.lastOrderAt || 0).getTime();
+        if (right.orders !== left.orders) {
+          return right.orders - left.orders;
+        }
+        return leftAge - rightAge;
+      })
+      .slice(0, 4);
+
+    if (customerSearchInput) {
+      customerSearchInput.value = customerSearchTerm;
+    }
 
     customerMetrics.innerHTML = `
       <article class="admin-metric-card">
         <span>Unique Customers</span>
-        <strong>${customers.length}</strong>
+        <strong>${allCustomers.length}</strong>
       </article>
       <article class="admin-metric-card">
         <span>Repeat Customers</span>
-        <strong>${repeatCustomers.length}</strong>
+        <strong>${allCustomers.filter((customer) => customer.orders > 1).length}</strong>
       </article>
       <article class="admin-metric-card">
         <span>Repeat Order Rate</span>
@@ -3871,18 +4619,37 @@ document.addEventListener("DOMContentLoaded", async function () {
       </article>
       <article class="admin-metric-card">
         <span>Best Customer Profit</span>
-        <strong>${topCustomer ? formatPrice(topCustomer.totalProfit) : formatPrice(0)}</strong>
+        <strong>${allCustomers[0] ? formatPrice(allCustomers[0].totalProfit) : formatPrice(0)}</strong>
       </article>
     `;
 
-    customerHighlight.innerHTML = topCustomer
+    customerHighlight.innerHTML = selectedCustomer
       ? `
           <article class="admin-customer-focus">
-            <strong>${topCustomer.customer}</strong>
-            <span>${topCustomer.phone || "No phone saved"}</span>
-            <p>${topCustomer.orders} orders, ${topCustomer.totalUnits} items, and ${formatPrice(topCustomer.totalProfit)} profit so far.</p>
+            <strong>${escapeHtml(selectedCustomer.customer)}</strong>
+            <span>${escapeHtml(selectedCustomer.phone || "No phone saved")}</span>
+            <p>${selectedCustomer.orders} orders, ${selectedCustomer.totalUnits} items, and ${formatPrice(selectedCustomer.totalProfit)} profit so far.</p>
             <div class="admin-customer-tags">
-              ${topCustomer.products.slice(0, 4).map((product) => `<span class="admin-summary-tag">${product}</span>`).join("")}
+              ${selectedCustomer.products.slice(0, 6).map((product) => `<span class="admin-summary-tag">${escapeHtml(product)}</span>`).join("")}
+            </div>
+            <div class="admin-inline-actions">
+              ${selectedCustomer.phone ? `<button type="button" data-customer-copy="${escapeHtml(selectedCustomer.phone)}">Copy Phone</button>` : ""}
+              <button type="button" data-customer-orders="${escapeHtml(selectedCustomer.key)}">Open Orders</button>
+              ${buildWhatsappLink(selectedCustomer.phone) ? `<a class="button button-secondary" href="${escapeHtml(buildWhatsappLink(selectedCustomer.phone))}" target="_blank" rel="noreferrer">WhatsApp</a>` : ""}
+            </div>
+            <div class="admin-order-detail-grid">
+              ${selectedCustomerOrders
+                .slice(0, 3)
+                .map(
+                  (order) => `
+                    <div class="admin-order-detail-card">
+                      <label>${escapeHtml(getOrderStatusLabel(order.status))}</label>
+                      <strong>${escapeHtml(order.productName || "Product")}</strong>
+                      <span>${escapeHtml(formatDateLabel(order.updatedAt || order.createdAt))}</span>
+                    </div>
+                  `
+                )
+                .join("")}
             </div>
           </article>
         `
@@ -3897,11 +4664,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       ? customers
           .map(
             (customer) => `
-              <article class="admin-customer-row">
+              <article class="admin-customer-row ${selectedCustomerKey === customer.key ? "is-active" : ""}" data-customer-select="${escapeHtml(customer.key)}">
                 <div>
-                  <strong>${customer.customer}</strong>
-                  <span>${customer.phone || "No phone saved"}</span>
-                  <span>Last order ${formatDateLabel(customer.lastOrderAt)}</span>
+                  <strong>${escapeHtml(customer.customer)}</strong>
+                  <span>${escapeHtml(customer.phone || "No phone saved")}</span>
+                  <span>Last order ${escapeHtml(formatDateLabel(customer.lastOrderAt))}</span>
                 </div>
                 <span>${customer.orders} orders</span>
                 <span>${customer.totalUnits} items</span>
@@ -3913,9 +4680,179 @@ document.addEventListener("DOMContentLoaded", async function () {
       : `
           <article class="admin-customer-row">
             <div>
-              <strong>No repeat customers yet</strong>
-              <span>Customer names will appear here automatically from the Orders tab.</span>
+              <strong>${allCustomers.length ? "No matching customers" : "No repeat customers yet"}</strong>
+              <span>${allCustomers.length ? "Try a shorter search term or clear the search box." : "Customer names will appear here automatically from the Orders tab."}</span>
             </div>
+          </article>
+        `;
+
+    if (customerFollowups) {
+      customerFollowups.innerHTML = followupCustomers.length
+        ? followupCustomers
+            .map(
+              (customer) => `
+                <article class="admin-customer-row" data-customer-select="${escapeHtml(customer.key)}">
+                  <div>
+                    <strong>${escapeHtml(customer.customer)}</strong>
+                    <span>${customer.orders > 1 ? "Repeat buyer worth checking in on" : "Recent buyer who may be ready for a follow-up"}</span>
+                  </div>
+                  <span>${escapeHtml(formatDateLabel(customer.lastOrderAt))}</span>
+                </article>
+              `
+            )
+            .join("")
+        : `
+            <article class="admin-customer-row">
+              <div>
+                <strong>No follow-up ideas yet</strong>
+                <span>Save more orders and this space will surface warm customer reminders.</span>
+              </div>
+            </article>
+          `;
+    }
+  }
+
+  function renderDeliveryDesk() {
+    if (!deliveryMetrics || !deliveryBoard || !deliveryFocus) {
+      return;
+    }
+
+    const statusDefinitions = [
+      { value: "new", label: "New", helper: "Just saved or still waiting for confirmation" },
+      { value: "confirmed", label: "Confirmed", helper: "Customer is committed but payment or dispatch is still pending" },
+      { value: "paid", label: "Paid", helper: "Ready for dispatch or final handoff" },
+      { value: "delivered", label: "Delivered", helper: "Completed orders" },
+      { value: "cancelled", label: "Cancelled", helper: "Stopped before completion" }
+    ];
+
+    const sortedOrders = [...orders].sort((left, right) => {
+      const weightDifference = getOrderPriorityWeight(left) - getOrderPriorityWeight(right);
+      if (weightDifference !== 0) {
+        return weightDifference;
+      }
+      return new Date(left.createdAt || 0).getTime() - new Date(right.createdAt || 0).getTime();
+    });
+
+    const needsAttention = sortedOrders.filter((order) => ["new", "confirmed"].includes(normalizeOrderStatus(order.status))).length;
+    const readyToDispatch = sortedOrders.filter((order) => normalizeOrderStatus(order.status) === "paid").length;
+    const deliveredCount = sortedOrders.filter((order) => normalizeOrderStatus(order.status) === "delivered").length;
+    const overdueCount = sortedOrders.filter((order) => {
+      const status = normalizeOrderStatus(order.status);
+      const age = Date.now() - new Date(order.createdAt || 0).getTime();
+      return ["new", "confirmed", "paid"].includes(status) && age > 2 * 24 * 60 * 60 * 1000;
+    }).length;
+
+    deliveryMetrics.innerHTML = `
+      <article class="admin-metric-card">
+        <span>Need Attention</span>
+        <strong>${needsAttention}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Ready to Dispatch</span>
+        <strong>${readyToDispatch}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Delivered</span>
+        <strong>${deliveredCount}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Over 2 Days Old</span>
+        <strong>${overdueCount}</strong>
+      </article>
+    `;
+
+    deliveryBoard.innerHTML = statusDefinitions
+      .map((statusDefinition) => {
+        const columnOrders = sortedOrders.filter((order) => normalizeOrderStatus(order.status) === statusDefinition.value);
+        return `
+          <article class="admin-delivery-column">
+            <div class="admin-delivery-column-head">
+              <div>
+                <strong>${statusDefinition.label}</strong>
+                <span>${statusDefinition.helper}</span>
+              </div>
+              <span class="admin-summary-pill">${columnOrders.length}</span>
+            </div>
+            <div class="admin-delivery-column-body">
+              ${columnOrders.length
+                ? columnOrders
+                    .map((order) => {
+                      const nextStatus = getNextOrderStatusValue(order.status);
+                      const previousStatus = getPreviousOrderStatusValue(order.status);
+                      return `
+                        <article class="admin-delivery-card">
+                          <div class="admin-delivery-card-copy">
+                            <strong>${escapeHtml(order.customer || "Walk-in customer")}</strong>
+                            <span>${escapeHtml(order.productName || "Product")} | ${Math.max(1, Number(order.quantity) || 1)} item${Math.max(1, Number(order.quantity) || 1) === 1 ? "" : "s"}</span>
+                            <span>${escapeHtml(order.areaName || "Area not set")} | ${escapeHtml(order.id || "")}</span>
+                          </div>
+                          <div class="admin-inline-actions">
+                            ${previousStatus !== normalizeOrderStatus(order.status) ? `<button type="button" data-delivery-move="${escapeHtml(order.id)}" data-delivery-status="${previousStatus}">Back</button>` : ""}
+                            ${nextStatus !== normalizeOrderStatus(order.status) ? `<button type="button" data-delivery-move="${escapeHtml(order.id)}" data-delivery-status="${nextStatus}">Next</button>` : ""}
+                            <button type="button" data-delivery-focus-order="${escapeHtml(order.id)}">View</button>
+                          </div>
+                        </article>
+                      `;
+                    })
+                    .join("")
+                : `<div class="empty-state-card"><strong>No ${statusDefinition.label.toLowerCase()} orders</strong><p>This stage is clear right now.</p></div>`}
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+    if (selectedDeliveryOrderId && !sortedOrders.some((order) => order.id === selectedDeliveryOrderId)) {
+      selectedDeliveryOrderId = "";
+    }
+
+    const focusOrder =
+      sortedOrders.find((order) => order.id === selectedDeliveryOrderId) ||
+      sortedOrders.find((order) => normalizeOrderStatus(order.status) === "paid") ||
+      sortedOrders.find((order) => normalizeOrderStatus(order.status) === "confirmed") ||
+      sortedOrders.find((order) => normalizeOrderStatus(order.status) === "new") ||
+      sortedOrders[0] ||
+      null;
+
+    if (focusOrder) {
+      selectedDeliveryOrderId = focusOrder.id || "";
+    }
+
+    deliveryFocus.innerHTML = focusOrder
+      ? `
+          <article class="admin-customer-focus">
+            <strong>${escapeHtml(focusOrder.customer || "Walk-in customer")}</strong>
+            <span>${escapeHtml(getOrderStatusLabel(focusOrder.status))} | ${escapeHtml(focusOrder.id || "")}</span>
+            <p>${escapeHtml(focusOrder.productName || "Product")} for ${escapeHtml(focusOrder.areaName || "delivery area not set")}. ${focusOrder.note ? escapeHtml(focusOrder.note) : "No customer note saved yet."}</p>
+            <div class="admin-order-detail-grid">
+              <div class="admin-order-detail-card">
+                <label>Phone</label>
+                <strong>${escapeHtml(focusOrder.phone || "No phone saved")}</strong>
+                <span>${escapeHtml(formatDateLabel(focusOrder.updatedAt || focusOrder.createdAt))}</span>
+              </div>
+              <div class="admin-order-detail-card">
+                <label>Total</label>
+                <strong>${formatPrice(focusOrder.orderTotal)}</strong>
+                <span>Profit ${formatPrice(focusOrder.totalProfit)}</span>
+              </div>
+              <div class="admin-order-detail-card">
+                <label>Next move</label>
+                <strong>${escapeHtml(getOrderStatusLabel(getNextOrderStatusValue(focusOrder.status)))}</strong>
+                <span>${escapeHtml(getOrderStatusLabel(getPreviousOrderStatusValue(focusOrder.status))) === escapeHtml(getOrderStatusLabel(focusOrder.status)) ? "No previous step" : "You can still step this order back if needed."}</span>
+              </div>
+            </div>
+            <div class="admin-inline-actions">
+              ${getPreviousOrderStatusValue(focusOrder.status) !== normalizeOrderStatus(focusOrder.status) ? `<button type="button" data-delivery-move="${escapeHtml(focusOrder.id)}" data-delivery-status="${getPreviousOrderStatusValue(focusOrder.status)}">Move Back</button>` : ""}
+              ${getNextOrderStatusValue(focusOrder.status) !== normalizeOrderStatus(focusOrder.status) ? `<button type="button" data-delivery-move="${escapeHtml(focusOrder.id)}" data-delivery-status="${getNextOrderStatusValue(focusOrder.status)}">Move Forward</button>` : ""}
+              <button type="button" data-delivery-edit-order="${escapeHtml(focusOrder.id)}">Edit Order</button>
+              <button type="button" data-delivery-track-order="${escapeHtml(focusOrder.id)}">Track Page</button>
+            </div>
+          </article>
+        `
+      : `
+          <article class="admin-customer-focus">
+            <strong>No delivery work yet</strong>
+            <p>Save a few orders first and this desk will start showing the next order that needs attention.</p>
           </article>
         `;
   }
@@ -5240,14 +6177,118 @@ document.addEventListener("DOMContentLoaded", async function () {
   handleImageUpload(heroImageUploadInput, heroImageInput, heroImagePreview);
   handleImageUpload(favoriteImageUploadInput, favoriteImageInput, favoriteImagePreview);
 
+  setupPanelCollapsing();
+  applyGuidanceMode();
+  adminTabGroups.forEach((group) => {
+    const groupName = group.dataset.adminGroup;
+    if (!groupName) {
+      return;
+    }
+    setAdminGroupCollapsed(groupName, collapsedAdminGroups.includes(groupName));
+  });
+
   adminTabButtons.forEach((button) => {
     button.addEventListener("click", function () {
       activateAdminTab(button.dataset.adminTab);
     });
   });
 
+  adminGroupToggleButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const groupName = button.dataset.adminGroupToggle;
+      if (!groupName) {
+        return;
+      }
+
+      const group = button.closest("[data-admin-group]");
+      const willCollapse = group ? !group.classList.contains("is-collapsed") : false;
+      setAdminGroupCollapsed(groupName, willCollapse);
+    });
+  });
+
+  if (adminTabSearchInput) {
+    adminTabSearchInput.addEventListener("input", function () {
+      filterAdminTabs(adminTabSearchInput.value);
+    });
+  }
+
+  if (adminGlobalSearchInput) {
+    adminGlobalSearchInput.addEventListener("input", function () {
+      renderAdminGlobalSearchResults(adminGlobalSearchInput.value);
+    });
+  }
+
+  if (adminToggleGuidanceButton) {
+    adminToggleGuidanceButton.addEventListener("click", function () {
+      adminGuidanceHidden = !adminGuidanceHidden;
+      applyGuidanceMode();
+      saveStoredFlag(adminGuidanceStorageKey, adminGuidanceHidden);
+    });
+  }
+
+  if (adminCollapsePanelsButton) {
+    adminCollapsePanelsButton.addEventListener("click", function () {
+      document.querySelectorAll(".admin-panel.is-collapsible").forEach((panel) => {
+        setPanelCollapsed(panel, true);
+      });
+      setStatus("All admin sections collapsed.");
+    });
+  }
+
+  if (adminExpandPanelsButton) {
+    adminExpandPanelsButton.addEventListener("click", function () {
+      document.querySelectorAll(".admin-panel.is-collapsible").forEach((panel) => {
+        setPanelCollapsed(panel, false);
+      });
+      setStatus("All admin sections expanded.");
+    });
+  }
+
   document.addEventListener("click", function (event) {
+    const commandButton = event.target.closest("[data-admin-command-open]");
     const jumpButton = event.target.closest("[data-admin-jump]");
+    const searchButton = event.target.closest("[data-admin-search-jump]");
+
+    if (commandButton) {
+      const targetTab = commandButton.dataset.adminCommandOpen;
+      if (!targetTab) {
+        return;
+      }
+
+      activateAdminTab(targetTab);
+
+      const targetFieldId = commandButton.dataset.adminCommandQueryTarget;
+      const targetFieldValue = commandButton.dataset.adminCommandQueryValue || "";
+      if (targetFieldId) {
+        const targetField = document.getElementById(targetFieldId);
+        if (targetField) {
+          targetField.value = targetFieldValue;
+          targetField.dispatchEvent(new Event("input", { bubbles: true }));
+          targetField.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setStatus(`${getAdminTabLabel(targetTab)} opened from search.`);
+      return;
+    }
+
+    if (searchButton) {
+      const targetTab = searchButton.dataset.adminSearchJump;
+      if (!targetTab) {
+        return;
+      }
+
+      activateAdminTab(targetTab);
+      if (adminTabSearchInput) {
+        adminTabSearchInput.value = "";
+        filterAdminTabs("");
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setStatus(`${getAdminTabLabel(targetTab)} opened from quick find.`);
+      return;
+    }
+
     if (!jumpButton) {
       return;
     }
@@ -5274,6 +6315,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (resetProfitButton) {
     resetProfitButton.addEventListener("click", resetProfitHistory);
+  }
+
+  renderMpesaDashboard();
+
+  if (mpesaClearAllButton) {
+    mpesaClearAllButton.addEventListener("click", function () {
+      const confirmed = window.confirm(
+        "Clear the entire M-Pesa workspace? This will remove the overview cards, pending confirmations, reconciliation, and transaction log in this browser."
+      );
+      if (!confirmed) {
+        return;
+      }
+
+      mpesaDashboard = { cleared: true };
+      renderMpesaDashboard();
+      saveMpesaDashboard("M-Pesa workspace cleared in this browser.");
+    });
   }
 
   [profitProductSelect, profitQuantityInput, profitOrderMomPriceInput, profitOrderPriceInput, profitOrderDeliveryChargeInput, profitOrderDeliveryCostInput].forEach(
@@ -5774,6 +6832,119 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
+  if (customerSearchInput) {
+    customerSearchInput.addEventListener("input", function () {
+      customerSearchTerm = customerSearchInput.value || "";
+      renderCustomerDashboard();
+    });
+  }
+
+  if (customerList) {
+    customerList.addEventListener("click", function (event) {
+      const row = event.target.closest("[data-customer-select]");
+      if (!row) {
+        return;
+      }
+
+      selectedCustomerKey = row.dataset.customerSelect || "";
+      renderCustomerDashboard();
+    });
+  }
+
+  if (customerFollowups) {
+    customerFollowups.addEventListener("click", function (event) {
+      const row = event.target.closest("[data-customer-select]");
+      if (!row) {
+        return;
+      }
+
+      selectedCustomerKey = row.dataset.customerSelect || "";
+      activateAdminTab("customers");
+      renderCustomerDashboard();
+      setStatus("Customer detail opened from follow-up ideas.");
+    });
+  }
+
+  if (customerHighlight) {
+    customerHighlight.addEventListener("click", async function (event) {
+      const copyButton = event.target.closest("[data-customer-copy]");
+      const ordersButton = event.target.closest("[data-customer-orders]");
+
+      if (copyButton) {
+        try {
+          await navigator.clipboard.writeText(copyButton.dataset.customerCopy || "");
+          setStatus("Customer phone copied.");
+        } catch (error) {
+          setStatus("Could not copy the customer phone right now.");
+        }
+        return;
+      }
+
+      if (ordersButton) {
+        const customer = getCustomerRecords().find((item) => item.key === ordersButton.dataset.customerOrders);
+        selectedCustomerKey = ordersButton.dataset.customerOrders || selectedCustomerKey;
+        activateAdminTab("orders");
+        orderSearchTerm = customer ? customer.customer || customer.phone || "" : "";
+        if (orderSearchInput) {
+          orderSearchInput.value = orderSearchTerm;
+        }
+        renderOrders();
+        setStatus("Filtered the order list for this customer.");
+      }
+    });
+  }
+
+  async function handleDeliveryAction(event) {
+    const moveButton = event.target.closest("[data-delivery-move]");
+    const focusButton = event.target.closest("[data-delivery-focus-order]");
+    const editButton = event.target.closest("[data-delivery-edit-order]");
+    const trackButton = event.target.closest("[data-delivery-track-order]");
+
+    if (moveButton) {
+      const orderId = moveButton.dataset.deliveryMove;
+      const nextStatus = normalizeOrderStatus(moveButton.dataset.deliveryStatus);
+      selectedDeliveryOrderId = orderId || "";
+      orders = orders.map((order) =>
+        order.id === orderId ? { ...order, status: nextStatus, updatedAt: new Date().toISOString() } : order
+      );
+      await saveOrders(`Order ${orderId} moved to ${getOrderStatusLabel(nextStatus)}.`);
+      return;
+    }
+
+    if (focusButton) {
+      const order = orders.find((item) => item.id === focusButton.dataset.deliveryFocusOrder);
+      if (!order) {
+        return;
+      }
+      selectedDeliveryOrderId = order.id || "";
+      renderDeliveryDesk();
+      setStatus(`Opened the delivery view for ${order.id}.`);
+      return;
+    }
+
+    if (editButton) {
+      const orderId = editButton.dataset.deliveryEditOrder;
+      loadOrderIntoForm(orderId);
+      activateAdminTab("orders");
+      setStatus(`Editing order ${orderId}.`);
+      return;
+    }
+
+    if (trackButton) {
+      const orderId = trackButton.dataset.deliveryTrackOrder;
+      window.open(buildTrackOrderUrl(orderId), "_blank", "noopener");
+      setStatus(`Opened the tracking page for ${orderId}.`);
+    }
+  }
+
+  if (deliveryBoard) {
+    deliveryBoard.addEventListener("click", handleDeliveryAction);
+  }
+
+  if (deliveryFocus) {
+    deliveryFocus.addEventListener("click", handleDeliveryAction);
+  }
+
   if (deliveryForm) {
     deliveryForm.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -6098,6 +7269,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   resetOrderFormState();
   renderOrders();
   renderCustomerDashboard();
+  renderDeliveryDesk();
   renderDeliveryAreas();
   renderExpenses();
   renderStockList();

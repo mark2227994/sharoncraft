@@ -61,7 +61,23 @@ This project is static HTML/CSS/JS, so a simple local server is enough.
 Recommended options:
 
 - VS Code Live Server
+- Node.js with `npm run dev`
 - Any local static file server that serves the repo root
+
+If you want a lightweight Node workflow:
+
+1. Install Node.js.
+2. Run `npm run dev`
+3. Open `http://127.0.0.1:5500`
+
+Available scripts:
+
+- `npm run dev`
+  Starts the local static server on the default port
+- `npm run dev:open`
+  Starts the server and opens the browser
+- `npm run serve:5500`
+  Starts the server explicitly on port `5500`
 
 When testing locally, verify:
 

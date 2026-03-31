@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const heroTitle = document.getElementById("home-hero-title");
   const heroDescription = document.getElementById("home-hero-description");
   const heroPrimary = document.getElementById("home-hero-primary");
+  const heroWhatsapp = document.getElementById("home-hero-whatsapp");
   const heroSecondary = document.getElementById("home-hero-secondary");
   const heroImage = document.getElementById("home-hero-image");
   const favoriteKicker = document.getElementById("home-favorite-kicker");
@@ -53,6 +54,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (heroPrimary) {
       heroPrimary.textContent = hero.primaryLabel || "Shop Now";
       heroPrimary.href = hero.primaryHref || "shop.html";
+    }
+    if (heroWhatsapp) {
+      heroWhatsapp.href = utils.buildWhatsAppUrl("Hello SharonCraft, I would like help choosing the right handmade beadwork for me.");
     }
     if (heroSecondary) {
       heroSecondary.textContent = hero.secondaryLabel || "Our Story";
@@ -143,6 +147,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           "Shop SharonCraft for handmade beaded necklaces, bracelets, decor, gift sets, and occasion pieces with easy WhatsApp ordering in Kenya.",
         path: "/",
         image: hero.image || "assets/images/IMG-20260226-WA0005.jpg",
+        imageAlt: hero.imageAlt || "SharonCraft handmade beadwork hero image",
         type: "website"
       });
     }
@@ -154,13 +159,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       utils.setStructuredData("home-organization", {
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": "OnlineStore",
         name: utils.data.site.name || "SharonCraft",
         url: new URL("/", window.location.origin).href,
         logo: new URL("assets/images/sharoncraft-logo-transparent.png", window.location.origin).href,
         image: new URL(hero.image || "assets/images/IMG-20260226-WA0005.jpg", window.location.origin).href,
         telephone: utils.data.site.phone || "",
         email: utils.data.site.email || "",
+        description: utils.data.site.tagline || "",
         address: {
           "@type": "PostalAddress",
           addressLocality: utils.data.site.location || "Nairobi, Kenya",
@@ -174,7 +180,27 @@ document.addEventListener("DOMContentLoaded", async function () {
         "@type": "WebSite",
         name: utils.data.site.name || "SharonCraft",
         url: new URL("/", window.location.origin).href,
-        description: hero.description || utils.data.site.tagline || ""
+        description: hero.description || utils.data.site.tagline || "",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${new URL("/shop.html", window.location.origin).href}?q={search_term_string}`,
+          "query-input": "required name=search_term_string"
+        }
+      });
+
+      utils.setStructuredData("home-featured-items", {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "Featured SharonCraft products",
+        itemListElement: (allProducts.filter((product) => product.featured).slice(0, 4).length
+          ? allProducts.filter((product) => product.featured).slice(0, 4)
+          : allProducts.slice(0, 4)
+        ).map((product, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href,
+          name: product.name || "SharonCraft product"
+        }))
       });
     }
 

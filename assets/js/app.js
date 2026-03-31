@@ -580,9 +580,20 @@
       item_category: normalizeText(category && category.name) || "Collection",
       price: Number(product && product.price) || 0,
       currency: "KES",
+      quantity: Math.max(1, Number(config.quantity) || 1),
       index: Number(config.index) || 0,
       item_list_id: normalizeText(config.listId),
       item_list_name: normalizeText(config.listName)
+    };
+  }
+
+  function buildProductAnalyticsPayload(product, options) {
+    const item = buildAnalyticsItem(product, options);
+
+    return {
+      currency: "KES",
+      value: Number(item.price) || 0,
+      items: [item]
     };
   }
 
@@ -697,6 +708,68 @@
       product_name: normalizeText(link.dataset.productName),
       transport_type: "beacon"
     });
+
+    const buttonLabel = normalizeText(link.dataset.analyticsLabel || link.textContent || "WhatsApp");
+    const productId = normalizeText(link.dataset.productId);
+    const product = productId ? getProductById(productId) : null;
+    const lowerLabel = buttonLabel.toLowerCase();
+
+    if (lowerLabel.includes("checkout")) {
+      const checkoutItems = getCartSummary()
+        .map((item, index) => buildAnalyticsItem(item.product || {
+          id: item.productId,
+          name: item.productName,
+          category: item.product && item.product.category,
+          price: item.productPrice
+        }, {
+          index: index + 1,
+          quantity: item.quantity,
+          listId: "cart_checkout",
+          listName: "Cart Checkout"
+        }))
+        .filter((item) => item.item_id);
+      const checkoutValue = checkoutItems.reduce(function (total, item) {
+        return total + ((Number(item.price) || 0) * Math.max(1, Number(item.quantity) || 1));
+      }, 0);
+
+      trackEvent("begin_checkout", {
+        currency: "KES",
+        value: checkoutValue,
+        checkout_channel: "whatsapp",
+        transport_type: "beacon",
+        items: checkoutItems
+      });
+      return;
+    }
+
+    const leadIntent = lowerLabel.includes("custom")
+      ? "custom_order"
+      : lowerLabel.includes("gift")
+        ? "gift_inquiry"
+        : product
+          ? "product_order"
+          : "general_inquiry";
+    const leadPayload = {
+      lead_channel: "whatsapp",
+      lead_intent: leadIntent,
+      button_label: buttonLabel,
+      transport_type: "beacon"
+    };
+
+    if (product) {
+      const productEvent = buildProductAnalyticsPayload(product, {
+        index: 1,
+        listId: "whatsapp_lead",
+        listName: "WhatsApp Lead"
+      });
+      leadPayload.currency = productEvent.currency;
+      leadPayload.value = productEvent.value;
+      leadPayload.items = productEvent.items;
+      leadPayload.product_id = normalizeText(product.id);
+      leadPayload.product_name = normalizeText(product.name);
+    }
+
+    trackEvent("generate_lead", leadPayload);
   }
 
   function bindAnalyticsEvents() {
@@ -743,7 +816,9 @@
     const description = normalizeText(settings.description) || data.site.tagline;
     const path = normalizeText(settings.path) || window.location.pathname;
     const image = normalizeText(settings.image) || "assets/images/IMG-20260226-WA0005.jpg";
+    const imageAlt = normalizeText(settings.imageAlt) || title;
     const type = normalizeText(settings.type) || "website";
+    const robots = normalizeText(settings.robots) || "index,follow";
     const canonicalUrl = absoluteUrl(path);
     const imageUrl = absoluteUrl(image);
 
@@ -778,6 +853,11 @@
       meta.setAttribute("property", "og:type");
       return meta;
     }, type);
+    setHeadValue('meta[property="og:site_name"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:site_name");
+      return meta;
+    }, data.site.name || "SharonCraft");
     setHeadValue('meta[property="og:url"]', function () {
       const meta = document.createElement("meta");
       meta.setAttribute("property", "og:url");
@@ -788,6 +868,11 @@
       meta.setAttribute("property", "og:image");
       return meta;
     }, imageUrl);
+    setHeadValue('meta[property="og:image:alt"]', function () {
+      const meta = document.createElement("meta");
+      meta.setAttribute("property", "og:image:alt");
+      return meta;
+    }, imageAlt);
     setHeadValue('meta[name="twitter:card"]', function () {
       const meta = document.createElement("meta");
       meta.name = "twitter:card";
@@ -808,6 +893,16 @@
       meta.name = "twitter:image";
       return meta;
     }, imageUrl);
+    setHeadValue('meta[name="twitter:image:alt"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "twitter:image:alt";
+      return meta;
+    }, imageAlt);
+    setHeadValue('meta[name="robots"]', function () {
+      const meta = document.createElement("meta");
+      meta.name = "robots";
+      return meta;
+    }, robots);
   }
 
   function setStructuredData(schemaId, payload) {
@@ -860,6 +955,29 @@
 
   function buildWhatsAppUrl(message) {
     return `https://wa.me/${data.site.whatsapp}?text=${encodeURIComponent(message)}`;
+  }
+
+  function buildProductWhatsAppMessage(product, options) {
+    const settings = options || {};
+    const productName = product && product.name ? product.name : "this SharonCraft piece";
+    const productPrice = product && Number.isFinite(Number(product.price)) ? formatCurrency(product.price) : "the listed price";
+    const intent = normalizeText(settings.intent) || "order";
+    const productPath = product && product.id ? `/product.html?id=${encodeURIComponent(product.id)}` : window.location.pathname;
+    const productLink = absoluteUrl(productPath);
+
+    if (intent === "custom") {
+      return `Hello SharonCraft, I would like to ask about custom colors or a similar version of ${productName}. Product link: ${productLink}`;
+    }
+
+    if (intent === "gift") {
+      return `Hello SharonCraft, I am considering ${productName} as a gift. Please advise on availability, delivery, and presentation. Product link: ${productLink}`;
+    }
+
+    if (intent === "share") {
+      return `Hello, I found this SharonCraft piece and thought you may like it: ${productName}. View it here: ${productLink}`;
+    }
+
+    return `Hello SharonCraft, I would like to order ${productName} for ${productPrice}. Please confirm availability, delivery, and payment steps. Product link: ${productLink}`;
   }
 
   function waitForData() {
@@ -972,6 +1090,16 @@
     return icons[name] || "";
   }
 
+  function menuIconMarkup() {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4.5 7.5h15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"></path>
+        <path d="M4.5 12h15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"></path>
+        <path d="M4.5 16.5h15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9"></path>
+      </svg>
+    `;
+  }
+
   function whatsappIconMarkup() {
     return `
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -1037,11 +1165,7 @@
   }
 
   function buildProductOrderUrl(product) {
-    const productName = product && product.name ? product.name : "this SharonCraft piece";
-    const productPrice = product && Number.isFinite(Number(product.price)) ? formatCurrency(product.price) : "the listed price";
-    return buildWhatsAppUrl(
-      `Hello SharonCraft, I would like to order ${productName} for ${productPrice}.`
-    );
+    return buildWhatsAppUrl(buildProductWhatsAppMessage(product, { intent: "order" }));
   }
 
   function createProductCard(product, options) {
@@ -1060,7 +1184,7 @@
     return `
       <article class="product-card reveal">
         <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes}>
-          <img src="${image}" alt="${productName}" loading="lazy" />
+          <img src="${image}" alt="${productName}" loading="lazy" decoding="async" />
           ${badgeMarkup}
           <div class="product-card-media-actions">
             <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
@@ -1084,7 +1208,7 @@
             </a>
             <a class="product-card-order-link" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
               <span class="product-card-action-icon product-card-action-icon-whatsapp" aria-hidden="true">${whatsappIconMarkup()}</span>
-              <span class="product-card-action-label">Quick WhatsApp Order</span>
+              <span class="product-card-action-label">Order on WhatsApp</span>
             </a>
           </div>
         </div>
@@ -1102,7 +1226,7 @@
             <span class="category-card-ring"></span>
             <span class="category-card-ring category-card-ring-secondary"></span>
             <div class="category-card-media">
-              <img src="${category.image}" alt="${category.name}" loading="lazy" />
+              <img src="${category.image}" alt="${category.name}" loading="lazy" decoding="async" />
             </div>
           </div>
           <div class="category-card-body">
@@ -1729,6 +1853,20 @@
 
     const currentPage = document.body.dataset.page || "";
     const isShopFamilyPage = currentPage === "shop" || currentPage === "product";
+    const showMobileSearch = ["home", "shop", "categories", "product"].includes(currentPage);
+    const categoryCardsMarkup = (data.categories || [])
+      .slice(0, 6)
+      .map(
+        (category) =>
+          `
+            <a class="site-nav-category-card" href="shop.html?category=${encodeURIComponent(category.slug)}" data-analytics-label="Header Category Shortcut">
+              <strong>${category.name}</strong>
+              <small>${normalizeText(category.tip) || "Explore now"}</small>
+            </a>
+          `
+      )
+      .join("");
+    const searchValue = normalizeText(new URL(window.location.href).searchParams.get("q"));
 
     target.innerHTML = `
       <div class="promo-bar">
@@ -1741,37 +1879,61 @@
       </div>
       <header class="site-header">
         <div class="container header-shell">
-          <a class="brand-mark" href="index.html" aria-label="SharonCraft home">
-            <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.png" alt="SharonCraft logo" />
-            <span class="brand-copy">
-              <strong>${data.site.name}</strong>
-              <small>Handmade joy from Kenya</small>
-            </span>
-          </a>
+          <div class="header-leading">
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+              <span class="nav-toggle-icon">${menuIconMarkup()}</span>
+              <span class="nav-toggle-label">Menu</span>
+            </button>
+            <a class="brand-mark" href="index.html" aria-label="SharonCraft home">
+              <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.png" alt="SharonCraft logo" />
+              <span class="brand-copy">
+                <strong>${data.site.name}</strong>
+                <small>Handmade joy from Kenya</small>
+              </span>
+            </a>
+          </div>
           <nav id="site-nav" class="site-nav" aria-label="Main navigation">
+            <div class="site-nav-topcard">
+              <span class="site-nav-title">Quick Access</span>
+              <strong>Shop faster on mobile</strong>
+              <p>Jump into your account, track an order, or open a category without digging through long links.</p>
+              <div class="site-nav-top-actions">
+                <a href="account.html">My Account</a>
+                <a href="order.html">Track Order</a>
+              </div>
+            </div>
+            <div class="site-nav-section">
+              <span class="site-nav-title">Shop by Category</span>
+              <div class="site-nav-category-grid">
+                ${categoryCardsMarkup}
+              </div>
+            </div>
             <div class="site-nav-links">
-              <a href="index.html" class="${currentPage === "home" ? "is-active" : ""}">${navIconMarkup("home")}<span>Home</span></a>
-              <a href="shop.html" class="${isShopFamilyPage ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
               <a href="categories.html" class="${currentPage === "categories" ? "is-active" : ""}">${navIconMarkup("categories")}<span>Categories</span></a>
+              <a href="shop.html" class="${isShopFamilyPage ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
+              <a href="index.html" class="${currentPage === "home" ? "is-active" : ""}">${navIconMarkup("home")}<span>Home</span></a>
               <a href="about.html" class="${currentPage === "about" ? "is-active" : ""}">${navIconMarkup("about")}<span>About</span></a>
               <a href="contact.html" class="${currentPage === "contact" ? "is-active" : ""}">${navIconMarkup("contact")}<span>Contact</span></a>
+            </div>
+            <div class="site-nav-utility-links">
+              <a href="contact.html">Need help choosing?</a>
+              <a href="${buildWhatsAppUrl("Hello SharonCraft, I need help choosing the right products.")}" target="_blank" rel="noreferrer" data-analytics-label="Header Drawer WhatsApp">Chat on WhatsApp</a>
             </div>
             <a class="button button-primary nav-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer" data-analytics-label="Header WhatsApp">
               <span class="nav-cta-icon">
                 ${whatsappIconMarkup()}
               </span>
               <span class="nav-cta-copy">
-                <strong>Order on WhatsApp</strong>
+              <strong>Order on WhatsApp</strong>
               </span>
             </a>
           </nav>
+          <button class="site-nav-backdrop" type="button" aria-label="Close menu"></button>
           <div class="header-actions">
             <a class="account-header-button ${currentPage === "account" ? "is-active" : ""}" href="account.html" aria-label="Open your SharonCraft account">
               ${navIconMarkup("account")}
+              <span class="account-header-label">Account</span>
             </a>
-            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
-              Menu
-            </button>
             <button class="cart-header-button" type="button" id="cart-open-button" aria-label="Open cart">
               ${cartIconMarkup()}
               <span>Cart</span>
@@ -1779,17 +1941,75 @@
             </button>
           </div>
         </div>
+        ${
+          showMobileSearch
+            ? `
+          <div class="container mobile-header-search-wrap">
+            <form class="mobile-header-search" action="shop.html" method="get">
+              <input type="search" name="q" placeholder="Search products, gifts, decor..." value="${escapeHtml(searchValue)}" aria-label="Search SharonCraft products" />
+              <button type="submit">Search</button>
+            </form>
+          </div>
+        `
+            : ""
+        }
       </header>
     `;
 
     const toggleButton = target.querySelector(".nav-toggle");
     const nav = target.querySelector(".site-nav");
+    const navBackdrop = target.querySelector(".site-nav-backdrop");
     const cartOpenButton = target.querySelector("#cart-open-button");
 
     if (toggleButton && nav) {
-      toggleButton.addEventListener("click", function () {
-        const isOpen = nav.classList.toggle("is-open");
+      const syncNavState = function (isOpen) {
+        nav.classList.toggle("is-open", isOpen);
+        if (navBackdrop) {
+          navBackdrop.classList.toggle("is-visible", isOpen);
+        }
+        document.body.classList.toggle("nav-open", isOpen);
         toggleButton.setAttribute("aria-expanded", String(isOpen));
+
+        const mobileMenuButton = document.getElementById("mobile-bottom-menu-button");
+        if (mobileMenuButton) {
+          mobileMenuButton.setAttribute("aria-expanded", String(isOpen));
+        }
+      };
+
+      const closeNav = function () {
+        syncNavState(false);
+      };
+
+      const toggleNav = function () {
+        syncNavState(!nav.classList.contains("is-open"));
+      };
+
+      window.SharonCraftLayout = window.SharonCraftLayout || {};
+      window.SharonCraftLayout.closeNav = closeNav;
+      window.SharonCraftLayout.toggleNav = toggleNav;
+
+      toggleButton.addEventListener("click", function () {
+        toggleNav();
+      });
+
+      if (navBackdrop) {
+        navBackdrop.addEventListener("click", closeNav);
+      }
+
+      nav.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeNav);
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeNav();
+        }
+      });
+
+      window.addEventListener("resize", function () {
+        if (window.innerWidth >= 980) {
+          closeNav();
+        }
       });
     }
 
@@ -1805,6 +2025,7 @@
       return;
     }
 
+    const currentPage = document.body.dataset.page || "";
     const visibleSocials = (Array.isArray(data.site.socials) ? data.site.socials : [])
       .filter((social) => normalizeText(social && social.url) && normalizeText(social && social.url) !== "#");
 
@@ -1816,6 +2037,13 @@
       .join("");
 
     const mpesaMarkup = data.site.mpesaSteps.map((step) => `<li>${step}</li>`).join("");
+    const featuredSearchMarkup = [
+      { href: "bridal-bead-sets-kenya.html", label: "Bridal bead sets" },
+      { href: "gift-sets-kenya.html", label: "Gift sets" },
+      { href: "maasai-inspired-bracelets-kenya.html", label: "Maasai-inspired bracelets" }
+    ]
+      .map((link) => `<li><a href="${link.href}">${link.label}</a></li>`)
+      .join("");
 
     target.innerHTML = `
       <footer class="site-footer">
@@ -1842,6 +2070,12 @@
             </ol>
           </section>
           <section>
+            <h3>Popular Searches</h3>
+            <ul class="footer-list footer-link-list">
+              ${featuredSearchMarkup}
+            </ul>
+          </section>
+          <section>
             <h3>Social</h3>
             <div class="footer-socials">
               ${socialMarkup || '<span class="footer-social-placeholder">Add Facebook and Instagram links in the admin social section.</span>'}
@@ -1849,6 +2083,29 @@
           </section>
         </div>
       </footer>
+      <nav class="mobile-bottom-nav" aria-label="Mobile quick navigation">
+        <button class="mobile-bottom-nav-link mobile-bottom-menu" type="button" id="mobile-bottom-menu-button" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
+          ${menuIconMarkup()}
+          <span>Menu</span>
+        </button>
+        <a class="mobile-bottom-nav-link ${currentPage === "home" ? "is-active" : ""}" href="index.html">
+          ${navIconMarkup("home")}
+          <span>Home</span>
+        </a>
+        <a class="mobile-bottom-nav-link ${currentPage === "shop" || currentPage === "product" ? "is-active" : ""}" href="shop.html">
+          ${navIconMarkup("shop")}
+          <span>Shop</span>
+        </a>
+        <button class="mobile-bottom-nav-link mobile-bottom-cart" type="button" id="mobile-bottom-cart-button" aria-label="Open cart">
+          ${cartIconMarkup()}
+          <span>Cart</span>
+          <strong data-cart-count>0</strong>
+        </button>
+        <a class="mobile-bottom-nav-link ${currentPage === "account" ? "is-active" : ""}" href="account.html">
+          ${navIconMarkup("account")}
+          <span>Account</span>
+        </a>
+      </nav>
       <div class="cart-backdrop" id="cart-backdrop"></div>
       <aside class="cart-drawer" id="cart-drawer" aria-hidden="true">
         <div class="cart-drawer-header">
@@ -1919,6 +2176,8 @@
     const scrollButton = target.querySelector(".scroll-top");
     const closeButton = target.querySelector("#cart-close-button");
     const backdrop = target.querySelector("#cart-backdrop");
+    const mobileBottomMenuButton = target.querySelector("#mobile-bottom-menu-button");
+    const mobileBottomCartButton = target.querySelector("#mobile-bottom-cart-button");
     const mpesaOpenButton = target.querySelector("#cart-mpesa-open");
     const mpesaCancelButton = target.querySelector("#cart-mpesa-cancel");
     const mpesaForm = target.querySelector("#cart-mpesa-form");
@@ -1939,6 +2198,18 @@
 
     if (backdrop) {
       backdrop.addEventListener("click", closeCart);
+    }
+
+    if (mobileBottomMenuButton) {
+      mobileBottomMenuButton.addEventListener("click", function () {
+        if (window.SharonCraftLayout && typeof window.SharonCraftLayout.toggleNav === "function") {
+          window.SharonCraftLayout.toggleNav();
+        }
+      });
+    }
+
+    if (mobileBottomCartButton) {
+      mobileBottomCartButton.addEventListener("click", openCart);
     }
 
     if (mpesaOpenButton) {
@@ -2106,6 +2377,7 @@
     get data() { return data; }, // Dynamic getter for current data
     formatCurrency,
     buildWhatsAppUrl,
+    buildProductWhatsAppMessage,
     getProductById,
     getCategoryBySlug,
     getProductsByCategory,
@@ -2117,6 +2389,7 @@
     setStructuredData,
     trackEvent,
     trackProductListView,
+    buildAnalyticsItem,
     getTrackedEvents: getStoredAnalyticsEvents,
     renderCategorySelect,
     refreshReveal: initReveal,
