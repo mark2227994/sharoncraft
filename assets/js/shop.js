@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const sortSelect = document.getElementById("shop-sort");
   const countLabel = document.getElementById("shop-count");
   const clearButton = document.getElementById("clear-shop-filters");
+  const helpWhatsapp = document.getElementById("shop-help-whatsapp");
+  const customerProof = document.getElementById("shop-customer-proof");
+  let discoveryAnalyticsTimer = null;
+  let lastDiscoverySignature = "";
 
   if (!grid) {
     return;
@@ -17,13 +21,47 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   await utils.waitForData();
 
+  if (helpWhatsapp) {
+    helpWhatsapp.href = utils.buildWhatsAppUrl(
+      "Hello SharonCraft, please help me choose the right beadwork based on my budget, occasion, or preferred style."
+    );
+  }
+
   utils.renderCategorySelect(categorySelect);
+
+  if (customerProof) {
+    const testimonials = (utils.data.site && Array.isArray(utils.data.site.testimonials) ? utils.data.site.testimonials : []).slice(0, 2);
+    customerProof.innerHTML = `
+      ${testimonials.map((item) => `
+        <article class="customer-proof-card reveal">
+          <span class="section-kicker">Client Review</span>
+          <h3>${item.name}</h3>
+          <p>"${item.quote}"</p>
+        </article>
+      `).join("")}
+      <article class="customer-proof-card reveal">
+        <span class="section-kicker">Order Support</span>
+        <h3>WhatsApp first, confusion last</h3>
+        <p>Buyers can ask about budget, delivery area, custom colors, and gifting before they commit, which reduces hesitation and improves conversion.</p>
+      </article>
+      <article class="customer-proof-card reveal">
+        <span class="section-kicker">Payment Clarity</span>
+        <h3>M-Pesa checkout stays familiar</h3>
+        <p>The checkout flow keeps payment in a trusted local flow with STK push support, then SharonCraft confirms the order details after payment.</p>
+      </article>
+    `;
+  }
 
   const url = new URL(window.location.href);
   const initialCategory = url.searchParams.get("category") || "";
+  const initialQuery = url.searchParams.get("q") || "";
 
   if (initialCategory) {
     categorySelect.value = initialCategory;
+  }
+
+  if (initialQuery) {
+    searchInput.value = initialQuery;
   }
 
   const chipContainer = document.getElementById("shop-chips");
@@ -185,15 +223,76 @@ document.addEventListener("DOMContentLoaded", async function () {
       products: sorted
     });
 
+    const discoverySignature = JSON.stringify({
+      keyword,
+      category,
+      price,
+      sort,
+      results: sorted.map((product) => product.id)
+    });
+
+    if (discoveryAnalyticsTimer) {
+      window.clearTimeout(discoveryAnalyticsTimer);
+    }
+
+    discoveryAnalyticsTimer = window.setTimeout(function () {
+      if (discoverySignature === lastDiscoverySignature || typeof utils.trackEvent !== "function") {
+        return;
+      }
+
+      lastDiscoverySignature = discoverySignature;
+
+      if (keyword) {
+        utils.trackEvent("search", {
+          search_term: keyword,
+          results_count: sorted.length,
+          category_filter: category || "all",
+          price_filter: price || "all",
+          sort_order: sort || "featured"
+        });
+      }
+
+      if (category) {
+        const activeCategory = utils.getCategoryBySlug(category);
+        utils.trackEvent("browse_category", {
+          category_slug: category,
+          category_name: activeCategory && activeCategory.name ? activeCategory.name : category,
+          results_count: sorted.length,
+          search_term: keyword,
+          price_filter: price || "all",
+          sort_order: sort || "featured"
+        });
+      }
+
+      if (keyword || category || price || sort !== "featured") {
+        utils.trackEvent("filter_products", {
+          search_term: keyword,
+          category_filter: category || "all",
+          price_filter: price || "all",
+          sort_order: sort || "featured",
+          results_count: sorted.length
+        });
+      }
+    }, 350);
+
     if (typeof utils.setPageMetadata === "function") {
       const categoryName = category ? ((utils.getCategoryBySlug(category) || {}).name || "SharonCraft collection") : "handmade beadwork in Kenya";
+      const querySuffix = keyword ? ` for "${keyword}"` : "";
+      const metadataPath = `/shop.html${category || keyword ? `?${new URLSearchParams({ ...(category ? { category } : {}), ...(keyword ? { q: keyword } : {}) }).toString()}` : ""}`;
       utils.setPageMetadata({
-        title: category ? `${categoryName} | Shop SharonCraft` : "Shop SharonCraft | Handmade Beadwork in Kenya",
+        title: category
+          ? `${categoryName}${querySuffix} | Shop SharonCraft`
+          : keyword
+            ? `${keyword} | Shop SharonCraft`
+            : "Shop SharonCraft | Handmade Beadwork in Kenya",
         description: category
-          ? `Browse ${categoryName} from SharonCraft and order quickly on WhatsApp.`
-          : "Browse SharonCraft necklaces, bracelets, decor, gift sets, and occasion beadwork, then order quickly on WhatsApp.",
-        path: category ? `/shop.html?category=${encodeURIComponent(category)}` : "/shop.html",
+          ? `Browse ${categoryName}${querySuffix} from SharonCraft and order quickly on WhatsApp from anywhere in Kenya.`
+          : keyword
+            ? `Browse SharonCraft results for ${keyword} and order handmade beadwork quickly on WhatsApp.`
+            : "Browse SharonCraft necklaces, bracelets, decor, gift sets, and occasion beadwork, then order quickly on WhatsApp.",
+        path: metadataPath,
         image: sorted[0] && Array.isArray(sorted[0].images) && sorted[0].images[0] ? sorted[0].images[0] : "assets/images/IMG-20260226-WA0005.jpg",
+        imageAlt: sorted[0] && sorted[0].name ? sorted[0].name : "SharonCraft featured collection",
         type: "website"
       });
     }

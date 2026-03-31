@@ -1,4 +1,11 @@
 *.exe
+node_modules/
+npm-debug.log*
+package-lock.json.bak
+.env
+.env.local
+.env.*.local
+*.log
 supabase/functions/.env
 supabase/functions/.env.local
 supabase/.temp/

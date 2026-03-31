@@ -20,17 +20,26 @@
 
     mobileMenuBound = true;
 
+    const closeSharedNav = function () {
+      if (window.SharonCraftLayout && typeof window.SharonCraftLayout.closeNav === "function") {
+        window.SharonCraftLayout.closeNav();
+        return;
+      }
+
+      nav.classList.remove("is-open");
+      navToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("nav-open");
+    };
+
     document.addEventListener("click", function (event) {
       const link = event.target.closest(".site-nav a");
       if (link) {
-        nav.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
+        closeSharedNav();
         return;
       }
 
       if (!nav.contains(event.target) && !navToggle.contains(event.target) && nav.classList.contains("is-open")) {
-        nav.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
+        closeSharedNav();
       }
     });
   }

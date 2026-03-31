@@ -4,23 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Product | SharonCraft</title>
-  <meta name="description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3JW5DJ52P"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B3JW5DJ52P');
-  </script>
+  <meta name="description" content="View SharonCraft product details, gallery images, pricing, and easy WhatsApp ordering for handmade beadwork in Kenya." />
   <link rel="canonical" href="https://www.sharoncraft.co.ke/product.html" />
   <meta property="og:title" content="Product | SharonCraft" />
-  <meta property="og:description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
+  <meta property="og:description" content="View SharonCraft product details, gallery images, pricing, and easy WhatsApp ordering for handmade beadwork in Kenya." />
   <meta property="og:type" content="product" />
   <meta property="og:url" content="https://www.sharoncraft.co.ke/product.html" />
   <meta property="og:image" content="https://www.sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Product | SharonCraft" />
-  <meta name="twitter:description" content="View SharonCraft product details, gallery images, pricing, and buying information." />
+  <meta name="twitter:description" content="View SharonCraft product details, gallery images, pricing, and easy WhatsApp ordering for handmade beadwork in Kenya." />
   <meta name="twitter:image" content="https://www.sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.jpg" />
   <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
   <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
@@ -41,7 +34,7 @@
         <div class="product-layout">
           <section class="product-gallery">
             <div class="product-main-image">
-              <img id="product-main-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="SharonCraft product" />
+              <img id="product-main-image" src="assets/images/IMG-20260226-WA0005.jpg" alt="SharonCraft product" loading="eager" fetchpriority="high" decoding="async" />
             </div>
             <div id="product-thumbs" class="thumb-grid"></div>
           </section>
@@ -59,10 +52,20 @@
             <ul id="product-details"></ul>
             <div class="cta-row">
               <button id="product-add-cart" class="button button-secondary" type="button">Add to Cart</button>
-              <a id="product-buy" class="button button-primary" href="#" target="_blank" rel="noreferrer">Buy via WhatsApp</a>
+              <a id="product-buy" class="button button-whatsapp" href="#" target="_blank" rel="noreferrer">Order on WhatsApp</a>
               <a id="product-customize" class="button button-secondary" href="#" target="_blank" rel="noreferrer">Ask About Custom Colors</a>
               <button id="product-view-cart" class="button button-secondary" type="button">View Cart</button>
               <a class="button button-secondary" href="shop.html">Back to Shop</a>
+            </div>
+            <div class="product-conversion-strip">
+              <div class="product-conversion-copy">
+                <strong>Need help before ordering?</strong>
+                <span>Share this piece, ask about gift options, or confirm delivery on WhatsApp in one tap.</span>
+              </div>
+              <div class="product-micro-actions">
+                <button id="product-share" class="button button-secondary" type="button">Share This Piece</button>
+                <a id="product-gift" class="button button-secondary" href="#" target="_blank" rel="noreferrer">Ask About Gift Options</a>
+              </div>
             </div>
             <div class="mpesa-box">
               <strong>M-Pesa</strong>
@@ -91,6 +94,17 @@
     <section class="section">
       <div class="container">
         <div class="section-heading">
+          <span class="section-kicker">Why Clients Buy</span>
+          <h2>Trust signals matter, especially for first-time shoppers.</h2>
+          <p>These short notes help buyers feel safer about ordering handmade pieces online.</p>
+        </div>
+        <div id="product-customer-proof" class="customer-proof-section"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-heading">
           <span class="section-kicker">Related Products</span>
           <h2>You may also like these SharonCraft favorites.</h2>
         </div>
@@ -107,14 +121,14 @@
     </div>
     <div class="product-sticky-actions">
       <button id="product-sticky-cart" class="button button-secondary" type="button">Add to Cart</button>
-      <a id="product-sticky-buy" class="button button-primary" href="#" target="_blank" rel="noreferrer">WhatsApp</a>
+      <a id="product-sticky-buy" class="button button-whatsapp" href="#" target="_blank" rel="noreferrer">Order on WhatsApp</a>
     </div>
   </aside>
 
   <div data-site-footer></div>
 
   <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
   <script src="supabase/supabase-catalog.js?v=20260330-folder-reorg" defer></script>
   <script src="assets/js/supabase-data-sync.js?v=20260327-live-fix" defer></script>

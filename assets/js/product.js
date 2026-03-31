@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const detailList = document.getElementById("product-details");
   const buyButton = document.getElementById("product-buy");
   const customizeButton = document.getElementById("product-customize");
+  const giftButton = document.getElementById("product-gift");
+  const shareButton = document.getElementById("product-share");
   const addCartButton = document.getElementById("product-add-cart");
   const viewCartButton = document.getElementById("product-view-cart");
   const stickyBar = document.getElementById("product-sticky-bar");
@@ -28,6 +30,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const mainImage = document.getElementById("product-main-image");
   const thumbGrid = document.getElementById("product-thumbs");
   const relatedGrid = document.getElementById("related-products");
+  const customerProof = document.getElementById("product-customer-proof");
   const mpesaCopy = document.getElementById("product-mpesa-copy");
   const limitedCopy = document.getElementById("product-limited-copy");
 
@@ -88,12 +91,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     .map((item) => String(item && item.url || "").trim())
     .filter((url) => url && url !== "#");
   const availabilityUrl = product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
+  const categoryName = productCategory ? productCategory.name : "Collection";
+  const seoDescription = `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
 
   document.title = `${productName} | SharonCraft`;
   title.textContent = productName;
   price.textContent = utils.formatCurrency(product.price);
   description.textContent = productDescription;
-  category.textContent = productCategory ? productCategory.name : "Collection";
+  category.textContent = categoryName;
   mainImage.src = productImages[0];
   mainImage.alt = productName;
   mpesaCopy.textContent = `Add ${productName} to cart, open the cart, and pay by M-Pesa with the STK prompt sent to your phone.`;
@@ -111,35 +116,58 @@ document.addEventListener("DOMContentLoaded", async function () {
     limitedCopy.textContent = utils.getScarcityNote(product);
   }
 
+  if (customerProof) {
+    const testimonials = (utils.data.site && Array.isArray(utils.data.site.testimonials) ? utils.data.site.testimonials : []).slice(0, 2);
+    customerProof.innerHTML = `
+      <article class="customer-proof-card reveal">
+        <span class="section-kicker">Delivery Confidence</span>
+        <h3>Ask before you order</h3>
+        <p>Buyers can confirm availability, delivery area, and gifting details on WhatsApp before paying for ${productName}.</p>
+      </article>
+      <article class="customer-proof-card reveal">
+        <span class="section-kicker">Handmade Detail</span>
+        <h3>Every piece keeps a crafted finish</h3>
+        <p>${productName} is presented with close-up images, clear pricing, and a simple support path so first-time shoppers know what to expect.</p>
+      </article>
+      ${testimonials.map((item) => `
+        <article class="customer-proof-card reveal">
+          <span class="section-kicker">Client Review</span>
+          <h3>${item.name}</h3>
+          <p>"${item.quote}"</p>
+        </article>
+      `).join("")}
+    `;
+  }
+
   breadcrumb.innerHTML = `
     <a href="index.html">Home</a>
     <span>/</span>
     <a href="shop.html">Shop</a>
     <span>/</span>
-    <a href="shop.html?category=${product.category}">${productCategory ? productCategory.name : "Collection"}</a>
+    <a href="shop.html?category=${product.category}">${categoryName}</a>
     <span>/</span>
     <strong>${productName}</strong>
   `;
 
   detailList.innerHTML = productDetails.map((item) => `<li>${item}</li>`).join("");
-  buyButton.href = utils.buildWhatsAppUrl(
-    `Hello SharonCraft, I would like to order the ${productName} for ${utils.formatCurrency(product.price)}.`
-  );
+  buyButton.href = utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "order" }));
   if (stickyBuyButton) {
     stickyBuyButton.href = buyButton.href;
   }
   if (customizeButton) {
-    customizeButton.href = utils.buildWhatsAppUrl(
-      `Hello SharonCraft, I would like to ask about custom colors or a similar version of ${productName}.`
-    );
+    customizeButton.href = utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "custom" }));
+  }
+  if (giftButton) {
+    giftButton.href = utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "gift" }));
   }
 
   if (typeof utils.setPageMetadata === "function") {
     utils.setPageMetadata({
       title: `${productName} | SharonCraft`,
-      description: `${productDescription.slice(0, 140)} Order ${productName} on WhatsApp from SharonCraft.`,
+      description: seoDescription,
       path: `/product.html?id=${encodeURIComponent(product.id)}`,
       image: productImages[0],
+      imageAlt: productName,
       type: "product"
     });
   }
@@ -153,13 +181,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       url: productUrl,
       mainEntityOfPage: productUrl,
       image: productImages.map((image) => new URL(image, window.location.origin).href),
-      description: productDescription,
+      description: seoDescription,
       sku: product.id,
-      category: productCategory ? productCategory.name : "Collection",
+      category: categoryName,
       brand: {
         "@type": "Brand",
         name: "SharonCraft"
       },
+      keywords: [categoryName, "handmade beadwork", "Kenya", "SharonCraft"].join(", "),
       offers: {
         "@type": "Offer",
         priceCurrency: "KES",
@@ -211,6 +240,26 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   if (typeof utils.trackEvent === "function") {
+    const productAnalyticsItem = typeof utils.buildAnalyticsItem === "function"
+      ? utils.buildAnalyticsItem(product, {
+          index: 1,
+          listId: "product_detail",
+          listName: "Product Detail"
+        })
+      : {
+          item_id: product.id,
+          item_name: productName,
+          item_category: categoryName,
+          price: Number(product.price) || 0,
+          quantity: 1
+        };
+
+    utils.trackEvent("view_item", {
+      currency: "KES",
+      value: Number(product.price) || 0,
+      items: [productAnalyticsItem]
+    });
+
     utils.trackEvent("product_view", {
       product_id: product.id,
       product_name: productName,
@@ -238,9 +287,54 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
+  if (shareButton) {
+    shareButton.addEventListener("click", async function () {
+      const sharePayload = {
+        title: `${productName} | SharonCraft`,
+        text: `I found this handmade SharonCraft piece: ${productName}`,
+        url: productUrl
+      };
+
+      try {
+        if (navigator.share) {
+          await navigator.share(sharePayload);
+          if (typeof utils.trackEvent === "function") {
+            utils.trackEvent("share", {
+              method: "native",
+              product_id: product.id,
+              product_name: productName
+            });
+          }
+          if (typeof window.showToast === "function") {
+            window.showToast("Product ready to share.", "success");
+          }
+          return;
+        }
+      } catch (error) {
+        if (error && error.name === "AbortError") {
+          return;
+        }
+      }
+
+      window.open(
+        utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "share" })),
+        "_blank",
+        "noopener"
+      );
+      if (typeof utils.trackEvent === "function") {
+        utils.trackEvent("share", {
+          method: "whatsapp",
+          product_id: product.id,
+          product_name: productName
+        });
+      }
+    });
+  }
+
   [
     { node: buyButton, label: "Product WhatsApp" },
     { node: customizeButton, label: "Product Custom Colors WhatsApp" },
+    { node: giftButton, label: "Product Gift WhatsApp" },
     { node: stickyBuyButton, label: "Sticky Product WhatsApp" }
   ].forEach(function (entry) {
     if (!entry.node) {
@@ -256,7 +350,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     .map(
       (image, index) => `
         <button class="thumb-button ${index === 0 ? "is-active" : ""}" type="button" data-image="${image}" aria-label="View image ${index + 1}">
-          <img src="${image}" alt="${productName} thumbnail ${index + 1}" loading="lazy" />
+          <img src="${image}" alt="${productName} thumbnail ${index + 1}" loading="lazy" decoding="async" />
         </button>
       `
     )

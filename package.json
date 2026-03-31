@@ -1,0 +1,12 @@
+{
+  "name": "sharoncraft-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Node.js workflow for the SharonCraft static storefront.",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "dev:open": "node scripts/dev-server.js --open",
+    "serve": "node scripts/dev-server.js",
+    "serve:5500": "node scripts/dev-server.js --port 5500"
+  }
+}
