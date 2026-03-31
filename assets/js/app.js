@@ -37,6 +37,15 @@
     return String(value || "").trim();
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function absoluteUrl(path) {
     const normalized = normalizeText(path);
     return new URL(normalized || window.location.pathname, window.location.origin).href;
@@ -1853,7 +1862,15 @@
 
     const currentPage = document.body.dataset.page || "";
     const isShopFamilyPage = currentPage === "shop" || currentPage === "product";
-    const showMobileSearch = ["home", "shop", "categories", "product"].includes(currentPage);
+    const useMinimalCategoriesHeader = currentPage === "categories";
+    const showMobileSearch = ["home", "shop", "product"].includes(currentPage);
+    const primaryNavLinks = [
+      { href: "index.html", icon: "home", label: "Home", isActive: currentPage === "home" },
+      { href: "categories.html", icon: "categories", label: "Categories", isActive: currentPage === "categories" },
+      { href: "shop.html", icon: "shop", label: "Shop", isActive: isShopFamilyPage },
+      { href: "about.html", icon: "about", label: "About", isActive: currentPage === "about" },
+      { href: "contact.html", icon: "contact", label: "Contact", isActive: currentPage === "contact" }
+    ];
     const categoryCardsMarkup = (data.categories || [])
       .slice(0, 6)
       .map(
@@ -1864,6 +1881,12 @@
               <small>${normalizeText(category.tip) || "Explore now"}</small>
             </a>
           `
+      )
+      .join("");
+    const primaryNavMarkup = primaryNavLinks
+      .map(
+        (link) =>
+          `<a href="${link.href}" class="${link.isActive ? "is-active" : ""}">${navIconMarkup(link.icon)}<span>${link.label}</span></a>`
       )
       .join("");
     const searchValue = normalizeText(new URL(window.location.href).searchParams.get("q"));
@@ -1880,10 +1903,16 @@
       <header class="site-header">
         <div class="container header-shell">
           <div class="header-leading">
+            ${
+              useMinimalCategoriesHeader
+                ? ""
+                : `
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
               <span class="nav-toggle-icon">${menuIconMarkup()}</span>
               <span class="nav-toggle-label">Menu</span>
             </button>
+            `
+            }
             <a class="brand-mark" href="index.html" aria-label="SharonCraft home">
               <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.png" alt="SharonCraft logo" />
               <span class="brand-copy">
@@ -1892,6 +1921,10 @@
               </span>
             </a>
           </div>
+          ${
+            useMinimalCategoriesHeader
+              ? ""
+              : `
           <nav id="site-nav" class="site-nav" aria-label="Main navigation">
             <div class="site-nav-topcard">
               <span class="site-nav-title">Quick Access</span>
@@ -1908,13 +1941,6 @@
                 ${categoryCardsMarkup}
               </div>
             </div>
-            <div class="site-nav-links">
-              <a href="categories.html" class="${currentPage === "categories" ? "is-active" : ""}">${navIconMarkup("categories")}<span>Categories</span></a>
-              <a href="shop.html" class="${isShopFamilyPage ? "is-active" : ""}">${navIconMarkup("shop")}<span>Shop</span></a>
-              <a href="index.html" class="${currentPage === "home" ? "is-active" : ""}">${navIconMarkup("home")}<span>Home</span></a>
-              <a href="about.html" class="${currentPage === "about" ? "is-active" : ""}">${navIconMarkup("about")}<span>About</span></a>
-              <a href="contact.html" class="${currentPage === "contact" ? "is-active" : ""}">${navIconMarkup("contact")}<span>Contact</span></a>
-            </div>
             <div class="site-nav-utility-links">
               <a href="contact.html">Need help choosing?</a>
               <a href="${buildWhatsAppUrl("Hello SharonCraft, I need help choosing the right products.")}" target="_blank" rel="noreferrer" data-analytics-label="Header Drawer WhatsApp">Chat on WhatsApp</a>
@@ -1929,6 +1955,8 @@
             </a>
           </nav>
           <button class="site-nav-backdrop" type="button" aria-label="Close menu"></button>
+          `
+          }
           <div class="header-actions">
             <a class="account-header-button ${currentPage === "account" ? "is-active" : ""}" href="account.html" aria-label="Open your SharonCraft account">
               ${navIconMarkup("account")}
@@ -1940,6 +1968,9 @@
               <strong data-cart-count>0</strong>
             </button>
           </div>
+          <nav class="header-primary-nav" aria-label="Primary page links">
+            ${primaryNavMarkup}
+          </nav>
         </div>
         ${
           showMobileSearch
@@ -2303,6 +2334,7 @@
     try {
       const registrations = await navigator.serviceWorker.getRegistrations();
       const currentOrigin = window.location.origin;
+      let removedLegacyRootWorker = false;
 
       await Promise.all(
         registrations.map(async function (registration) {
@@ -2320,12 +2352,22 @@
 
             if (isRootScope && isRootSw) {
               await registration.unregister();
+              removedLegacyRootWorker = true;
             }
           } catch (error) {
             console.warn("Unable to inspect a service worker registration.", error);
           }
         })
       );
+
+      if (removedLegacyRootWorker && "caches" in window) {
+        try {
+          const cacheKeys = await window.caches.keys();
+          await Promise.all(cacheKeys.map((key) => window.caches.delete(key)));
+        } catch (error) {
+          console.warn("Unable to clear legacy browser caches.", error);
+        }
+      }
     } catch (error) {
       console.warn("Unable to check for legacy service workers.", error);
     }
