@@ -50,6 +50,49 @@ document.addEventListener("DOMContentLoaded", async function () {
   const liveCatalogApi = window.SharonCraftCatalog || null;
 
   const normalizeReviewText = (value) => String(value || "").trim();
+  const normalizeSeoKeywords = (value) => {
+    const source = Array.isArray(value) ? value.join(",") : String(value || "");
+    const unique = new Set();
+    return source
+      .split(",")
+      .map((item) => normalizeReviewText(item))
+      .filter((item) => {
+        const normalized = item.toLowerCase();
+        if (!normalized || unique.has(normalized)) {
+          return false;
+        }
+        unique.add(normalized);
+        return true;
+      });
+  };
+  const normalizeSeoOverride = (value) => {
+    const source = value && typeof value === "object" ? value : {};
+    return {
+      title: normalizeReviewText(source.title),
+      description: normalizeReviewText(source.description),
+      keywords: normalizeSeoKeywords(source.keywords)
+    };
+  };
+  const loadProductSeoOverride = async (id) => {
+    if (
+      !id ||
+      !liveCatalogApi ||
+      typeof liveCatalogApi.fetchSetting !== "function"
+    ) {
+      return normalizeSeoOverride({});
+    }
+
+    try {
+      const overrides = await liveCatalogApi.fetchSetting("product_seo_overrides");
+      if (!overrides || typeof overrides !== "object") {
+        return normalizeSeoOverride({});
+      }
+      return normalizeSeoOverride(overrides[id]);
+    } catch (error) {
+      console.warn("Could not load product SEO overrides.", error);
+      return normalizeSeoOverride({});
+    }
+  };
   const escapeReviewHtml = (value) =>
     normalizeReviewText(value)
       .replace(/&/g, "&amp;")
@@ -239,7 +282,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     .filter((url) => url && url !== "#");
   const availabilityUrl = product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
   const categoryName = productCategory ? productCategory.name : "Collection";
-  const seoDescription = `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
+  const seoOverride = await loadProductSeoOverride(product.id);
+  const seoTitle = seoOverride.title || `${productName} | SharonCraft`;
+  const seoDescription = seoOverride.description || `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
+  const seoKeywords = seoOverride.keywords.length
+    ? seoOverride.keywords.join(", ")
+    : [categoryName, "handmade beadwork", "Kenya", "SharonCraft"].join(", ");
   const approvedReviews = typeof utils.getApprovedReviewsForProduct === "function"
     ? utils.getApprovedReviewsForProduct(product.id).map((item) => ({
         id: normalizeReviewText(item.id || item.sourceId),
@@ -444,8 +492,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (typeof utils.setPageMetadata === "function") {
     utils.setPageMetadata({
-      title: `${productName} | SharonCraft`,
+      title: seoTitle,
       description: seoDescription,
+      keywords: seoKeywords,
       path: `/product.html?id=${encodeURIComponent(product.id)}`,
       image: productImages[0],
       imageAlt: productName,
@@ -469,7 +518,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         "@type": "Brand",
         name: "SharonCraft"
       },
-      keywords: [categoryName, "handmade beadwork", "Kenya", "SharonCraft"].join(", "),
+      keywords: seoKeywords,
       ...(reviewMetrics.approvedCount
         ? {
             aggregateRating: {
