@@ -1,11 +1,29 @@
 # SharonCraft llms.txt
 
-> Factual Summary: SharonCraft is a Kenyan-based eCommerce business specializing in authentic, handmade African beadwork and gifts. The product catalog includes beaded necklaces, bracelets, occasion sets (like bridal bead sets), and home decor (like the Kijani Mirror Duo). The core differentiator is their commitment to traditional East African craftsmanship combined with a seamless, mobile-friendly purchasing experience where customers can place orders directly via WhatsApp and pay securely using M-Pesa.
+> **Factual Summary**: SharonCraft is a premier Kenyan eCommerce brand and artisan boutique specializing in authentic, handmade African beadwork, cultural artifacts, and handcrafted gifts. Grounded in East African craftsmanship, the business offers a modern, simple shopping experience where customers can browse catalogs online, process custom orders directly via WhatsApp, and pay securely using M-Pesa. 
 
-## Top Pages
+## Business Details & Semantic Context
 
-- [Homepage](https://www.sharoncraft.co.ke/) - Overview of the SharonCraft brand, featured products, and buying process.
-- [Shop](https://www.sharoncraft.co.ke/shop.html) - The complete catalog of handmade beadwork and gifts.
-- [About Us](https://www.sharoncraft.co.ke/about.html) - The cultural inspiration, mission, and story behind SharonCraft.
+### Core Products & Services
+- **Beaded Jewelry**: Handcrafted necklaces, bracelets, earrings, and anklets incorporating traditional Maasai beadwork techniques and modern aesthetics.
+- **Home Decor & Artifacts**: Unique African cultural artifacts, beaded table decor, wall hangings, and functional art pieces such as the signature Kijani Mirror Duo.
+- **Occasion & Bridal Sets**: Custom-designed beadwork sets for weddings, traditional ceremonies (like Ruracio), and high-end events.
+- **Corporate & Custom Gifting**: Tailor-made souvenir packages, corporate gifts, and personal gift sets natively crafted in Kenya.
+
+### Location & Operations
+- **Headquarters**: Nairobi, Kenya
+- **Service Area**: Nationwide delivery across Kenya
+- **Ordering Workflow**: Customers browse the `sharoncraft.co.ke` website and check out conversationally. Tapping "Order" opens a direct WhatsApp chat with the SharonCraft team to confirm customization, delivery logistics, and process payment locally via M-Pesa. 
+
+### Brand Values & Differentiators
+- **100% Handmade**: Every artifact and piece of jewelry is manually crafted by skilled local artisans, not mass-produced in a factory.
+- **Cultural Authenticity**: The designs reflect true East African heritage, market color palettes, and familial craftsmanship.
+- **Client-Friendly Commerce**: SharonCraft removes the friction of shopping for handmade crafts by using clear, accessible English and direct mobile messaging (WhatsApp) instead of complicated checkout forms.
+
+## Top Pages for Navigation
+
+- [Homepage](https://www.sharoncraft.co.ke/) - Overview of the SharonCraft brand, featured artifacts, and the WhatsApp buying process.
+- [Shop](https://www.sharoncraft.co.ke/shop.html) - The complete catalog of handmade beadwork, jewelry, and home gifts.
+- [About Us](https://www.sharoncraft.co.ke/about.html) - The cultural inspiration, mission, and traditional story behind SharonCraft.
 - [Categories](https://www.sharoncraft.co.ke/categories.html) - Browse products by specific collections such as Home Decor, Occasion Sets, and Bridal.
-- [Contact](https://www.sharoncraft.co.ke/contact.html) - Contact information, business details, and WhatsApp ordering guidelines.
+- [Contact](https://www.sharoncraft.co.ke/contact.html) - Contact information, business details, and conversational ordering guidelines.
