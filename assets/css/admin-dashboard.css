@@ -1179,6 +1179,105 @@ body.admin-sidebar-collapsed .admin-sidebar-toggle svg {
   transform: rotate(180deg);
 }
 
+.admin-dashboard-page .admin-canvas-studio {
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.admin-dashboard-page .admin-canvas-controls,
+.admin-dashboard-page .admin-canvas-control-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-dashboard-page .admin-canvas-control-card {
+  padding: 1.1rem;
+}
+
+.admin-dashboard-page .admin-canvas-control-card .admin-panel-header h3,
+.admin-dashboard-page .admin-canvas-preview-head h3 {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+}
+
+.admin-dashboard-page .admin-canvas-brush-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-dashboard-page .admin-canvas-preview-shell {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem;
+  border: 1px solid var(--admin-stroke);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(242, 201, 76, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 242, 235, 0.96));
+  box-shadow: var(--admin-shadow-soft);
+}
+
+.admin-dashboard-page .admin-canvas-preview-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.admin-dashboard-page .admin-canvas-preview-head p {
+  max-width: 24rem;
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 0.92rem;
+}
+
+.admin-dashboard-page .admin-canvas-stage-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 620px;
+  padding: 1rem;
+  border-radius: 28px;
+  background:
+    linear-gradient(45deg, rgba(85, 64, 53, 0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(85, 64, 53, 0.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(85, 64, 53, 0.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(85, 64, 53, 0.08) 75%);
+  background-size: 22px 22px;
+  background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+}
+
+.admin-dashboard-page .admin-canvas-stage {
+  width: min(100%, 720px);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 28px 60px rgba(38, 25, 19, 0.22);
+  background: #fff;
+}
+
+.admin-dashboard-page #admin-design-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: default;
+  touch-action: none;
+}
+
+.admin-dashboard-page #admin-design-canvas.is-drawing {
+  cursor: crosshair;
+}
+
+.admin-dashboard-page .admin-canvas-stage.is-story {
+  width: min(100%, 420px);
+}
+
+.admin-dashboard-page .admin-canvas-stage.is-landscape {
+  width: min(100%, 780px);
+}
+
 @media (max-width: 1220px) {
   .admin-dashboard-page .admin-overview-grid,
   .admin-dashboard-summary,
@@ -1187,6 +1286,10 @@ body.admin-sidebar-collapsed .admin-sidebar-toggle svg {
   }
 
   .admin-dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard-page .admin-canvas-studio {
     grid-template-columns: 1fr;
   }
 }
@@ -1259,6 +1362,15 @@ body.admin-sidebar-collapsed .admin-sidebar-toggle svg {
 
   .admin-dashboard-chart-controls {
     width: 100%;
+  }
+
+  .admin-dashboard-page .admin-canvas-stage-wrap {
+    min-height: auto;
+    padding: 0.75rem;
+  }
+
+  .admin-dashboard-page .admin-canvas-preview-shell {
+    padding: 0.95rem;
   }
 
   .admin-dashboard-order-item {
