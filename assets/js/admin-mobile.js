@@ -99,6 +99,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     }).format(Number(value) || 0);
   }
 
+  function formatBytes(value) {
+    const size = Math.max(0, Number(value) || 0);
+    if (!size) {
+      return "0 KB";
+    }
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(size < 1024 * 100 ? 0 : 1)} KB`;
+    }
+    return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
   function formatTimeAgo(value) {
     const timestamp = Date.parse(value || "");
     if (!Number.isFinite(timestamp)) {
@@ -202,6 +213,92 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function loadFileImage(file) {
+    return new Promise(function (resolve, reject) {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = function () {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("The photo could not be opened for resizing."));
+      };
+      image.src = objectUrl;
+    });
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise(function (resolve, reject) {
+      canvas.toBlob(function (blob) {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+        reject(new Error("The photo could not be compressed right now."));
+      }, type, quality);
+    });
+  }
+
+  async function optimizeImageForUpload(file) {
+    const maxDimension = 1600;
+    const quality = 0.82;
+    const image = await loadFileImage(file);
+    const width = image.naturalWidth || image.width || 0;
+    const height = image.naturalHeight || image.height || 0;
+
+    if (!width || !height) {
+      return {
+        file,
+        originalSize: file.size || 0,
+        optimizedSize: file.size || 0,
+        compressed: false
+      };
+    }
+
+    const scale = Math.min(1, maxDimension / Math.max(width, height));
+    const targetWidth = Math.max(1, Math.round(width * scale));
+    const targetHeight = Math.max(1, Math.round(height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      return {
+        file,
+        originalSize: file.size || 0,
+        optimizedSize: file.size || 0,
+        compressed: false
+      };
+    }
+
+    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+    const blob = await canvasToBlob(canvas, outputType, quality);
+    const extension = outputType === "image/png" ? ".png" : ".jpg";
+    const baseName = normalizeText(file.name).replace(/\.[a-z0-9]+$/i, "") || "product-photo";
+    const optimizedFile = new File([blob], `${baseName}-optimized${extension}`, {
+      type: outputType,
+      lastModified: Date.now()
+    });
+
+    const originalSize = file.size || 0;
+    const optimizedSize = optimizedFile.size || 0;
+    const compressed = optimizedSize > 0 && optimizedSize < originalSize;
+
+    return {
+      file: optimizedFile,
+      originalSize,
+      optimizedSize,
+      compressed,
+      width: targetWidth,
+      height: targetHeight
+    };
+  }
+
   async function uploadPhoneImage(file) {
     if (!file) {
       return;
@@ -222,8 +319,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     try {
-      setStatus(uploadStatus, `Uploading ${file.name}...`, "info");
-      const uploaded = await catalogApi.uploadProductImage(file);
+      setStatus(uploadStatus, `Optimizing ${file.name} for faster upload...`, "info");
+      const optimized = await optimizeImageForUpload(file);
+      const fileToUpload = optimized && optimized.file ? optimized.file : file;
+      const sizeSummary = optimized
+        ? `${formatBytes(optimized.originalSize)} to ${formatBytes(optimized.optimizedSize)}`
+        : formatBytes(file.size || 0);
+
+      setStatus(uploadStatus, `Uploading optimized photo (${sizeSummary})...`, "info");
+      const uploaded = await catalogApi.uploadProductImage(fileToUpload);
       const publicUrl = normalizeText(uploaded && uploaded.publicUrl);
 
       if (!publicUrl) {
@@ -237,10 +341,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (uploadTargetInput && uploadTargetInput.value === "gallery") {
         appendGalleryImage(publicUrl);
-        setStatus(uploadStatus, "Photo uploaded and added to the gallery list.", "success");
+        setStatus(
+          uploadStatus,
+          optimized && optimized.compressed
+            ? `Photo compressed from ${formatBytes(optimized.originalSize)} to ${formatBytes(optimized.optimizedSize)} and added to the gallery.`
+            : `Photo uploaded at ${formatBytes((optimized && optimized.optimizedSize) || file.size || 0)} and added to the gallery.`,
+          "success"
+        );
       } else {
         imageInput.value = publicUrl;
-        setStatus(uploadStatus, "Photo uploaded and set as the main product image.", "success");
+        setStatus(
+          uploadStatus,
+          optimized && optimized.compressed
+            ? `Photo compressed from ${formatBytes(optimized.originalSize)} to ${formatBytes(optimized.optimizedSize)} and set as the main image.`
+            : `Photo uploaded at ${formatBytes((optimized && optimized.optimizedSize) || file.size || 0)} and set as the main image.`,
+          "success"
+        );
       }
     } catch (error) {
       console.error("Unable to upload phone image.", error);
