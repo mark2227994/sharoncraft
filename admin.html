@@ -390,7 +390,7 @@
         <div class="admin-tab-group" data-admin-group="marketing">
           <button class="admin-tab-group-toggle" type="button" data-admin-group-toggle="marketing" aria-expanded="true">
             <span>Marketing</span>
-            <small>4 tools</small>
+            <small>5 tools</small>
           </button>
           <div class="admin-tab-group-body">
             <button class="admin-tab-button" type="button" data-admin-tab="analytics">
@@ -400,6 +400,10 @@
             <button class="admin-tab-button" type="button" data-admin-tab="reviews">
               <span>Reviews</span>
               <small>Approve product feedback for the storefront</small>
+            </button>
+            <button class="admin-tab-button" type="button" data-admin-tab="canvas">
+              <span>Canvas Studio</span>
+              <small>Create promo visuals and edit the live canvas</small>
             </button>
             <button class="admin-tab-button" type="button" data-admin-tab="social">
               <span>Social Tools</span>
@@ -2363,6 +2367,178 @@
                 <div id="admin-review-approved-list" class="admin-review-list"></div>
               </article>
             </section>
+          </div>
+        </section>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="canvas">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Canvas Studio</span>
+            <h2>Edit a live design canvas for promos, product highlights, and quick social visuals.</h2>
+            <p>Choose a product, swap the background, change the text, draw directly on the canvas, and export a polished image without leaving the admin.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Live preview</span>
+            <span>Draw mode</span>
+            <span>Export PNG</span>
+          </div>
+        </article>
+
+        <section class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Creative Workspace</span>
+              <h2>Canvas Editor</h2>
+            </div>
+            <div class="admin-inline-actions">
+              <button class="button button-secondary" id="admin-canvas-reset" type="button">Reset Canvas</button>
+              <button class="button button-primary" id="admin-canvas-download" type="button">Export PNG</button>
+            </div>
+          </div>
+          <p class="admin-panel-muted">Best for square posts, story slides, or simple promo cards that need your own image, colors, and message fast.</p>
+
+          <div class="admin-canvas-studio">
+            <div class="admin-canvas-controls">
+              <div class="admin-canvas-control-grid">
+                <section class="admin-panel admin-canvas-control-card">
+                  <div class="admin-panel-header">
+                    <div>
+                      <span class="section-kicker">Layout</span>
+                      <h3>Canvas setup</h3>
+                    </div>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-preset">Canvas size</label>
+                    <select id="admin-canvas-preset">
+                      <option value="square">Square 1080 x 1080</option>
+                      <option value="story">Story 1080 x 1920</option>
+                      <option value="landscape">Landscape 1600 x 900</option>
+                    </select>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-product">Quick-fill from product</label>
+                    <div class="admin-smart-row">
+                      <select id="admin-canvas-product">
+                        <option value="">Choose product</option>
+                      </select>
+                      <button class="button button-secondary" id="admin-canvas-apply-product" type="button">Use Product</button>
+                    </div>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-bg-image">Background image path</label>
+                    <input id="admin-canvas-bg-image" type="text" placeholder="assets/images/your-photo.webp" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-upload">Upload background</label>
+                    <input id="admin-canvas-upload" type="file" accept="image/*" />
+                    <p class="admin-field-tip">Upload for quick editing in this browser, or paste an existing project image path above for a reusable design.</p>
+                  </div>
+                </section>
+
+                <section class="admin-panel admin-canvas-control-card">
+                  <div class="admin-panel-header">
+                    <div>
+                      <span class="section-kicker">Look</span>
+                      <h3>Colors and overlay</h3>
+                    </div>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-bg-color">Background color</label>
+                    <input id="admin-canvas-bg-color" type="color" value="#70423a" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-overlay-color">Overlay color</label>
+                    <input id="admin-canvas-overlay-color" type="color" value="#1d1311" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-overlay-opacity">Overlay strength</label>
+                    <input id="admin-canvas-overlay-opacity" type="range" min="0" max="80" step="1" value="38" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-accent-color">Accent color</label>
+                    <input id="admin-canvas-accent-color" type="color" value="#f2c94c" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-text-color">Text color</label>
+                    <input id="admin-canvas-text-color" type="color" value="#fff7ef" />
+                  </div>
+                </section>
+
+                <section class="admin-panel admin-canvas-control-card">
+                  <div class="admin-panel-header">
+                    <div>
+                      <span class="section-kicker">Copy</span>
+                      <h3>Text layers</h3>
+                    </div>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-kicker">Kicker</label>
+                    <input id="admin-canvas-kicker" type="text" maxlength="48" placeholder="SharonCraft Collection" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-headline">Headline</label>
+                    <textarea id="admin-canvas-headline" maxlength="140" placeholder="Bold, client-friendly headline"></textarea>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-body">Body text</label>
+                    <textarea id="admin-canvas-body" maxlength="180" placeholder="Short supporting message"></textarea>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-price">Price or tag</label>
+                    <input id="admin-canvas-price" type="text" maxlength="40" placeholder="From KES 2,500" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-cta">Button label</label>
+                    <input id="admin-canvas-cta" type="text" maxlength="36" placeholder="Shop Now" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-align">Text alignment</label>
+                    <select id="admin-canvas-align">
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                    </select>
+                  </div>
+                </section>
+
+                <section class="admin-panel admin-canvas-control-card">
+                  <div class="admin-panel-header">
+                    <div>
+                      <span class="section-kicker">Brush</span>
+                      <h3>Draw on top</h3>
+                    </div>
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-brush-color">Brush color</label>
+                    <input id="admin-canvas-brush-color" type="color" value="#ffffff" />
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="admin-canvas-brush-size">Brush size</label>
+                    <input id="admin-canvas-brush-size" type="range" min="4" max="48" step="1" value="18" />
+                  </div>
+                  <div class="admin-canvas-brush-actions">
+                    <button class="button button-secondary" id="admin-canvas-toggle-draw" type="button">Enable Draw Mode</button>
+                    <button class="button button-secondary" id="admin-canvas-clear-drawing" type="button">Clear Drawing</button>
+                  </div>
+                  <p class="admin-field-tip">Draw mode is useful for fast arrows, circles, notes, or simple highlight marks on top of the design.</p>
+                </section>
+              </div>
+            </div>
+
+            <div class="admin-canvas-preview-shell">
+              <div class="admin-canvas-preview-head">
+                <div>
+                  <span class="section-kicker">Live Preview</span>
+                  <h3 id="admin-canvas-size-label">Square 1080 x 1080</h3>
+                </div>
+                <p id="admin-canvas-mode-copy">Use the controls on the left to update the design instantly.</p>
+              </div>
+              <div class="admin-canvas-stage-wrap">
+                <div class="admin-canvas-stage" id="admin-canvas-stage">
+                  <canvas id="admin-design-canvas" width="1080" height="1080" aria-label="Editable promo canvas"></canvas>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </section>

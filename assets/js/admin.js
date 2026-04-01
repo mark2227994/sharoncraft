@@ -893,6 +893,32 @@ document.addEventListener("DOMContentLoaded", async function () {
   const reviewPendingList = document.getElementById("admin-review-pending-list");
   const reviewApprovedList = document.getElementById("admin-review-approved-list");
   const reviewRefreshButton = document.getElementById("admin-reviews-refresh");
+  const canvasPresetSelect = document.getElementById("admin-canvas-preset");
+  const canvasProductSelect = document.getElementById("admin-canvas-product");
+  const canvasApplyProductButton = document.getElementById("admin-canvas-apply-product");
+  const canvasBackgroundImageInput = document.getElementById("admin-canvas-bg-image");
+  const canvasUploadInput = document.getElementById("admin-canvas-upload");
+  const canvasBackgroundColorInput = document.getElementById("admin-canvas-bg-color");
+  const canvasOverlayColorInput = document.getElementById("admin-canvas-overlay-color");
+  const canvasOverlayOpacityInput = document.getElementById("admin-canvas-overlay-opacity");
+  const canvasAccentColorInput = document.getElementById("admin-canvas-accent-color");
+  const canvasTextColorInput = document.getElementById("admin-canvas-text-color");
+  const canvasKickerInput = document.getElementById("admin-canvas-kicker");
+  const canvasHeadlineInput = document.getElementById("admin-canvas-headline");
+  const canvasBodyInput = document.getElementById("admin-canvas-body");
+  const canvasPriceInput = document.getElementById("admin-canvas-price");
+  const canvasCtaInput = document.getElementById("admin-canvas-cta");
+  const canvasAlignSelect = document.getElementById("admin-canvas-align");
+  const canvasBrushColorInput = document.getElementById("admin-canvas-brush-color");
+  const canvasBrushSizeInput = document.getElementById("admin-canvas-brush-size");
+  const canvasToggleDrawButton = document.getElementById("admin-canvas-toggle-draw");
+  const canvasClearDrawingButton = document.getElementById("admin-canvas-clear-drawing");
+  const canvasResetButton = document.getElementById("admin-canvas-reset");
+  const canvasDownloadButton = document.getElementById("admin-canvas-download");
+  const canvasSizeLabel = document.getElementById("admin-canvas-size-label");
+  const canvasModeCopy = document.getElementById("admin-canvas-mode-copy");
+  const canvasStage = document.getElementById("admin-canvas-stage");
+  const designCanvas = document.getElementById("admin-design-canvas");
   const liveAuthState = document.getElementById("admin-live-auth-state");
   const liveAuthForm = document.getElementById("admin-live-auth-form");
   const liveEmailInput = document.getElementById("admin-live-email");
@@ -903,6 +929,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const adminGuidanceStorageKey = "sharoncraft-admin-guidance-hidden";
   const adminCollapsedPanelsStorageKey = "sharoncraft-admin-collapsed-panels";
   const adminCollapsedGroupsStorageKey = "sharoncraft-admin-collapsed-groups";
+  const canvasStudioStorageKey = "sharoncraft-admin-canvas-studio";
   const defaultMpesaMarkup = {
     overview: mpesaOverview ? mpesaOverview.innerHTML : "",
     queue: mpesaQueue ? mpesaQueue.innerHTML : "",
@@ -929,6 +956,36 @@ document.addEventListener("DOMContentLoaded", async function () {
   let adminGuidanceHidden = loadStoredFlag(adminGuidanceStorageKey, true);
   let collapsedAdminPanels = loadStoredStringArray(adminCollapsedPanelsStorageKey);
   let collapsedAdminGroups = loadStoredStringArray(adminCollapsedGroupsStorageKey);
+  const CANVAS_PRESETS = {
+    square: { width: 1080, height: 1080, label: "Square 1080 x 1080" },
+    story: { width: 1080, height: 1920, label: "Story 1080 x 1920" },
+    landscape: { width: 1600, height: 900, label: "Landscape 1600 x 900" }
+  };
+  const defaultCanvasStudioState = {
+    preset: "square",
+    productId: "",
+    backgroundImage: "",
+    backgroundColor: "#70423a",
+    overlayColor: "#1d1311",
+    overlayOpacity: 38,
+    accentColor: "#f2c94c",
+    textColor: "#fff7ef",
+    kicker: "SharonCraft",
+    headline: "Handmade beadwork with bright Kenyan character.",
+    body: "Create a polished promo visual for products, launches, gifts, and quick client updates.",
+    price: "From KES 2,500",
+    cta: "Shop Now",
+    align: "left",
+    brushColor: "#ffffff",
+    brushSize: 18,
+    strokes: []
+  };
+  let canvasStudioState = loadCanvasStudioState();
+  let canvasStudioImage = null;
+  let canvasStudioImageSource = "";
+  let canvasStudioFailedImageSource = "";
+  let canvasStudioIsDrawing = false;
+  let canvasStudioActiveStroke = null;
 
   function loadSocialSettings() {
     try {
@@ -1156,6 +1213,574 @@ document.addEventListener("DOMContentLoaded", async function () {
             <p>${escapeHtml(emptyText)}</p>
           </article>
         `;
+  }
+
+  function normalizeCanvasStudioState(savedState) {
+    const source = savedState && typeof savedState === "object" ? savedState : {};
+    const preset = Object.prototype.hasOwnProperty.call(CANVAS_PRESETS, source.preset) ? source.preset : defaultCanvasStudioState.preset;
+    const align = source.align === "center" ? "center" : "left";
+    const overlayOpacity = Math.max(0, Math.min(80, Number(source.overlayOpacity) || defaultCanvasStudioState.overlayOpacity));
+    const brushSize = Math.max(4, Math.min(48, Number(source.brushSize) || defaultCanvasStudioState.brushSize));
+    const strokes = Array.isArray(source.strokes)
+      ? source.strokes
+          .map((stroke) => ({
+            color: cleanImagePath(stroke && stroke.color) || defaultCanvasStudioState.brushColor,
+            size: Math.max(1, Math.min(72, Number(stroke && stroke.size) || defaultCanvasStudioState.brushSize)),
+            points: Array.isArray(stroke && stroke.points)
+              ? stroke.points
+                  .map((point) => ({
+                    x: Math.max(0, Math.min(1, Number(point && point.x) || 0)),
+                    y: Math.max(0, Math.min(1, Number(point && point.y) || 0))
+                  }))
+                  .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+              : []
+          }))
+          .filter((stroke) => stroke.points.length)
+          .slice(-40)
+      : [];
+
+    return {
+      preset,
+      productId: String(source.productId || defaultCanvasStudioState.productId).trim(),
+      backgroundImage: cleanImagePath(source.backgroundImage) || "",
+      backgroundColor: String(source.backgroundColor || defaultCanvasStudioState.backgroundColor).trim() || defaultCanvasStudioState.backgroundColor,
+      overlayColor: String(source.overlayColor || defaultCanvasStudioState.overlayColor).trim() || defaultCanvasStudioState.overlayColor,
+      overlayOpacity,
+      accentColor: String(source.accentColor || defaultCanvasStudioState.accentColor).trim() || defaultCanvasStudioState.accentColor,
+      textColor: String(source.textColor || defaultCanvasStudioState.textColor).trim() || defaultCanvasStudioState.textColor,
+      kicker: String(source.kicker || defaultCanvasStudioState.kicker).trim(),
+      headline: String(source.headline || defaultCanvasStudioState.headline).trim(),
+      body: String(source.body || defaultCanvasStudioState.body).trim(),
+      price: String(source.price || defaultCanvasStudioState.price).trim(),
+      cta: String(source.cta || defaultCanvasStudioState.cta).trim(),
+      align,
+      brushColor: String(source.brushColor || defaultCanvasStudioState.brushColor).trim() || defaultCanvasStudioState.brushColor,
+      brushSize,
+      strokes
+    };
+  }
+
+  function loadCanvasStudioState() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(canvasStudioStorageKey) || "null");
+      return normalizeCanvasStudioState(saved);
+    } catch (error) {
+      return normalizeCanvasStudioState(defaultCanvasStudioState);
+    }
+  }
+
+  function saveCanvasStudioState(message) {
+    const saved = safeLocalStorageSetItem(canvasStudioStorageKey, JSON.stringify(canvasStudioState), "canvas studio");
+    if (message) {
+      setStatus(saved ? message : `${message} Local save failed because browser storage is full.`);
+    }
+    return saved;
+  }
+
+  function getCanvasPresetConfig(preset) {
+    return CANVAS_PRESETS[preset] || CANVAS_PRESETS[defaultCanvasStudioState.preset];
+  }
+
+  function syncCanvasStudioInputs() {
+    if (canvasPresetSelect) {
+      canvasPresetSelect.value = canvasStudioState.preset;
+    }
+    if (canvasProductSelect) {
+      canvasProductSelect.value = catalog.some((product) => product.id === canvasStudioState.productId) ? canvasStudioState.productId : "";
+    }
+    if (canvasBackgroundImageInput) {
+      canvasBackgroundImageInput.value = canvasStudioState.backgroundImage;
+    }
+    if (canvasBackgroundColorInput) {
+      canvasBackgroundColorInput.value = canvasStudioState.backgroundColor;
+    }
+    if (canvasOverlayColorInput) {
+      canvasOverlayColorInput.value = canvasStudioState.overlayColor;
+    }
+    if (canvasOverlayOpacityInput) {
+      canvasOverlayOpacityInput.value = String(canvasStudioState.overlayOpacity);
+    }
+    if (canvasAccentColorInput) {
+      canvasAccentColorInput.value = canvasStudioState.accentColor;
+    }
+    if (canvasTextColorInput) {
+      canvasTextColorInput.value = canvasStudioState.textColor;
+    }
+    if (canvasKickerInput) {
+      canvasKickerInput.value = canvasStudioState.kicker;
+    }
+    if (canvasHeadlineInput) {
+      canvasHeadlineInput.value = canvasStudioState.headline;
+    }
+    if (canvasBodyInput) {
+      canvasBodyInput.value = canvasStudioState.body;
+    }
+    if (canvasPriceInput) {
+      canvasPriceInput.value = canvasStudioState.price;
+    }
+    if (canvasCtaInput) {
+      canvasCtaInput.value = canvasStudioState.cta;
+    }
+    if (canvasAlignSelect) {
+      canvasAlignSelect.value = canvasStudioState.align;
+    }
+    if (canvasBrushColorInput) {
+      canvasBrushColorInput.value = canvasStudioState.brushColor;
+    }
+    if (canvasBrushSizeInput) {
+      canvasBrushSizeInput.value = String(canvasStudioState.brushSize);
+    }
+  }
+
+  function renderCanvasProductSelect() {
+    if (!canvasProductSelect) {
+      return;
+    }
+
+    const currentValue = canvasStudioState.productId || canvasProductSelect.value || "";
+    canvasProductSelect.innerHTML = [`<option value="">Choose product</option>`]
+      .concat(catalog.map((product) => `<option value="${product.id}">${escapeHtml(product.name)}</option>`))
+      .join("");
+    canvasProductSelect.value = catalog.some((product) => product.id === currentValue) ? currentValue : "";
+    if (canvasProductSelect.value !== currentValue) {
+      canvasStudioState.productId = canvasProductSelect.value;
+      saveCanvasStudioState();
+    }
+  }
+
+  function hexToRgba(hex, alpha) {
+    const normalized = String(hex || "").replace("#", "").trim();
+    if (normalized.length !== 3 && normalized.length !== 6) {
+      return `rgba(0, 0, 0, ${alpha})`;
+    }
+
+    const expanded = normalized.length === 3 ? normalized.split("").map((value) => value + value).join("") : normalized;
+    const red = parseInt(expanded.slice(0, 2), 16);
+    const green = parseInt(expanded.slice(2, 4), 16);
+    const blue = parseInt(expanded.slice(4, 6), 16);
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+  }
+
+  function formatCanvasPrice(price) {
+    const value = Number(price) || 0;
+    return value > 0 ? `KES ${value.toLocaleString("en-KE")}` : "";
+  }
+
+  function truncateCanvasCopy(value, maxLength) {
+    const text = String(value || "").trim();
+    if (!text || text.length <= maxLength) {
+      return text;
+    }
+
+    return `${text.slice(0, Math.max(0, maxLength - 1)).trim()}...`;
+  }
+
+  function wrapCanvasLines(ctx, text, maxWidth) {
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      return [];
+    }
+
+    const lines = [];
+    let currentLine = words.shift() || "";
+
+    words.forEach((word) => {
+      const nextLine = `${currentLine} ${word}`.trim();
+      if (ctx.measureText(nextLine).width <= maxWidth) {
+        currentLine = nextLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines;
+  }
+
+  function drawCanvasTextBlock(ctx, options) {
+    const settings = options || {};
+    const lines = wrapCanvasLines(ctx, settings.text, settings.maxWidth || 320).slice(0, settings.maxLines || 4);
+    const fontSize = settings.fontSize || 36;
+    const lineHeight = settings.lineHeight || fontSize * 1.18;
+    const x = settings.x || 0;
+    const y = settings.y || 0;
+
+    lines.forEach((line, index) => {
+      ctx.fillText(line, x, y + index * lineHeight);
+    });
+
+    return lines.length * lineHeight;
+  }
+
+  function drawRoundedRect(ctx, x, y, width, height, radius) {
+    const safeRadius = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + safeRadius, y);
+    ctx.arcTo(x + width, y, x + width, y + height, safeRadius);
+    ctx.arcTo(x + width, y + height, x, y + height, safeRadius);
+    ctx.arcTo(x, y + height, x, y, safeRadius);
+    ctx.arcTo(x, y, x + width, y, safeRadius);
+    ctx.closePath();
+  }
+
+  function drawCanvasCoverImage(ctx, image, width, height) {
+    if (!image || !image.naturalWidth || !image.naturalHeight) {
+      return;
+    }
+
+    const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+    const drawWidth = image.naturalWidth * scale;
+    const drawHeight = image.naturalHeight * scale;
+    const drawX = (width - drawWidth) / 2;
+    const drawY = (height - drawHeight) / 2;
+    ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+  }
+
+  function ensureCanvasBackgroundImage(source) {
+    const normalized = cleanImagePath(source);
+    if (!normalized) {
+      canvasStudioImage = null;
+      canvasStudioImageSource = "";
+      canvasStudioFailedImageSource = "";
+      return;
+    }
+
+    if (canvasStudioImageSource === normalized && canvasStudioImage) {
+      return;
+    }
+
+    if (canvasStudioImageSource === normalized && !canvasStudioImage) {
+      return;
+    }
+
+    canvasStudioImage = null;
+    canvasStudioImageSource = normalized;
+    const image = new Image();
+    image.onload = function () {
+      if (canvasStudioImageSource !== normalized) {
+        return;
+      }
+
+      canvasStudioFailedImageSource = "";
+      canvasStudioImage = image;
+      drawCanvasStudio();
+    };
+    image.onerror = function () {
+      if (canvasStudioImageSource !== normalized) {
+        return;
+      }
+
+      canvasStudioImage = null;
+      if (canvasStudioFailedImageSource !== normalized) {
+        canvasStudioFailedImageSource = normalized;
+        setStatus("Canvas background could not be loaded. Check the image path or upload another file.");
+      }
+      drawCanvasStudio();
+    };
+    image.src = normalized;
+  }
+
+  function drawCanvasStrokes(ctx, width, height) {
+    canvasStudioState.strokes.forEach((stroke) => {
+      if (!stroke || !Array.isArray(stroke.points) || stroke.points.length === 0) {
+        return;
+      }
+
+      ctx.save();
+      ctx.strokeStyle = stroke.color || canvasStudioState.brushColor;
+      ctx.lineWidth = Math.max(1, Number(stroke.size) || canvasStudioState.brushSize);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      stroke.points.forEach((point, index) => {
+        const x = Math.max(0, Math.min(1, Number(point.x) || 0)) * width;
+        const y = Math.max(0, Math.min(1, Number(point.y) || 0)) * height;
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      if (stroke.points.length === 1) {
+        const point = stroke.points[0];
+        ctx.lineTo(point.x * width + 0.01, point.y * height + 0.01);
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function renderCanvasStudio() {
+    if (!designCanvas) {
+      return;
+    }
+
+    canvasStudioState = normalizeCanvasStudioState(canvasStudioState);
+    syncCanvasStudioInputs();
+    const preset = getCanvasPresetConfig(canvasStudioState.preset);
+    const canvasWidth = preset.width;
+    const canvasHeight = preset.height;
+    const ctx = designCanvas.getContext("2d");
+
+    if (!ctx) {
+      return;
+    }
+
+    if (designCanvas.width !== canvasWidth) {
+      designCanvas.width = canvasWidth;
+    }
+    if (designCanvas.height !== canvasHeight) {
+      designCanvas.height = canvasHeight;
+    }
+
+    if (canvasStage) {
+      canvasStage.classList.toggle("is-story", canvasStudioState.preset === "story");
+      canvasStage.classList.toggle("is-landscape", canvasStudioState.preset === "landscape");
+    }
+    if (canvasSizeLabel) {
+      canvasSizeLabel.textContent = preset.label;
+    }
+    if (canvasModeCopy) {
+      canvasModeCopy.textContent = canvasStudioIsDrawing
+        ? "Draw mode is on. Drag on the canvas to mark up the design."
+        : "Use the controls on the left to update the design instantly.";
+    }
+    if (canvasToggleDrawButton) {
+      canvasToggleDrawButton.textContent = canvasStudioIsDrawing ? "Disable Draw Mode" : "Enable Draw Mode";
+    }
+    designCanvas.classList.toggle("is-drawing", canvasStudioIsDrawing);
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = canvasStudioState.backgroundColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    ensureCanvasBackgroundImage(canvasStudioState.backgroundImage);
+    if (canvasStudioImage && canvasStudioImageSource === cleanImagePath(canvasStudioState.backgroundImage)) {
+      drawCanvasCoverImage(ctx, canvasStudioImage, canvasWidth, canvasHeight);
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+    gradient.addColorStop(0, hexToRgba(canvasStudioState.overlayColor, Math.min(0.92, canvasStudioState.overlayOpacity / 100 + 0.18)));
+    gradient.addColorStop(1, hexToRgba(canvasStudioState.overlayColor, Math.min(0.82, canvasStudioState.overlayOpacity / 100)));
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.save();
+    ctx.globalAlpha = 0.26;
+    ctx.fillStyle = canvasStudioState.accentColor;
+    ctx.beginPath();
+    ctx.arc(canvasWidth * 0.88, canvasHeight * 0.14, Math.min(canvasWidth, canvasHeight) * 0.16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    const paddingX = canvasWidth * 0.085;
+    const maxTextWidth = canvasStudioState.align === "center" ? canvasWidth * 0.74 : canvasWidth * 0.6;
+    const anchorX = canvasStudioState.align === "center" ? canvasWidth / 2 : paddingX;
+    const contentTop = canvasHeight * (canvasStudioState.preset === "story" ? 0.14 : 0.16);
+    ctx.textAlign = canvasStudioState.align;
+    ctx.textBaseline = "top";
+
+    if (canvasStudioState.kicker) {
+      ctx.save();
+      ctx.font = `${Math.round(Math.max(24, canvasWidth * 0.022))}px Poppins`;
+      const kickerPaddingX = canvasWidth * 0.02;
+      const kickerHeight = Math.max(52, canvasHeight * 0.048);
+      const kickerWidth = Math.min(maxTextWidth, ctx.measureText(canvasStudioState.kicker).width + kickerPaddingX * 2);
+      const kickerX = canvasStudioState.align === "center" ? anchorX - kickerWidth / 2 : anchorX;
+      drawRoundedRect(ctx, kickerX, contentTop, kickerWidth, kickerHeight, kickerHeight / 2);
+      ctx.fillStyle = hexToRgba(canvasStudioState.accentColor, 0.96);
+      ctx.fill();
+      ctx.fillStyle = "#2e231d";
+      ctx.textAlign = "center";
+      ctx.fillText(canvasStudioState.kicker.toUpperCase(), kickerX + kickerWidth / 2, contentTop + kickerHeight * 0.24);
+      ctx.restore();
+    }
+
+    let textY = contentTop + Math.max(74, canvasHeight * 0.075);
+    ctx.fillStyle = canvasStudioState.textColor;
+    ctx.textAlign = canvasStudioState.align;
+
+    ctx.font = `800 ${Math.round(canvasStudioState.preset === "story" ? canvasWidth * 0.06 : canvasWidth * 0.054)}px Poppins`;
+    textY += drawCanvasTextBlock(ctx, {
+      text: canvasStudioState.headline,
+      x: anchorX,
+      y: textY,
+      maxWidth: maxTextWidth,
+      maxLines: canvasStudioState.preset === "story" ? 5 : 4,
+      lineHeight: canvasStudioState.preset === "story" ? canvasWidth * 0.07 : canvasWidth * 0.062
+    });
+
+    if (canvasStudioState.body) {
+      textY += canvasHeight * 0.018;
+      ctx.font = `600 ${Math.round(canvasStudioState.preset === "story" ? canvasWidth * 0.028 : canvasWidth * 0.025)}px Nunito`;
+      ctx.fillStyle = hexToRgba(canvasStudioState.textColor, 0.9);
+      textY += drawCanvasTextBlock(ctx, {
+        text: canvasStudioState.body,
+        x: anchorX,
+        y: textY,
+        maxWidth: maxTextWidth,
+        maxLines: 4,
+        lineHeight: canvasStudioState.preset === "story" ? canvasWidth * 0.038 : canvasWidth * 0.034
+      });
+    }
+
+    const bottomBlockY = canvasHeight - canvasHeight * 0.17;
+    ctx.textAlign = canvasStudioState.align;
+    if (canvasStudioState.price) {
+      ctx.save();
+      ctx.font = `800 ${Math.round(canvasWidth * 0.03)}px Poppins`;
+      const priceText = canvasStudioState.price;
+      const chipPaddingX = canvasWidth * 0.022;
+      const chipHeight = Math.max(58, canvasHeight * 0.054);
+      const chipWidth = Math.min(maxTextWidth, ctx.measureText(priceText).width + chipPaddingX * 2);
+      const chipX = canvasStudioState.align === "center" ? anchorX - chipWidth / 2 : anchorX;
+      drawRoundedRect(ctx, chipX, bottomBlockY, chipWidth, chipHeight, chipHeight / 2);
+      ctx.fillStyle = hexToRgba(canvasStudioState.textColor, 0.12);
+      ctx.fill();
+      ctx.fillStyle = canvasStudioState.textColor;
+      ctx.textAlign = "center";
+      ctx.fillText(priceText, chipX + chipWidth / 2, bottomBlockY + chipHeight * 0.23);
+      ctx.restore();
+    }
+
+    if (canvasStudioState.cta) {
+      ctx.save();
+      ctx.font = `800 ${Math.round(canvasWidth * 0.026)}px Poppins`;
+      const buttonText = canvasStudioState.cta;
+      const buttonPaddingX = canvasWidth * 0.024;
+      const buttonHeight = Math.max(62, canvasHeight * 0.058);
+      const buttonWidth = Math.min(maxTextWidth, ctx.measureText(buttonText).width + buttonPaddingX * 2);
+      const buttonX = canvasStudioState.align === "center" ? anchorX - buttonWidth / 2 : anchorX;
+      const buttonY = bottomBlockY + Math.max(78, canvasHeight * 0.072);
+      drawRoundedRect(ctx, buttonX, buttonY, buttonWidth, buttonHeight, buttonHeight / 2);
+      ctx.fillStyle = canvasStudioState.accentColor;
+      ctx.fill();
+      ctx.fillStyle = "#2c211c";
+      ctx.textAlign = "center";
+      ctx.fillText(buttonText, buttonX + buttonWidth / 2, buttonY + buttonHeight * 0.22);
+      ctx.restore();
+    }
+
+    drawCanvasStrokes(ctx, canvasWidth, canvasHeight);
+  }
+
+  function applyProductToCanvas(productId) {
+    const product = catalog.find((entry) => entry.id === productId);
+    if (!product) {
+      setStatus("Choose a product first.");
+      return;
+    }
+
+    canvasStudioState.productId = product.id;
+    canvasStudioState.backgroundImage = cleanImagePath((product.images && product.images[0]) || "") || "";
+    canvasStudioState.kicker = categoryMap.get(product.category) || "SharonCraft Collection";
+    canvasStudioState.headline = product.name;
+    canvasStudioState.body = truncateCanvasCopy(product.shortDescription || product.description || "Handmade SharonCraft piece ready for gifting, styling, and quick WhatsApp orders.", 150);
+    canvasStudioState.price = formatCanvasPrice(product.price) || defaultCanvasStudioState.price;
+    canvasStudioState.cta = "Order on WhatsApp";
+    saveCanvasStudioState(`${product.name} loaded into Canvas Studio.`);
+    renderCanvasStudio();
+  }
+
+  function resetCanvasStudio() {
+    canvasStudioState = normalizeCanvasStudioState(defaultCanvasStudioState);
+    canvasStudioImage = null;
+    canvasStudioImageSource = "";
+    canvasStudioFailedImageSource = "";
+    canvasStudioIsDrawing = false;
+    canvasStudioActiveStroke = null;
+    saveCanvasStudioState("Canvas Studio reset.");
+    renderCanvasProductSelect();
+    renderCanvasStudio();
+  }
+
+  function downloadCanvasStudioImage() {
+    if (!designCanvas) {
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = designCanvas.toDataURL("image/png");
+    link.download = `sharoncraft-canvas-${canvasStudioState.preset}-${Date.now()}.png`;
+    link.click();
+    setStatus("Canvas exported as PNG.");
+  }
+
+  function getCanvasPointerPosition(event) {
+    if (!designCanvas) {
+      return null;
+    }
+
+    const rect = designCanvas.getBoundingClientRect();
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+    if (!Number.isFinite(clientX) || !Number.isFinite(clientY) || !rect.width || !rect.height) {
+      return null;
+    }
+
+    return {
+      x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+      y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+    };
+  }
+
+  function beginCanvasStroke(event) {
+    if (!canvasStudioIsDrawing || !designCanvas) {
+      return;
+    }
+
+    const point = getCanvasPointerPosition(event);
+    if (!point) {
+      return;
+    }
+
+    event.preventDefault();
+    canvasStudioActiveStroke = {
+      color: canvasStudioState.brushColor,
+      size: canvasStudioState.brushSize,
+      points: [point]
+    };
+    canvasStudioState.strokes = canvasStudioState.strokes.concat(canvasStudioActiveStroke).slice(-40);
+    if (typeof designCanvas.setPointerCapture === "function") {
+      designCanvas.setPointerCapture(event.pointerId);
+    }
+    drawCanvasStudio();
+  }
+
+  function moveCanvasStroke(event) {
+    if (!canvasStudioIsDrawing || !canvasStudioActiveStroke) {
+      return;
+    }
+
+    const point = getCanvasPointerPosition(event);
+    if (!point) {
+      return;
+    }
+
+    event.preventDefault();
+    canvasStudioActiveStroke.points.push(point);
+    drawCanvasStudio();
+  }
+
+  function endCanvasStroke(event) {
+    if (!canvasStudioActiveStroke) {
+      return;
+    }
+
+    if (designCanvas && typeof designCanvas.releasePointerCapture === "function") {
+      try {
+        designCanvas.releasePointerCapture(event.pointerId);
+      } catch (error) {
+        // Ignore release errors when the pointer is already gone.
+      }
+    }
+    canvasStudioActiveStroke = null;
+    saveCanvasStudioState();
+    drawCanvasStudio();
   }
 
   function isEmbeddedImage(path) {
@@ -2504,6 +3129,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       profit: "Profit",
       bundles: "Bundles & Growth",
       analytics: "Analytics",
+      canvas: "Canvas Studio",
       social: "Social Tools",
       replies: "Quick Replies",
       assets: "Photo Library"
@@ -3781,6 +4407,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       case "reviews":
         renderReviewModerationDashboard();
         refreshReviewModerationDashboard();
+        break;
+      case "canvas":
+        renderCanvasProductSelect();
+        renderCanvasStudio();
         break;
       case "social":
         renderSocialCalendar();
@@ -5753,6 +6383,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderProfitDashboard();
     renderOrderProductSelect();
     renderStockList();
+    renderCanvasProductSelect();
     renderSocialProductSelect();
     renderSocialMedia();
     renderSocialTracker();
@@ -6600,6 +7231,107 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
       setStatus("All admin sections expanded.");
     });
+  }
+
+  [
+    [canvasPresetSelect, "preset"],
+    [canvasBackgroundImageInput, "backgroundImage"],
+    [canvasBackgroundColorInput, "backgroundColor"],
+    [canvasOverlayColorInput, "overlayColor"],
+    [canvasOverlayOpacityInput, "overlayOpacity"],
+    [canvasAccentColorInput, "accentColor"],
+    [canvasTextColorInput, "textColor"],
+    [canvasKickerInput, "kicker"],
+    [canvasHeadlineInput, "headline"],
+    [canvasBodyInput, "body"],
+    [canvasPriceInput, "price"],
+    [canvasCtaInput, "cta"],
+    [canvasAlignSelect, "align"],
+    [canvasBrushColorInput, "brushColor"],
+    [canvasBrushSizeInput, "brushSize"]
+  ].forEach(([input, key]) => {
+    if (!input) {
+      return;
+    }
+
+    const handler = function () {
+      canvasStudioState[key] = input.type === "range" ? Number(input.value) : input.value;
+      saveCanvasStudioState();
+      renderCanvasStudio();
+    };
+
+    input.addEventListener("input", handler);
+    input.addEventListener("change", handler);
+  });
+
+  if (canvasProductSelect) {
+    canvasProductSelect.addEventListener("change", function () {
+      canvasStudioState.productId = canvasProductSelect.value;
+      saveCanvasStudioState();
+    });
+  }
+
+  if (canvasApplyProductButton) {
+    canvasApplyProductButton.addEventListener("click", function () {
+      applyProductToCanvas(canvasProductSelect ? canvasProductSelect.value : "");
+    });
+  }
+
+  if (canvasUploadInput) {
+    canvasUploadInput.addEventListener("change", function () {
+      const file = canvasUploadInput.files && canvasUploadInput.files[0];
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        canvasStudioState.backgroundImage = String(reader.result || "");
+        saveCanvasStudioState(`${file.name} loaded into Canvas Studio.`);
+        renderCanvasStudio();
+      };
+      reader.onerror = function () {
+        setStatus("Canvas upload failed. Please try another image.");
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (canvasToggleDrawButton) {
+    canvasToggleDrawButton.addEventListener("click", function () {
+      canvasStudioIsDrawing = !canvasStudioIsDrawing;
+      canvasToggleDrawButton.textContent = canvasStudioIsDrawing ? "Disable Draw Mode" : "Enable Draw Mode";
+      renderCanvasStudio();
+      setStatus(canvasStudioIsDrawing ? "Canvas draw mode enabled." : "Canvas draw mode disabled.");
+    });
+  }
+
+  if (canvasClearDrawingButton) {
+    canvasClearDrawingButton.addEventListener("click", function () {
+      canvasStudioState.strokes = [];
+      saveCanvasStudioState("Canvas drawing cleared.");
+      renderCanvasStudio();
+    });
+  }
+
+  if (canvasResetButton) {
+    canvasResetButton.addEventListener("click", function () {
+      resetCanvasStudio();
+    });
+  }
+
+  if (canvasDownloadButton) {
+    canvasDownloadButton.addEventListener("click", function () {
+      downloadCanvasStudioImage();
+    });
+  }
+
+  if (designCanvas) {
+    designCanvas.addEventListener("pointerdown", beginCanvasStroke);
+    designCanvas.addEventListener("pointermove", moveCanvasStroke);
+    designCanvas.addEventListener("pointerup", endCanvasStroke);
+    designCanvas.addEventListener("pointerleave", endCanvasStroke);
+    designCanvas.addEventListener("pointercancel", endCanvasStroke);
   }
 
   document.addEventListener("click", function (event) {
@@ -7631,6 +8363,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderDeliveryAreas();
   renderExpenses();
   renderStockList();
+  renderCanvasProductSelect();
+  renderCanvasStudio();
   renderBundleProductPicker([]);
   renderBundles();
   resetReplyForm();
