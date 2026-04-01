@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     await window.SharonCraftLiveSync.ready;
   }
   await utils.waitForData();
+  if (typeof utils.loadReviewSummaries === "function") {
+    await utils.loadReviewSummaries();
+  }
 
   const emptyState = document.getElementById("wishlist-page-empty");
   const listNode = document.getElementById("wishlist-page-list");

@@ -12,6 +12,9 @@
     }
 
     await utils.waitForData();
+    if (typeof utils.loadReviewSummaries === "function") {
+      await utils.loadReviewSummaries();
+    }
 
     const productIds = Array.isArray(config.productIds) ? config.productIds : [];
     const fallbackCategory = String(config.category || "").trim();

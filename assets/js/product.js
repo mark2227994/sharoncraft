@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const productId = params.get("id");
 
   await utils.waitForData();
+  if (typeof utils.loadReviewSummaries === "function") {
+    await utils.loadReviewSummaries();
+  }
 
   const product = await utils.getProductById(productId);
   const breadcrumb = document.getElementById("product-breadcrumb");
@@ -44,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const reviewMessageField = document.getElementById("product-review-message");
   const reviewWhatsAppButton = document.getElementById("product-review-whatsapp");
   const reviewStorageKey = "sharoncraft_product_reviews";
+  const liveCatalogApi = window.SharonCraftCatalog || null;
 
   const normalizeReviewText = (value) => String(value || "").trim();
   const escapeReviewHtml = (value) =>
@@ -72,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const ratingValue = clampReviewRating(value);
     return `
       <span class="review-stars" aria-label="${ratingValue} out of 5 stars">
-        ${Array.from({ length: 5 }, (_, index) => `<span aria-hidden="true">${index < ratingValue ? "★" : "☆"}</span>`).join("")}
+        ${Array.from({ length: 5 }, (_, index) => `<span aria-hidden="true">${index < ratingValue ? "&#9733;" : "&#9734;"}</span>`).join("")}
       </span>
     `;
   };
@@ -110,9 +114,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     const author = escapeReviewHtml(review.author || "SharonCraft client");
     const location = escapeReviewHtml(review.location || "Kenya");
     const message = escapeReviewHtml(review.message || "");
-    const badge = review.featured
-      ? '<span class="review-badge">Verified SharonCraft client</span>'
-      : '<span class="review-badge">Product feedback</span>';
+    const badge = review.status === "pending"
+      ? '<span class="review-badge is-pending">Pending approval</span>'
+      : '<span class="review-badge">Approved client review</span>';
     return `
       <article class="review-card reveal">
         <div class="review-card-top">
@@ -130,10 +134,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       </article>
     `;
   };
-  const renderReviews = (reviews, averageRating) => {
+  const renderReviews = (reviews, metrics) => {
     if (!reviewList || !reviewSummary || !reviewEmpty) {
       return;
     }
+
+    const reviewMetrics = metrics && typeof metrics === "object" ? metrics : {};
+    const approvedCount = Number(reviewMetrics.approvedCount) || 0;
+    const pendingCount = Number(reviewMetrics.pendingCount) || 0;
+    const averageRating = Number(reviewMetrics.averageRating) || 0;
 
     if (!reviews.length) {
       reviewList.innerHTML = "";
@@ -144,8 +153,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     reviewEmpty.hidden = true;
     reviewList.innerHTML = reviews.map(buildReviewMarkup).join("");
-    const averageLabel = Number.isFinite(averageRating) ? averageRating.toFixed(1) : "5.0";
-    reviewSummary.textContent = `${reviews.length} review${reviews.length === 1 ? "" : "s"} so far with an average of ${averageLabel}/5. Clients can quickly scan real buying feedback before ordering.`;
+    if (approvedCount > 0) {
+      reviewSummary.textContent = `${approvedCount} approved review${approvedCount === 1 ? "" : "s"} with an average of ${averageRating.toFixed(1)}/5.${pendingCount ? ` ${pendingCount} more waiting for approval.` : ""}`;
+      return;
+    }
+
+    reviewSummary.textContent = pendingCount
+      ? `${pendingCount} review${pendingCount === 1 ? "" : "s"} waiting for approval. Clients can still submit feedback below.`
+      : "Reviews from SharonCraft clients will appear here as they come in.";
   };
   const syncReviewWhatsAppLink = (currentProductName) => {
     if (!reviewWhatsAppButton) {
@@ -225,32 +240,37 @@ document.addEventListener("DOMContentLoaded", async function () {
   const availabilityUrl = product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
   const categoryName = productCategory ? productCategory.name : "Collection";
   const seoDescription = `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
-  const featuredReviews = (site && Array.isArray(site.testimonials) ? site.testimonials : [])
-    .slice(0, 2)
-    .map((item, index) => ({
-      id: `featured-${index + 1}`,
-      author: normalizeReviewText(item && item.name) || "SharonCraft client",
-      location: normalizeReviewText(item && item.location) || "Kenya",
-      rating: 5,
-      message: normalizeReviewText(item && item.quote) || `Loved the finish and service for ${productName}.`,
-      createdAt: normalizeReviewText(item && item.date) || "",
-      featured: true
-    }));
+  const approvedReviews = typeof utils.getApprovedReviewsForProduct === "function"
+    ? utils.getApprovedReviewsForProduct(product.id).map((item) => ({
+        id: normalizeReviewText(item.id || item.sourceId),
+        author: normalizeReviewText(item.author) || "SharonCraft client",
+        location: normalizeReviewText(item.location) || "Kenya",
+        rating: clampReviewRating(item.rating),
+        message: normalizeReviewText(item.message),
+        createdAt: normalizeReviewText(item.approvedAt || item.createdAt),
+        status: "approved"
+      }))
+    : [];
+  const approvedIds = new Set(approvedReviews.map((item) => item.id).filter(Boolean));
   const localReviews = getLocalProductReviews(product.id)
     .map((item, index) => ({
-      id: item.id || `local-${index + 1}`,
+      id: normalizeReviewText(item.id) || `local-${index + 1}`,
       author: normalizeReviewText(item.author) || "SharonCraft client",
       location: normalizeReviewText(item.location) || "Kenya",
       rating: clampReviewRating(item.rating),
       message: normalizeReviewText(item.message),
       createdAt: normalizeReviewText(item.createdAt) || "",
-      featured: false
+      status: normalizeReviewText(item.status) || "pending"
     }))
-    .filter((item) => item.message);
-  const allReviews = [...localReviews, ...featuredReviews];
-  const averageRating = allReviews.length
-    ? allReviews.reduce((sum, item) => sum + clampReviewRating(item.rating), 0) / allReviews.length
-    : 0;
+    .filter((item) => item.message && !approvedIds.has(item.id));
+  const allReviews = [...localReviews, ...approvedReviews];
+  const reviewMetrics = {
+    approvedCount: approvedReviews.length,
+    pendingCount: localReviews.length,
+    averageRating: approvedReviews.length
+      ? approvedReviews.reduce((sum, item) => sum + clampReviewRating(item.rating), 0) / approvedReviews.length
+      : 0
+  };
 
   document.title = `${productName} | SharonCraft`;
   title.textContent = productName;
@@ -285,7 +305,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     limitedCopy.textContent = utils.getScarcityNote(product);
   }
 
-  renderReviews(allReviews, averageRating);
+  renderReviews(allReviews, reviewMetrics);
   syncReviewWhatsAppLink(productName);
 
   if (customerProof) {
@@ -342,17 +362,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
 
-    reviewForm.addEventListener("submit", function (event) {
+    reviewForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const nextReview = {
         id: `review-${Date.now()}`,
+        productId: product.id,
+        productName,
+        category: categoryName,
         author: normalizeReviewText(reviewNameField && reviewNameField.value) || "SharonCraft client",
         location: normalizeReviewText(reviewLocationField && reviewLocationField.value) || "Kenya",
         rating: clampReviewRating(reviewRatingField && reviewRatingField.value),
         message: normalizeReviewText(reviewMessageField && reviewMessageField.value),
         createdAt: new Date().toISOString(),
-        featured: false
+        status: "pending"
       };
 
       if (!nextReview.message) {
@@ -363,18 +386,36 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
 
       const updatedLocalReviews = saveLocalProductReview(product.id, nextReview).map((item, index) => ({
-        id: item.id || `local-${index + 1}`,
+        id: normalizeReviewText(item.id) || `local-${index + 1}`,
         author: normalizeReviewText(item.author) || "SharonCraft client",
         location: normalizeReviewText(item.location) || "Kenya",
         rating: clampReviewRating(item.rating),
         message: normalizeReviewText(item.message),
         createdAt: normalizeReviewText(item.createdAt) || "",
-        featured: false
+        status: normalizeReviewText(item.status) || "pending"
       }));
-      const mergedReviews = [...updatedLocalReviews, ...featuredReviews];
-      const mergedAverage = mergedReviews.reduce((sum, item) => sum + clampReviewRating(item.rating), 0) / mergedReviews.length;
+      const mergedReviews = [...updatedLocalReviews, ...approvedReviews];
 
-      renderReviews(mergedReviews, mergedAverage);
+      let submittedToLive = false;
+      if (
+        liveCatalogApi &&
+        typeof liveCatalogApi.isConfigured === "function" &&
+        liveCatalogApi.isConfigured() &&
+        typeof liveCatalogApi.submitProductReview === "function"
+      ) {
+        try {
+          await liveCatalogApi.submitProductReview(nextReview);
+          submittedToLive = true;
+        } catch (error) {
+          console.warn("Unable to send review submission to Supabase.", error);
+        }
+      }
+
+      renderReviews(mergedReviews, {
+        approvedCount: approvedReviews.length,
+        pendingCount: updatedLocalReviews.length,
+        averageRating: reviewMetrics.averageRating
+      });
       reviewForm.reset();
       if (reviewRatingField) {
         reviewRatingField.value = "5";
@@ -383,7 +424,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       utils.refreshReveal();
 
       if (typeof window.showToast === "function") {
-        window.showToast("Your review has been added on this device.", "success");
+        window.showToast(
+          submittedToLive
+            ? "Your review was sent for approval and saved on this device."
+            : "Your review was saved on this device. You can also send it on WhatsApp.",
+          "success"
+        );
       }
 
       if (typeof utils.trackEvent === "function") {
@@ -424,6 +470,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         name: "SharonCraft"
       },
       keywords: [categoryName, "handmade beadwork", "Kenya", "SharonCraft"].join(", "),
+      ...(reviewMetrics.approvedCount
+        ? {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: reviewMetrics.averageRating.toFixed(1),
+              reviewCount: String(reviewMetrics.approvedCount)
+            }
+          }
+        : {}),
       offers: {
         "@type": "Offer",
         priceCurrency: "KES",
