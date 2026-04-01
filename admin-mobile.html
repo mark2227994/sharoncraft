@@ -138,6 +138,30 @@
               <input id="admin-mobile-image" type="text" placeholder="assets/images/your-product.webp" required />
             </label>
 
+            <section class="admin-mobile-upload-card">
+              <div class="admin-mobile-subhead">
+                <span class="section-kicker">Phone Camera</span>
+                <h3>Snap and upload instantly</h3>
+              </div>
+              <div class="admin-mobile-upload-grid">
+                <label>
+                  <span>Upload target</span>
+                  <select id="admin-mobile-upload-target">
+                    <option value="main">Set as main image</option>
+                    <option value="gallery">Add to gallery</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Camera or photo library</span>
+                  <input id="admin-mobile-camera-input" type="file" accept="image/*" capture="environment" />
+                </label>
+              </div>
+              <div class="admin-mobile-upload-preview" id="admin-mobile-upload-preview" hidden>
+                <img id="admin-mobile-upload-preview-image" src="assets/images/custom-occasion-beadwork-46mokm.webp" alt="Uploaded product preview" />
+              </div>
+              <p id="admin-mobile-upload-status" class="admin-mobile-status">Snap a product photo here and the phone admin will upload it to live storage for you.</p>
+            </section>
+
             <label>
               <span>Gallery image paths</span>
               <textarea id="admin-mobile-gallery" rows="3" placeholder="Add more image paths separated by commas"></textarea>

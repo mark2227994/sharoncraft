@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const priceInput = document.getElementById("admin-mobile-price");
   const badgeInput = document.getElementById("admin-mobile-badge");
   const imageInput = document.getElementById("admin-mobile-image");
+  const uploadTargetInput = document.getElementById("admin-mobile-upload-target");
+  const cameraInput = document.getElementById("admin-mobile-camera-input");
+  const uploadPreview = document.getElementById("admin-mobile-upload-preview");
+  const uploadPreviewImage = document.getElementById("admin-mobile-upload-preview-image");
+  const uploadStatus = document.getElementById("admin-mobile-upload-status");
   const galleryInput = document.getElementById("admin-mobile-gallery");
   const descriptionInput = document.getElementById("admin-mobile-description");
   const detailsInput = document.getElementById("admin-mobile-details");
@@ -48,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   let analyticsEvents = [];
   let currentRange = "7d";
   let currentUser = null;
+  let isUploadingPhoto = false;
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -156,6 +162,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     formKicker.textContent = "New Product";
     formTitle.textContent = "Add from anywhere";
     saveProductButton.textContent = "Save To Live Catalog";
+    if (uploadPreview) {
+      uploadPreview.hidden = true;
+    }
+    if (cameraInput) {
+      cameraInput.value = "";
+    }
+    setStatus(uploadStatus, "Snap a product photo here and the phone admin will upload it to live storage for you.", "info");
   }
 
   function fillForm(product) {
@@ -176,8 +189,69 @@ document.addEventListener("DOMContentLoaded", async function () {
     formKicker.textContent = "Editing Product";
     formTitle.textContent = normalizeText(product.name) || "Edit product";
     saveProductButton.textContent = "Update Live Product";
+    setStatus(uploadStatus, "You can replace the main photo or add a gallery shot from your phone camera.", "info");
     activateTab("add");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function appendGalleryImage(url) {
+    const existing = parseList(galleryInput.value);
+    if (!existing.includes(url)) {
+      existing.push(url);
+      galleryInput.value = existing.join(", ");
+    }
+  }
+
+  async function uploadPhoneImage(file) {
+    if (!file) {
+      return;
+    }
+
+    if (isUploadingPhoto) {
+      return;
+    }
+
+    if (!catalogApi || typeof catalogApi.uploadProductImage !== "function") {
+      setStatus(uploadStatus, "Live image upload is not available on this page yet.", "error");
+      return;
+    }
+
+    isUploadingPhoto = true;
+    if (cameraInput) {
+      cameraInput.disabled = true;
+    }
+
+    try {
+      setStatus(uploadStatus, `Uploading ${file.name}...`, "info");
+      const uploaded = await catalogApi.uploadProductImage(file);
+      const publicUrl = normalizeText(uploaded && uploaded.publicUrl);
+
+      if (!publicUrl) {
+        throw new Error("The upload finished but no public image URL was returned.");
+      }
+
+      if (uploadPreview && uploadPreviewImage) {
+        uploadPreview.hidden = false;
+        uploadPreviewImage.src = publicUrl;
+      }
+
+      if (uploadTargetInput && uploadTargetInput.value === "gallery") {
+        appendGalleryImage(publicUrl);
+        setStatus(uploadStatus, "Photo uploaded and added to the gallery list.", "success");
+      } else {
+        imageInput.value = publicUrl;
+        setStatus(uploadStatus, "Photo uploaded and set as the main product image.", "success");
+      }
+    } catch (error) {
+      console.error("Unable to upload phone image.", error);
+      setStatus(uploadStatus, error && error.message ? error.message : "Phone image upload failed.", "error");
+    } finally {
+      isUploadingPhoto = false;
+      if (cameraInput) {
+        cameraInput.disabled = false;
+        cameraInput.value = "";
+      }
+    }
   }
 
   function buildProductPayload(existingProduct) {
@@ -566,6 +640,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (searchInput) {
     searchInput.addEventListener("input", renderProducts);
+  }
+
+  if (cameraInput) {
+    cameraInput.addEventListener("change", async function (event) {
+      const file = event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) {
+        return;
+      }
+
+      await uploadPhoneImage(file);
+    });
   }
 
   if (productList) {
