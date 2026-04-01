@@ -37,8 +37,8 @@ document.addEventListener("DOMContentLoaded", function () {
   };
   const tabGroups = {
     products: new Set(["workspace", "catalog", "categories", "visuals", "preview", "assets"]),
-    orders: new Set(["orders", "delivery", "mpesa", "profit", "bundles"]),
-    settings: new Set(["operations", "social", "replies"])
+    selling: new Set(["orders", "customers", "delivery", "mpesa", "operations", "profit", "bundles"]),
+    marketing: new Set(["analytics", "social", "replies"])
   };
   let overlayMode = "";
   let commandItems = [];
@@ -93,15 +93,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function sidebarTarget(tab) {
     if (tabGroups.products.has(tab)) return "workspace";
-    if (tabGroups.orders.has(tab)) return "orders";
-    if (tabGroups.settings.has(tab)) return "settings";
-    if (tab === "customers") return "customers";
-    if (tab === "analytics") return "analytics";
+    if (tabGroups.selling.has(tab)) return tab === "customers" ? "customers" : "orders";
+    if (tabGroups.marketing.has(tab)) return tab === "analytics" ? "analytics" : "settings";
     return "dashboard";
   }
 
   function setSidebarActive(target) {
     els.sidebarLinks.forEach((link) => link.classList.toggle("is-active", link.dataset.adminSidebarTarget === target));
+    
+    const groupName = target === "workspace" ? "products" :
+                      target === "orders" || target === "customers" ? "selling" :
+                      target === "analytics" || target === "settings" ? "marketing" : "none";
+                      
+    const groups = document.querySelectorAll(".admin-tab-group");
+    groups.forEach(g => {
+      g.style.display = g.dataset.adminGroup === groupName ? "block" : "none";
+    });
+    
+    const tabBar = document.querySelector(".admin-tab-bar");
+    if (tabBar) {
+      tabBar.style.display = groupName === "none" ? "none" : "";
+    }
   }
 
   function closeSidebarOnMobile() {

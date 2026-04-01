@@ -8,5 +8,10 @@
     "dev:open": "node scripts/dev-server.js --open",
     "serve": "node scripts/dev-server.js",
     "serve:5500": "node scripts/dev-server.js --port 5500"
+  },
+  "devDependencies": {
+    "postcss": "^8.5.8",
+    "postcss-scss": "^4.0.9",
+    "prettier": "^3.8.1"
   }
 }

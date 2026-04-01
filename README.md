@@ -111,4 +111,5 @@ If you update schema, auth behavior, or storage rules:
 
 - [SUPABASE_SETUP.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/SUPABASE_SETUP.md)
 - [SUPABASE_BACKUP_CHECKLIST.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/SUPABASE_BACKUP_CHECKLIST.md)
+- [WHATSAPP_SETUP.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/WHATSAPP_SETUP.md)
 - [DEPLOYMENT.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/DEPLOYMENT.md)

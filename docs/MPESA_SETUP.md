@@ -8,8 +8,10 @@ This project now includes a real M-Pesa STK Push integration path using Supabase
   Starts an STK Push request with Daraja and saves the checkout record.
 - `supabase/functions/mpesa-callback`
   Receives the Daraja callback and updates the checkout status.
+- `supabase/functions/mpesa-checkout-status`
+  Lets the storefront poll for the final payment result and linked order IDs.
 - `public.mpesa_checkouts`
-  Stores M-Pesa checkout requests, response payloads, and callback results.
+  Stores M-Pesa checkout requests, response payloads, callback results, and generated order IDs.
 - Cart drawer checkout UI
   Lets the client enter name, phone, delivery area, then trigger `Pay with M-Pesa`.
 
@@ -45,6 +47,7 @@ Deploy:
 ```bash
 supabase functions deploy mpesa-stk-push
 supabase functions deploy mpesa-callback
+supabase functions deploy mpesa-checkout-status
 ```
 
 This repo now includes [supabase/config.toml](/c:/Users/USER/Desktop/projects/bead%20VN2/supabase/config.toml), which sets both functions to `verify_jwt = false`. That matters because:
@@ -74,9 +77,15 @@ If you set `MPESA_CALLBACK_SECRET`, the checkout function automatically appends 
   - `status = prompted` after request acceptance
   - `status = paid` after callback success
   - `mpesa_receipt_number`
+- Check `public.orders` and `public.order_tracking` for the new `ORD-...` records created automatically after a successful callback.
+- Confirm the paid customer sees the generated `ORD-...` tracking ID in the storefront after payment.
 
 ## 6. Notes
 
-- The current integration records payment requests in `mpesa_checkouts`. It does not yet convert successful M-Pesa payments into admin `orders` automatically.
+- Successful M-Pesa callbacks now create live `orders` and `order_tracking` rows automatically.
+- Successful M-Pesa callbacks can also send a WhatsApp payment confirmation when WhatsApp secrets and template setup are in place.
+- Each paid item gets a public tracking ID in the `ORD-YYYYMMDD-XXXX` format so the client can follow up without seeing private order data.
 - WhatsApp checkout remains as a fallback path.
 - The frontend never stores Daraja secrets. All secret work stays in Supabase Edge Functions.
+
+For WhatsApp payment notification setup, see [WHATSAPP_SETUP.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/WHATSAPP_SETUP.md).

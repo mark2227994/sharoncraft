@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { sendPaymentReceivedWhatsApp } from "../_shared/whatsapp.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -18,6 +19,39 @@ function normalizeNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function normalizeOrderIdList(value: unknown) {
+  return Array.isArray(value)
+    ? value
+        .map((entry) => normalizeText(entry))
+        .filter((entry) => /^ORD-\d{8}-[A-Z0-9]{4}$/i.test(entry))
+    : [];
+}
+
+function formatOrderDateSegment(value: unknown) {
+  const parsed = new Date(normalizeText(value) || Date.now());
+  const safeDate = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  const year = safeDate.getUTCFullYear();
+  const month = String(safeDate.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(safeDate.getUTCDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+}
+
+function hashText(value: unknown) {
+  return String(value || "")
+    .split("")
+    .reduce((hash, char) => ((hash * 31 + char.charCodeAt(0)) | 0), 7);
+}
+
+function buildPublicOrderId(createdAt: unknown, seedText: string, attempt = 0) {
+  const dateSegment = formatOrderDateSegment(createdAt);
+  const suffixSource = Math.abs(hashText(`${seedText}:${dateSegment}:${attempt}`))
+    .toString(36)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+  const suffix = (suffixSource + "0000").slice(0, 4);
+  return `ORD-${dateSegment}-${suffix}`;
+}
+
 function extractMetadataValue(items: unknown[], key: string) {
   const match = Array.isArray(items)
     ? items.find((item) => normalizeText(item && (item as Record<string, unknown>).Name) === key)
@@ -27,10 +61,71 @@ function extractMetadataValue(items: unknown[], key: string) {
     : "";
 }
 
+async function resolvePublicOrderIds(reference: string, createdAt: unknown, count: number, savedIds: unknown) {
+  const normalizedSavedIds = normalizeOrderIdList(savedIds);
+  if (normalizedSavedIds.length === count) {
+    return normalizedSavedIds;
+  }
+
+  const { data: existingOrders, error: existingOrdersError } = await supabaseAdmin
+    .from("orders")
+    .select("id")
+    .eq("checkout_reference", reference)
+    .order("created_at", { ascending: true });
+
+  if (existingOrdersError) {
+    throw existingOrdersError;
+  }
+
+  const normalizedExistingIds = normalizeOrderIdList(existingOrders?.map((row) => row.id) || []);
+  if (normalizedExistingIds.length === count) {
+    return normalizedExistingIds;
+  }
+
+  const nextIds: string[] = [];
+
+  for (let index = 0; index < count; index += 1) {
+    let attempt = 0;
+    let resolvedId = "";
+
+    while (!resolvedId && attempt < 50) {
+      const candidate = buildPublicOrderId(createdAt, `${reference}:${index + 1}`, attempt);
+      if (nextIds.includes(candidate)) {
+        attempt += 1;
+        continue;
+      }
+
+      const { data: existingOrder, error: lookupError } = await supabaseAdmin
+        .from("orders")
+        .select("id, checkout_reference")
+        .eq("id", candidate)
+        .maybeSingle();
+
+      if (lookupError) {
+        throw lookupError;
+      }
+
+      if (!existingOrder || normalizeText(existingOrder.checkout_reference) === reference) {
+        resolvedId = candidate;
+        nextIds.push(candidate);
+        continue;
+      }
+
+      attempt += 1;
+    }
+
+    if (!resolvedId) {
+      throw new Error(`Unable to reserve a public order ID for checkout ${reference}.`);
+    }
+  }
+
+  return nextIds;
+}
+
 async function syncOrdersForPaidCheckout(reference: string) {
   const { data: checkout, error: checkoutError } = await supabaseAdmin
     .from("mpesa_checkouts")
-    .select("reference, customer_name, customer_phone, delivery_area, amount, items, mpesa_receipt_number, created_at")
+    .select("reference, customer_name, customer_phone, delivery_area, amount, items, mpesa_receipt_number, created_at, order_ids")
     .eq("reference", reference)
     .maybeSingle();
 
@@ -46,12 +141,13 @@ async function syncOrdersForPaidCheckout(reference: string) {
     return;
   }
 
+  const orderIds = await resolvePublicOrderIds(reference, checkout.created_at, items.length, checkout.order_ids);
   const orderRows = items.map((item, index) => {
     const productId = normalizeText(item?.productId);
     const productName = normalizeText(item?.productName) || "SharonCraft item";
     const quantity = Math.max(1, normalizeNumber(item?.quantity) || 1);
     const lineTotal = Math.max(0, normalizeNumber(item?.lineTotal));
-    const orderId = `${reference}-${String(index + 1).padStart(2, "0")}`;
+    const orderId = orderIds[index];
     const noteParts = [
       `Paid via M-Pesa`,
       checkout.mpesa_receipt_number ? `Receipt: ${normalizeText(checkout.mpesa_receipt_number)}` : "",
@@ -69,6 +165,9 @@ async function syncOrdersForPaidCheckout(reference: string) {
       delivery_area: normalizeText(checkout.delivery_area),
       status: "paid",
       note: noteParts.join(" | "),
+      checkout_reference: reference,
+      payment_method: "mpesa",
+      payment_reference: normalizeText(checkout.mpesa_receipt_number),
       total_profit: 0,
       order_total: lineTotal,
       created_at: checkout.created_at || new Date().toISOString(),
@@ -94,6 +193,18 @@ async function syncOrdersForPaidCheckout(reference: string) {
     return;
   }
 
+  const { error: checkoutSyncError } = await supabaseAdmin
+    .from("mpesa_checkouts")
+    .update({
+      order_ids: orderIds,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("reference", reference);
+
+  if (checkoutSyncError) {
+    console.error("Unable to save generated order IDs back to the checkout record", checkoutSyncError);
+  }
+
   const { error: trackingError } = await supabaseAdmin
     .from("order_tracking")
     .upsert(trackingRows, { onConflict: "id" });
@@ -101,6 +212,15 @@ async function syncOrdersForPaidCheckout(reference: string) {
   if (trackingError) {
     console.error("Unable to sync paid checkout into order tracking", trackingError);
   }
+
+  return {
+    reference,
+    customerName: normalizeText(checkout.customer_name),
+    customerPhone: normalizeText(checkout.customer_phone),
+    amount: Math.max(0, normalizeNumber(checkout.amount)),
+    mpesaReceiptNumber: normalizeText(checkout.mpesa_receipt_number),
+    orderIds,
+  };
 }
 
 Deno.serve(async (request) => {
@@ -160,7 +280,17 @@ Deno.serve(async (request) => {
 
     const reference = normalizeText(paidCheckout?.reference);
     if (reference) {
-      await syncOrdersForPaidCheckout(reference);
+      const syncResult = await syncOrdersForPaidCheckout(reference);
+      if (syncResult) {
+        await sendPaymentReceivedWhatsApp(supabaseAdmin, {
+          checkoutReference: syncResult.reference,
+          customerName: syncResult.customerName,
+          customerPhone: syncResult.customerPhone,
+          amount: syncResult.amount,
+          mpesaReceiptNumber: syncResult.mpesaReceiptNumber,
+          orderIds: syncResult.orderIds,
+        });
+      }
     }
   }
 
