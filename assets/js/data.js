@@ -6,9 +6,11 @@
   const socialSettingsKey = "sharoncraft-social-settings";
   const categoriesSettingsKey = "sharoncraft-category-settings";
   const homeVisualsSettingsKey = "sharoncraft-home-visuals";
+  const siteContentSettingsKey = "sharoncraft-site-content";
   const liveCatalogCacheKey = "sharoncraft-live-catalog-cache";
   const liveHomeVisualsCacheKey = "sharoncraft-live-home-visuals-cache";
   const liveSocialSettingsCacheKey = "sharoncraft-live-social-settings-cache";
+  const liveSiteContentCacheKey = "sharoncraft-live-site-content-cache";
 
   const defaultData = {
     site: {
@@ -595,9 +597,11 @@
     socialSettingsKey,
     categoriesSettingsKey,
     homeVisualsSettingsKey,
+    siteContentSettingsKey,
     liveCatalogCacheKey,
     liveHomeVisualsCacheKey,
-    liveSocialSettingsCacheKey
+    liveSocialSettingsCacheKey,
+    liveSiteContentCacheKey
   };
   window.SharonCraftData = data;
 })();

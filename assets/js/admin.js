@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     (window.SharonCraftStorage && window.SharonCraftStorage.categoriesSettingsKey) || "sharoncraft-category-settings";
   const homeVisualsSettingsKey =
     (window.SharonCraftStorage && window.SharonCraftStorage.homeVisualsSettingsKey) || "sharoncraft-home-visuals";
+  const siteContentSettingsKey =
+    (window.SharonCraftStorage && window.SharonCraftStorage.siteContentSettingsKey) || "sharoncraft-site-content";
+  const liveSiteContentCacheKey =
+    (window.SharonCraftStorage && window.SharonCraftStorage.liveSiteContentCacheKey) || "sharoncraft-live-site-content-cache";
   const socialPlannerKey = "sharoncraft-social-planner";
   const ordersKey = "sharoncraft-orders";
   const deliveryAreasKey = "sharoncraft-delivery-areas";
@@ -84,6 +88,279 @@ document.addEventListener("DOMContentLoaded", async function () {
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
   const defaultHomeVisualSource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.homeVisuals) || utils.data.homeVisuals || {};
+  const defaultSiteContentSource = {
+    branding: {
+      siteName: "SharonCraft",
+      siteTagline: "Bright handmade beadwork for gifts, home styling, and joyful African-inspired looks.",
+      promo: "Free Nairobi delivery for orders above KES 3,500 this week.",
+      whatsapp: "254112222572",
+      phone: "+254 112 222 572",
+      email: "hello@sharoncraft.co.ke",
+      location: "Nairobi, Kenya",
+      logoImage: "assets/images/sharoncraft-logo-transparent.webp",
+      logoAlt: "SharonCraft logo",
+      faviconImage: "assets/images/sharoncraft-favicon.webp",
+      appleTouchIcon: "assets/images/sharoncraft-logo-transparent.webp"
+    },
+    home: {
+      heroNotes: [
+        { title: "Handmade in Kenya", text: "Every item is crafted with care and a strong cultural feel." },
+        { title: "Easy ordering", text: "Pick your item, chat on WhatsApp, then confirm payment and delivery." },
+        { title: "Warm gift ideas", text: "Perfect for birthdays, weddings, housewarming gifts, and personal style." }
+      ],
+      popularSearches: {
+        kicker: "Popular Searches",
+        title: "Start with what people actually search for.",
+        description: "These focused pages help shoppers land on the right SharonCraft collection faster.",
+        cards: [
+          {
+            image: "assets/images/handmade-african-souvenir-7dgi8p.webp",
+            imageAlt: "Kenyan artifacts from SharonCraft",
+            title: "Kenyan artifacts",
+            text: "Culture-inspired decor, display pieces, and gift-ready handmade accents.",
+            label: "Open Page",
+            href: "kenyan-artifacts.html"
+          },
+          {
+            image: "assets/images/custom-occasion-beadwork-wap9kh.webp",
+            imageAlt: "Beaded earrings and jewelry ideas from SharonCraft",
+            title: "Beaded earrings",
+            text: "Matching jewelry looks and custom-order support for accessory-led shoppers.",
+            label: "Open Page",
+            href: "beaded-earrings-kenya.html"
+          },
+          {
+            image: "assets/images/sharoncraft-african-necklace-p1sw79.webp",
+            imageAlt: "Maasai jewelry from SharonCraft",
+            title: "Maasai jewelry",
+            text: "Statement necklaces, bracelets, and occasion-ready beadwork.",
+            label: "Open Page",
+            href: "maasai-jewelry-kenya.html"
+          }
+        ]
+      },
+      buyingGuides: {
+        kicker: "Buying Guides",
+        title: "Read before you buy if you want the right piece faster.",
+        description: "These guides help SharonCraft show up for question-style searches while helping clients shop with more confidence.",
+        cards: [
+          {
+            image: "assets/images/handmade-african-souvenir-7dgi8p.webp",
+            imageAlt: "Guide about where to buy Kenyan artifacts",
+            title: "Where to buy Kenyan artifacts",
+            text: "Learn how to compare authentic handmade artifact pages and culture-inspired decor options.",
+            label: "Read Guide",
+            href: "articles/where-to-buy-kenyan-artifacts.html"
+          },
+          {
+            image: "assets/images/sharoncraft-african-necklace-p1sw79.webp",
+            imageAlt: "Guide about choosing Maasai jewelry",
+            title: "How to choose Maasai jewelry",
+            text: "Use occasion, gift intent, and outfit balance to narrow your choice quickly.",
+            label: "Read Guide",
+            href: "articles/how-to-choose-maasai-jewelry.html"
+          },
+          {
+            image: "assets/images/custom-occasion-beadwork-46mokm.webp",
+            imageAlt: "Guide about handmade Kenyan gifts",
+            title: "Best handmade Kenyan gifts",
+            text: "See which gift ideas work best for weddings, birthdays, and housewarming moments.",
+            label: "Read Guide",
+            href: "articles/best-handmade-kenyan-gifts.html"
+          }
+        ]
+      },
+      story: {
+        kicker: "SharonCraft Story",
+        title: "Inspired by craft, color, family moments, and everyday African beauty.",
+        description: "SharonCraft brings together beadwork that feels joyful, modern, and easy to live with. From statement mirrors to simple bracelets, each item is made to feel special without making shopping complicated.",
+        primaryLabel: "Read the Story",
+        primaryHref: "about.html",
+        secondaryLabel: "Contact Us",
+        secondaryHref: "contact.html",
+        images: [
+          { src: "assets/images/sharoncraft-african-necklace-n95vta.webp", alt: "Beaded accessory display" },
+          { src: "assets/images/nairobi-artisan-jewelry-9e1bft.webp", alt: "Hanging beaded necklaces" },
+          { src: "assets/images/traditional-bridal-bead-set-knimvb.webp", alt: "Colorful bracelet selection" }
+        ]
+      },
+      ordering: {
+        kicker: "Easy Ordering",
+        title: "From product photo to checkout in a few comfortable steps.",
+        steps: [
+          { title: "1. Pick your favorite", text: "Open the product page, check the gallery, and confirm the style you want." },
+          { title: "2. Chat on WhatsApp", text: "Ask about colors, delivery, or custom requests before paying." },
+          { title: "3. Confirm M-Pesa and delivery", text: "Get the total, share your location, and finish your order quickly." }
+        ],
+        primaryLabel: "Start Shopping",
+        primaryHref: "shop.html",
+        secondaryLabel: "Ask a Question",
+        secondaryHref: "contact.html"
+      },
+      clientLove: {
+        kicker: "Client Love",
+        title: "Why customers feel confident ordering from SharonCraft."
+      },
+      servicesFaq: {
+        kicker: "Our Offerings",
+        title: "SharonCraft Products & Services (Q&A)"
+      },
+      newArrivals: {
+        kicker: "Fresh This Week",
+        title: "New arrivals for gifting, styling, and cheerful home updates."
+      }
+    },
+    about: {
+      hero: {
+        kicker: "About SharonCraft",
+        title: "Handmade pieces shaped by color, culture, and everyday joy.",
+        text1: "SharonCraft celebrates African beadwork in a way that feels warm, clean, and easy for modern clients to shop. The goal is simple: make beautiful handmade work easier to discover, gift, and enjoy at home.",
+        text2: "Our pieces are inspired by market color, ceremonial styling, family celebrations, and the pride of Kenyan craftsmanship. We keep the language simple, the ordering process friendly, and the design bright enough to feel alive.",
+        gallery: [
+          { src: "assets/images/kenyan-bead-decor-yhip8u.webp", alt: "SharonCraft beaded bags and accessories" },
+          { src: "assets/images/nairobi-artisan-jewelry-9e1bft.webp", alt: "SharonCraft layered necklaces" }
+        ]
+      },
+      values: [
+        { title: "Craft First", text: "Each piece keeps the handmade texture and bright bead detail that make African craft feel personal and alive." },
+        { title: "Client Friendly", text: "The website, product pages, and CTAs are written in clear English so shopping feels easy for every customer." },
+        { title: "Ready for Growth", text: "The catalog is organized to grow with the business, so new products and collections can be added smoothly over time." }
+      ],
+      culture: {
+        kicker: "Cultural Inspiration",
+        title: "Bright patterns, proud colors, and beadwork that feels full of life.",
+        text: "The SharonCraft look takes inspiration from market displays, event bead sets, home pieces, and the joyful use of color seen across East African creative spaces. The mood is modern, but the heart stays rooted in craft traditions.",
+        images: [
+          { src: "assets/images/custom-occasion-beadwork-46mokm.webp", alt: "Model wearing a SharonCraft occasion set" },
+          { src: "assets/images/traditional-bridal-bead-set-knimvb.webp", alt: "Bracelet display with many colors" },
+          { src: "assets/images/authentic-maasai-bracelet-8ei1qd.webp", alt: "Beaded table decor set" }
+        ]
+      },
+      faq: {
+        kicker: "Quick Facts",
+        title: "Frequently Asked Questions About SharonCraft",
+        items: [
+          {
+            question: "What is SharonCraft?",
+            answer: "SharonCraft is a Kenyan-based artisan business dedicated to producing and selling authentic, handmade African beadwork. Our catalog includes custom jewelry, home decor accents, and occasion sets designed for modern homes and memorable gifting."
+          },
+          {
+            question: "Where are SharonCraft products made?",
+            answer: "Every single item in the SharonCraft collection is proudly <strong>handmade in Kenya</strong> by skilled craftspeople, honoring regional traditions while using vibrant, durable materials."
+          },
+          {
+            question: "What is SharonCraft's core mission?",
+            answer: "Our mission is to make beautiful, authentic African beadwork accessible and easy to purchase. We simplify the shopping journey by offering direct, conversational ordering so every customer gets personal attention and exactly what they want."
+          },
+          {
+            question: "Who is the CEO of SharonCraft?",
+            answer: "SharonCraft was founded and is led by CEO <strong>Kelvin Mark</strong>, who is dedicated to elevating the visibility of Kenyan craftsmanship on the global stage."
+          }
+        ]
+      }
+    },
+    shop: {
+      hero: {
+        kicker: "Shop SharonCraft",
+        title: "Find beadwork you can scan quickly and order with confidence.",
+        description: "Browse the collection first, then refine only if you need to narrow things down."
+      },
+      refine: {
+        kicker: "Browse & Refine",
+        title: "See the pieces first. Fine-tune only when needed."
+      },
+      guides: {
+        kicker: "Shopping Guides",
+        title: "Helpful articles for shoppers who are still deciding.",
+        description: "These guides support question-style searches while helping clients move from browsing to buying with more clarity.",
+        cards: [
+          {
+            image: "assets/images/sharoncraft-african-necklace-p1sw79.webp",
+            imageAlt: "Guide about choosing Maasai jewelry",
+            title: "How to choose Maasai jewelry",
+            text: "Use this guide if you are comparing occasion wear, personal style, or gift-ready jewelry.",
+            label: "Read Guide",
+            href: "articles/how-to-choose-maasai-jewelry.html"
+          },
+          {
+            image: "assets/images/custom-occasion-beadwork-46mokm.webp",
+            imageAlt: "Guide about handmade Kenyan gifts",
+            title: "Best handmade Kenyan gifts",
+            text: "Helpful when you are shopping for someone else and need the safest gift path.",
+            label: "Read Guide",
+            href: "articles/best-handmade-kenyan-gifts.html"
+          },
+          {
+            image: "assets/images/kenyan-bead-decor-yhip8u.webp",
+            imageAlt: "Guide about styling beaded home decor",
+            title: "How to style beaded home decor",
+            text: "Great for decor buyers who want a modern space to still feel warm and expressive.",
+            label: "Read Guide",
+            href: "articles/how-to-style-beaded-home-decor.html"
+          }
+        ]
+      },
+      help: {
+        kicker: "Need Help Choosing?",
+        title: "Send a quick WhatsApp message and get help with style, gifts, or custom colors.",
+        description: "If you are not sure what to buy, SharonCraft can help you choose by budget, category, or occasion before you place the order."
+      },
+      trust: {
+        kicker: "Client Trust",
+        title: "Visitors convert faster when the buying experience feels proven and clear.",
+        description: "SharonCraft keeps ordering personal, mobile-friendly, and easy to confirm through WhatsApp and M-Pesa."
+      }
+    },
+    journal: {
+      hero: {
+        kicker: "SharonCraft Journal",
+        title: "Buyer guides, culture, and search-friendly knowledge around Kenyan beadwork.",
+        description: "Use these articles to understand Maasai jewelry, handmade Kenyan gifts, artifact buying, and how to style beaded decor before you shop."
+      },
+      guides: {
+        kicker: "Latest Guides",
+        title: "Start with the topic closest to your search.",
+        description: "Each guide supports a different buying intent, from cultural research to gift decisions and decor styling."
+      },
+      cards: [
+        {
+          kicker: "Heritage Series",
+          title: "The History of Maasai Beadwork and Modern Revival",
+          text: "Dive deep into the color theory, cultural significance, and centuries-old tradition behind the intricate Maasai beadwork styles that inspire our collections today.",
+          label: "Read Guide",
+          href: "articles/history-of-maasai-beadwork.html"
+        },
+        {
+          kicker: "Buying Guide",
+          title: "Where to buy Kenyan artifacts without ending up with generic souvenir pieces.",
+          text: "Learn what to look for in authentic handmade artifact pages, what makes gifting easier, and how to compare decor-led options more confidently.",
+          label: "Read Guide",
+          href: "articles/where-to-buy-kenyan-artifacts.html"
+        },
+        {
+          kicker: "Style Guide",
+          title: "How to choose Maasai jewelry for events, gifts, and everyday wear.",
+          text: "Use occasion, outfit balance, and gift intent to narrow your choice much faster before you start comparing individual pieces.",
+          label: "Read Guide",
+          href: "articles/how-to-choose-maasai-jewelry.html"
+        },
+        {
+          kicker: "Gift Guide",
+          title: "Best handmade Kenyan gifts for weddings, birthdays, and housewarming moments.",
+          text: "Understand when to choose jewelry, decor, or occasion sets depending on who the gift is for and how personal it should feel.",
+          label: "Read Guide",
+          href: "articles/best-handmade-kenyan-gifts.html"
+        },
+        {
+          kicker: "Decor Guide",
+          title: "How to style beaded home decor in a modern room without making it feel crowded.",
+          text: "Use beaded decor as one strong room moment, then build around it with balance instead of visual noise.",
+          label: "Read Guide",
+          href: "articles/how-to-style-beaded-home-decor.html"
+        }
+      ]
+    }
+  };
   const defaultProductSource = (window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || utils.data.products;
   let curatedLibraryImages = [];
   let categoryCatalog = (utils.data.categories || []).map((category) => normalizeCategory(category));
@@ -761,6 +1038,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const visualFavoritePreviewKicker = document.getElementById("admin-visual-favorite-preview-kicker");
   const visualFavoritePreviewTitle = document.getElementById("admin-visual-favorite-preview-title");
   const visualFavoritePreviewDescription = document.getElementById("admin-visual-favorite-preview-description");
+  const siteContentForm = document.getElementById("admin-site-content-form");
+  const siteContentSaveButton = document.getElementById("admin-site-content-save");
+  const siteContentResetButton = document.getElementById("admin-site-content-reset");
   const featureFilter = document.getElementById("admin-feature-filter");
   const featuredSummary = document.getElementById("admin-featured-summary");
   const featuredManager = document.getElementById("admin-featured-manager");
@@ -1107,6 +1387,290 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function mergeContentShape(source, fallback) {
+    if (Array.isArray(fallback)) {
+      const sourceArray = Array.isArray(source) ? source : [];
+      return fallback.map(function (item, index) {
+        return mergeContentShape(sourceArray[index], item);
+      });
+    }
+
+    if (fallback && typeof fallback === "object") {
+      const sourceObject = source && typeof source === "object" ? source : {};
+      return Object.keys(fallback).reduce(function (result, key) {
+        const hasValue = Object.prototype.hasOwnProperty.call(sourceObject, key);
+        result[key] = mergeContentShape(hasValue ? sourceObject[key] : undefined, fallback[key]);
+        return result;
+      }, {});
+    }
+
+    if (source === undefined || source === null) {
+      return fallback;
+    }
+
+    if (typeof fallback === "number") {
+      return Number(source) || 0;
+    }
+
+    if (typeof fallback === "boolean") {
+      return Boolean(source);
+    }
+
+    return String(source);
+  }
+
+  function cloneContent(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function loadSiteContent() {
+    try {
+      const localRaw = window.localStorage.getItem(siteContentSettingsKey);
+      if (localRaw) {
+        return mergeContentShape(JSON.parse(localRaw), defaultSiteContentSource);
+      }
+
+      const cachedRaw = window.localStorage.getItem(liveSiteContentCacheKey);
+      if (cachedRaw) {
+        return mergeContentShape(JSON.parse(cachedRaw), defaultSiteContentSource);
+      }
+    } catch (error) {
+      console.warn("Unable to load saved site content overrides.", error);
+    }
+
+    return cloneContent(defaultSiteContentSource);
+  }
+
+  const makeTextField = (path, label, placeholder) => ({ type: "text", path, label, placeholder });
+  const makeTextareaField = (path, label, placeholder) => ({ type: "textarea", path, label, placeholder });
+  const makeImageField = (path, label, placeholder, altPath, altLabel) => ({
+    type: "image",
+    path,
+    label,
+    placeholder,
+    altPath,
+    altLabel: altLabel || "Image alt text"
+  });
+
+  const siteContentEditorSections = [
+    {
+      title: "Branding",
+      description: "Shared brand assets and contact details used across the main site.",
+      fields: [
+        makeTextField("siteContent.branding.siteName", "Site name", "SharonCraft"),
+        makeTextareaField("siteContent.branding.siteTagline", "Site tagline", "Bright handmade beadwork for gifts..."),
+        makeTextareaField("siteContent.branding.promo", "Promo text", "Free Nairobi delivery for orders above KES 3,500 this week."),
+        makeTextField("siteContent.branding.whatsapp", "WhatsApp number", "254112222572"),
+        makeTextField("siteContent.branding.phone", "Phone label", "+254 112 222 572"),
+        makeTextField("siteContent.branding.email", "Email", "hello@sharoncraft.co.ke"),
+        makeTextField("siteContent.branding.location", "Location", "Nairobi, Kenya"),
+        makeImageField("siteContent.branding.logoImage", "Logo image", "assets/images/sharoncraft-logo-transparent.webp", "siteContent.branding.logoAlt", "Logo alt text"),
+        makeImageField("siteContent.branding.faviconImage", "Favicon image", "assets/images/sharoncraft-favicon.webp"),
+        makeImageField("siteContent.branding.appleTouchIcon", "Apple touch icon", "assets/images/sharoncraft-logo-transparent.webp")
+      ]
+    },
+    {
+      title: "Home Hero",
+      description: "Welcome hero and favorite spotlight on the homepage.",
+      fields: [
+        makeTextField("homeVisuals.hero.kicker", "Hero kicker", "Welcome to SharonCraft"),
+        makeTextField("homeVisuals.hero.title", "Hero title", "Clean, colorful handmade beadwork..."),
+        makeTextareaField("homeVisuals.hero.description", "Hero description", "Discover bracelets, necklaces, decor..."),
+        makeTextField("homeVisuals.hero.primaryLabel", "Hero primary button", "Shop Now"),
+        makeTextField("homeVisuals.hero.primaryHref", "Hero primary link", "shop.html"),
+        makeTextField("homeVisuals.hero.secondaryLabel", "Hero secondary button", "Our Story"),
+        makeTextField("homeVisuals.hero.secondaryHref", "Hero secondary link", "about.html"),
+        makeImageField("homeVisuals.hero.image", "Hero image", "assets/images/custom-occasion-beadwork-46mokm.webp", "homeVisuals.hero.imageAlt", "Hero image alt"),
+        makeTextField("homeVisuals.favorite.kicker", "Favorite kicker", "Client Favorite"),
+        makeTextField("homeVisuals.favorite.title", "Favorite title", "Kijani Mirror Duo"),
+        makeTextareaField("homeVisuals.favorite.description", "Favorite description", "Bright decor with a clean modern finish..."),
+        makeImageField("homeVisuals.favorite.image", "Favorite image", "assets/images/kenyan-bead-decor-yhip8u.webp", "homeVisuals.favorite.imageAlt", "Favorite image alt")
+      ]
+    },
+    {
+      title: "Homepage Sections",
+      description: "Homepage notes, search cards, guide cards, story block, ordering steps, and supporting copy.",
+      fields: [
+        makeTextField("siteContent.home.heroNotes.0.title", "Hero note 1 title", "Handmade in Kenya"),
+        makeTextareaField("siteContent.home.heroNotes.0.text", "Hero note 1 text", "Every item is crafted with care..."),
+        makeTextField("siteContent.home.heroNotes.1.title", "Hero note 2 title", "Easy ordering"),
+        makeTextareaField("siteContent.home.heroNotes.1.text", "Hero note 2 text", "Pick your item, chat on WhatsApp..."),
+        makeTextField("siteContent.home.heroNotes.2.title", "Hero note 3 title", "Warm gift ideas"),
+        makeTextareaField("siteContent.home.heroNotes.2.text", "Hero note 3 text", "Perfect for birthdays, weddings..."),
+        makeTextField("siteContent.home.popularSearches.kicker", "Popular searches kicker", "Popular Searches"),
+        makeTextField("siteContent.home.popularSearches.title", "Popular searches title", "Start with what people actually search for."),
+        makeTextareaField("siteContent.home.popularSearches.description", "Popular searches description", "These focused pages help shoppers..."),
+        makeImageField("siteContent.home.popularSearches.cards.0.image", "Popular card 1 image", "assets/images/...", "siteContent.home.popularSearches.cards.0.imageAlt", "Popular card 1 alt"),
+        makeTextField("siteContent.home.popularSearches.cards.0.title", "Popular card 1 title", "Kenyan artifacts"),
+        makeTextareaField("siteContent.home.popularSearches.cards.0.text", "Popular card 1 text", "Culture-inspired decor..."),
+        makeTextField("siteContent.home.popularSearches.cards.0.label", "Popular card 1 button", "Open Page"),
+        makeTextField("siteContent.home.popularSearches.cards.0.href", "Popular card 1 link", "kenyan-artifacts.html"),
+        makeImageField("siteContent.home.popularSearches.cards.1.image", "Popular card 2 image", "assets/images/...", "siteContent.home.popularSearches.cards.1.imageAlt", "Popular card 2 alt"),
+        makeTextField("siteContent.home.popularSearches.cards.1.title", "Popular card 2 title", "Beaded earrings"),
+        makeTextareaField("siteContent.home.popularSearches.cards.1.text", "Popular card 2 text", "Matching jewelry looks..."),
+        makeTextField("siteContent.home.popularSearches.cards.1.label", "Popular card 2 button", "Open Page"),
+        makeTextField("siteContent.home.popularSearches.cards.1.href", "Popular card 2 link", "beaded-earrings-kenya.html"),
+        makeImageField("siteContent.home.popularSearches.cards.2.image", "Popular card 3 image", "assets/images/...", "siteContent.home.popularSearches.cards.2.imageAlt", "Popular card 3 alt"),
+        makeTextField("siteContent.home.popularSearches.cards.2.title", "Popular card 3 title", "Maasai jewelry"),
+        makeTextareaField("siteContent.home.popularSearches.cards.2.text", "Popular card 3 text", "Statement necklaces, bracelets..."),
+        makeTextField("siteContent.home.popularSearches.cards.2.label", "Popular card 3 button", "Open Page"),
+        makeTextField("siteContent.home.popularSearches.cards.2.href", "Popular card 3 link", "maasai-jewelry-kenya.html"),
+        makeTextField("siteContent.home.buyingGuides.kicker", "Buying guides kicker", "Buying Guides"),
+        makeTextField("siteContent.home.buyingGuides.title", "Buying guides title", "Read before you buy if you want the right piece faster."),
+        makeTextareaField("siteContent.home.buyingGuides.description", "Buying guides description", "These guides help SharonCraft show up..."),
+        makeImageField("siteContent.home.buyingGuides.cards.0.image", "Guide card 1 image", "assets/images/...", "siteContent.home.buyingGuides.cards.0.imageAlt", "Guide card 1 alt"),
+        makeTextField("siteContent.home.buyingGuides.cards.0.title", "Guide card 1 title", "Where to buy Kenyan artifacts"),
+        makeTextareaField("siteContent.home.buyingGuides.cards.0.text", "Guide card 1 text", "Learn how to compare authentic..."),
+        makeTextField("siteContent.home.buyingGuides.cards.0.label", "Guide card 1 button", "Read Guide"),
+        makeTextField("siteContent.home.buyingGuides.cards.0.href", "Guide card 1 link", "articles/where-to-buy-kenyan-artifacts.html"),
+        makeImageField("siteContent.home.buyingGuides.cards.1.image", "Guide card 2 image", "assets/images/...", "siteContent.home.buyingGuides.cards.1.imageAlt", "Guide card 2 alt"),
+        makeTextField("siteContent.home.buyingGuides.cards.1.title", "Guide card 2 title", "How to choose Maasai jewelry"),
+        makeTextareaField("siteContent.home.buyingGuides.cards.1.text", "Guide card 2 text", "Use occasion, gift intent..."),
+        makeTextField("siteContent.home.buyingGuides.cards.1.label", "Guide card 2 button", "Read Guide"),
+        makeTextField("siteContent.home.buyingGuides.cards.1.href", "Guide card 2 link", "articles/how-to-choose-maasai-jewelry.html"),
+        makeImageField("siteContent.home.buyingGuides.cards.2.image", "Guide card 3 image", "assets/images/...", "siteContent.home.buyingGuides.cards.2.imageAlt", "Guide card 3 alt"),
+        makeTextField("siteContent.home.buyingGuides.cards.2.title", "Guide card 3 title", "Best handmade Kenyan gifts"),
+        makeTextareaField("siteContent.home.buyingGuides.cards.2.text", "Guide card 3 text", "See which gift ideas work best..."),
+        makeTextField("siteContent.home.buyingGuides.cards.2.label", "Guide card 3 button", "Read Guide"),
+        makeTextField("siteContent.home.buyingGuides.cards.2.href", "Guide card 3 link", "articles/best-handmade-kenyan-gifts.html"),
+        makeTextField("siteContent.home.story.kicker", "Story kicker", "SharonCraft Story"),
+        makeTextField("siteContent.home.story.title", "Story title", "Inspired by craft, color..."),
+        makeTextareaField("siteContent.home.story.description", "Story description", "SharonCraft brings together beadwork..."),
+        makeTextField("siteContent.home.story.primaryLabel", "Story primary button", "Read the Story"),
+        makeTextField("siteContent.home.story.primaryHref", "Story primary link", "about.html"),
+        makeTextField("siteContent.home.story.secondaryLabel", "Story secondary button", "Contact Us"),
+        makeTextField("siteContent.home.story.secondaryHref", "Story secondary link", "contact.html"),
+        makeImageField("siteContent.home.story.images.0.src", "Story image 1", "assets/images/...", "siteContent.home.story.images.0.alt", "Story image 1 alt"),
+        makeImageField("siteContent.home.story.images.1.src", "Story image 2", "assets/images/...", "siteContent.home.story.images.1.alt", "Story image 2 alt"),
+        makeImageField("siteContent.home.story.images.2.src", "Story image 3", "assets/images/...", "siteContent.home.story.images.2.alt", "Story image 3 alt"),
+        makeTextField("siteContent.home.ordering.kicker", "Ordering kicker", "Easy Ordering"),
+        makeTextField("siteContent.home.ordering.title", "Ordering title", "From product photo to checkout..."),
+        makeTextField("siteContent.home.ordering.steps.0.title", "Ordering step 1 title", "1. Pick your favorite"),
+        makeTextareaField("siteContent.home.ordering.steps.0.text", "Ordering step 1 text", "Open the product page..."),
+        makeTextField("siteContent.home.ordering.steps.1.title", "Ordering step 2 title", "2. Chat on WhatsApp"),
+        makeTextareaField("siteContent.home.ordering.steps.1.text", "Ordering step 2 text", "Ask about colors, delivery..."),
+        makeTextField("siteContent.home.ordering.steps.2.title", "Ordering step 3 title", "3. Confirm M-Pesa and delivery"),
+        makeTextareaField("siteContent.home.ordering.steps.2.text", "Ordering step 3 text", "Get the total, share your location..."),
+        makeTextField("siteContent.home.ordering.primaryLabel", "Ordering primary button", "Start Shopping"),
+        makeTextField("siteContent.home.ordering.primaryHref", "Ordering primary link", "shop.html"),
+        makeTextField("siteContent.home.ordering.secondaryLabel", "Ordering secondary button", "Ask a Question"),
+        makeTextField("siteContent.home.ordering.secondaryHref", "Ordering secondary link", "contact.html"),
+        makeTextField("siteContent.home.clientLove.kicker", "Client love kicker", "Client Love"),
+        makeTextField("siteContent.home.clientLove.title", "Client love title", "Why customers feel confident ordering from SharonCraft."),
+        makeTextField("siteContent.home.servicesFaq.kicker", "Services kicker", "Our Offerings"),
+        makeTextField("siteContent.home.servicesFaq.title", "Services title", "SharonCraft Products & Services (Q&A)"),
+        makeTextField("siteContent.home.newArrivals.kicker", "New arrivals kicker", "Fresh This Week"),
+        makeTextField("siteContent.home.newArrivals.title", "New arrivals title", "New arrivals for gifting, styling, and cheerful home updates.")
+      ]
+    },
+    {
+      title: "About Page",
+      description: "About-page hero, gallery, values, cultural inspiration, and FAQ copy.",
+      fields: [
+        makeTextField("siteContent.about.hero.kicker", "About hero kicker", "About SharonCraft"),
+        makeTextField("siteContent.about.hero.title", "About hero title", "Handmade pieces shaped by color..."),
+        makeTextareaField("siteContent.about.hero.text1", "About hero paragraph 1", "SharonCraft celebrates African beadwork..."),
+        makeTextareaField("siteContent.about.hero.text2", "About hero paragraph 2", "Our pieces are inspired by market color..."),
+        makeImageField("siteContent.about.hero.gallery.0.src", "About gallery image 1", "assets/images/...", "siteContent.about.hero.gallery.0.alt", "About gallery image 1 alt"),
+        makeImageField("siteContent.about.hero.gallery.1.src", "About gallery image 2", "assets/images/...", "siteContent.about.hero.gallery.1.alt", "About gallery image 2 alt"),
+        makeTextField("siteContent.about.values.0.title", "Value card 1 title", "Craft First"),
+        makeTextareaField("siteContent.about.values.0.text", "Value card 1 text", "Each piece keeps the handmade texture..."),
+        makeTextField("siteContent.about.values.1.title", "Value card 2 title", "Client Friendly"),
+        makeTextareaField("siteContent.about.values.1.text", "Value card 2 text", "The website, product pages..."),
+        makeTextField("siteContent.about.values.2.title", "Value card 3 title", "Ready for Growth"),
+        makeTextareaField("siteContent.about.values.2.text", "Value card 3 text", "The catalog is organized to grow..."),
+        makeTextField("siteContent.about.culture.kicker", "Culture kicker", "Cultural Inspiration"),
+        makeTextField("siteContent.about.culture.title", "Culture title", "Bright patterns, proud colors..."),
+        makeTextareaField("siteContent.about.culture.text", "Culture description", "The SharonCraft look takes inspiration..."),
+        makeImageField("siteContent.about.culture.images.0.src", "Culture image 1", "assets/images/...", "siteContent.about.culture.images.0.alt", "Culture image 1 alt"),
+        makeImageField("siteContent.about.culture.images.1.src", "Culture image 2", "assets/images/...", "siteContent.about.culture.images.1.alt", "Culture image 2 alt"),
+        makeImageField("siteContent.about.culture.images.2.src", "Culture image 3", "assets/images/...", "siteContent.about.culture.images.2.alt", "Culture image 3 alt"),
+        makeTextField("siteContent.about.faq.kicker", "FAQ kicker", "Quick Facts"),
+        makeTextField("siteContent.about.faq.title", "FAQ title", "Frequently Asked Questions About SharonCraft"),
+        makeTextField("siteContent.about.faq.items.0.question", "FAQ 1 question", "What is SharonCraft?"),
+        makeTextareaField("siteContent.about.faq.items.0.answer", "FAQ 1 answer", "SharonCraft is a Kenyan-based artisan business..."),
+        makeTextField("siteContent.about.faq.items.1.question", "FAQ 2 question", "Where are SharonCraft products made?"),
+        makeTextareaField("siteContent.about.faq.items.1.answer", "FAQ 2 answer", "Every single item in the SharonCraft collection..."),
+        makeTextField("siteContent.about.faq.items.2.question", "FAQ 3 question", "What is SharonCraft's core mission?"),
+        makeTextareaField("siteContent.about.faq.items.2.answer", "FAQ 3 answer", "Our mission is to make beautiful, authentic African beadwork accessible..."),
+        makeTextField("siteContent.about.faq.items.3.question", "FAQ 4 question", "Who is the CEO of SharonCraft?"),
+        makeTextareaField("siteContent.about.faq.items.3.answer", "FAQ 4 answer", "SharonCraft was founded and is led by CEO <strong>Kelvin Mark</strong>...")
+      ]
+    },
+    {
+      title: "Shop Page",
+      description: "Shop-page hero, guide cards, help block, and trust copy.",
+      fields: [
+        makeTextField("siteContent.shop.hero.kicker", "Shop hero kicker", "Shop SharonCraft"),
+        makeTextField("siteContent.shop.hero.title", "Shop hero title", "Find beadwork you can scan quickly..."),
+        makeTextareaField("siteContent.shop.hero.description", "Shop hero description", "Browse the collection first..."),
+        makeTextField("siteContent.shop.refine.kicker", "Refine kicker", "Browse & Refine"),
+        makeTextField("siteContent.shop.refine.title", "Refine title", "See the pieces first. Fine-tune only when needed."),
+        makeTextField("siteContent.shop.guides.kicker", "Shop guides kicker", "Shopping Guides"),
+        makeTextField("siteContent.shop.guides.title", "Shop guides title", "Helpful articles for shoppers who are still deciding."),
+        makeTextareaField("siteContent.shop.guides.description", "Shop guides description", "These guides support question-style searches..."),
+        makeImageField("siteContent.shop.guides.cards.0.image", "Shop guide 1 image", "assets/images/...", "siteContent.shop.guides.cards.0.imageAlt", "Shop guide 1 alt"),
+        makeTextField("siteContent.shop.guides.cards.0.title", "Shop guide 1 title", "How to choose Maasai jewelry"),
+        makeTextareaField("siteContent.shop.guides.cards.0.text", "Shop guide 1 text", "Use this guide if you are comparing..."),
+        makeTextField("siteContent.shop.guides.cards.0.label", "Shop guide 1 button", "Read Guide"),
+        makeTextField("siteContent.shop.guides.cards.0.href", "Shop guide 1 link", "articles/how-to-choose-maasai-jewelry.html"),
+        makeImageField("siteContent.shop.guides.cards.1.image", "Shop guide 2 image", "assets/images/...", "siteContent.shop.guides.cards.1.imageAlt", "Shop guide 2 alt"),
+        makeTextField("siteContent.shop.guides.cards.1.title", "Shop guide 2 title", "Best handmade Kenyan gifts"),
+        makeTextareaField("siteContent.shop.guides.cards.1.text", "Shop guide 2 text", "Helpful when you are shopping for someone else..."),
+        makeTextField("siteContent.shop.guides.cards.1.label", "Shop guide 2 button", "Read Guide"),
+        makeTextField("siteContent.shop.guides.cards.1.href", "Shop guide 2 link", "articles/best-handmade-kenyan-gifts.html"),
+        makeImageField("siteContent.shop.guides.cards.2.image", "Shop guide 3 image", "assets/images/...", "siteContent.shop.guides.cards.2.imageAlt", "Shop guide 3 alt"),
+        makeTextField("siteContent.shop.guides.cards.2.title", "Shop guide 3 title", "How to style beaded home decor"),
+        makeTextareaField("siteContent.shop.guides.cards.2.text", "Shop guide 3 text", "Great for decor buyers who want a modern space..."),
+        makeTextField("siteContent.shop.guides.cards.2.label", "Shop guide 3 button", "Read Guide"),
+        makeTextField("siteContent.shop.guides.cards.2.href", "Shop guide 3 link", "articles/how-to-style-beaded-home-decor.html"),
+        makeTextField("siteContent.shop.help.kicker", "Help kicker", "Need Help Choosing?"),
+        makeTextField("siteContent.shop.help.title", "Help title", "Send a quick WhatsApp message and get help with style, gifts, or custom colors."),
+        makeTextareaField("siteContent.shop.help.description", "Help description", "If you are not sure what to buy..."),
+        makeTextField("siteContent.shop.trust.kicker", "Trust kicker", "Client Trust"),
+        makeTextField("siteContent.shop.trust.title", "Trust title", "Visitors convert faster when the buying experience feels proven and clear."),
+        makeTextareaField("siteContent.shop.trust.description", "Trust description", "SharonCraft keeps ordering personal, mobile-friendly...")
+      ]
+    },
+    {
+      title: "Journal Page",
+      description: "Journal hero and article card copy for the main guide hub.",
+      fields: [
+        makeTextField("siteContent.journal.hero.kicker", "Journal hero kicker", "SharonCraft Journal"),
+        makeTextField("siteContent.journal.hero.title", "Journal hero title", "Buyer guides, culture, and search-friendly knowledge..."),
+        makeTextareaField("siteContent.journal.hero.description", "Journal hero description", "Use these articles to understand Maasai jewelry..."),
+        makeTextField("siteContent.journal.guides.kicker", "Journal guides kicker", "Latest Guides"),
+        makeTextField("siteContent.journal.guides.title", "Journal guides title", "Start with the topic closest to your search."),
+        makeTextareaField("siteContent.journal.guides.description", "Journal guides description", "Each guide supports a different buying intent..."),
+        makeTextField("siteContent.journal.cards.0.kicker", "Journal card 1 kicker", "Heritage Series"),
+        makeTextField("siteContent.journal.cards.0.title", "Journal card 1 title", "The History of Maasai Beadwork and Modern Revival"),
+        makeTextareaField("siteContent.journal.cards.0.text", "Journal card 1 text", "Dive deep into the color theory..."),
+        makeTextField("siteContent.journal.cards.0.label", "Journal card 1 button", "Read Guide"),
+        makeTextField("siteContent.journal.cards.0.href", "Journal card 1 link", "articles/history-of-maasai-beadwork.html"),
+        makeTextField("siteContent.journal.cards.1.kicker", "Journal card 2 kicker", "Buying Guide"),
+        makeTextField("siteContent.journal.cards.1.title", "Journal card 2 title", "Where to buy Kenyan artifacts without ending up with generic souvenir pieces."),
+        makeTextareaField("siteContent.journal.cards.1.text", "Journal card 2 text", "Learn what to look for in authentic handmade artifact pages..."),
+        makeTextField("siteContent.journal.cards.1.label", "Journal card 2 button", "Read Guide"),
+        makeTextField("siteContent.journal.cards.1.href", "Journal card 2 link", "articles/where-to-buy-kenyan-artifacts.html"),
+        makeTextField("siteContent.journal.cards.2.kicker", "Journal card 3 kicker", "Style Guide"),
+        makeTextField("siteContent.journal.cards.2.title", "Journal card 3 title", "How to choose Maasai jewelry for events, gifts, and everyday wear."),
+        makeTextareaField("siteContent.journal.cards.2.text", "Journal card 3 text", "Use occasion, outfit balance, and gift intent..."),
+        makeTextField("siteContent.journal.cards.2.label", "Journal card 3 button", "Read Guide"),
+        makeTextField("siteContent.journal.cards.2.href", "Journal card 3 link", "articles/how-to-choose-maasai-jewelry.html"),
+        makeTextField("siteContent.journal.cards.3.kicker", "Journal card 4 kicker", "Gift Guide"),
+        makeTextField("siteContent.journal.cards.3.title", "Journal card 4 title", "Best handmade Kenyan gifts for weddings, birthdays, and housewarming moments."),
+        makeTextareaField("siteContent.journal.cards.3.text", "Journal card 4 text", "Understand when to choose jewelry, decor, or occasion sets..."),
+        makeTextField("siteContent.journal.cards.3.label", "Journal card 4 button", "Read Guide"),
+        makeTextField("siteContent.journal.cards.3.href", "Journal card 4 link", "articles/best-handmade-kenyan-gifts.html"),
+        makeTextField("siteContent.journal.cards.4.kicker", "Journal card 5 kicker", "Decor Guide"),
+        makeTextField("siteContent.journal.cards.4.title", "Journal card 5 title", "How to style beaded home decor in a modern room without making it feel crowded."),
+        makeTextareaField("siteContent.journal.cards.4.text", "Journal card 5 text", "Use beaded decor as one strong room moment..."),
+        makeTextField("siteContent.journal.cards.4.label", "Journal card 5 button", "Read Guide"),
+        makeTextField("siteContent.journal.cards.4.href", "Journal card 5 link", "articles/how-to-style-beaded-home-decor.html")
+      ]
+    }
+  ];
+
   function loadReplyTemplates() {
     try {
       const saved = JSON.parse(window.localStorage.getItem(replyTemplatesKey) || "null");
@@ -1121,6 +1685,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   let socialSettings = loadSocialSettings();
   let homeVisuals = loadHomeVisuals();
+  let siteContent = loadSiteContent();
   let socialPlanner = loadSocialPlanner();
   let orders = await loadOrders();
   let deliveryAreas = loadDeliveryAreas();
@@ -3114,12 +3679,325 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function getContentFieldId(path) {
+    return `admin-site-content-${String(path || "").replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase()}`;
+  }
+
+  function getStateRoot(rootName) {
+    if (rootName === "homeVisuals") {
+      return homeVisuals;
+    }
+    return siteContent;
+  }
+
+  function getStateValue(path) {
+    const segments = String(path || "").split(".").filter(Boolean);
+    const rootName = segments.shift();
+    return segments.reduce(function (current, segment) {
+      if (!current || typeof current !== "object") {
+        return "";
+      }
+      const nextKey = /^\d+$/.test(segment) ? Number(segment) : segment;
+      return current[nextKey];
+    }, getStateRoot(rootName));
+  }
+
+  function setStateValue(path, value) {
+    const segments = String(path || "").split(".").filter(Boolean);
+    const rootName = segments.shift();
+    const root = getStateRoot(rootName);
+    let cursor = root;
+
+    segments.forEach(function (segment, index) {
+      const key = /^\d+$/.test(segment) ? Number(segment) : segment;
+      if (index === segments.length - 1) {
+        cursor[key] = value;
+        return;
+      }
+
+      if (!cursor[key] || typeof cursor[key] !== "object") {
+        const nextSegment = segments[index + 1];
+        cursor[key] = /^\d+$/.test(nextSegment) ? [] : {};
+      }
+      cursor = cursor[key];
+    });
+  }
+
+  function renderSiteContentImagePreview(path) {
+    const preview = document.getElementById(`${getContentFieldId(path)}-preview`);
+    const value = cleanImagePath(getStateValue(path));
+
+    if (!preview) {
+      return;
+    }
+
+    if (!value) {
+      preview.classList.remove("is-visible");
+      preview.innerHTML = "";
+      return;
+    }
+
+    preview.classList.add("is-visible");
+    preview.innerHTML = `<img src="${escapeHtml(value)}" alt="Preview" />`;
+  }
+
+  async function handleSiteContentImageUpload(event) {
+    const input = event && event.target;
+    const path = input && input.dataset ? input.dataset.contentUpload : "";
+    const file = input && input.files ? input.files[0] : null;
+
+    if (!file || !path) {
+      return;
+    }
+
+    const textInput = document.querySelector(`[data-site-content-path="${path}"]`);
+    const previewPath = `${getContentFieldId(path)}-preview`;
+
+    const canUploadToSupabase =
+      liveCatalogApi &&
+      typeof liveCatalogApi.uploadProductImage === "function" &&
+      typeof liveCatalogApi.isConfigured === "function" &&
+      liveCatalogApi.isConfigured();
+
+    if (canUploadToSupabase) {
+      const user = currentLiveUser || (await refreshLiveUser());
+      if (user) {
+        try {
+          setStatus(`Uploading ${file.name}...`);
+          const uploaded = await liveCatalogApi.uploadProductImage(file);
+          const publicUrl = uploaded && uploaded.publicUrl ? uploaded.publicUrl : "";
+
+          if (publicUrl) {
+            setStateValue(path, publicUrl);
+            if (textInput) {
+              textInput.value = publicUrl;
+            }
+            renderSiteContentImagePreview(path);
+            setStatus(`Image uploaded to Supabase: ${file.name}`);
+            return;
+          }
+        } catch (error) {
+          console.error("Unable to upload site-content image to Supabase.", error);
+          setStatus("Supabase upload failed. Falling back to local preview (may not persist).", "warning");
+        }
+      }
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (loadEvent) {
+      const dataUrl = loadEvent && loadEvent.target ? loadEvent.target.result : "";
+      if (!dataUrl) {
+        setStatus("Error reading image file.", "error");
+        return;
+      }
+
+      setStateValue(path, dataUrl);
+      if (textInput) {
+        textInput.value = dataUrl;
+      }
+      renderSiteContentImagePreview(path);
+      setStatus(`Image preview loaded: ${file.name} (Tip: sign in to publish so it doesn't revert)`);
+    };
+    reader.onerror = function () {
+      setStatus("Error reading image file.", "error");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function bindSiteContentForm() {
+    if (!siteContentForm) {
+      return;
+    }
+
+    siteContentForm.querySelectorAll("[data-site-content-path]").forEach(function (input) {
+      const updateValue = function () {
+        setStateValue(input.dataset.siteContentPath, input.value);
+        if (input.dataset.siteContentType === "image") {
+          renderSiteContentImagePreview(input.dataset.siteContentPath);
+        }
+      };
+
+      input.addEventListener("input", updateValue);
+      input.addEventListener("change", updateValue);
+    });
+
+    siteContentForm.querySelectorAll("[data-content-upload]").forEach(function (input) {
+      input.addEventListener("change", handleSiteContentImageUpload);
+    });
+  }
+
+  function renderSiteContentStudio() {
+    if (!siteContentForm) {
+      return;
+    }
+
+    siteContentForm.innerHTML = siteContentEditorSections
+      .map(function (section) {
+        const fieldsMarkup = section.fields
+          .map(function (field) {
+            const fieldId = getContentFieldId(field.path);
+            const value = getStateValue(field.path);
+
+            if (field.type === "textarea") {
+              return `
+                <label class="admin-site-content-field" for="${fieldId}">
+                  <span>${escapeHtml(field.label)}</span>
+                  <textarea
+                    id="${fieldId}"
+                    data-site-content-path="${escapeHtml(field.path)}"
+                    data-site-content-type="${field.type}"
+                    placeholder="${escapeHtml(field.placeholder || "")}"
+                  >${escapeHtml(String(value || ""))}</textarea>
+                </label>
+              `;
+            }
+
+            if (field.type === "image") {
+              const altValue = field.altPath ? getStateValue(field.altPath) : "";
+              return `
+                <div class="admin-site-content-field admin-site-content-field-image">
+                  <label for="${fieldId}">
+                    <span>${escapeHtml(field.label)}</span>
+                    <input
+                      id="${fieldId}"
+                      type="text"
+                      value="${escapeHtml(String(value || ""))}"
+                      data-site-content-path="${escapeHtml(field.path)}"
+                      data-site-content-type="${field.type}"
+                      placeholder="${escapeHtml(field.placeholder || "")}"
+                    />
+                  </label>
+                  <div class="admin-site-content-upload-row">
+                    <input id="${fieldId}-upload" type="file" accept="image/*" class="admin-file-input" data-content-upload="${escapeHtml(field.path)}" />
+                    <label for="${fieldId}-upload" class="admin-upload-button">Upload image</label>
+                  </div>
+                  ${
+                    field.altPath
+                      ? `
+                        <label for="${fieldId}-alt">
+                          <span>${escapeHtml(field.altLabel || "Image alt text")}</span>
+                          <input
+                            id="${fieldId}-alt"
+                            type="text"
+                            value="${escapeHtml(String(altValue || ""))}"
+                            data-site-content-path="${escapeHtml(field.altPath)}"
+                            data-site-content-type="text"
+                            placeholder="Describe the image"
+                          />
+                        </label>
+                      `
+                      : ""
+                  }
+                  <div id="${fieldId}-preview" class="admin-image-preview"></div>
+                </div>
+              `;
+            }
+
+            return `
+              <label class="admin-site-content-field" for="${fieldId}">
+                <span>${escapeHtml(field.label)}</span>
+                <input
+                  id="${fieldId}"
+                  type="text"
+                  value="${escapeHtml(String(value || ""))}"
+                  data-site-content-path="${escapeHtml(field.path)}"
+                  data-site-content-type="${field.type}"
+                  placeholder="${escapeHtml(field.placeholder || "")}"
+                />
+              </label>
+            `;
+          })
+          .join("");
+
+        return `
+          <section class="admin-site-content-group">
+            <div class="admin-section-label">
+              <strong>${escapeHtml(section.title)}</strong>
+              <p>${escapeHtml(section.description)}</p>
+            </div>
+            <div class="admin-site-content-grid">
+              ${fieldsMarkup}
+            </div>
+          </section>
+        `;
+      })
+      .join("");
+
+    bindSiteContentForm();
+    siteContentEditorSections.forEach(function (section) {
+      section.fields.forEach(function (field) {
+        if (field.type === "image") {
+          renderSiteContentImagePreview(field.path);
+        }
+      });
+    });
+  }
+
+  async function publishSiteContentToSupabase(localMessage) {
+    renderLiveAuthState();
+
+    if (!localMessage) {
+      localMessage = "Site content saved.";
+    }
+
+    if (!liveCatalogApi || typeof liveCatalogApi.saveSetting !== "function" || !liveCatalogApi.isConfigured()) {
+      setStatus(`${localMessage} Saved locally only because Supabase is not configured here.`);
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.saveSetting("site_content", siteContent);
+      safeLocalStorageSetItem(liveSiteContentCacheKey, JSON.stringify(siteContent), "live site content cache");
+      renderLiveAuthState();
+      setStatus(`${localMessage} Supabase live site content updated too.`);
+      return true;
+    } catch (error) {
+      console.error("Unable to publish site content to Supabase.", error);
+      if (error && /sign in/i.test(String(error.message || ""))) {
+        setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
+        return false;
+      }
+      setStatus(`${localMessage} Saved locally only. Supabase publish failed.`);
+      return false;
+    }
+  }
+
+  async function saveSiteContentState(message) {
+    homeVisuals = normalizeHomeVisuals(homeVisuals);
+    siteContent = mergeContentShape(siteContent, defaultSiteContentSource);
+
+    const savedVisuals = safeLocalStorageSetItem(homeVisualsSettingsKey, JSON.stringify(homeVisuals), "homepage visuals");
+    const savedContent = safeLocalStorageSetItem(siteContentSettingsKey, JSON.stringify(siteContent), "site content");
+
+    utils.data.homeVisuals = JSON.parse(JSON.stringify(homeVisuals));
+    populateVisualStoryForm();
+    renderVisualPreview();
+    renderSiteContentStudio();
+
+    const localMessage = message || "Site content saved locally.";
+    if (!savedVisuals || !savedContent) {
+      setStatus(`${localMessage} Some local browser storage failed, so check the form before closing it.`, "warning");
+      return false;
+    }
+
+    await publishHomeVisualsToSupabase(localMessage);
+    await publishSiteContentToSupabase(localMessage);
+    return true;
+  }
+
   function getAdminTabLabel(tabName) {
     const labels = {
       workspace: "Add Product",
       catalog: "Product List",
       categories: "Categories",
       visuals: "Visual Story",
+      content: "Site Content",
       preview: "Phone Preview",
       orders: "Orders",
       customers: "Customers",
@@ -7166,6 +8044,23 @@ document.addEventListener("DOMContentLoaded", async function () {
   handleImageUpload(heroImageUploadInput, heroImageInput, heroImagePreview);
   handleImageUpload(favoriteImageUploadInput, favoriteImageInput, favoriteImagePreview);
 
+  if (siteContentSaveButton) {
+    siteContentSaveButton.addEventListener("click", async function () {
+      await saveSiteContentState("Site content saved.");
+    });
+  }
+
+  if (siteContentResetButton) {
+    siteContentResetButton.addEventListener("click", function () {
+      homeVisuals = normalizeHomeVisuals(defaultHomeVisualSource);
+      siteContent = cloneContent(defaultSiteContentSource);
+      populateVisualStoryForm();
+      renderVisualPreview();
+      renderSiteContentStudio();
+      setStatus("Site content studio reset to the default draft. Save when you are ready.");
+    });
+  }
+
   setupPanelCollapsing();
   applyGuidanceMode();
   adminTabGroups.forEach((group) => {
@@ -8341,6 +9236,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderVisualImageLibrary();
   populateVisualStoryForm();
   activateVisualSection(activeVisualSection);
+  renderSiteContentStudio();
   renderImageLibrary();
   renderInlineImageLibrary();
   resetForm();
