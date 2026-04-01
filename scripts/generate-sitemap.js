@@ -12,6 +12,7 @@ const excludedRootPages = new Set([
   "404.html",
   "account.html",
   "admin.html",
+  "admin-mobile.html",
   "cart.html",
   "login.html",
   "order.html",
@@ -247,3 +248,4 @@ if (require.main === module) {
   console.log(`Sitemap generated successfully at: ${result.outputPath}`);
   console.log(`Included ${result.count} URLs.`);
 }
+

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SharonCraft Mobile Admin</title>
+  <meta name="description" content="Phone-first SharonCraft admin for adding products and checking live storefront analytics from anywhere." />
+  <meta name="theme-color" content="#6f4335" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SC Admin" />
+  <link rel="manifest" href="admin-mobile.webmanifest" />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260401-mobile-ui-refresh" />
+  <link rel="stylesheet" href="assets/css/admin-mobile.css?v=20260401-phone-admin" />
+</head>
+<body class="admin-mobile-page">
+  <main class="admin-mobile-shell">
+    <section class="admin-mobile-auth-view" id="admin-mobile-auth-view">
+      <div class="admin-mobile-brand">
+        <img src="assets/images/sharoncraft-logo-transparent.webp" alt="SharonCraft logo" />
+        <div>
+          <span class="section-kicker">Phone Admin</span>
+          <h1>Manage SharonCraft on your phone.</h1>
+          <p>Add products quickly, track live storefront activity, and leave the heavier admin tools for your laptop.</p>
+        </div>
+      </div>
+
+      <article class="admin-mobile-card admin-mobile-auth-card">
+        <div class="admin-mobile-card-head">
+          <div>
+            <span class="section-kicker">Secure Sign In</span>
+            <h2>Admin access only</h2>
+          </div>
+          <span class="admin-mobile-chip">Live Supabase</span>
+        </div>
+
+        <form id="admin-mobile-login-form" class="admin-mobile-form">
+          <label>
+            <span>Email</span>
+            <input id="admin-mobile-email" type="email" autocomplete="username" placeholder="you@example.com" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="admin-mobile-password" type="password" autocomplete="current-password" placeholder="Your admin password" required />
+          </label>
+          <button class="button button-primary" id="admin-mobile-login-button" type="submit">Sign In To Mobile Admin</button>
+        </form>
+
+        <p id="admin-mobile-auth-status" class="admin-mobile-status">Checking live admin access...</p>
+      </article>
+
+      <article class="admin-mobile-card admin-mobile-info-card">
+        <div class="admin-mobile-card-head">
+          <div>
+            <span class="section-kicker">Best Use</span>
+            <h2>What this phone app is for</h2>
+          </div>
+        </div>
+        <div class="admin-mobile-info-list">
+          <article>
+            <strong>Add a product fast</strong>
+            <p>Name, price, image, short details, and publish in a calm mobile flow.</p>
+          </article>
+          <article>
+            <strong>Check live activity</strong>
+            <p>See views, carts, WhatsApp taps, top products, and top pages on the go.</p>
+          </article>
+          <article>
+            <strong>Keep laptop for the rest</strong>
+            <p>Reviews, orders, social tools, advanced visual editing, and the full workspace stay on desktop admin.</p>
+          </article>
+        </div>
+      </article>
+    </section>
+
+    <section class="admin-mobile-app" id="admin-mobile-app" hidden>
+      <header class="admin-mobile-topbar">
+        <div class="admin-mobile-topbar-copy">
+          <span class="section-kicker">SharonCraft Mobile Admin</span>
+          <h1>Phone control room</h1>
+          <p id="admin-mobile-user-copy">Signed in</p>
+        </div>
+        <button class="button button-secondary" id="admin-mobile-logout" type="button">Logout</button>
+      </header>
+
+      <div class="admin-mobile-status-row">
+        <p id="admin-mobile-app-status" class="admin-mobile-status">Loading live products and analytics...</p>
+        <span class="admin-mobile-chip" id="admin-mobile-live-chip">Live sync</span>
+      </div>
+
+      <nav class="admin-mobile-tabbar" aria-label="Mobile admin sections">
+        <button class="admin-mobile-tab is-active" type="button" data-mobile-tab="add">Add Product</button>
+        <button class="admin-mobile-tab" type="button" data-mobile-tab="catalog">Catalog</button>
+        <button class="admin-mobile-tab" type="button" data-mobile-tab="analytics">Analytics</button>
+      </nav>
+
+      <section class="admin-mobile-panel is-active" data-mobile-panel="add">
+        <article class="admin-mobile-card">
+          <div class="admin-mobile-card-head">
+            <div>
+              <span class="section-kicker" id="admin-mobile-form-kicker">New Product</span>
+              <h2 id="admin-mobile-form-title">Add from anywhere</h2>
+            </div>
+            <button class="button button-secondary" id="admin-mobile-reset-form" type="button">Start Fresh</button>
+          </div>
+
+          <form id="admin-mobile-product-form" class="admin-mobile-form">
+            <input id="admin-mobile-product-id" type="hidden" />
+            <label>
+              <span>Product name</span>
+              <input id="admin-mobile-name" type="text" maxlength="90" placeholder="Malkia Collar" required />
+            </label>
+
+            <div class="admin-mobile-two-up">
+              <label>
+                <span>Category</span>
+                <select id="admin-mobile-category" required></select>
+              </label>
+              <label>
+                <span>Price (KES)</span>
+                <input id="admin-mobile-price" type="number" min="0" step="1" placeholder="3200" required />
+              </label>
+            </div>
+
+            <label>
+              <span>Badge</span>
+              <input id="admin-mobile-badge" type="text" maxlength="40" placeholder="New or Best Seller" />
+            </label>
+
+            <label>
+              <span>Main image path</span>
+              <input id="admin-mobile-image" type="text" placeholder="assets/images/your-product.webp" required />
+            </label>
+
+            <label>
+              <span>Gallery image paths</span>
+              <textarea id="admin-mobile-gallery" rows="3" placeholder="Add more image paths separated by commas"></textarea>
+            </label>
+
+            <label>
+              <span>Description</span>
+              <textarea id="admin-mobile-description" rows="5" maxlength="500" placeholder="Simple client-friendly description" required></textarea>
+            </label>
+
+            <label>
+              <span>Short details</span>
+              <textarea id="admin-mobile-details" rows="3" placeholder="Handmade in Kenya, Lightweight, Great for gifting"></textarea>
+            </label>
+
+            <div class="admin-mobile-toggle-grid">
+              <label class="admin-mobile-switch">
+                <input id="admin-mobile-featured" type="checkbox" />
+                <span>Feature on storefront</span>
+              </label>
+              <label class="admin-mobile-switch">
+                <input id="admin-mobile-new" type="checkbox" />
+                <span>Mark as new arrival</span>
+              </label>
+              <label class="admin-mobile-switch">
+                <input id="admin-mobile-soldout" type="checkbox" />
+                <span>Mark as sold out</span>
+              </label>
+            </div>
+
+            <div class="admin-mobile-actions">
+              <button class="button button-primary" id="admin-mobile-save-product" type="submit">Save To Live Catalog</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <section class="admin-mobile-panel" data-mobile-panel="catalog">
+        <article class="admin-mobile-card">
+          <div class="admin-mobile-card-head">
+            <div>
+              <span class="section-kicker">Live Product List</span>
+              <h2>Your phone-ready catalog desk</h2>
+            </div>
+            <button class="button button-secondary" id="admin-mobile-refresh-products" type="button">Refresh</button>
+          </div>
+
+          <label class="admin-mobile-search">
+            <span>Search products</span>
+            <input id="admin-mobile-product-search" type="search" placeholder="Search by name or category" />
+          </label>
+
+          <div id="admin-mobile-product-list" class="admin-mobile-product-list"></div>
+        </article>
+      </section>
+
+      <section class="admin-mobile-panel" data-mobile-panel="analytics">
+        <article class="admin-mobile-card">
+          <div class="admin-mobile-card-head">
+            <div>
+              <span class="section-kicker">Live Storefront Signals</span>
+              <h2>Quick analytics for decision making</h2>
+            </div>
+            <button class="button button-secondary" id="admin-mobile-refresh-analytics" type="button">Refresh</button>
+          </div>
+
+          <div class="admin-mobile-range-row" role="group" aria-label="Analytics range">
+            <button class="admin-mobile-range is-active" type="button" data-mobile-range="7d">7d</button>
+            <button class="admin-mobile-range" type="button" data-mobile-range="30d">30d</button>
+            <button class="admin-mobile-range" type="button" data-mobile-range="90d">90d</button>
+          </div>
+
+          <div id="admin-mobile-analytics-summary" class="admin-mobile-metric-grid"></div>
+
+          <div class="admin-mobile-split">
+            <section class="admin-mobile-subcard">
+              <div class="admin-mobile-subhead">
+                <span class="section-kicker">Top Products</span>
+                <h3>Most attention</h3>
+              </div>
+              <div id="admin-mobile-analytics-products" class="admin-mobile-rank-list"></div>
+            </section>
+
+            <section class="admin-mobile-subcard">
+              <div class="admin-mobile-subhead">
+                <span class="section-kicker">Top Pages</span>
+                <h3>Where visits land</h3>
+              </div>
+              <div id="admin-mobile-analytics-pages" class="admin-mobile-rank-list"></div>
+            </section>
+          </div>
+
+          <section class="admin-mobile-subcard">
+            <div class="admin-mobile-subhead">
+              <span class="section-kicker">Recent Activity</span>
+              <h3>Latest storefront events</h3>
+            </div>
+            <div id="admin-mobile-analytics-feed" class="admin-mobile-feed"></div>
+          </section>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
+  <script src="supabase/supabase-catalog.js?v=20260401-reviews-sync" defer></script>
+  <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/admin-middleware.js?v=20260330-auth" defer></script>
+  <script src="assets/js/admin-mobile.js?v=20260401-phone-admin" defer></script>
+</body>
+</html>
