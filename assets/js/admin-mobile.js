@@ -30,6 +30,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   const generateDraftButton = document.getElementById("admin-mobile-generate-draft");
   const draftPalette = document.getElementById("admin-mobile-draft-palette");
   const draftStatus = document.getElementById("admin-mobile-draft-status");
+  const generateSeoButton = document.getElementById("admin-mobile-generate-seo");
+  const seoTitleInput = document.getElementById("admin-mobile-seo-title");
+  const seoDescriptionInput = document.getElementById("admin-mobile-seo-description");
+  const seoKeywordsInput = document.getElementById("admin-mobile-seo-keywords");
+  const seoPreviewUrl = document.getElementById("admin-mobile-seo-preview-url");
+  const seoPreviewTitle = document.getElementById("admin-mobile-seo-preview-title");
+  const seoPreviewDescription = document.getElementById("admin-mobile-seo-preview-description");
+  const seoStatus = document.getElementById("admin-mobile-seo-status");
   const galleryInput = document.getElementById("admin-mobile-gallery");
   const descriptionInput = document.getElementById("admin-mobile-description");
   const detailsInput = document.getElementById("admin-mobile-details");
@@ -58,6 +66,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   let currentUser = null;
   let isUploadingPhoto = false;
   let latestPhotoAnalysis = null;
+  let productSeoOverrides = {};
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -86,6 +95,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         return normalizeText(item);
       })
       .filter(Boolean);
+  }
+
+  function parseKeywords(value) {
+    const unique = new Set();
+    return parseList(value).filter(function (item) {
+      const normalized = item.toLowerCase();
+      if (!normalized || unique.has(normalized)) {
+        return false;
+      }
+      unique.add(normalized);
+      return true;
+    });
   }
 
   function getCategoryName(slug) {
@@ -130,6 +151,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       .reduce(function (hash, character) {
         return ((hash * 31) + character.charCodeAt(0)) | 0;
       }, 11);
+  }
+
+  function truncateText(value, maxLength) {
+    const text = normalizeText(value).replace(/\s+/g, " ");
+    const limit = Math.max(0, Number(maxLength) || 0);
+    if (!limit || text.length <= limit) {
+      return text;
+    }
+
+    const clipped = text.slice(0, Math.max(1, limit - 1));
+    const trimmed = clipped.replace(/\s+\S*$/, "").trim() || clipped.trim();
+    return `${trimmed}...`;
   }
 
   function formatTimeAgo(value) {
@@ -202,9 +235,21 @@ document.addEventListener("DOMContentLoaded", async function () {
       cameraInput.value = "";
     }
     latestPhotoAnalysis = null;
+    productSeoOverrides = productSeoOverrides && typeof productSeoOverrides === "object" ? productSeoOverrides : {};
     renderDraftPalette();
     setStatus(uploadStatus, "Snap a product photo here and the phone admin will resize and compress it before live upload.", "info");
     setStatus(draftStatus, "The helper uses your category plus the uploaded photo's dominant colors to create a clean draft starter.", "info");
+    if (seoTitleInput) {
+      seoTitleInput.value = "";
+    }
+    if (seoDescriptionInput) {
+      seoDescriptionInput.value = "";
+    }
+    if (seoKeywordsInput) {
+      seoKeywordsInput.value = "";
+    }
+    updateSeoPreview();
+    setStatus(seoStatus, "SEO copy saved here will override the product page title, description, and keyword metadata on the live site.", "info");
   }
 
   function fillForm(product) {
@@ -227,6 +272,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     saveProductButton.textContent = "Update Live Product";
     setStatus(uploadStatus, "You can replace the main photo or add a gallery shot from your phone camera.", "info");
     setStatus(draftStatus, "Generate a fresh draft if you want the phone helper to rewrite the title and description.", "info");
+    fillSeoFields(product.id);
     activateTab("add");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -330,6 +376,82 @@ document.addEventListener("DOMContentLoaded", async function () {
           `;
         }).join("")
       : "";
+  }
+
+  function normalizeSeoOverride(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return {
+      title: normalizeText(source.title),
+      description: normalizeText(source.description),
+      keywords: Array.isArray(source.keywords) ? parseKeywords(source.keywords.join(", ")) : parseKeywords(source.keywords),
+      updatedAt: normalizeText(source.updatedAt)
+    };
+  }
+
+  function getCurrentSeoProductId() {
+    const existingId = normalizeText(productIdInput && productIdInput.value);
+    const nameValue = normalizeText(nameInput && nameInput.value);
+    return existingId || (nameValue ? slugify(nameValue) : "");
+  }
+
+  function getSeoOverrideForProduct(productId) {
+    const normalizedId = normalizeText(productId);
+    if (!normalizedId || !productSeoOverrides || typeof productSeoOverrides !== "object") {
+      return normalizeSeoOverride({});
+    }
+    return normalizeSeoOverride(productSeoOverrides[normalizedId]);
+  }
+
+  function readSeoFields() {
+    return normalizeSeoOverride({
+      title: seoTitleInput && seoTitleInput.value,
+      description: seoDescriptionInput && seoDescriptionInput.value,
+      keywords: seoKeywordsInput && seoKeywordsInput.value
+    });
+  }
+
+  function hasSeoFields() {
+    const seo = readSeoFields();
+    return Boolean(seo.title || seo.description || seo.keywords.length);
+  }
+
+  function updateSeoPreview() {
+    const previewId = getCurrentSeoProductId() || "new-product";
+    const fallbackTitle = normalizeText(nameInput && nameInput.value)
+      ? `${normalizeText(nameInput.value)} | SharonCraft`
+      : "Your SEO title preview will appear here.";
+    const seo = readSeoFields();
+
+    if (seoPreviewUrl) {
+      seoPreviewUrl.textContent = `www.sharoncraft.co.ke/product.html?id=${encodeURIComponent(previewId)}`;
+    }
+    if (seoPreviewTitle) {
+      seoPreviewTitle.textContent = seo.title || fallbackTitle;
+    }
+    if (seoPreviewDescription) {
+      seoPreviewDescription.textContent = seo.description || "The meta description preview updates as you type so you can keep it clean and client-friendly.";
+    }
+  }
+
+  function fillSeoFields(productId) {
+    const seo = getSeoOverrideForProduct(productId);
+    if (seoTitleInput) {
+      seoTitleInput.value = seo.title;
+    }
+    if (seoDescriptionInput) {
+      seoDescriptionInput.value = seo.description;
+    }
+    if (seoKeywordsInput) {
+      seoKeywordsInput.value = seo.keywords.join(", ");
+    }
+    updateSeoPreview();
+    setStatus(
+      seoStatus,
+      seo.title || seo.description || seo.keywords.length
+        ? "This product already has live SEO overrides saved from the admin."
+        : "No saved SEO override yet. Generate one here and it will control the live product metadata.",
+      seo.title || seo.description || seo.keywords.length ? "success" : "info"
+    );
   }
 
   async function analyzeImageColors(file) {
@@ -450,6 +572,82 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
   }
 
+  function buildSeoDraft() {
+    const categorySlug = normalizeText(categoryInput && categoryInput.value) || "necklaces";
+    const categoryName = getCategoryName(categorySlug);
+    const draft = buildDraftFromContext();
+    const productName = normalizeText(nameInput && nameInput.value) || draft.title;
+    const productDescription = normalizeText(descriptionInput && descriptionInput.value) || draft.description;
+    const colorNames = latestPhotoAnalysis && Array.isArray(latestPhotoAnalysis.colorNames)
+      ? latestPhotoAnalysis.colorNames.filter(Boolean)
+      : [];
+    const colorPhrase = colorNames.length
+      ? `${colorNames.slice(0, 2).join(" and ").toLowerCase()} tones`
+      : "handmade detail";
+    const categorySeo = {
+      necklaces: {
+        lead: "Kenyan beaded necklaces",
+        keywords: ["kenyan beaded necklace", "maasai jewelry kenya", "handmade necklace kenya"],
+        use: "weddings, gifting, and standout styling"
+      },
+      bracelets: {
+        lead: "Kenyan beaded bracelets",
+        keywords: ["kenyan beaded bracelet", "handmade bracelet kenya", "african bead bracelet"],
+        use: "easy gifting, stacking, and everyday styling"
+      },
+      "home-decor": {
+        lead: "Kenyan home decor",
+        keywords: ["kenyan home decor", "african beaded decor", "handmade decor nairobi"],
+        use: "warm interiors, housewarming gifts, and statement spaces"
+      },
+      "bags-accessories": {
+        lead: "Kenyan beaded accessories",
+        keywords: ["kenyan beaded accessories", "beaded bag kenya", "handmade accessories nairobi"],
+        use: "daily carry, gifting, and standout accessories"
+      },
+      "gift-sets": {
+        lead: "Handmade Kenyan gifts",
+        keywords: ["handmade kenyan gifts", "kenyan gift set", "african bead gift set"],
+        use: "birthdays, celebrations, and memorable gifting"
+      },
+      "bridal-occasion": {
+        lead: "Kenyan bridal beadwork",
+        keywords: ["bridal bead set kenya", "maasai bridal jewelry", "kenyan wedding accessories"],
+        use: "weddings, ceremonies, and occasion styling"
+      }
+    };
+    const seoConfig = categorySeo[categorySlug] || {
+      lead: `${categoryName} in Kenya`,
+      keywords: [`${categoryName.toLowerCase()} kenya`, `handmade ${categoryName.toLowerCase()}`, "sharoncraft kenya"],
+      use: "gifting and easy WhatsApp ordering"
+    };
+
+    const candidateTitle = productName.toLowerCase().includes(seoConfig.lead.toLowerCase())
+      ? `${productName} | SharonCraft`
+      : `${productName} | ${seoConfig.lead} | SharonCraft`;
+    const title = truncateText(candidateTitle, 68);
+    const description = truncateText(
+      `Shop ${productName} at SharonCraft. ${productDescription} Designed with ${colorPhrase} for ${seoConfig.use} in Kenya. Order easily on WhatsApp.`,
+      170
+    );
+    const keywords = parseKeywords([
+      productName,
+      categoryName,
+      seoConfig.lead,
+      seoConfig.keywords.join(", "),
+      colorNames.length ? `${colorNames[0].toLowerCase()} ${categoryName.toLowerCase()}` : "",
+      "SharonCraft",
+      "handmade in Kenya",
+      "Nairobi gifts"
+    ].join(", "));
+
+    return {
+      title,
+      description,
+      keywords
+    };
+  }
+
   function applySmartDraft(options) {
     const settings = options || {};
     const draft = buildDraftFromContext();
@@ -465,6 +663,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     renderDraftPalette();
+    applySeoDraft({ force: settings.force });
     setStatus(
       draftStatus,
       latestPhotoAnalysis && latestPhotoAnalysis.colorNames && latestPhotoAnalysis.colorNames.length
@@ -472,6 +671,29 @@ document.addEventListener("DOMContentLoaded", async function () {
         : "Draft built from the selected category. Add or upload a photo first for color-led suggestions.",
       "success"
     );
+  }
+
+  function applySeoDraft(options) {
+    const settings = options || {};
+    const draft = buildSeoDraft();
+
+    if (seoTitleInput && (!normalizeText(seoTitleInput.value) || settings.force)) {
+      seoTitleInput.value = draft.title;
+    }
+    if (seoDescriptionInput && (!normalizeText(seoDescriptionInput.value) || settings.force)) {
+      seoDescriptionInput.value = draft.description;
+    }
+    if (seoKeywordsInput && (!parseKeywords(seoKeywordsInput.value).length || settings.force)) {
+      seoKeywordsInput.value = draft.keywords.join(", ");
+    }
+
+    updateSeoPreview();
+    setStatus(
+      seoStatus,
+      `SEO copy built around ${getCategoryName(categoryInput && categoryInput.value).toLowerCase()} search intent${latestPhotoAnalysis && latestPhotoAnalysis.colorNames && latestPhotoAnalysis.colorNames.length ? ` and ${latestPhotoAnalysis.colorNames.join(", ").toLowerCase()} color cues` : ""}.`,
+      "success"
+    );
+    return draft;
   }
 
   function loadFileImage(file) {
@@ -665,6 +887,54 @@ document.addEventListener("DOMContentLoaded", async function () {
       newUntil: newInput.checked ? new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString() : "",
       sortOrder: existingProduct && Number.isFinite(Number(existingProduct.sortOrder)) ? Number(existingProduct.sortOrder) : 0
     };
+  }
+
+  async function loadSeoOverrides() {
+    if (!catalogApi || typeof catalogApi.fetchSetting !== "function") {
+      productSeoOverrides = {};
+      return productSeoOverrides;
+    }
+
+    try {
+      const value = await catalogApi.fetchSetting("product_seo_overrides");
+      productSeoOverrides = value && typeof value === "object" ? value : {};
+    } catch (error) {
+      console.warn("Could not load product SEO overrides.", error);
+      productSeoOverrides = {};
+    }
+
+    return productSeoOverrides;
+  }
+
+  async function saveSeoOverride(productId) {
+    if (!catalogApi || typeof catalogApi.saveSetting !== "function") {
+      return false;
+    }
+
+    const normalizedId = normalizeText(productId);
+    if (!normalizedId) {
+      return false;
+    }
+
+    const seo = readSeoFields();
+    const nextOverrides = {
+      ...(productSeoOverrides && typeof productSeoOverrides === "object" ? productSeoOverrides : {})
+    };
+
+    if (seo.title || seo.description || seo.keywords.length) {
+      nextOverrides[normalizedId] = {
+        title: seo.title,
+        description: seo.description,
+        keywords: seo.keywords,
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      delete nextOverrides[normalizedId];
+    }
+
+    await catalogApi.saveSetting("product_seo_overrides", nextOverrides);
+    productSeoOverrides = nextOverrides;
+    return true;
   }
 
   function renderProducts() {
@@ -884,6 +1154,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
+    if (!hasSeoFields()) {
+      applySeoDraft({ force: false });
+    }
+
     const nextProducts = existingProduct
       ? products.map(function (product) {
           return normalizeText(product.id) === existingId ? payload : product;
@@ -892,10 +1166,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     setStatus(appStatus, "Saving product to the live catalog...", "info");
     await catalogApi.saveProducts(nextProducts);
+    let seoSaved = true;
+    try {
+      await saveSeoOverride(payload.id);
+    } catch (error) {
+      seoSaved = false;
+      console.warn("Product saved but SEO overrides could not be synced.", error);
+    }
     products = nextProducts;
     resetForm();
     renderProducts();
-    setStatus(appStatus, `${payload.name} is live in the catalog.`, "success");
+    setStatus(
+      appStatus,
+      seoSaved
+        ? `${payload.name} is live in the catalog, and its SEO copy is synced.`
+        : `${payload.name} is live in the catalog, but its SEO override could not sync right now.`,
+      seoSaved ? "success" : "info"
+    );
     activateTab("catalog");
   }
 
@@ -906,6 +1193,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     userCopy.textContent = normalizeText(user.email) || "Signed in as admin";
     liveChip.textContent = "Live Supabase";
     populateCategorySelect();
+    await loadSeoOverrides();
     resetForm();
     await loadProducts({ showStatus: false });
     await loadAnalytics({ showStatus: false });
@@ -1010,6 +1298,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (refreshProductsButton) {
     refreshProductsButton.addEventListener("click", async function () {
       try {
+        await loadSeoOverrides();
         await loadProducts();
       } catch (error) {
         setStatus(appStatus, "Could not refresh products right now.", "error");
@@ -1034,6 +1323,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (generateDraftButton) {
     generateDraftButton.addEventListener("click", function () {
       applySmartDraft({ force: true });
+    });
+  }
+
+  if (generateSeoButton) {
+    generateSeoButton.addEventListener("click", function () {
+      applySeoDraft({ force: true });
     });
   }
 
@@ -1063,6 +1358,22 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
   }
+
+  [nameInput, categoryInput, descriptionInput, productIdInput].forEach(function (field) {
+    if (!field) {
+      return;
+    }
+    field.addEventListener("input", updateSeoPreview);
+    field.addEventListener("change", updateSeoPreview);
+  });
+
+  [seoTitleInput, seoDescriptionInput, seoKeywordsInput].forEach(function (field) {
+    if (!field) {
+      return;
+    }
+    field.addEventListener("input", updateSeoPreview);
+    field.addEventListener("change", updateSeoPreview);
+  });
 
   if (catalogApi && typeof catalogApi.onAuthStateChange === "function") {
     catalogApi.onAuthStateChange(async function (user) {
