@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const uploadPreview = document.getElementById("admin-mobile-upload-preview");
   const uploadPreviewImage = document.getElementById("admin-mobile-upload-preview-image");
   const uploadStatus = document.getElementById("admin-mobile-upload-status");
+  const generateDraftButton = document.getElementById("admin-mobile-generate-draft");
+  const draftPalette = document.getElementById("admin-mobile-draft-palette");
+  const draftStatus = document.getElementById("admin-mobile-draft-status");
   const galleryInput = document.getElementById("admin-mobile-gallery");
   const descriptionInput = document.getElementById("admin-mobile-description");
   const detailsInput = document.getElementById("admin-mobile-details");
@@ -54,6 +57,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   let currentRange = "7d";
   let currentUser = null;
   let isUploadingPhoto = false;
+  let latestPhotoAnalysis = null;
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -108,6 +112,24 @@ document.addEventListener("DOMContentLoaded", async function () {
       return `${(size / 1024).toFixed(size < 1024 * 100 ? 0 : 1)} KB`;
     }
     return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  function titleCase(value) {
+    return normalizeText(value)
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(function (word) {
+        return `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
+      })
+      .join(" ");
+  }
+
+  function hashText(value) {
+    return normalizeText(value)
+      .split("")
+      .reduce(function (hash, character) {
+        return ((hash * 31) + character.charCodeAt(0)) | 0;
+      }, 11);
   }
 
   function formatTimeAgo(value) {
@@ -179,7 +201,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (cameraInput) {
       cameraInput.value = "";
     }
-    setStatus(uploadStatus, "Snap a product photo here and the phone admin will upload it to live storage for you.", "info");
+    latestPhotoAnalysis = null;
+    renderDraftPalette();
+    setStatus(uploadStatus, "Snap a product photo here and the phone admin will resize and compress it before live upload.", "info");
+    setStatus(draftStatus, "The helper uses your category plus the uploaded photo's dominant colors to create a clean draft starter.", "info");
   }
 
   function fillForm(product) {
@@ -201,6 +226,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     formTitle.textContent = normalizeText(product.name) || "Edit product";
     saveProductButton.textContent = "Update Live Product";
     setStatus(uploadStatus, "You can replace the main photo or add a gallery shot from your phone camera.", "info");
+    setStatus(draftStatus, "Generate a fresh draft if you want the phone helper to rewrite the title and description.", "info");
     activateTab("add");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -211,6 +237,241 @@ document.addEventListener("DOMContentLoaded", async function () {
       existing.push(url);
       galleryInput.value = existing.join(", ");
     }
+  }
+
+  function rgbToHsl(red, green, blue) {
+    const r = red / 255;
+    const g = green / 255;
+    const b = blue / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const lightness = (max + min) / 2;
+    let hue = 0;
+    let saturation = 0;
+
+    if (max !== min) {
+      const delta = max - min;
+      saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+      switch (max) {
+        case r:
+          hue = ((g - b) / delta + (g < b ? 6 : 0)) / 6;
+          break;
+        case g:
+          hue = ((b - r) / delta + 2) / 6;
+          break;
+        default:
+          hue = ((r - g) / delta + 4) / 6;
+          break;
+      }
+    }
+
+    return {
+      h: hue * 360,
+      s: saturation,
+      l: lightness
+    };
+  }
+
+  function describeColor(rgb) {
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+    if (hsl.l <= 0.16) {
+      return "Onyx";
+    }
+    if (hsl.l >= 0.88 && hsl.s <= 0.16) {
+      return "Ivory";
+    }
+    if (hsl.s <= 0.12) {
+      return hsl.l > 0.6 ? "Stone" : "Charcoal";
+    }
+    if (hsl.h < 15 || hsl.h >= 345) {
+      return hsl.l > 0.6 ? "Coral" : "Ruby";
+    }
+    if (hsl.h < 38) {
+      return hsl.l > 0.62 ? "Amber" : "Terracotta";
+    }
+    if (hsl.h < 62) {
+      return "Gold";
+    }
+    if (hsl.h < 90) {
+      return "Olive";
+    }
+    if (hsl.h < 155) {
+      return hsl.l > 0.55 ? "Emerald" : "Forest";
+    }
+    if (hsl.h < 190) {
+      return "Teal";
+    }
+    if (hsl.h < 235) {
+      return hsl.l > 0.6 ? "Sky" : "Cobalt";
+    }
+    if (hsl.h < 290) {
+      return "Violet";
+    }
+    return hsl.l > 0.65 ? "Blush" : "Berry";
+  }
+
+  function renderDraftPalette() {
+    if (!draftPalette) {
+      return;
+    }
+
+    const swatches = latestPhotoAnalysis && Array.isArray(latestPhotoAnalysis.palette)
+      ? latestPhotoAnalysis.palette
+      : [];
+
+    draftPalette.innerHTML = swatches.length
+      ? swatches.map(function (item) {
+          return `
+            <span class="admin-mobile-draft-chip">
+              <span class="admin-mobile-draft-chip-swatch" style="background:${escapeHtml(item.hex)}"></span>
+              ${escapeHtml(item.name)}
+            </span>
+          `;
+        }).join("")
+      : "";
+  }
+
+  async function analyzeImageColors(file) {
+    const image = await loadFileImage(file);
+    const sampleSize = 48;
+    const canvas = document.createElement("canvas");
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    if (!ctx) {
+      return null;
+    }
+
+    ctx.drawImage(image, 0, 0, sampleSize, sampleSize);
+    const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+    const buckets = new Map();
+
+    for (let index = 0; index < data.length; index += 16) {
+      const alpha = data[index + 3];
+      if (alpha < 120) {
+        continue;
+      }
+
+      const red = Math.round(data[index] / 32) * 32;
+      const green = Math.round(data[index + 1] / 32) * 32;
+      const blue = Math.round(data[index + 2] / 32) * 32;
+      const key = `${red},${green},${blue}`;
+      if (!buckets.has(key)) {
+        buckets.set(key, { r: red, g: green, b: blue, count: 0 });
+      }
+      buckets.get(key).count += 1;
+    }
+
+    const palette = Array.from(buckets.values())
+      .sort(function (left, right) {
+        return right.count - left.count;
+      })
+      .slice(0, 3)
+      .map(function (item) {
+        return {
+          hex: `rgb(${item.r}, ${item.g}, ${item.b})`,
+          name: describeColor(item),
+          count: item.count
+        };
+      });
+
+    return {
+      palette,
+      colorNames: palette.map(function (item) {
+        return item.name;
+      })
+    };
+  }
+
+  function buildDraftFromContext() {
+    const categorySlug = normalizeText(categoryInput.value);
+    const categoryName = getCategoryName(categorySlug);
+    const badge = normalizeText(badgeInput.value);
+    const analysis = latestPhotoAnalysis || { colorNames: [], palette: [] };
+    const colors = analysis.colorNames.length ? analysis.colorNames : ["Handmade"];
+    const primaryColor = colors[0];
+    const secondaryColor = colors[1] && colors[1] !== colors[0] ? colors[1] : "";
+    const seed = hashText(`${categorySlug}|${primaryColor}|${secondaryColor}|${badge}`);
+    const categoryDrafts = {
+      necklaces: {
+        nouns: ["Statement Necklace", "Collar Necklace", "Beaded Necklace"],
+        use: "weddings, gifting, and standout everyday styling"
+      },
+      bracelets: {
+        nouns: ["Beaded Bracelet", "Stack Bracelet", "Handmade Bracelet"],
+        use: "easy gifting, repeat wear, and coordinated looks"
+      },
+      "home-decor": {
+        nouns: ["Decor Accent", "Beaded Home Piece", "Home Decor Accent"],
+        use: "living rooms, bedrooms, and housewarming gifting"
+      },
+      "bags-accessories": {
+        nouns: ["Beaded Accessory", "Carry Accent", "Handmade Accessory"],
+        use: "daily styling, travel looks, and thoughtful gifting"
+      },
+      "gift-sets": {
+        nouns: ["Gift Set", "Curated Gift Piece", "Handmade Gift Set"],
+        use: "birthdays, celebrations, and memorable gifting"
+      },
+      "bridal-occasion": {
+        nouns: ["Occasion Set", "Bridal Bead Set", "Ceremony Piece"],
+        use: "weddings, ceremonies, and photo-ready styling"
+      }
+    };
+    const config = categoryDrafts[categorySlug] || {
+      nouns: [titleCase(categoryName || "Handmade Piece"), "Handmade Piece", "SharonCraft Favorite"],
+      use: "gifting, styling, and quick WhatsApp orders"
+    };
+    const noun = config.nouns[Math.abs(seed) % config.nouns.length];
+    const titleParts = [primaryColor];
+    if (secondaryColor && secondaryColor !== primaryColor && Math.abs(seed) % 2 === 0) {
+      titleParts.push(secondaryColor);
+    }
+    titleParts.push(noun);
+    const title = titleCase(titleParts.join(" "));
+
+    const palettePhrase = secondaryColor
+      ? `${primaryColor.toLowerCase()} and ${secondaryColor.toLowerCase()} tones`
+      : `${primaryColor.toLowerCase()} tones`;
+    const badgePhrase = badge ? `${badge.toLowerCase()} SharonCraft ` : "SharonCraft ";
+    const description = `A ${badgePhrase}${normalizeText(categoryName).toLowerCase() || "handmade"} piece with ${palettePhrase} and a clean handcrafted finish. It works well for ${config.use}, and gives clients an easy option to style, gift, or order on WhatsApp.`;
+    const details = [
+      `Handmade ${normalizeText(categoryName).toLowerCase() || "piece"} with ${palettePhrase}`,
+      "Client-friendly finish for gifting or easy styling",
+      "Fast to share and order through SharonCraft WhatsApp support"
+    ];
+
+    return {
+      title,
+      description,
+      details
+    };
+  }
+
+  function applySmartDraft(options) {
+    const settings = options || {};
+    const draft = buildDraftFromContext();
+
+    if (!normalizeText(nameInput.value) || settings.force) {
+      nameInput.value = draft.title;
+    }
+    if (!normalizeText(descriptionInput.value) || settings.force) {
+      descriptionInput.value = draft.description;
+    }
+    if (!normalizeText(detailsInput.value) || settings.force) {
+      detailsInput.value = draft.details.join(", ");
+    }
+
+    renderDraftPalette();
+    setStatus(
+      draftStatus,
+      latestPhotoAnalysis && latestPhotoAnalysis.colorNames && latestPhotoAnalysis.colorNames.length
+        ? `Draft built from ${latestPhotoAnalysis.colorNames.join(", ").toLowerCase()} color cues and the selected category.`
+        : "Draft built from the selected category. Add or upload a photo first for color-led suggestions.",
+      "success"
+    );
   }
 
   function loadFileImage(file) {
@@ -319,6 +580,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     try {
+      latestPhotoAnalysis = await analyzeImageColors(file);
+      renderDraftPalette();
       setStatus(uploadStatus, `Optimizing ${file.name} for faster upload...`, "info");
       const optimized = await optimizeImageForUpload(file);
       const fileToUpload = optimized && optimized.file ? optimized.file : file;
@@ -356,6 +619,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             ? `Photo compressed from ${formatBytes(optimized.originalSize)} to ${formatBytes(optimized.optimizedSize)} and set as the main image.`
             : `Photo uploaded at ${formatBytes((optimized && optimized.optimizedSize) || file.size || 0)} and set as the main image.`,
           "success"
+        );
+      }
+
+      if (!normalizeText(nameInput.value) || !normalizeText(descriptionInput.value)) {
+        applySmartDraft({ force: false });
+      } else if (latestPhotoAnalysis && latestPhotoAnalysis.colorNames && latestPhotoAnalysis.colorNames.length) {
+        setStatus(
+          draftStatus,
+          `Photo colors detected: ${latestPhotoAnalysis.colorNames.join(", ")}. Tap Generate Smart Draft any time to refresh the title and description.`,
+          "info"
         );
       }
     } catch (error) {
@@ -756,6 +1029,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (searchInput) {
     searchInput.addEventListener("input", renderProducts);
+  }
+
+  if (generateDraftButton) {
+    generateDraftButton.addEventListener("click", function () {
+      applySmartDraft({ force: true });
+    });
   }
 
   if (cameraInput) {

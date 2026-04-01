@@ -87,7 +87,8 @@ body.admin-mobile-page {
 
 .admin-mobile-card,
 .admin-mobile-subcard,
-.admin-mobile-upload-card {
+.admin-mobile-upload-card,
+.admin-mobile-draft-card {
   padding: 1.15rem;
   border: 1px solid var(--admin-mobile-stroke);
   border-radius: var(--admin-mobile-radius);
@@ -128,9 +129,49 @@ body.admin-mobile-page {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 241, 232, 0.96));
 }
 
+.admin-mobile-draft-card {
+  display: grid;
+  gap: 0.9rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 239, 231, 0.98));
+}
+
 .admin-mobile-upload-grid {
   display: grid;
   gap: 0.85rem;
+}
+
+.admin-mobile-draft-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-mobile-draft-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.admin-mobile-draft-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 36px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(84, 58, 45, 0.08);
+  color: var(--admin-mobile-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.admin-mobile-draft-chip-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(45, 32, 25, 0.12);
+  flex: 0 0 auto;
 }
 
 .admin-mobile-upload-preview {
