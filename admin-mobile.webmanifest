@@ -1,0 +1,20 @@
+{
+  "name": "SharonCraft Mobile Admin",
+  "short_name": "SC Admin",
+  "start_url": "/admin-mobile.html",
+  "display": "standalone",
+  "background_color": "#f5ede5",
+  "theme_color": "#6f4335",
+  "icons": [
+    {
+      "src": "/assets/images/sharoncraft-logo-transparent.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    },
+    {
+      "src": "/assets/images/sharoncraft-favicon.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    }
+  ]
+}
