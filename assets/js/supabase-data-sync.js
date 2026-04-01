@@ -3,6 +3,8 @@
   const storage = window.SharonCraftStorage;
   const liveCatalog = window.SharonCraftCatalog;
   const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm.webp";
+  const siteContentSettingsKey = (storage && storage.siteContentSettingsKey) || "sharoncraft-site-content";
+  const liveSiteContentCacheKey = (storage && storage.liveSiteContentCacheKey) || "sharoncraft-live-site-content-cache";
   const normalizeText = (value) => String(value || "").trim();
   const computeCacheVersion = (value) => {
     const input = JSON.stringify(value || {});
@@ -65,6 +67,19 @@
       }
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) && parsed.length > 0;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const hasLocalSiteContentOverride = () => {
+    try {
+      const raw = window.localStorage.getItem(siteContentSettingsKey);
+      if (!raw) {
+        return false;
+      }
+      const parsed = JSON.parse(raw);
+      return Boolean(parsed && typeof parsed === "object");
     } catch (error) {
       return false;
     }
@@ -321,11 +336,48 @@
     return data.site.socials;
   }
 
+  async function syncSiteContentFromSupabase() {
+    if (isLocalPreview && hasLocalSiteContentOverride()) {
+      return null;
+    }
+
+    if (
+      !liveCatalog ||
+      typeof liveCatalog.fetchSetting !== "function" ||
+      typeof liveCatalog.isConfigured !== "function" ||
+      !liveCatalog.isConfigured()
+    ) {
+      return null;
+    }
+
+    const setting = await liveCatalog.fetchSetting("site_content");
+    if (!setting || typeof setting !== "object") {
+      return null;
+    }
+
+    if (!isLocalPreview) {
+      try {
+        window.localStorage.removeItem(siteContentSettingsKey);
+      } catch (error) {
+        console.warn("Unable to clear stale local site content override.", error);
+      }
+
+      try {
+        window.localStorage.setItem(liveSiteContentCacheKey, JSON.stringify(setting));
+      } catch (error) {
+        console.warn("Unable to cache the latest live site content.", error);
+      }
+    }
+
+    return setting;
+  }
+
   async function syncFromSupabase() {
     const results = await Promise.allSettled([
       syncProductsFromSupabase(),
       syncHomeVisualsFromSupabase(),
-      syncSocialsFromSupabase()
+      syncSocialsFromSupabase(),
+      syncSiteContentFromSupabase()
     ]);
     return results;
   }

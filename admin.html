@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css?v=20260401-mobile-ui-refresh" />
-  <link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20260331-premium" />
+  <link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20260401-site-content-studio" />
 </head>
 <body class="admin-dashboard-page">
   <div class="admin-app-shell">
@@ -321,7 +321,7 @@
         <div class="admin-tab-group" data-admin-group="products">
           <button class="admin-tab-group-toggle" type="button" data-admin-group-toggle="products" aria-expanded="true">
             <span>Products</span>
-            <small>6 tools</small>
+            <small>7 tools</small>
           </button>
           <div class="admin-tab-group-body">
             <button class="admin-tab-button is-active" type="button" data-admin-tab="workspace">
@@ -339,6 +339,10 @@
             <button class="admin-tab-button" type="button" data-admin-tab="visuals">
               <span>Visual Story</span>
               <small>Change the home welcome and favorite photos</small>
+            </button>
+            <button class="admin-tab-button" type="button" data-admin-tab="content">
+              <span>Site Content</span>
+              <small>Edit main site images and text</small>
             </button>
             <button class="admin-tab-button" type="button" data-admin-tab="preview">
               <span>Phone Preview</span>
@@ -1191,6 +1195,72 @@
                   </div>
                 </article>
               </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="admin-tab-panel" data-admin-panel="content">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Main Site Editor</span>
+            <h2>Change branding, images, and non-product page text from one content studio.</h2>
+            <p>Use this for the homepage, about page, shop page, journal, logos, icons, and shared brand copy. Product card images stay in the product workspace.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Brand assets</span>
+            <span>About page</span>
+            <span>Homepage sections</span>
+            <span>Shop and journal copy</span>
+          </div>
+        </article>
+        <div class="admin-layout admin-layout-wide">
+          <section class="admin-panel admin-site-content-panel">
+            <div class="admin-panel-header">
+              <div>
+                <span class="section-kicker">Site Content Studio</span>
+                <h2>Images and text editor</h2>
+              </div>
+            </div>
+            <p class="admin-panel-muted">This section controls the main storefront content outside product cards. Save locally first, then publish live when you are happy.</p>
+            <div id="admin-site-content-form" class="admin-site-content-form"></div>
+            <div class="admin-actions">
+              <button class="button button-secondary" id="admin-site-content-reset" type="button">Reset Content Draft</button>
+              <button class="button button-primary" id="admin-site-content-save" type="button">Save Site Content</button>
+            </div>
+          </section>
+
+          <aside class="admin-side-stack">
+            <section class="admin-panel admin-site-content-help">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">What It Changes</span>
+                  <h2>Coverage</h2>
+                </div>
+              </div>
+              <div class="admin-help-grid admin-help-grid-compact">
+                <article class="admin-help-card">
+                  <strong>Branding</strong>
+                  <p>Logo image, favicon, app icon, phone, WhatsApp, email, and other shared store identity details.</p>
+                </article>
+                <article class="admin-help-card">
+                  <strong>Homepage</strong>
+                  <p>Hero notes, search cards, guide cards, story block, ordering steps, and supporting sections.</p>
+                </article>
+                <article class="admin-help-card">
+                  <strong>About, Shop, Journal</strong>
+                  <p>Edit the key text blocks and supporting images without touching product-card media.</p>
+                </article>
+              </div>
+            </section>
+            <section class="admin-panel">
+              <div class="admin-panel-header">
+                <div>
+                  <span class="section-kicker">Publishing Note</span>
+                  <h2>How it works</h2>
+                </div>
+              </div>
+              <p class="admin-panel-muted">Uploads in this section can go straight to Supabase storage when you are signed in. If you are not signed in, the editor still saves a local draft so you can keep working safely.</p>
             </section>
           </aside>
         </div>
@@ -2643,8 +2713,8 @@
   <script src="assets/js/auth/admin-middleware.js?v=20260330-auth" defer></script>
   <script src="assets/js/admin-auth.js?v=20260330-auth" defer></script>
   <script src="assets/js/image-manifest.js?v=20260327-gallery"></script>
-  <script src="assets/js/app.js?v=20260401-reviews-mobile-pass" defer></script>
-  <script src="assets/js/admin.js?v=20260401-reviews-desk" defer></script>
+  <script src="assets/js/app.js?v=20260401-site-content-studio" defer></script>
+  <script src="assets/js/admin.js?v=20260401-site-content-studio" defer></script>
   <script src="assets/js/admin-dashboard-ui.js?v=20260331-premium" defer></script>
 </body>
 </html>

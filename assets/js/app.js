@@ -12,6 +12,9 @@
   const analyticsAcquisitionKey = "sharoncraft-analytics-acquisition";
   const analyticsDebugKey = "sharoncraft-ga-debug";
   const approvedReviewsCacheKey = "sharoncraft-approved-reviews-cache";
+  const storageConfig = window.SharonCraftStorage || {};
+  const siteContentSettingsKey = storageConfig.siteContentSettingsKey || "sharoncraft-site-content";
+  const liveSiteContentCacheKey = storageConfig.liveSiteContentCacheKey || "sharoncraft-live-site-content-cache";
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
@@ -36,6 +39,7 @@
     lastGtagHit: "",
     lastGtagHitAt: ""
   };
+  let siteContentOverrides = null;
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -48,6 +52,17 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function normalizeWhatsAppNumber(value) {
+    const digits = String(value || "").replace(/\D+/g, "");
+    if (digits.startsWith("254")) {
+      return digits;
+    }
+    if (digits.startsWith("0")) {
+      return `254${digits.slice(1)}`;
+    }
+    return digits;
   }
 
   function clampRating(value) {
@@ -969,10 +984,363 @@
     node.setAttribute("content", value);
   }
 
+  function parseStoredSiteContent(key) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function readStoredSiteContent() {
+    return parseStoredSiteContent(siteContentSettingsKey) || parseStoredSiteContent(liveSiteContentCacheKey);
+  }
+
+  function getPathValue(source, path) {
+    return String(path || "")
+      .split(".")
+      .filter(Boolean)
+      .reduce(function (current, segment) {
+        if (!current || typeof current !== "object") {
+          return undefined;
+        }
+
+        if (/^\d+$/.test(segment)) {
+          return current[Number(segment)];
+        }
+
+        return current[segment];
+      }, source);
+  }
+
+  function applyTextOverride(selector, value, options) {
+    const target = document.querySelector(selector);
+    const normalizedValue = value === undefined || value === null ? "" : String(value);
+    if (!target || !normalizedValue) {
+      return;
+    }
+
+    if (options && options.html) {
+      target.innerHTML = normalizedValue;
+      return;
+    }
+
+    target.textContent = normalizedValue;
+  }
+
+  function applyLinkOverride(selector, config) {
+    const target = document.querySelector(selector);
+    const settings = config && typeof config === "object" ? config : {};
+    if (!target) {
+      return;
+    }
+
+    if (normalizeText(settings.label)) {
+      target.textContent = settings.label;
+    }
+    if (normalizeText(settings.href)) {
+      target.href = settings.href;
+    }
+  }
+
+  function applyImageOverride(selector, config) {
+    const target = document.querySelector(selector);
+    const settings = config && typeof config === "object" ? config : {};
+    if (!target || !normalizeText(settings.src)) {
+      return;
+    }
+
+    target.src = settings.src;
+    if (normalizeText(settings.alt)) {
+      target.alt = settings.alt;
+    }
+  }
+
+  function mergeBrandingIntoSiteData(branding) {
+    const source = branding && typeof branding === "object" ? branding : {};
+    if (normalizeText(source.siteName)) {
+      data.site.name = normalizeText(source.siteName);
+    }
+    if (normalizeText(source.siteTagline)) {
+      data.site.tagline = normalizeText(source.siteTagline);
+    }
+    if (normalizeText(source.promo)) {
+      data.site.promo = normalizeText(source.promo);
+    }
+    if (normalizeText(source.phone)) {
+      data.site.phone = normalizeText(source.phone);
+    }
+    if (normalizeText(source.email)) {
+      data.site.email = normalizeText(source.email);
+    }
+    if (normalizeText(source.location)) {
+      data.site.location = normalizeText(source.location);
+    }
+    if (normalizeText(source.whatsapp)) {
+      data.site.whatsapp = normalizeWhatsAppNumber(source.whatsapp);
+    }
+  }
+
+  function applyBrandingOverrides(branding) {
+    const source = branding && typeof branding === "object" ? branding : {};
+    const logoImage = normalizeText(source.logoImage);
+    const logoAlt = normalizeText(source.logoAlt) || `${data.site.name || "SharonCraft"} logo`;
+    const faviconImage = normalizeText(source.faviconImage);
+    const appleTouchIcon = normalizeText(source.appleTouchIcon);
+
+    if (faviconImage) {
+      document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach(function (node) {
+        node.href = faviconImage;
+      });
+    }
+
+    if (appleTouchIcon) {
+      const target = document.head.querySelector('link[rel="apple-touch-icon"]');
+      if (target) {
+        target.href = appleTouchIcon;
+      }
+    }
+
+    if (logoImage) {
+      document.querySelectorAll(".brand-logo").forEach(function (image) {
+        image.src = logoImage;
+        image.alt = logoAlt;
+      });
+    }
+  }
+
+  function applyHomeContentOverrides(content) {
+    const home = content && content.home;
+    if (!home || typeof home !== "object") {
+      return;
+    }
+
+    [
+      { selector: "#home-hero-note-1-title", path: "heroNotes.0.title" },
+      { selector: "#home-hero-note-1-text", path: "heroNotes.0.text" },
+      { selector: "#home-hero-note-2-title", path: "heroNotes.1.title" },
+      { selector: "#home-hero-note-2-text", path: "heroNotes.1.text" },
+      { selector: "#home-hero-note-3-title", path: "heroNotes.2.title" },
+      { selector: "#home-hero-note-3-text", path: "heroNotes.2.text" },
+      { selector: "#home-searches-kicker", path: "popularSearches.kicker" },
+      { selector: "#home-searches-title", path: "popularSearches.title" },
+      { selector: "#home-searches-description", path: "popularSearches.description" },
+      { selector: "#home-guides-kicker", path: "buyingGuides.kicker" },
+      { selector: "#home-guides-title", path: "buyingGuides.title" },
+      { selector: "#home-guides-description", path: "buyingGuides.description" },
+      { selector: "#home-story-kicker", path: "story.kicker" },
+      { selector: "#home-story-title", path: "story.title" },
+      { selector: "#home-story-description", path: "story.description" },
+      { selector: "#home-order-kicker", path: "ordering.kicker" },
+      { selector: "#home-order-title", path: "ordering.title" },
+      { selector: "#home-order-step-1-title", path: "ordering.steps.0.title" },
+      { selector: "#home-order-step-1-text", path: "ordering.steps.0.text" },
+      { selector: "#home-order-step-2-title", path: "ordering.steps.1.title" },
+      { selector: "#home-order-step-2-text", path: "ordering.steps.1.text" },
+      { selector: "#home-order-step-3-title", path: "ordering.steps.2.title" },
+      { selector: "#home-order-step-3-text", path: "ordering.steps.2.text" },
+      { selector: "#home-client-love-kicker", path: "clientLove.kicker" },
+      { selector: "#home-client-love-title", path: "clientLove.title" },
+      { selector: "#home-services-kicker", path: "servicesFaq.kicker" },
+      { selector: "#home-services-title", path: "servicesFaq.title" },
+      { selector: "#home-new-kicker", path: "newArrivals.kicker" },
+      { selector: "#home-new-title", path: "newArrivals.title" }
+    ].forEach(function (binding) {
+      applyTextOverride(binding.selector, getPathValue(home, binding.path));
+    });
+
+    [0, 1, 2].forEach(function (index) {
+      applyImageOverride(`#home-search-card-${index + 1}-image`, {
+        src: getPathValue(home, `popularSearches.cards.${index}.image`),
+        alt: getPathValue(home, `popularSearches.cards.${index}.imageAlt`)
+      });
+      applyTextOverride(`#home-search-card-${index + 1}-title`, getPathValue(home, `popularSearches.cards.${index}.title`));
+      applyTextOverride(`#home-search-card-${index + 1}-text`, getPathValue(home, `popularSearches.cards.${index}.text`));
+      applyLinkOverride(`#home-search-card-${index + 1}-link`, {
+        label: getPathValue(home, `popularSearches.cards.${index}.label`),
+        href: getPathValue(home, `popularSearches.cards.${index}.href`)
+      });
+
+      applyImageOverride(`#home-guide-card-${index + 1}-image`, {
+        src: getPathValue(home, `buyingGuides.cards.${index}.image`),
+        alt: getPathValue(home, `buyingGuides.cards.${index}.imageAlt`)
+      });
+      applyTextOverride(`#home-guide-card-${index + 1}-title`, getPathValue(home, `buyingGuides.cards.${index}.title`));
+      applyTextOverride(`#home-guide-card-${index + 1}-text`, getPathValue(home, `buyingGuides.cards.${index}.text`));
+      applyLinkOverride(`#home-guide-card-${index + 1}-link`, {
+        label: getPathValue(home, `buyingGuides.cards.${index}.label`),
+        href: getPathValue(home, `buyingGuides.cards.${index}.href`)
+      });
+
+      applyImageOverride(`#home-story-image-${index + 1}`, {
+        src: getPathValue(home, `story.images.${index}.src`),
+        alt: getPathValue(home, `story.images.${index}.alt`)
+      });
+    });
+
+    applyLinkOverride("#home-story-primary-link", {
+      label: getPathValue(home, "story.primaryLabel"),
+      href: getPathValue(home, "story.primaryHref")
+    });
+    applyLinkOverride("#home-story-secondary-link", {
+      label: getPathValue(home, "story.secondaryLabel"),
+      href: getPathValue(home, "story.secondaryHref")
+    });
+    applyLinkOverride("#home-order-primary-link", {
+      label: getPathValue(home, "ordering.primaryLabel"),
+      href: getPathValue(home, "ordering.primaryHref")
+    });
+    applyLinkOverride("#home-order-secondary-link", {
+      label: getPathValue(home, "ordering.secondaryLabel"),
+      href: getPathValue(home, "ordering.secondaryHref")
+    });
+  }
+
+  function applyAboutContentOverrides(content) {
+    const about = content && content.about;
+    if (!about || typeof about !== "object") {
+      return;
+    }
+
+    [
+      { selector: "#about-hero-kicker", path: "hero.kicker" },
+      { selector: "#about-hero-title", path: "hero.title" },
+      { selector: "#about-hero-text-1", path: "hero.text1" },
+      { selector: "#about-hero-text-2", path: "hero.text2" },
+      { selector: "#about-value-1-title", path: "values.0.title" },
+      { selector: "#about-value-1-text", path: "values.0.text" },
+      { selector: "#about-value-2-title", path: "values.1.title" },
+      { selector: "#about-value-2-text", path: "values.1.text" },
+      { selector: "#about-value-3-title", path: "values.2.title" },
+      { selector: "#about-value-3-text", path: "values.2.text" },
+      { selector: "#about-culture-kicker", path: "culture.kicker" },
+      { selector: "#about-culture-title", path: "culture.title" },
+      { selector: "#about-culture-text", path: "culture.text" },
+      { selector: "#about-faq-kicker", path: "faq.kicker" },
+      { selector: "#about-faq-title", path: "faq.title" }
+    ].forEach(function (binding) {
+      applyTextOverride(binding.selector, getPathValue(about, binding.path), binding.html ? { html: true } : undefined);
+    });
+
+    [0, 1].forEach(function (index) {
+      applyImageOverride(`#about-gallery-image-${index + 1}`, {
+        src: getPathValue(about, `hero.gallery.${index}.src`),
+        alt: getPathValue(about, `hero.gallery.${index}.alt`)
+      });
+    });
+
+    [0, 1, 2].forEach(function (index) {
+      applyImageOverride(`#about-culture-image-${index + 1}`, {
+        src: getPathValue(about, `culture.images.${index}.src`),
+        alt: getPathValue(about, `culture.images.${index}.alt`)
+      });
+    });
+
+    [0, 1, 2, 3].forEach(function (index) {
+      applyTextOverride(`#about-faq-${index + 1}-question`, getPathValue(about, `faq.items.${index}.question`));
+      applyTextOverride(`#about-faq-${index + 1}-answer`, getPathValue(about, `faq.items.${index}.answer`), { html: true });
+    });
+  }
+
+  function applyShopContentOverrides(content) {
+    const shop = content && content.shop;
+    if (!shop || typeof shop !== "object") {
+      return;
+    }
+
+    [
+      { selector: "#shop-hero-kicker", path: "hero.kicker" },
+      { selector: "#shop-hero-title", path: "hero.title" },
+      { selector: "#shop-hero-description", path: "hero.description" },
+      { selector: "#shop-refine-kicker", path: "refine.kicker" },
+      { selector: "#shop-refine-title", path: "refine.title" },
+      { selector: "#shop-guides-kicker", path: "guides.kicker" },
+      { selector: "#shop-guides-title", path: "guides.title" },
+      { selector: "#shop-guides-description", path: "guides.description" },
+      { selector: "#shop-help-kicker", path: "help.kicker" },
+      { selector: "#shop-help-title", path: "help.title" },
+      { selector: "#shop-help-description", path: "help.description" },
+      { selector: "#shop-trust-kicker", path: "trust.kicker" },
+      { selector: "#shop-trust-title", path: "trust.title" },
+      { selector: "#shop-trust-description", path: "trust.description" }
+    ].forEach(function (binding) {
+      applyTextOverride(binding.selector, getPathValue(shop, binding.path));
+    });
+
+    [0, 1, 2].forEach(function (index) {
+      applyImageOverride(`#shop-guide-card-${index + 1}-image`, {
+        src: getPathValue(shop, `guides.cards.${index}.image`),
+        alt: getPathValue(shop, `guides.cards.${index}.imageAlt`)
+      });
+      applyTextOverride(`#shop-guide-card-${index + 1}-title`, getPathValue(shop, `guides.cards.${index}.title`));
+      applyTextOverride(`#shop-guide-card-${index + 1}-text`, getPathValue(shop, `guides.cards.${index}.text`));
+      applyLinkOverride(`#shop-guide-card-${index + 1}-link`, {
+        label: getPathValue(shop, `guides.cards.${index}.label`),
+        href: getPathValue(shop, `guides.cards.${index}.href`)
+      });
+    });
+  }
+
+  function applyJournalContentOverrides(content) {
+    const journal = content && content.journal;
+    if (!journal || typeof journal !== "object") {
+      return;
+    }
+
+    [
+      { selector: "#journal-hero-kicker", path: "hero.kicker" },
+      { selector: "#journal-hero-title", path: "hero.title" },
+      { selector: "#journal-hero-description", path: "hero.description" },
+      { selector: "#journal-guides-kicker", path: "guides.kicker" },
+      { selector: "#journal-guides-title", path: "guides.title" },
+      { selector: "#journal-guides-description", path: "guides.description" }
+    ].forEach(function (binding) {
+      applyTextOverride(binding.selector, getPathValue(journal, binding.path));
+    });
+
+    [0, 1, 2, 3, 4].forEach(function (index) {
+      applyTextOverride(`#journal-card-${index + 1}-kicker`, getPathValue(journal, `cards.${index}.kicker`));
+      applyTextOverride(`#journal-card-${index + 1}-title`, getPathValue(journal, `cards.${index}.title`));
+      applyTextOverride(`#journal-card-${index + 1}-text`, getPathValue(journal, `cards.${index}.text`));
+      applyLinkOverride(`#journal-card-${index + 1}-link`, {
+        label: getPathValue(journal, `cards.${index}.label`),
+        href: getPathValue(journal, `cards.${index}.href`)
+      });
+    });
+  }
+
+  function applySiteContentOverrides(content) {
+    if (!content || typeof content !== "object") {
+      return;
+    }
+
+    applyBrandingOverrides(content.branding);
+
+    const currentPage = normalizeText(document.body && document.body.dataset && document.body.dataset.page);
+    if (currentPage === "home") {
+      applyHomeContentOverrides(content);
+    }
+    if (currentPage === "about") {
+      applyAboutContentOverrides(content);
+    }
+    if (currentPage === "shop") {
+      applyShopContentOverrides(content);
+    }
+    if (currentPage === "journal") {
+      applyJournalContentOverrides(content);
+    }
+  }
+
   function setPageMetadata(options) {
     const settings = options || {};
     const title = normalizeText(settings.title) || document.title || data.site.name;
     const description = normalizeText(settings.description) || data.site.tagline;
+    const keywords = normalizeText(settings.keywords);
     const path = normalizeText(settings.path) || window.location.pathname;
     const image = normalizeText(settings.image) || "assets/images/custom-occasion-beadwork-46mokm.webp";
     const imageAlt = normalizeText(settings.imageAlt) || title;
@@ -988,6 +1356,14 @@
       meta.name = "description";
       return meta;
     }, description);
+
+    if (keywords) {
+      setHeadValue('meta[name="keywords"]', function () {
+        const meta = document.createElement("meta");
+        meta.name = "keywords";
+        return meta;
+      }, keywords);
+    }
 
     let canonical = document.head.querySelector('link[rel="canonical"]');
     if (!canonical) {
@@ -2378,9 +2754,9 @@
       <footer class="site-footer">
         <div class="container footer-grid">
           <section>
-            <span class="section-kicker">SharonCraft</span>
-            <h2>Colorful handmade beadwork for homes, gifts, and joyful moments.</h2>
-            <p>${data.site.tagline}</p>
+            <span class="section-kicker">${data.site.name || "SharonCraft"}</span>
+            <h2>${data.site.tagline || "Colorful handmade beadwork for homes, gifts, and joyful moments."}</h2>
+            <p>${data.site.promo || data.site.tagline}</p>
           </section>
           <section>
             <h3>Contact</h3>
@@ -2683,6 +3059,11 @@
       }
     }
 
+    siteContentOverrides = readStoredSiteContent();
+    if (siteContentOverrides) {
+      mergeBrandingIntoSiteData(siteContentOverrides.branding);
+    }
+
     await unregisterLegacyRootServiceWorker();
     ensureAnalyticsDebugPanel();
     bindAnalyticsEvents();
@@ -2709,6 +3090,7 @@
     });
     renderHeader();
     renderFooter();
+    applySiteContentOverrides(siteContentOverrides);
     initReveal();
     renderCartUi();
     startCartTimer();
