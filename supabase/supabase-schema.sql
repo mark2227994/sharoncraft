@@ -88,7 +88,12 @@ create table if not exists public.orders (
   updated_at timestamptz not null default now()
 );
 
+alter table public.orders add column if not exists checkout_reference text not null default '';
+alter table public.orders add column if not exists payment_method text not null default '';
+alter table public.orders add column if not exists payment_reference text not null default '';
+
 create index if not exists orders_created_at_idx on public.orders(created_at desc);
+create index if not exists orders_checkout_reference_idx on public.orders(checkout_reference);
 create index if not exists orders_customer_phone_idx on public.orders(customer_phone);
 create index if not exists orders_status_idx on public.orders(status);
 
@@ -137,10 +142,37 @@ create table if not exists public.mpesa_checkouts (
   updated_at timestamptz not null default now()
 );
 
+alter table public.mpesa_checkouts add column if not exists order_ids jsonb not null default '[]'::jsonb;
+
 create index if not exists mpesa_checkouts_created_at_idx on public.mpesa_checkouts(created_at desc);
 create index if not exists mpesa_checkouts_reference_idx on public.mpesa_checkouts(reference);
 create index if not exists mpesa_checkouts_status_idx on public.mpesa_checkouts(status);
 create index if not exists mpesa_checkouts_checkout_request_idx on public.mpesa_checkouts(checkout_request_id);
+
+create table if not exists public.whatsapp_notifications (
+  id bigint generated always as identity primary key,
+  event_type text not null default '',
+  template_name text not null default '',
+  template_language text not null default '',
+  provider text not null default '',
+  recipient_phone text not null default '',
+  checkout_reference text not null default '',
+  order_ids jsonb not null default '[]'::jsonb,
+  status text not null default 'pending' check (
+    status = any (array['pending', 'sent', 'failed', 'skipped'])
+  ),
+  provider_message_id text not null default '',
+  error_message text not null default '',
+  request_payload jsonb not null default '{}'::jsonb,
+  response_payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists whatsapp_notifications_created_at_idx on public.whatsapp_notifications(created_at desc);
+create index if not exists whatsapp_notifications_checkout_reference_idx on public.whatsapp_notifications(checkout_reference);
+create index if not exists whatsapp_notifications_status_idx on public.whatsapp_notifications(status);
+create index if not exists whatsapp_notifications_event_type_idx on public.whatsapp_notifications(event_type);
 
 alter table public.products enable row level security;
 alter table public.site_settings enable row level security;
@@ -149,6 +181,7 @@ alter table public.admin_users enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_tracking enable row level security;
 alter table public.mpesa_checkouts enable row level security;
+alter table public.whatsapp_notifications enable row level security;
 
 drop policy if exists "Public read products" on public.products;
 create policy "Public read products"
@@ -435,6 +468,19 @@ using (
 drop policy if exists "Admin read mpesa checkouts" on public.mpesa_checkouts;
 create policy "Admin read mpesa checkouts"
 on public.mpesa_checkouts
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.admin_users au
+    where au.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Admin read whatsapp notifications" on public.whatsapp_notifications;
+create policy "Admin read whatsapp notifications"
+on public.whatsapp_notifications
 for select
 to authenticated
 using (

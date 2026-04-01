@@ -1,0 +1,11 @@
+# SharonCraft llms.txt
+
+> Factual Summary: SharonCraft is a Kenyan-based eCommerce business specializing in authentic, handmade African beadwork and gifts. The product catalog includes beaded necklaces, bracelets, occasion sets (like bridal bead sets), and home decor (like the Kijani Mirror Duo). The core differentiator is their commitment to traditional East African craftsmanship combined with a seamless, mobile-friendly purchasing experience where customers can place orders directly via WhatsApp and pay securely using M-Pesa.
+
+## Top Pages
+
+- [Homepage](https://www.sharoncraft.co.ke/) - Overview of the SharonCraft brand, featured products, and buying process.
+- [Shop](https://www.sharoncraft.co.ke/shop.html) - The complete catalog of handmade beadwork and gifts.
+- [About Us](https://www.sharoncraft.co.ke/about.html) - The cultural inspiration, mission, and story behind SharonCraft.
+- [Categories](https://www.sharoncraft.co.ke/categories.html) - Browse products by specific collections such as Home Decor, Occasion Sets, and Bridal.
+- [Contact](https://www.sharoncraft.co.ke/contact.html) - Contact information, business details, and WhatsApp ordering guidelines.

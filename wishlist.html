@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Wishlist | SharonCraft</title>
+  <meta name="description" content="Review your saved SharonCraft handmade beadwork." />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260331-header-nav" />
+</head>
+<body data-page="wishlist">
+  <div data-site-header></div>
+
+  <main>
+    <section class="page-hero cart-page-hero">
+      <div class="container">
+        <div class="page-hero-copy">
+          <span class="section-kicker">Your Wishlist</span>
+          <h1>Saved for later.</h1>
+          <p>Keep track of the beadwork you love, ready to be added to your cart whenever you decide.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container container-narrow">
+        <section class="cart-page-main" style="grid-column: 1 / -1;">
+          <div class="cart-page-card">
+            <div class="cart-page-card-head">
+              <div>
+                <span class="section-kicker">Saved Pieces</span>
+                <h2>Your favorites</h2>
+              </div>
+              <span id="wishlist-page-count" class="cart-page-count">0 items</span>
+            </div>
+
+            <div id="wishlist-page-empty" class="cart-page-empty">
+              <h3>Your wishlist is empty</h3>
+              <p>Browse the collection and tap the heart icon to save items here.</p>
+              <a class="button button-primary" href="shop.html">Explore Collection</a>
+            </div>
+
+            <div id="wishlist-page-list" class="product-grid" style="margin-top: 1.5rem;"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div data-site-footer></div>
+
+  <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
+  <script src="supabase/supabase-catalog.js?v=20260330-folder-reorg" defer></script>
+  <script src="assets/js/supabase-data-sync.js?v=20260327-live-fix" defer></script>
+  <script src="assets/js/app.js?v=20260401-update-cache-fix" defer></script>
+  <script src="assets/js/wishlist.js?v=1" defer></script>
+</body>
+</html>

@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const shareButton = document.getElementById("product-share");
   const addCartButton = document.getElementById("product-add-cart");
   const viewCartButton = document.getElementById("product-view-cart");
+  const wishlistButton = document.getElementById("product-wishlist");
   const stickyBar = document.getElementById("product-sticky-bar");
   const stickyBuyButton = document.getElementById("product-sticky-buy");
   const stickyCartButton = document.getElementById("product-sticky-cart");
@@ -110,6 +111,17 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   if (stickyPrice) {
     stickyPrice.textContent = utils.formatCurrency(product.price);
+  }
+
+  if (wishlistButton) {
+    wishlistButton.dataset.toggleWishlist = product.id;
+    const updateWishlistUI = () => {
+      const isSaved = utils.getWishlist().includes(product.id);
+      wishlistButton.classList.toggle("is-active", isSaved);
+      wishlistButton.textContent = isSaved ? "Remove from Wishlist" : "Save to Wishlist";
+    };
+    updateWishlistUI();
+    window.addEventListener("sharoncraft-wishlist-updated", updateWishlistUI);
   }
 
   if (limitedCopy) {

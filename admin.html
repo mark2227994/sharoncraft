@@ -409,7 +409,12 @@
         </div>
       </nav>
 
-      <section class="admin-tab-panel is-active" data-admin-panel="workspace">
+      
+      <!-- ========================================== -->
+      <!-- MODULE: PRODUCTS FLOW                        -->
+      <!-- ========================================== -->
+
+<section class="admin-tab-panel is-active" data-admin-panel="workspace">
         <div class="admin-workspace">
           <section class="admin-panel admin-editor-panel">
             <div class="admin-panel-header">
@@ -1240,7 +1245,53 @@
         </section>
       </section>
 
-      <section class="admin-tab-panel" data-admin-panel="orders">
+      <section class="admin-tab-panel" data-admin-panel="assets">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Photo Flow</span>
+            <h2>Find the right image quickly, then push it straight into the product draft.</h2>
+            <p>Search by file name, choose the strongest photo first, and keep the gallery focused on useful extra angles.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Search</span>
+            <span>Use as main</span>
+            <span>Add to gallery</span>
+          </div>
+        </article>
+        <section class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Assets</span>
+              <h2>Image Library</h2>
+            </div>
+          </div>
+          <p class="admin-panel-muted">Search by file name, then use `Use as Main` or `Add to Gallery` to speed up product setup. After updating the image manifest, tap `Refresh Gallery` here instead of reloading the whole admin page.</p>
+          <div class="admin-help-grid">
+            <article class="admin-help-card">
+              <strong>Main image</strong>
+              <p>Choose the clearest photo with the strongest first impression. This is the one most shoppers notice first.</p>
+            </article>
+            <article class="admin-help-card">
+              <strong>Gallery images</strong>
+              <p>Add only the extra photos that show a new angle, a detail, or how the product looks when worn or used.</p>
+            </article>
+            <article class="admin-help-card">
+              <strong>Search tip</strong>
+              <p>Type part of the file name from the camera or WhatsApp image to find it faster without scrolling through everything.</p>
+            </article>
+          </div>
+          <div class="admin-list-toolbar admin-assets-toolbar">
+            <input id="admin-image-search" type="search" placeholder="Search image file names" />
+            <button class="button button-secondary" id="admin-refresh-gallery" type="button">Refresh Gallery</button>
+          </div>
+          <div id="admin-image-library" class="admin-image-library"></div>
+        </section>
+          </section>
+      <!-- ========================================== -->
+      <!-- MODULE: SELLING FLOW                        -->
+      <!-- ========================================== -->
+
+<section class="admin-tab-panel" data-admin-panel="orders">
         <article class="admin-tab-intro">
           <div>
             <span class="section-kicker">Orders Workflow</span>
@@ -1913,55 +1964,50 @@
         </div>
       </section>
 
-      <section class="admin-tab-panel" data-admin-panel="replies">
+      <section class="admin-tab-panel" data-admin-panel="bundles">
         <article class="admin-tab-intro">
           <div>
-            <span class="section-kicker">Reply Flow</span>
-            <h2>Save short messages you can personalize quickly without sounding robotic.</h2>
-            <p>Build one reply at a time, keep it warm, then load and copy it when a similar customer question comes in.</p>
+            <span class="section-kicker">Offer Flow</span>
+            <h2>Create bundles that are easy to sell, then keep the bigger business goal visible.</h2>
+            <p>This page combines product offers with growth tracking so promotions still support the kiosk plan instead of becoming random discounts.</p>
           </div>
           <div class="admin-tab-tags">
-            <span>Warm</span>
-            <span>Short</span>
-            <span>Reusable</span>
-            <span>Easy to edit</span>
+            <span>Bundles</span>
+            <span>Savings</span>
+            <span>Kiosk goal</span>
+            <span>Monthly growth</span>
           </div>
         </article>
         <div class="admin-layout admin-layout-wide">
           <section class="admin-panel">
             <div class="admin-panel-header">
               <div>
-                <span class="section-kicker">Replies</span>
-                <h2>WhatsApp Reply Templates</h2>
+                <span class="section-kicker">Bundle Studio</span>
+                <h2>Offer Builder</h2>
               </div>
             </div>
-            <p class="admin-panel-muted">Save only flexible starter messages here, then personalize each one before sending it to a real customer.</p>
-            <form id="admin-reply-form" class="admin-form">
+            <p class="admin-panel-muted">Choose products that feel natural together, then set one clear bundle price you can post or share quickly.</p>
+            <form id="admin-bundle-form" class="admin-form">
               <section class="admin-form-section">
                 <div class="admin-section-label">
-                  <strong>Template setup</strong>
-                  <p>Give the reply a simple title and choose the kind of conversation it belongs to.</p>
+                  <strong>Bundle basics</strong>
+                  <p>Name the offer, set the bundle price, and add a short note you can reuse in chats or captions.</p>
                 </div>
                 <div class="admin-inline">
-                  <input id="admin-reply-title" type="text" placeholder="Template title" />
-                  <select id="admin-reply-category">
-                    <option value="new-inquiry">New inquiry</option>
-                    <option value="order-follow-up">Order follow up</option>
-                    <option value="payment">Payment</option>
-                    <option value="delivery">Delivery</option>
-                    <option value="custom-order">Custom order</option>
-                  </select>
+                  <input id="admin-bundle-name" type="text" placeholder="Bundle name" />
+                  <input id="admin-bundle-price" type="number" min="0" placeholder="Bundle price" />
                 </div>
+                <textarea id="admin-bundle-note" placeholder="Short bundle note or selling angle"></textarea>
               </section>
               <section class="admin-form-section">
                 <div class="admin-section-label">
-                  <strong>Message body</strong>
-                  <p>Write it as a starter reply, not a final one, so you can still personalize it fast.</p>
+                  <strong>Choose products</strong>
+                  <p>Pick only products that make sense together so the offer feels useful instead of forced.</p>
                 </div>
-                <textarea id="admin-reply-message" placeholder="Write a simple message you can quickly copy to WhatsApp."></textarea>
+                <div id="admin-bundle-product-picker" class="admin-bundle-picker"></div>
               </section>
               <div class="admin-actions">
-                <button class="button button-primary" type="submit">Save Template</button>
+                <button class="button button-primary" type="submit">Save Bundle</button>
               </div>
             </form>
           </section>
@@ -1970,18 +2016,29 @@
             <section class="admin-panel">
               <div class="admin-panel-header">
                 <div>
-                  <span class="section-kicker">Shortcut Tips</span>
-                  <h2>Useful Placeholders</h2>
+                  <span class="section-kicker">Growth Goal</span>
+                  <h2>Kiosk Progress</h2>
                 </div>
               </div>
-              <div class="admin-reply-helper">
-                <span class="admin-summary-tag">[Customer Name]</span>
-                <span class="admin-summary-tag">[Product Name]</span>
-                <span class="admin-summary-tag">[Price]</span>
-                <span class="admin-summary-tag">[Delivery Area]</span>
-                <span class="admin-summary-tag">[M-Pesa Number]</span>
-              </div>
-              <p class="admin-note">Keep replies short, warm, and easy to edit before sending.</p>
+              <p class="admin-panel-muted">Keep the larger target visible so daily selling decisions still support the plan.</p>
+              <form id="admin-goal-form" class="admin-form">
+                <section class="admin-form-section">
+                  <div class="admin-section-label">
+                    <strong>Goal setup</strong>
+                    <p>Save the target, how much has already been set aside, and one note that keeps the goal emotionally clear.</p>
+                  </div>
+                  <div class="admin-inline">
+                    <input id="admin-goal-target" type="number" min="0" placeholder="Kiosk target" />
+                    <input id="admin-goal-saved" type="number" min="0" placeholder="Amount already saved" />
+                  </div>
+                  <textarea id="admin-goal-note" placeholder="What this goal means for the business"></textarea>
+                </section>
+                <div class="admin-actions">
+                  <button class="button button-primary" type="submit">Save Goal</button>
+                </div>
+              </form>
+              <div id="admin-growth-metrics" class="admin-profit-metrics"></div>
+              <div id="admin-goal-card" class="admin-goal-card"></div>
             </section>
           </aside>
         </div>
@@ -1989,11 +2046,115 @@
         <section class="admin-panel admin-section-tight">
           <div class="admin-panel-header">
             <div>
-              <span class="section-kicker">Saved Replies</span>
-              <h2>Template List</h2>
+              <span class="section-kicker">Saved Offers</span>
+              <h2>Bundle List</h2>
             </div>
           </div>
-          <div id="admin-reply-list" class="admin-reply-list"></div>
+          <div id="admin-bundle-metrics" class="admin-profit-metrics"></div>
+          <div id="admin-bundle-list" class="admin-bundle-list"></div>
+        </section>
+
+        <section class="admin-panel admin-section-tight">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Monthly Progress</span>
+              <h2>Growth Timeline</h2>
+            </div>
+          </div>
+          <div id="admin-growth-monthly" class="admin-bundle-list"></div>
+        </section>
+      </section>
+
+      
+      <!-- ========================================== -->
+      <!-- MODULE: MARKETING FLOW                        -->
+      <!-- ========================================== -->
+
+<section class="admin-tab-panel" data-admin-panel="analytics">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Analytics Flow</span>
+            <h2>See what shoppers are viewing, tapping, and sending to WhatsApp.</h2>
+            <p>This screen can now load shared storefront activity from Supabase, with this-browser events still available as a fallback for quick testing.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Product views</span>
+            <span>Add to cart</span>
+            <span>WhatsApp clicks</span>
+          </div>
+        </article>
+        <section class="admin-panel admin-analytics-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Storefront Activity</span>
+              <h2>Analytics Dashboard</h2>
+            </div>
+            <div class="admin-inline-actions">
+              <button class="button button-secondary" id="admin-analytics-refresh" type="button">Refresh Activity</button>
+              <button class="button button-secondary" id="admin-analytics-clear" type="button">Clear Event Log</button>
+            </div>
+          </div>
+          <p class="admin-panel-muted">Sign in to Supabase in this admin to see shared live storefront activity across devices, or keep using the local browser log for quick testing.</p>
+          <div class="admin-analytics-toolbar">
+            <div class="admin-analytics-range" role="group" aria-label="Analytics range">
+              <button class="admin-analytics-range-button" type="button" data-analytics-range="today">Today</button>
+              <button class="admin-analytics-range-button" type="button" data-analytics-range="7d">7 Days</button>
+              <button class="admin-analytics-range-button" type="button" data-analytics-range="30d">30 Days</button>
+            </div>
+            <p id="admin-analytics-range-label" class="admin-panel-muted admin-analytics-range-copy"></p>
+          </div>
+          <div id="admin-analytics-summary" class="admin-analytics-summary"></div>
+          <div class="admin-analytics-layout">
+            <section class="admin-analytics-column">
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Top Converting</span>
+                    <h3>Strongest buyer-intent products</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-conversions" class="admin-analytics-products"></div>
+              </div>
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Top Products</span>
+                    <h3 id="admin-analytics-products-title">Most active products in live activity</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-products" class="admin-analytics-products"></div>
+              </div>
+            </section>
+            <section class="admin-analytics-column">
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Top Sources</span>
+                    <h3>Where visitors are coming from</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-sources" class="admin-analytics-products"></div>
+              </div>
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Top Pages</span>
+                    <h3>Pages pulling the most attention</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-pages" class="admin-analytics-products"></div>
+              </div>
+              <div class="admin-analytics-card">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Recent Events</span>
+                    <h3>Latest shopper actions</h3>
+                  </div>
+                </div>
+                <div id="admin-analytics-feed" class="admin-analytics-feed"></div>
+              </div>
+            </section>
+          </div>
         </section>
       </section>
 
@@ -2121,50 +2282,55 @@
         </div>
       </section>
 
-      <section class="admin-tab-panel" data-admin-panel="bundles">
+      <section class="admin-tab-panel" data-admin-panel="replies">
         <article class="admin-tab-intro">
           <div>
-            <span class="section-kicker">Offer Flow</span>
-            <h2>Create bundles that are easy to sell, then keep the bigger business goal visible.</h2>
-            <p>This page combines product offers with growth tracking so promotions still support the kiosk plan instead of becoming random discounts.</p>
+            <span class="section-kicker">Reply Flow</span>
+            <h2>Save short messages you can personalize quickly without sounding robotic.</h2>
+            <p>Build one reply at a time, keep it warm, then load and copy it when a similar customer question comes in.</p>
           </div>
           <div class="admin-tab-tags">
-            <span>Bundles</span>
-            <span>Savings</span>
-            <span>Kiosk goal</span>
-            <span>Monthly growth</span>
+            <span>Warm</span>
+            <span>Short</span>
+            <span>Reusable</span>
+            <span>Easy to edit</span>
           </div>
         </article>
         <div class="admin-layout admin-layout-wide">
           <section class="admin-panel">
             <div class="admin-panel-header">
               <div>
-                <span class="section-kicker">Bundle Studio</span>
-                <h2>Offer Builder</h2>
+                <span class="section-kicker">Replies</span>
+                <h2>WhatsApp Reply Templates</h2>
               </div>
             </div>
-            <p class="admin-panel-muted">Choose products that feel natural together, then set one clear bundle price you can post or share quickly.</p>
-            <form id="admin-bundle-form" class="admin-form">
+            <p class="admin-panel-muted">Save only flexible starter messages here, then personalize each one before sending it to a real customer.</p>
+            <form id="admin-reply-form" class="admin-form">
               <section class="admin-form-section">
                 <div class="admin-section-label">
-                  <strong>Bundle basics</strong>
-                  <p>Name the offer, set the bundle price, and add a short note you can reuse in chats or captions.</p>
+                  <strong>Template setup</strong>
+                  <p>Give the reply a simple title and choose the kind of conversation it belongs to.</p>
                 </div>
                 <div class="admin-inline">
-                  <input id="admin-bundle-name" type="text" placeholder="Bundle name" />
-                  <input id="admin-bundle-price" type="number" min="0" placeholder="Bundle price" />
+                  <input id="admin-reply-title" type="text" placeholder="Template title" />
+                  <select id="admin-reply-category">
+                    <option value="new-inquiry">New inquiry</option>
+                    <option value="order-follow-up">Order follow up</option>
+                    <option value="payment">Payment</option>
+                    <option value="delivery">Delivery</option>
+                    <option value="custom-order">Custom order</option>
+                  </select>
                 </div>
-                <textarea id="admin-bundle-note" placeholder="Short bundle note or selling angle"></textarea>
               </section>
               <section class="admin-form-section">
                 <div class="admin-section-label">
-                  <strong>Choose products</strong>
-                  <p>Pick only products that make sense together so the offer feels useful instead of forced.</p>
+                  <strong>Message body</strong>
+                  <p>Write it as a starter reply, not a final one, so you can still personalize it fast.</p>
                 </div>
-                <div id="admin-bundle-product-picker" class="admin-bundle-picker"></div>
+                <textarea id="admin-reply-message" placeholder="Write a simple message you can quickly copy to WhatsApp."></textarea>
               </section>
               <div class="admin-actions">
-                <button class="button button-primary" type="submit">Save Bundle</button>
+                <button class="button button-primary" type="submit">Save Template</button>
               </div>
             </form>
           </section>
@@ -2173,29 +2339,18 @@
             <section class="admin-panel">
               <div class="admin-panel-header">
                 <div>
-                  <span class="section-kicker">Growth Goal</span>
-                  <h2>Kiosk Progress</h2>
+                  <span class="section-kicker">Shortcut Tips</span>
+                  <h2>Useful Placeholders</h2>
                 </div>
               </div>
-              <p class="admin-panel-muted">Keep the larger target visible so daily selling decisions still support the plan.</p>
-              <form id="admin-goal-form" class="admin-form">
-                <section class="admin-form-section">
-                  <div class="admin-section-label">
-                    <strong>Goal setup</strong>
-                    <p>Save the target, how much has already been set aside, and one note that keeps the goal emotionally clear.</p>
-                  </div>
-                  <div class="admin-inline">
-                    <input id="admin-goal-target" type="number" min="0" placeholder="Kiosk target" />
-                    <input id="admin-goal-saved" type="number" min="0" placeholder="Amount already saved" />
-                  </div>
-                  <textarea id="admin-goal-note" placeholder="What this goal means for the business"></textarea>
-                </section>
-                <div class="admin-actions">
-                  <button class="button button-primary" type="submit">Save Goal</button>
-                </div>
-              </form>
-              <div id="admin-growth-metrics" class="admin-profit-metrics"></div>
-              <div id="admin-goal-card" class="admin-goal-card"></div>
+              <div class="admin-reply-helper">
+                <span class="admin-summary-tag">[Customer Name]</span>
+                <span class="admin-summary-tag">[Product Name]</span>
+                <span class="admin-summary-tag">[Price]</span>
+                <span class="admin-summary-tag">[Delivery Area]</span>
+                <span class="admin-summary-tag">[M-Pesa Number]</span>
+              </div>
+              <p class="admin-note">Keep replies short, warm, and easy to edit before sending.</p>
             </section>
           </aside>
         </div>
@@ -2203,155 +2358,15 @@
         <section class="admin-panel admin-section-tight">
           <div class="admin-panel-header">
             <div>
-              <span class="section-kicker">Saved Offers</span>
-              <h2>Bundle List</h2>
+              <span class="section-kicker">Saved Replies</span>
+              <h2>Template List</h2>
             </div>
           </div>
-          <div id="admin-bundle-metrics" class="admin-profit-metrics"></div>
-          <div id="admin-bundle-list" class="admin-bundle-list"></div>
-        </section>
-
-        <section class="admin-panel admin-section-tight">
-          <div class="admin-panel-header">
-            <div>
-              <span class="section-kicker">Monthly Progress</span>
-              <h2>Growth Timeline</h2>
-            </div>
-          </div>
-          <div id="admin-growth-monthly" class="admin-bundle-list"></div>
+          <div id="admin-reply-list" class="admin-reply-list"></div>
         </section>
       </section>
 
-      <section class="admin-tab-panel" data-admin-panel="analytics">
-        <article class="admin-tab-intro">
-          <div>
-            <span class="section-kicker">Analytics Flow</span>
-            <h2>See what shoppers are viewing, tapping, and sending to WhatsApp.</h2>
-            <p>This screen can now load shared storefront activity from Supabase, with this-browser events still available as a fallback for quick testing.</p>
-          </div>
-          <div class="admin-tab-tags">
-            <span>Product views</span>
-            <span>Add to cart</span>
-            <span>WhatsApp clicks</span>
-          </div>
-        </article>
-        <section class="admin-panel admin-analytics-panel">
-          <div class="admin-panel-header">
-            <div>
-              <span class="section-kicker">Storefront Activity</span>
-              <h2>Analytics Dashboard</h2>
-            </div>
-            <div class="admin-inline-actions">
-              <button class="button button-secondary" id="admin-analytics-refresh" type="button">Refresh Activity</button>
-              <button class="button button-secondary" id="admin-analytics-clear" type="button">Clear Event Log</button>
-            </div>
-          </div>
-          <p class="admin-panel-muted">Sign in to Supabase in this admin to see shared live storefront activity across devices, or keep using the local browser log for quick testing.</p>
-          <div class="admin-analytics-toolbar">
-            <div class="admin-analytics-range" role="group" aria-label="Analytics range">
-              <button class="admin-analytics-range-button" type="button" data-analytics-range="today">Today</button>
-              <button class="admin-analytics-range-button" type="button" data-analytics-range="7d">7 Days</button>
-              <button class="admin-analytics-range-button" type="button" data-analytics-range="30d">30 Days</button>
-            </div>
-            <p id="admin-analytics-range-label" class="admin-panel-muted admin-analytics-range-copy"></p>
-          </div>
-          <div id="admin-analytics-summary" class="admin-analytics-summary"></div>
-          <div class="admin-analytics-layout">
-            <section class="admin-analytics-column">
-              <div class="admin-analytics-card">
-                <div class="admin-analytics-card-head">
-                  <div>
-                    <span class="section-kicker">Top Converting</span>
-                    <h3>Strongest buyer-intent products</h3>
-                  </div>
-                </div>
-                <div id="admin-analytics-conversions" class="admin-analytics-products"></div>
-              </div>
-              <div class="admin-analytics-card">
-                <div class="admin-analytics-card-head">
-                  <div>
-                    <span class="section-kicker">Top Products</span>
-                    <h3 id="admin-analytics-products-title">Most active products in live activity</h3>
-                  </div>
-                </div>
-                <div id="admin-analytics-products" class="admin-analytics-products"></div>
-              </div>
-            </section>
-            <section class="admin-analytics-column">
-              <div class="admin-analytics-card">
-                <div class="admin-analytics-card-head">
-                  <div>
-                    <span class="section-kicker">Top Sources</span>
-                    <h3>Where visitors are coming from</h3>
-                  </div>
-                </div>
-                <div id="admin-analytics-sources" class="admin-analytics-products"></div>
-              </div>
-              <div class="admin-analytics-card">
-                <div class="admin-analytics-card-head">
-                  <div>
-                    <span class="section-kicker">Top Pages</span>
-                    <h3>Pages pulling the most attention</h3>
-                  </div>
-                </div>
-                <div id="admin-analytics-pages" class="admin-analytics-products"></div>
-              </div>
-              <div class="admin-analytics-card">
-                <div class="admin-analytics-card-head">
-                  <div>
-                    <span class="section-kicker">Recent Events</span>
-                    <h3>Latest shopper actions</h3>
-                  </div>
-                </div>
-                <div id="admin-analytics-feed" class="admin-analytics-feed"></div>
-              </div>
-            </section>
-          </div>
-        </section>
-      </section>
-
-      <section class="admin-tab-panel" data-admin-panel="assets">
-        <article class="admin-tab-intro">
-          <div>
-            <span class="section-kicker">Photo Flow</span>
-            <h2>Find the right image quickly, then push it straight into the product draft.</h2>
-            <p>Search by file name, choose the strongest photo first, and keep the gallery focused on useful extra angles.</p>
-          </div>
-          <div class="admin-tab-tags">
-            <span>Search</span>
-            <span>Use as main</span>
-            <span>Add to gallery</span>
-          </div>
-        </article>
-        <section class="admin-panel">
-          <div class="admin-panel-header">
-            <div>
-              <span class="section-kicker">Assets</span>
-              <h2>Image Library</h2>
-            </div>
-          </div>
-          <p class="admin-panel-muted">Search by file name, then use `Use as Main` or `Add to Gallery` to speed up product setup. After updating the image manifest, tap `Refresh Gallery` here instead of reloading the whole admin page.</p>
-          <div class="admin-help-grid">
-            <article class="admin-help-card">
-              <strong>Main image</strong>
-              <p>Choose the clearest photo with the strongest first impression. This is the one most shoppers notice first.</p>
-            </article>
-            <article class="admin-help-card">
-              <strong>Gallery images</strong>
-              <p>Add only the extra photos that show a new angle, a detail, or how the product looks when worn or used.</p>
-            </article>
-            <article class="admin-help-card">
-              <strong>Search tip</strong>
-              <p>Type part of the file name from the camera or WhatsApp image to find it faster without scrolling through everything.</p>
-            </article>
-          </div>
-          <div class="admin-list-toolbar admin-assets-toolbar">
-            <input id="admin-image-search" type="search" placeholder="Search image file names" />
-            <button class="button button-secondary" id="admin-refresh-gallery" type="button">Refresh Gallery</button>
-          </div>
-          <div id="admin-image-library" class="admin-image-library"></div>
-        </section>
-          </section>
+      
         </div>
       </main>
     </div>
@@ -2414,3 +2429,4 @@
   <script src="assets/js/admin-dashboard-ui.js?v=20260331-premium" defer></script>
 </body>
 </html>
+

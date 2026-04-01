@@ -221,10 +221,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     const code = Number(result && result.resultCode);
     const resultDesc = normalizeText(result && result.resultDesc);
     const receipt = normalizeText(result && result.mpesaReceiptNumber);
+    const orderIds = Array.isArray(result && result.orderIds)
+      ? result.orderIds.map((entry) => normalizeText(entry)).filter(Boolean)
+      : [];
+    const orderSummary = orderIds.length
+      ? orderIds.length === 1
+        ? ` Track it with order ID ${orderIds[0]}.`
+        : ` Track these items with order IDs ${orderIds.join(", ")}.`
+      : "";
 
     if (status === "paid") {
       return {
-        message: `Payment received${receipt ? ` - receipt ${receipt}` : ""}. Your order is now in SharonCraft admin and tracking.`,
+        message: `Payment received${receipt ? ` - receipt ${receipt}` : ""}. Your order is now in SharonCraft admin and tracking.${orderSummary}`,
         tone: "success",
       };
     }

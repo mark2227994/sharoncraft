@@ -1248,6 +1248,50 @@
     `;
   }
 
+  function getWishlist() {
+    try {
+      const stored = window.localStorage.getItem(wishlistStorageKey) || "[]";
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveWishlist(wishlist) {
+    window.localStorage.setItem(wishlistStorageKey, JSON.stringify(wishlist));
+    document.querySelectorAll("[data-wishlist-toggle]").forEach((button) => {
+      const productId = button.dataset.productId;
+      if (productId) {
+        button.classList.toggle("is-active", wishlist.includes(productId));
+      }
+    });
+    window.dispatchEvent(new CustomEvent("sharoncraft-wishlist-updated", { detail: { wishlist } }));
+  }
+
+  function toggleWishlist(productId) {
+    if (!productId) return;
+    let wishlist = getWishlist();
+    if (wishlist.includes(productId)) {
+      wishlist = wishlist.filter((id) => id !== productId);
+    } else {
+      wishlist.push(productId);
+      if (typeof window.showToast === "function") {
+        window.showToast("Saved to wishlist", "success");
+      } else {
+        window.alert("Saved to wishlist");
+      }
+    }
+    saveWishlist(wishlist);
+  }
+
+  function removeFromWishlist(productId) {
+    if (!productId) return;
+    let wishlist = getWishlist();
+    wishlist = wishlist.filter((id) => id !== productId);
+    saveWishlist(wishlist);
+  }
+
   function getCart() {
     try {
       const stored = window.localStorage.getItem(cartStorageKey) || "[]";
@@ -1453,12 +1497,20 @@
     return `/${pageKey}.html`;
   }
 
-  function getFriendlyMpesaStatusMessage(status, resultCode, resultDesc, receiptNumber) {
+  function getFriendlyMpesaStatusMessage(status, resultCode, resultDesc, receiptNumber, orderIds) {
     const normalizedStatus = normalizeText(status).toLowerCase();
     const code = Number(resultCode);
+    const normalizedOrderIds = Array.isArray(orderIds)
+      ? orderIds.map((entry) => normalizeText(entry)).filter(Boolean)
+      : [];
+    const orderSummary = normalizedOrderIds.length
+      ? normalizedOrderIds.length === 1
+        ? ` Track it with order ID ${normalizedOrderIds[0]}.`
+        : ` Track these items with order IDs ${normalizedOrderIds.join(", ")}.`
+      : "";
 
     if (normalizedStatus === "paid") {
-      return `Payment received${normalizeText(receiptNumber) ? ` - receipt ${normalizeText(receiptNumber)}` : ""}. Your order is now in SharonCraft admin and tracking.`;
+      return `Payment received${normalizeText(receiptNumber) ? ` - receipt ${normalizeText(receiptNumber)}` : ""}. Your order is now in SharonCraft admin and tracking.${orderSummary}`;
     }
 
     if (normalizedStatus === "cancelled" || code === 1032) {
@@ -1510,7 +1562,8 @@
           result.status,
           result.resultCode,
           result.resultDesc,
-          result.mpesaReceiptNumber
+          result.mpesaReceiptNumber,
+          result.orderIds
         );
 
         if (result.status === "paid") {
@@ -1958,6 +2011,13 @@
           `
           }
           <div class="header-actions">
+            <form action="shop.html" method="get" class="global-desktop-search" aria-label="Sitewide search">
+              <input type="search" name="q" placeholder="Search products..." value="${escapeHtml(searchValue)}" aria-label="Search keyword" />
+            </form>
+            <a class="account-header-button ${currentPage === "wishlist" ? "is-active" : ""}" href="wishlist.html" aria-label="Open your wishlist">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <span class="account-header-label">Wishlist</span>
+            </a>
             <a class="account-header-button ${currentPage === "account" ? "is-active" : ""}" href="account.html" aria-label="Open your SharonCraft account">
               ${navIconMarkup("account")}
               <span class="account-header-label">Account</span>
@@ -2090,6 +2150,9 @@
               <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
               <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
               <li><a href="order.html">Track an order</a></li>
+              <li><a href="faq.html">FAQ</a></li>
+              <li><a href="returns.html">Returns & Refunds</a></li>
+              <li><a href="terms.html">Terms</a></li>
               <li><a href="privacy.html">Privacy</a></li>
               <li>${data.site.location}</li>
             </ul>
@@ -2438,6 +2501,9 @@
     addToCart,
     openCart,
     closeCart,
+    getWishlist,
+    toggleWishlist,
+    removeFromWishlist,
     ensureCartTimer,
     getTimeRemaining,
     formatTimeRemaining,
