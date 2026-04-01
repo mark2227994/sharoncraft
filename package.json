@@ -7,6 +7,8 @@
     "build:release": "npm run build:seo && node scripts/verify-release.js",
     "build:seo": "node scripts/generate-sitemap.js && node scripts/generate-merchant-feed.js",
     "generate:merchant-feed": "node scripts/generate-merchant-feed.js",
+    "notify:indexnow": "node scripts/notify-indexnow.js",
+    "notify:indexnow:dry": "node scripts/notify-indexnow.js --dry-run",
     "generate:sitemap": "node scripts/generate-sitemap.js",
     "dev": "node scripts/dev-server.js",
     "dev:open": "node scripts/dev-server.js --open",

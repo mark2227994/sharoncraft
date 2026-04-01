@@ -12,6 +12,7 @@ Check these locally first:
 - account page loads without console errors
 - admin page still opens if you changed shared scripts or styling
 - `404.html` and `privacy.html` open correctly
+- `robots.txt`, `llms.txt`, and the IndexNow key file still exist if you changed SEO or AI-discovery files
 - `npm run build:release` before pushing if you want one command that rebuilds SEO files and checks key storefront pages plus local HTML references
 
 ## 2. If you changed Supabase-related logic
@@ -43,6 +44,7 @@ Current working flow:
 2. Commit with a clear message.
 3. Push to `main`.
 4. Wait for the hosting platform to redeploy from GitHub.
+5. Run `npm run notify:indexnow` after the live deploy if you want to notify IndexNow/Bing about the updated URLs.
 
 Example:
 
@@ -63,6 +65,9 @@ Open the live website and check:
 - `contact.html`
 - `404.html`
 - `privacy.html`
+- `robots.txt`
+- `llms.txt`
+- `6e8a6d86-fb64-4afc-a912-0a4c9ee7cb50.txt`
 
 Then test:
 

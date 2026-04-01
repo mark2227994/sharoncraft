@@ -6,6 +6,7 @@ Use this checklist when you want SharonCraft to show up more often in Google, Ge
 
 - Run `npm run build:release`
 - Make sure `robots.txt` still points to `sitemap.xml`
+- Make sure `robots.txt` still allows `OAI-SearchBot` and public search crawlers to access the storefront
 - Confirm new public pages are linked from the homepage or footer
 - Avoid adding important content only inside JavaScript widgets with no HTML fallback
 
@@ -41,6 +42,7 @@ Use this checklist when you want SharonCraft to show up more often in Google, Ge
 - Verify the site in Bing Webmaster Tools
 - Submit the sitemap there too
 - Claim or import the listing in Bing Places
+- Run `npm run notify:indexnow` after major live updates so Bing/Copilot can discover changes faster
 
 ## 6. Publish search-intent pages
 
@@ -87,3 +89,4 @@ Track these every month:
 - Add new article pages when customers ask repeated questions
 - Refresh landing page copy when search trends change
 - Rebuild SEO files with `npm run build:seo` or `npm run build:release`
+- Keep `llms.txt` accurate when the brand story, contact details, or trust pages change
