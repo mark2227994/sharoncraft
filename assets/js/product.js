@@ -214,6 +214,11 @@ document.addEventListener("DOMContentLoaded", async function () {
           url: siteUrl,
           telephone: site.phone || "",
           email: site.email || "",
+          founder: {
+            "@type": "Person",
+            name: "Kelvin Mark",
+            jobTitle: "CEO"
+          },
           sameAs: socialLinks
         }
       }
