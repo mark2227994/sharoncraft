@@ -2,7 +2,7 @@
   const data = window.SharonCraftData;
   const storage = window.SharonCraftStorage;
   const liveCatalog = window.SharonCraftCatalog;
-  const fallbackImage = "assets/images/IMG-20260226-WA0005.jpg";
+  const fallbackImage = "assets/images/IMG-20260226-WA0005.webp";
   const normalizeText = (value) => String(value || "").trim();
   const computeCacheVersion = (value) => {
     const input = JSON.stringify(value || {});
@@ -110,8 +110,8 @@
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
         secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
         image:
-          String(hero.image || fallbackHero.image || "assets/images/IMG-20260226-WA0005.jpg").trim() ||
-          "assets/images/IMG-20260226-WA0005.jpg",
+          String(hero.image || fallbackHero.image || "assets/images/IMG-20260226-WA0005.webp").trim() ||
+          "assets/images/IMG-20260226-WA0005.webp",
         imageAlt:
           String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
           "SharonCraft welcoming beadwork photo",
@@ -121,8 +121,8 @@
         title: String(favorite.title || fallbackFavorite.title || "").trim(),
         description: String(favorite.description || fallbackFavorite.description || "").trim(),
         image:
-          String(favorite.image || fallbackFavorite.image || "assets/images/IMG-20260214-WA0006.jpg").trim() ||
-          "assets/images/IMG-20260214-WA0006.jpg",
+          String(favorite.image || fallbackFavorite.image || "assets/images/IMG-20260214-WA0006.webp").trim() ||
+          "assets/images/IMG-20260214-WA0006.webp",
         imageAlt:
           String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
           "SharonCraft favorite product photo",

@@ -21,63 +21,63 @@ document.addEventListener("DOMContentLoaded", async function () {
   await utils.waitForData();
   const liveCatalogApi = window.SharonCraftCatalog || null;
   const fallbackAvailableImages = [
-    "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.jpeg",
-    "assets/images/d2801c4b-e113-440b-8eaf-fa52ac5703a8_0_watermark.jpeg",
-    "assets/images/handmade-kenyan-beadwork-62apdf.jpeg",
-    "assets/images/authentic-maasai-bracelet-8ei1qd.jpg",
-    "assets/images/sharoncraft-african-necklace-gilyu6.jpg",
-    "assets/images/IMG-20260214-WA0006.jpg",
-    "assets/images/kenyan-bead-decor-mw9yuq.jpg",
-    "assets/images/traditional-bridal-bead-set-pner91.jpg",
-    "assets/images/custom-occasion-beadwork-kqufsh.jpg",
-    "assets/images/IMG-20260226-WA0005.jpg",
-    "assets/images/handmade-african-souvenir-7dgi8p.jpg",
-    "assets/images/nairobi-artisan-jewelry-36egyo.jpg",
-    "assets/images/handmade-kenyan-beadwork-jrpr9r.jpg",
-    "assets/images/authentic-maasai-bracelet-9c0vy1.jpg",
-    "assets/images/sharoncraft-african-necklace-uwyiuy.jpg",
-    "assets/images/kenyan-bead-decor-nxwcav.jpg",
-    "assets/images/traditional-bridal-bead-set-d35cq5.jpg",
-    "assets/images/custom-occasion-beadwork-wap9kh.jpg",
-    "assets/images/handmade-african-souvenir-b84ai7.jpg",
-    "assets/images/nairobi-artisan-jewelry-6zr4il.jpg",
-    "assets/images/handmade-kenyan-beadwork-yossig.jpg",
-    "assets/images/authentic-maasai-bracelet-eb9hav.jpg",
-    "assets/images/sharoncraft-african-necklace-wmwmaf.jpg",
-    "assets/images/kenyan-bead-decor-9kag7s.jpg",
-    "assets/images/traditional-bridal-bead-set-knimvb.jpg",
-    "assets/images/custom-occasion-beadwork-xmia2u.jpg",
-    "assets/images/handmade-african-souvenir-1p2kyj.jpg",
-    "assets/images/nairobi-artisan-jewelry-zocas6.jpg",
-    "assets/images/handmade-kenyan-beadwork-3bexxk.jpg",
-    "assets/images/authentic-maasai-bracelet-7zvhk4.jpg",
-    "assets/images/sharoncraft-african-necklace-n95vta.jpg",
-    "assets/images/kenyan-bead-decor-yhip8u.jpg",
-    "assets/images/traditional-bridal-bead-set-492otc.jpg",
-    "assets/images/custom-occasion-beadwork-46mokm.jpg",
-    "assets/images/handmade-african-souvenir-brt5k2.jpg",
-    "assets/images/nairobi-artisan-jewelry-xfka7l.jpg",
-    "assets/images/handmade-kenyan-beadwork-mi86cs.jpg",
-    "assets/images/authentic-maasai-bracelet-ptfkru.jpg",
-    "assets/images/sharoncraft-african-necklace-e8twpi.jpg",
-    "assets/images/kenyan-bead-decor-hkewyc.jpg",
-    "assets/images/traditional-bridal-bead-set-4z0x4s.jpg",
-    "assets/images/custom-occasion-beadwork-96fk0x.jpg",
-    "assets/images/handmade-african-souvenir-ldj58p.jpg",
-    "assets/images/nairobi-artisan-jewelry-9e1bft.jpg",
+    "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.webp",
+    "assets/images/d2801c4b-e113-440b-8eaf-fa52ac5703a8_0_watermark.webp",
+    "assets/images/handmade-kenyan-beadwork-62apdf.webp",
+    "assets/images/authentic-maasai-bracelet-8ei1qd.webp",
+    "assets/images/sharoncraft-african-necklace-gilyu6.webp",
+    "assets/images/IMG-20260214-WA0006.webp",
+    "assets/images/kenyan-bead-decor-mw9yuq.webp",
+    "assets/images/traditional-bridal-bead-set-pner91.webp",
+    "assets/images/custom-occasion-beadwork-kqufsh.webp",
+    "assets/images/IMG-20260226-WA0005.webp",
+    "assets/images/handmade-african-souvenir-7dgi8p.webp",
+    "assets/images/nairobi-artisan-jewelry-36egyo.webp",
+    "assets/images/handmade-kenyan-beadwork-jrpr9r.webp",
+    "assets/images/authentic-maasai-bracelet-9c0vy1.webp",
+    "assets/images/sharoncraft-african-necklace-uwyiuy.webp",
+    "assets/images/kenyan-bead-decor-nxwcav.webp",
+    "assets/images/traditional-bridal-bead-set-d35cq5.webp",
+    "assets/images/custom-occasion-beadwork-wap9kh.webp",
+    "assets/images/handmade-african-souvenir-b84ai7.webp",
+    "assets/images/nairobi-artisan-jewelry-6zr4il.webp",
+    "assets/images/handmade-kenyan-beadwork-yossig.webp",
+    "assets/images/authentic-maasai-bracelet-eb9hav.webp",
+    "assets/images/sharoncraft-african-necklace-wmwmaf.webp",
+    "assets/images/kenyan-bead-decor-9kag7s.webp",
+    "assets/images/traditional-bridal-bead-set-knimvb.webp",
+    "assets/images/custom-occasion-beadwork-xmia2u.webp",
+    "assets/images/handmade-african-souvenir-1p2kyj.webp",
+    "assets/images/nairobi-artisan-jewelry-zocas6.webp",
+    "assets/images/handmade-kenyan-beadwork-3bexxk.webp",
+    "assets/images/authentic-maasai-bracelet-7zvhk4.webp",
+    "assets/images/sharoncraft-african-necklace-n95vta.webp",
+    "assets/images/kenyan-bead-decor-yhip8u.webp",
+    "assets/images/traditional-bridal-bead-set-492otc.webp",
+    "assets/images/custom-occasion-beadwork-46mokm.webp",
+    "assets/images/handmade-african-souvenir-brt5k2.webp",
+    "assets/images/nairobi-artisan-jewelry-xfka7l.webp",
+    "assets/images/handmade-kenyan-beadwork-mi86cs.webp",
+    "assets/images/authentic-maasai-bracelet-ptfkru.webp",
+    "assets/images/sharoncraft-african-necklace-e8twpi.webp",
+    "assets/images/kenyan-bead-decor-hkewyc.webp",
+    "assets/images/traditional-bridal-bead-set-4z0x4s.webp",
+    "assets/images/custom-occasion-beadwork-96fk0x.webp",
+    "assets/images/handmade-african-souvenir-ldj58p.webp",
+    "assets/images/nairobi-artisan-jewelry-9e1bft.webp",
     "assets/images/kenya bracelete.jpg",
     "assets/images/kenya-flag.svg",
-    "assets/images/handmade-kenyan-beadwork-k7amrw.jpeg",
-    "assets/images/authentic-maasai-bracelet-77ao7w.jpeg",
-    "assets/images/sharoncraft-african-necklace-p1sw79.jpeg",
-    "assets/images/kenyan-bead-decor-kwwvkk.jpeg",
-    "assets/images/traditional-bridal-bead-set-jzgne1.jpeg",
-    "assets/images/custom-occasion-beadwork-jdxyio.jpeg",
-    "assets/images/handmade-african-souvenir-joswzj.jpeg",
-    "assets/images/nairobi-artisan-jewelry-2aw8sc.jpeg"
+    "assets/images/handmade-kenyan-beadwork-k7amrw.webp",
+    "assets/images/authentic-maasai-bracelet-77ao7w.webp",
+    "assets/images/sharoncraft-african-necklace-p1sw79.webp",
+    "assets/images/kenyan-bead-decor-kwwvkk.webp",
+    "assets/images/traditional-bridal-bead-set-jzgne1.webp",
+    "assets/images/custom-occasion-beadwork-jdxyio.webp",
+    "assets/images/handmade-african-souvenir-joswzj.webp",
+    "assets/images/nairobi-artisan-jewelry-2aw8sc.webp"
   ];
   let availableImages = [];
-  const fallbackImage = "assets/images/IMG-20260226-WA0005.jpg";
+  const fallbackImage = "assets/images/IMG-20260226-WA0005.webp";
   const defaultCategorySource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
   const defaultHomeVisualSource =
@@ -3591,7 +3591,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const images = getFormGalleryImages();
     const currentCategory = categoryMap.get(categoryInput.value) || "Collection";
     const currentBadge = badgeInput.value.trim() || "New";
-    const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/IMG-20260226-WA0005.jpg";
+    const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/IMG-20260226-WA0005.webp";
     const currentMomPrice = Number(momPriceInput.value) || 0;
     const currentDeliveryCharge = Number(deliveryChargeInput.value) || 0;
     const currentDeliveryCost = Number(deliveryCostInput.value) || 0;
@@ -5526,7 +5526,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     badgeInput.value = "New";
     featuredInput.checked = false;
     newInput.checked = true;
-    imageInput.value = "assets/images/IMG-20260226-WA0005.jpg";
+    imageInput.value = "assets/images/IMG-20260226-WA0005.webp";
     galleryInput.value = "";
     temporaryMainPreviewSrc = "";
     renderDraftPreview();
@@ -5610,7 +5610,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (button.dataset.action === "remove") {
       images = images.filter((item) => item !== image);
-      imageInput.value = toFormImageValue(images[0] || "assets/images/IMG-20260226-WA0005.jpg");
+      imageInput.value = toFormImageValue(images[0] || "assets/images/IMG-20260226-WA0005.webp");
       temporaryMainPreviewSrc = "";
       syncGalleryTextarea(images.length ? images : [imageInput.value]);
       renderDraftPreview();

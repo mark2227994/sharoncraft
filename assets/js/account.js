@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       title: "SharonCraft Account | Login or Register",
       description: "Create or sign in to your SharonCraft customer account and keep your details ready for future orders.",
       path: "/account.html",
-      image: "assets/images/sharoncraft-logo-transparent.png",
+      image: "assets/images/sharoncraft-logo-transparent.webp",
       type: "website",
     });
   }
