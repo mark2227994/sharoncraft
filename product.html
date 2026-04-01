@@ -10,18 +10,18 @@
   <meta property="og:description" content="View SharonCraft product details, gallery images, pricing, and easy WhatsApp ordering for handmade beadwork in Kenya." />
   <meta property="og:type" content="product" />
   <meta property="og:url" content="https://www.sharoncraft.co.ke/product.html" />
-  <meta property="og:image" content="https://www.sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.webp" />
+  <meta property="og:image" content="https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm.webp" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Product | SharonCraft" />
   <meta name="twitter:description" content="View SharonCraft product details, gallery images, pricing, and easy WhatsApp ordering for handmade beadwork in Kenya." />
-  <meta name="twitter:image" content="https://www.sharoncraft.co.ke/assets/images/IMG-20260226-WA0005.webp" />
+  <meta name="twitter:image" content="https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm.webp" />
   <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.webp" />
   <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.webp" />
   <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260331-header-nav" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260401-mobile-ui-refresh" />
 </head>
 <body data-page="product">
   <div data-site-header></div>
@@ -34,7 +34,7 @@
         <div class="product-layout">
           <section class="product-gallery">
             <div class="product-main-image">
-              <img id="product-main-image" src="assets/images/IMG-20260226-WA0005.webp" alt="SharonCraft product" loading="eager" fetchpriority="high" decoding="async" />
+              <img id="product-main-image" src="assets/images/custom-occasion-beadwork-46mokm.webp" alt="SharonCraft product" loading="eager" fetchpriority="high" decoding="async" />
             </div>
             <div id="product-thumbs" class="thumb-grid"></div>
           </section>
@@ -103,6 +103,59 @@
       </div>
     </section>
 
+    <section class="section product-reviews-section">
+      <div class="container">
+        <div class="product-reviews-grid">
+          <section class="product-reviews-panel">
+            <div class="section-heading product-reviews-heading">
+              <span class="section-kicker">Client Reviews</span>
+              <h2>Give shoppers a calmer, more confident buying moment.</h2>
+              <p id="product-review-summary">Reviews from SharonCraft clients will appear here as they come in.</p>
+            </div>
+            <div id="product-review-list" class="review-list" aria-live="polite"></div>
+            <p id="product-review-empty" class="review-empty">No reviews yet for this piece. Be the first client to share how it looked, felt, and arrived.</p>
+          </section>
+
+          <aside class="review-form-card">
+            <span class="section-kicker">Leave A Review</span>
+            <h3>How did this piece feel in real life?</h3>
+            <p>Short, honest feedback helps the next client shop with more trust.</p>
+            <form id="product-review-form" class="review-form">
+              <div class="review-form-grid">
+                <label>
+                  <span>Your name</span>
+                  <input id="product-review-name" name="name" type="text" maxlength="50" placeholder="Jane W." required />
+                </label>
+                <label>
+                  <span>Location</span>
+                  <input id="product-review-location" name="location" type="text" maxlength="50" placeholder="Nairobi" />
+                </label>
+              </div>
+              <label>
+                <span>Rating</span>
+                <select id="product-review-rating" name="rating" required>
+                  <option value="5">5 stars - Excellent</option>
+                  <option value="4">4 stars - Very good</option>
+                  <option value="3">3 stars - Good</option>
+                  <option value="2">2 stars - Fair</option>
+                  <option value="1">1 star - Needs work</option>
+                </select>
+              </label>
+              <label>
+                <span>Your review</span>
+                <textarea id="product-review-message" name="message" maxlength="500" placeholder="Tell other clients about the size, finish, comfort, delivery, or gifting experience." required></textarea>
+              </label>
+              <div class="review-form-actions">
+                <button class="button button-primary" type="submit">Post My Review</button>
+                <a id="product-review-whatsapp" class="button button-secondary" href="#" target="_blank" rel="noreferrer">Send On WhatsApp</a>
+              </div>
+              <small>Reviews stay simple and product-specific so clients can scan them quickly.</small>
+            </form>
+          </aside>
+        </div>
+      </div>
+    </section>
+
     <section class="section">
       <div class="container">
         <div class="section-heading">
@@ -135,6 +188,6 @@
   <script src="assets/js/supabase-data-sync.js?v=20260327-live-fix" defer></script>
   <script src="assets/js/app.js?v=20260401-update-cache-fix" defer></script>
   <script src="assets/js/mobile-ux.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/product.js?v=20260331-mpesa" defer></script>
+  <script src="assets/js/product.js?v=20260401-reviews-ui" defer></script>
 </body>
 </html>

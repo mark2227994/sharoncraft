@@ -824,7 +824,7 @@
     const title = normalizeText(settings.title) || document.title || data.site.name;
     const description = normalizeText(settings.description) || data.site.tagline;
     const path = normalizeText(settings.path) || window.location.pathname;
-    const image = normalizeText(settings.image) || "assets/images/IMG-20260226-WA0005.webp";
+    const image = normalizeText(settings.image) || "assets/images/custom-occasion-beadwork-46mokm.webp";
     const imageAlt = normalizeText(settings.imageAlt) || title;
     const type = normalizeText(settings.type) || "website";
     const robots = normalizeText(settings.robots) || "index,follow";
@@ -937,6 +937,90 @@
     node.textContent = JSON.stringify(payload);
   }
 
+  function getPublicSocialUrls() {
+    return (Array.isArray(data.site && data.site.socials) ? data.site.socials : [])
+      .map((social) => normalizeText(social && social.url))
+      .filter((url) => url && url !== "#" && !/wa\.me|whatsapp/i.test(url));
+  }
+
+  function setSiteStructuredData() {
+    const siteUrl = new URL("/", window.location.origin).href;
+    const organizationId = `${siteUrl}#organization`;
+    const storeId = `${siteUrl}#store`;
+    const websiteId = `${siteUrl}#website`;
+    const storeImage = absoluteUrl("assets/images/custom-occasion-beadwork-46mokm.webp");
+    const socialUrls = getPublicSocialUrls();
+    const description = [
+      `${data.site.name} is a handmade Kenyan beadwork shop based in Nairobi.`,
+      "The store offers jewelry, bridal bead sets, gift ideas, cultural decor, and WhatsApp-friendly ordering."
+    ].join(" ");
+    const organization = {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: data.site.name || "SharonCraft",
+      url: siteUrl,
+      logo: absoluteUrl("assets/images/sharoncraft-logo-transparent.webp"),
+      image: storeImage,
+      email: normalizeText(data.site.email),
+      telephone: normalizeText(data.site.phone),
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Nairobi",
+        addressCountry: "KE"
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: normalizeText(data.site.email),
+        telephone: normalizeText(data.site.phone),
+        areaServed: "KE",
+        availableLanguage: ["en"]
+      }
+    };
+
+    if (socialUrls.length) {
+      organization.sameAs = socialUrls;
+    }
+
+    setStructuredData("site-organization", {
+      "@context": "https://schema.org",
+      "@graph": [
+        organization,
+        {
+          "@type": "OnlineStore",
+          "@id": storeId,
+          name: data.site.name || "SharonCraft",
+          url: siteUrl,
+          image: storeImage,
+          description,
+          slogan: normalizeText(data.site.tagline),
+          brand: {
+            "@id": organizationId
+          },
+          areaServed: {
+            "@type": "Country",
+            name: "Kenya"
+          },
+          paymentAccepted: "M-Pesa",
+          hasMerchantReturnPolicy: {
+            "@type": "MerchantReturnPolicy",
+            merchantReturnLink: absoluteUrl("returns.html")
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": websiteId,
+          url: siteUrl,
+          name: data.site.name || "SharonCraft",
+          description: normalizeText(data.site.tagline),
+          publisher: {
+            "@id": organizationId
+          }
+        }
+      ]
+    });
+  }
+
   function getProductImages(product) {
     const imageList = []
       .concat(Array.isArray(product && product.images) ? product.images : [])
@@ -946,7 +1030,7 @@
       .filter(Boolean);
 
     const uniqueImages = imageList.filter((image, index) => imageList.indexOf(image) === index);
-    return uniqueImages.length ? uniqueImages : ["assets/images/IMG-20260226-WA0005.webp"];
+    return uniqueImages.length ? uniqueImages : ["assets/images/custom-occasion-beadwork-46mokm.webp"];
   }
 
   function formatCurrency(value) {
@@ -2129,9 +2213,12 @@
 
     const mpesaMarkup = data.site.mpesaSteps.map((step) => `<li>${step}</li>`).join("");
     const featuredSearchMarkup = [
-      { href: "bridal-bead-sets-kenya.html", label: "Bridal bead sets" },
-      { href: "gift-sets-kenya.html", label: "Gift sets" },
-      { href: "maasai-inspired-bracelets-kenya.html", label: "Maasai-inspired bracelets" }
+      { href: "kenyan-artifacts.html", label: "Kenyan artifacts" },
+      { href: "beaded-earrings-kenya.html", label: "Beaded earrings" },
+      { href: "maasai-jewelry-kenya.html", label: "Maasai jewelry" },
+      { href: "handmade-kenyan-gifts.html", label: "Handmade Kenyan gifts" },
+      { href: "african-home-decor-nairobi.html", label: "African home decor" },
+      { href: "bridal-bead-sets-kenya.html", label: "Bridal bead sets" }
     ]
       .map((link) => `<li><a href="${link.href}">${link.label}</a></li>`)
       .join("");
@@ -2464,6 +2551,7 @@
       flushAnalyticsQueue();
     });
     scheduleAnalyticsFlush(200);
+    setSiteStructuredData();
     trackEvent("page_view", {
       page_title: document.title,
       page_location: window.location.href

@@ -21,63 +21,63 @@ document.addEventListener("DOMContentLoaded", async function () {
   await utils.waitForData();
   const liveCatalogApi = window.SharonCraftCatalog || null;
   const fallbackAvailableImages = [
-    "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.webp",
-    "assets/images/d2801c4b-e113-440b-8eaf-fa52ac5703a8_0_watermark.webp",
-    "assets/images/handmade-kenyan-beadwork-62apdf.webp",
-    "assets/images/authentic-maasai-bracelet-8ei1qd.webp",
-    "assets/images/sharoncraft-african-necklace-gilyu6.webp",
-    "assets/images/IMG-20260214-WA0006.webp",
-    "assets/images/kenyan-bead-decor-mw9yuq.webp",
-    "assets/images/traditional-bridal-bead-set-pner91.webp",
-    "assets/images/custom-occasion-beadwork-kqufsh.webp",
-    "assets/images/IMG-20260226-WA0005.webp",
-    "assets/images/handmade-african-souvenir-7dgi8p.webp",
-    "assets/images/nairobi-artisan-jewelry-36egyo.webp",
-    "assets/images/handmade-kenyan-beadwork-jrpr9r.webp",
-    "assets/images/authentic-maasai-bracelet-9c0vy1.webp",
-    "assets/images/sharoncraft-african-necklace-uwyiuy.webp",
-    "assets/images/kenyan-bead-decor-nxwcav.webp",
-    "assets/images/traditional-bridal-bead-set-d35cq5.webp",
-    "assets/images/custom-occasion-beadwork-wap9kh.webp",
-    "assets/images/handmade-african-souvenir-b84ai7.webp",
-    "assets/images/nairobi-artisan-jewelry-6zr4il.webp",
-    "assets/images/handmade-kenyan-beadwork-yossig.webp",
-    "assets/images/authentic-maasai-bracelet-eb9hav.webp",
-    "assets/images/sharoncraft-african-necklace-wmwmaf.webp",
-    "assets/images/kenyan-bead-decor-9kag7s.webp",
-    "assets/images/traditional-bridal-bead-set-knimvb.webp",
-    "assets/images/custom-occasion-beadwork-xmia2u.webp",
-    "assets/images/handmade-african-souvenir-1p2kyj.webp",
-    "assets/images/nairobi-artisan-jewelry-zocas6.webp",
-    "assets/images/handmade-kenyan-beadwork-3bexxk.webp",
-    "assets/images/authentic-maasai-bracelet-7zvhk4.webp",
-    "assets/images/sharoncraft-african-necklace-n95vta.webp",
+    "assets/images/2f81aa6f-be3f-4284-bafc-39349accfd40_0_watermark.jpeg",
+    "assets/images/d2801c4b-e113-440b-8eaf-fa52ac5703a8_0_watermark.jpeg",
+    "assets/images/IMG-20260212-WA0020.jpeg",
+    "assets/images/IMG-20260214-WA0004.jpg",
+    "assets/images/IMG-20260214-WA0005.jpg",
     "assets/images/kenyan-bead-decor-yhip8u.webp",
-    "assets/images/traditional-bridal-bead-set-492otc.webp",
+    "assets/images/IMG-20260214-WA0007.jpg",
+    "assets/images/IMG-20260221-WA0000.jpg",
+    "assets/images/IMG-20260221-WA0003.jpg",
     "assets/images/custom-occasion-beadwork-46mokm.webp",
-    "assets/images/handmade-african-souvenir-brt5k2.webp",
-    "assets/images/nairobi-artisan-jewelry-xfka7l.webp",
-    "assets/images/handmade-kenyan-beadwork-mi86cs.webp",
-    "assets/images/authentic-maasai-bracelet-ptfkru.webp",
-    "assets/images/sharoncraft-african-necklace-e8twpi.webp",
-    "assets/images/kenyan-bead-decor-hkewyc.webp",
-    "assets/images/traditional-bridal-bead-set-4z0x4s.webp",
-    "assets/images/custom-occasion-beadwork-96fk0x.webp",
-    "assets/images/handmade-african-souvenir-ldj58p.webp",
-    "assets/images/nairobi-artisan-jewelry-9e1bft.webp",
+    "assets/images/sharoncraft-african-necklace-p1sw79.webp",
+    "assets/images/IMG-20260305-WA0001.jpg",
+    "assets/images/IMG-20260317-WA0003.jpg",
+    "assets/images/IMG_20230923_150506.jpg",
+    "assets/images/IMG_20230923_150515.jpg",
+    "assets/images/IMG_20230923_150524.jpg",
+    "assets/images/IMG_20230923_150542.jpg",
+    "assets/images/IMG_20230927_135101.jpg",
+    "assets/images/IMG_20230927_135109.jpg",
+    "assets/images/IMG_20230927_135118.jpg",
+    "assets/images/IMG_20230927_135122.jpg",
+    "assets/images/IMG_20240316_151005.jpg",
+    "assets/images/IMG_20240316_151014.jpg",
+    "assets/images/IMG_20240316_151021.jpg",
+    "assets/images/IMG_20240316_151041.jpg",
+    "assets/images/IMG_20240719_100801.jpg",
+    "assets/images/IMG_20240729_131535.jpg",
+    "assets/images/IMG_20240729_131552.jpg",
+    "assets/images/IMG_20240729_131556.jpg",
+    "assets/images/IMG_20250604_103830.jpg",
+    "assets/images/IMG_20250606_113904.jpg",
+    "assets/images/IMG_20250606_113910.jpg",
+    "assets/images/IMG_20250606_113919.jpg",
+    "assets/images/IMG_20250606_113933.jpg",
+    "assets/images/IMG_20250606_113948.jpg",
+    "assets/images/IMG_20250610_114035.jpg",
+    "assets/images/IMG_20250712_135532.jpg",
+    "assets/images/IMG_20250816_095238.jpg",
+    "assets/images/IMG_20250819_123219.jpg",
+    "assets/images/IMG_20260115_111952.jpg",
+    "assets/images/IMG_20260116_135128.jpg",
+    "assets/images/IMG_20260116_135132.jpg",
+    "assets/images/IMG_20260116_135140.jpg",
+    "assets/images/IMG_20260116_135153.jpg",
     "assets/images/kenya bracelete.jpg",
     "assets/images/kenya-flag.svg",
-    "assets/images/handmade-kenyan-beadwork-k7amrw.webp",
-    "assets/images/authentic-maasai-bracelet-77ao7w.webp",
-    "assets/images/sharoncraft-african-necklace-p1sw79.webp",
-    "assets/images/kenyan-bead-decor-kwwvkk.webp",
-    "assets/images/traditional-bridal-bead-set-jzgne1.webp",
-    "assets/images/custom-occasion-beadwork-jdxyio.webp",
-    "assets/images/handmade-african-souvenir-joswzj.webp",
-    "assets/images/nairobi-artisan-jewelry-2aw8sc.webp"
+    "assets/images/WhatsApp Image 2026-03-21 at 14.21.15.jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 14.22.49.jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 14.23.21.jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 14.26.24.jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 14.27.00.jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 14.27.14.jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 15.48.32 (1).jpeg",
+    "assets/images/WhatsApp Image 2026-03-21 at 15.48.32.jpeg"
   ];
   let availableImages = [];
-  const fallbackImage = "assets/images/IMG-20260226-WA0005.webp";
+  const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm.webp";
   const defaultCategorySource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
   const defaultHomeVisualSource =
@@ -92,10 +92,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   let defaultCategoryImageMap = buildDefaultCategoryImageMap(categoryCatalog);
 
   function setAvailableImages(imageList) {
+    const sourceImages = Array.isArray(imageList) && imageList.length ? imageList : fallbackAvailableImages;
     availableImages = Array.from(
       new Set(
-        (Array.isArray(imageList) ? imageList : [])
-          .concat(fallbackAvailableImages)
+        sourceImages
           .map((image) => String(image || "").trim())
           .filter(Boolean)
       )
@@ -3591,7 +3591,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const images = getFormGalleryImages();
     const currentCategory = categoryMap.get(categoryInput.value) || "Collection";
     const currentBadge = badgeInput.value.trim() || "New";
-    const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/IMG-20260226-WA0005.webp";
+    const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/custom-occasion-beadwork-46mokm.webp";
     const currentMomPrice = Number(momPriceInput.value) || 0;
     const currentDeliveryCharge = Number(deliveryChargeInput.value) || 0;
     const currentDeliveryCost = Number(deliveryCostInput.value) || 0;
@@ -3644,7 +3644,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               <strong>${product.name}</strong>
               <span>${categoryMap.get(product.category) || product.category}</span>
               <span>${formatPrice(product.price)}</span>
-              <small>${product.featured ? "Featured" : "Standard"} • ${product.newArrival ? "New" : "Collection"} • Profit ${formatPrice(getTotalProfit(product))}</small>
+              <small>${product.featured ? "Featured" : "Standard"} â€¢ ${product.newArrival ? "New" : "Collection"} â€¢ Profit ${formatPrice(getTotalProfit(product))}</small>
             </div>
             <div class="admin-item-actions">
               <button type="button" data-action="edit" data-id="${product.id}">Edit</button>
@@ -4347,7 +4347,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 <div>
                   <strong>${order.customer}</strong>
                   <span>${order.productName} x${order.quantity}</span>
-                  <span>${order.areaName || "No area"} · ${order.phone || "No phone"}</span>
+                  <span>${order.areaName || "No area"} Â· ${order.phone || "No phone"}</span>
                 </div>
                 <span>${formatPrice(order.totalProfit)}</span>
                 <select data-order-status="${order.id}">
@@ -4424,8 +4424,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                   <strong>${order.customer}</strong>
                   <span>${order.productName} x${order.quantity}</span>
                   <span>Order ID: ${order.orderId || order.id}</span>
-                  <span>${order.areaName || "No area"} · ${order.phone || "No phone"}</span>
-                  <span>${formatDate(order.createdAt)} · ${order.orderTotal ? formatPrice(order.orderTotal) : "Total not set"}</span>
+                  <span>${order.areaName || "No area"} Â· ${order.phone || "No phone"}</span>
+                  <span>${formatDate(order.createdAt)} Â· ${order.orderTotal ? formatPrice(order.orderTotal) : "Total not set"}</span>
                   <div class="admin-inline-actions">
                     <button type="button" data-order-copy-id="${order.id}">Copy ID</button>
                     <button type="button" data-order-copy-link="${order.id}">Copy Track Link</button>
@@ -4868,7 +4868,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           <article class="admin-ops-row">
             <div>
               <strong>${area.name}</strong>
-              <span>Client ${formatPrice(area.clientCharge)} · Real cost ${formatPrice(area.realCost)}</span>
+              <span>Client ${formatPrice(area.clientCharge)} Â· Real cost ${formatPrice(area.realCost)}</span>
             </div>
             <strong>${formatPrice(Math.max(0, Number(area.clientCharge) - Number(area.realCost)))}</strong>
             <button type="button" data-delivery-delete="${area.id}">Delete</button>
@@ -5526,7 +5526,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     badgeInput.value = "New";
     featuredInput.checked = false;
     newInput.checked = true;
-    imageInput.value = "assets/images/IMG-20260226-WA0005.webp";
+    imageInput.value = "assets/images/custom-occasion-beadwork-46mokm.webp";
     galleryInput.value = "";
     temporaryMainPreviewSrc = "";
     renderDraftPreview();
@@ -5610,7 +5610,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (button.dataset.action === "remove") {
       images = images.filter((item) => item !== image);
-      imageInput.value = toFormImageValue(images[0] || "assets/images/IMG-20260226-WA0005.webp");
+      imageInput.value = toFormImageValue(images[0] || "assets/images/custom-occasion-beadwork-46mokm.webp");
       temporaryMainPreviewSrc = "";
       syncGalleryTextarea(images.length ? images : [imageInput.value]);
       renderDraftPreview();
@@ -5678,12 +5678,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!kanbanContainer) return;
 
     const categoryEmojis = {
-      "necklaces": "👑",
-      "bracelets": "💍",
-      "home-decor": "🏡",
-      "bags-accessories": "👜",
-      "gift-sets": "🎁",
-      "bridal-occasion": "💐"
+      "necklaces": "ðŸ‘‘",
+      "bracelets": "ðŸ’",
+      "home-decor": "ðŸ¡",
+      "bags-accessories": "ðŸ‘œ",
+      "gift-sets": "ðŸŽ",
+      "bridal-occasion": "ðŸ’"
     };
 
     const categoryNames = {
@@ -5704,7 +5704,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       <div class="admin-kanban-column admin-kanban-column-inbox" data-category="uncategorized">
         <div class="admin-kanban-header">
           <h3 class="admin-kanban-title">
-            <span>📥</span>
+            <span>ðŸ“¥</span>
             Inbox
           </h3>
           <span class="admin-kanban-badge admin-kanban-badge-warning">${uncategorizedProducts.length}</span>
@@ -5720,12 +5720,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                       <p class="admin-kanban-item-name">${product.name}</p>
                       <p class="admin-kanban-item-price">${formatPrice(product.price)}</p>
                     </div>
-                    <span class="admin-kanban-item-icon">⭐</span>
+                    <span class="admin-kanban-item-icon">â­</span>
                   </div>
                 `
                   )
                   .join("")
-              : '<div class="admin-kanban-empty admin-kanban-inbox-empty">✓ All products organized!</div>'
+              : '<div class="admin-kanban-empty admin-kanban-inbox-empty">âœ“ All products organized!</div>'
           }
         </div>
       </div>
@@ -5738,7 +5738,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         <div class="admin-kanban-column" data-category="${category.slug}">
           <div class="admin-kanban-header">
             <h3 class="admin-kanban-title">
-              <span>${categoryEmojis[category.slug] || "📦"}</span>
+              <span>${categoryEmojis[category.slug] || "ðŸ“¦"}</span>
               ${categoryNames[category.slug] || category.slug}
             </h3>
             <span class="admin-kanban-badge">${productsInCategory.length}</span>

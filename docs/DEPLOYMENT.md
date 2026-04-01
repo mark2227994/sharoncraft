@@ -12,6 +12,7 @@ Check these locally first:
 - account page loads without console errors
 - admin page still opens if you changed shared scripts or styling
 - `404.html` and `privacy.html` open correctly
+- `npm run build:release` before pushing if you want one command that rebuilds SEO files and checks key storefront pages plus local HTML references
 
 ## 2. If you changed Supabase-related logic
 

@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       ...Array.from(categorySelect.options)
         .filter((option) => option.value)
         .map((option) => ({ value: option.value, label: option.textContent }))
+        .slice(0, 4)
     ];
 
     chipContainer.innerHTML = categories
@@ -290,7 +291,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             ? `Browse SharonCraft results for ${keyword} and order handmade beadwork quickly on WhatsApp.`
             : "Browse SharonCraft necklaces, bracelets, decor, gift sets, and occasion beadwork, then order quickly on WhatsApp.",
         path: metadataPath,
-        image: sorted[0] && Array.isArray(sorted[0].images) && sorted[0].images[0] ? sorted[0].images[0] : "assets/images/IMG-20260226-WA0005.webp",
+        image: sorted[0] && Array.isArray(sorted[0].images) && sorted[0].images[0] ? sorted[0].images[0] : "assets/images/custom-occasion-beadwork-46mokm.webp",
         imageAlt: sorted[0] && sorted[0].name ? sorted[0].name : "SharonCraft featured collection",
         type: "website"
       });
@@ -303,7 +304,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const productCategory = utils.getCategoryBySlug(product.category);
         const productImages = Array.isArray(product.images) && product.images.length
           ? product.images
-          : ["assets/images/IMG-20260226-WA0005.webp"];
+          : ["assets/images/custom-occasion-beadwork-46mokm.webp"];
         const productUrl = new URL(`/product.html?id=${encodeURIComponent(product.id)}`, window.location.origin).href;
 
         return {
@@ -336,11 +337,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 url: siteUrl,
                 telephone: site.phone || "",
                 email: site.email || "",
-                founder: {
-                  "@type": "Person",
-                  name: "Kelvin Mark",
-                  jobTitle: "CEO"
-                },
                 sameAs: socialLinks
               }
             }

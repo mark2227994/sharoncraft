@@ -493,6 +493,9 @@
     }
     const { data, error } = await supabase.auth.getUser();
     if (error) {
+      if (error.status === 400 || error.message.includes("AuthSessionMissingError") || error.name === "AuthSessionMissingError") {
+        return null;
+      }
       throw error;
     }
     return data && data.user ? data.user : null;
