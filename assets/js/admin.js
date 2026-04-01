@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const goalKey = "sharoncraft-kiosk-goal";
   const mpesaDashboardKey = "sharoncraft-mpesa-dashboard";
   const storefrontAnalyticsKey = "sharoncraft-analytics-events";
+  const approvedReviewsCacheKey = "sharoncraft-approved-reviews-cache";
+  const reviewModerationStorageKey = "sharoncraft-review-moderation-cache";
   const utils = window.SharonCraftUtils;
   // Wait for data to be loaded
   await utils.waitForData();
@@ -887,6 +889,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const analyticsRefreshButton = document.getElementById("admin-analytics-refresh");
   const analyticsClearButton = document.getElementById("admin-analytics-clear");
   const analyticsRangeButtons = document.querySelectorAll("[data-analytics-range]");
+  const reviewsSummary = document.getElementById("admin-reviews-summary");
+  const reviewPendingList = document.getElementById("admin-review-pending-list");
+  const reviewApprovedList = document.getElementById("admin-review-approved-list");
+  const reviewRefreshButton = document.getElementById("admin-reviews-refresh");
   const liveAuthState = document.getElementById("admin-live-auth-state");
   const liveAuthForm = document.getElementById("admin-live-auth-form");
   const liveEmailInput = document.getElementById("admin-live-email");
@@ -914,6 +920,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   let selectedCustomerKey = "";
   let selectedDeliveryOrderId = "";
   let remoteStorefrontAnalyticsEvents = [];
+  let remoteReviewSubmissions = [];
+  let approvedStorefrontReviews = loadLocalApprovedReviews();
+  let reviewModerationState = loadLocalReviewModeration();
   let analyticsDataSource = "browser";
   let analyticsRange = String(window.localStorage.getItem(analyticsRangeStorageKey) || "7d").trim() || "7d";
   let mpesaDashboard = loadMpesaDashboard();
@@ -2881,6 +2890,317 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
+  function normalizeReviewRecord(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const reviewId = String(source.id || source.review_id || source.sourceId || "").trim();
+
+    return {
+      id: reviewId || `review-${Date.now().toString(36)}`,
+      sourceId: String(source.sourceId || source.review_id || source.id || "").trim() || reviewId,
+      productId: String(source.productId || source.product_id || "").trim(),
+      productName: String(source.productName || source.product_name || "").trim() || "SharonCraft product",
+      category: String(source.category || "").trim(),
+      author: String(source.author || source.review_author || source.name || "").trim() || "SharonCraft client",
+      location: String(source.location || source.review_location || "").trim() || "Kenya",
+      rating: Math.max(1, Math.min(5, Number(source.rating || source.review_rating) || 5)),
+      message: String(source.message || source.review_message || "").trim(),
+      status: String(source.status || source.review_status || "approved").trim() || "approved",
+      createdAt: String(source.createdAt || source.created_at || "").trim(),
+      approvedAt: String(source.approvedAt || source.approved_at || "").trim()
+    };
+  }
+
+  function loadLocalApprovedReviews() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(approvedReviewsCacheKey) || "[]");
+      return Array.isArray(saved) ? saved.map(normalizeReviewRecord).filter((review) => review.productId && review.message) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function loadLocalReviewModeration() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(reviewModerationStorageKey) || "{}");
+      return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function persistReviewCachesLocally() {
+    safeLocalStorageSetItem(approvedReviewsCacheKey, JSON.stringify(approvedStorefrontReviews), "approved reviews");
+    safeLocalStorageSetItem(reviewModerationStorageKey, JSON.stringify(reviewModerationState), "review moderation");
+  }
+
+  function formatReviewDate(value) {
+    const parsed = Date.parse(value || "");
+    if (!Number.isFinite(parsed)) {
+      return "Recently";
+    }
+
+    return new Intl.DateTimeFormat("en-KE", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }).format(new Date(parsed));
+  }
+
+  function renderReviewStars(rating) {
+    const score = Math.max(1, Math.min(5, Number(rating) || 5));
+    return `${String.fromCharCode(9733).repeat(score)}${String.fromCharCode(9734).repeat(Math.max(0, 5 - score))}`;
+  }
+
+  function getPendingReviewQueue() {
+    const approvedSourceIds = new Set(
+      approvedStorefrontReviews
+        .map((review) => String(review.sourceId || review.id || "").trim())
+        .filter(Boolean)
+    );
+
+    return remoteReviewSubmissions
+      .map(normalizeReviewRecord)
+      .filter((review) => {
+        const moderationKey = String(review.sourceId || review.id || "").trim();
+        const moderationStatus = String(reviewModerationState[moderationKey] || "").trim().toLowerCase();
+        return review.productId &&
+          review.message &&
+          !approvedSourceIds.has(moderationKey) &&
+          moderationStatus !== "approved" &&
+          moderationStatus !== "rejected" &&
+          moderationStatus !== "removed";
+      });
+  }
+
+  function renderReviewModerationDashboard() {
+    if (!reviewsSummary || !reviewPendingList || !reviewApprovedList) {
+      return;
+    }
+
+    const pendingReviews = getPendingReviewQueue();
+    const approvedReviews = approvedStorefrontReviews
+      .map(normalizeReviewRecord)
+      .filter((review) => review.productId && review.message)
+      .sort((left, right) => Date.parse(right.approvedAt || right.createdAt || "") - Date.parse(left.approvedAt || left.createdAt || ""));
+    const averageApprovedRating = approvedReviews.length
+      ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) / approvedReviews.length
+      : 0;
+    const rejectedCount = Object.values(reviewModerationState).filter((status) => String(status).trim().toLowerCase() === "rejected").length;
+
+    reviewsSummary.innerHTML = `
+      <article class="admin-metric-card">
+        <span>Pending reviews</span>
+        <strong>${pendingReviews.length}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Approved live</span>
+        <strong>${approvedReviews.length}</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Average rating</span>
+        <strong>${approvedReviews.length ? averageApprovedRating.toFixed(1) : "0.0"}/5</strong>
+      </article>
+      <article class="admin-metric-card">
+        <span>Rejected or removed</span>
+        <strong>${rejectedCount}</strong>
+      </article>
+    `;
+
+    reviewPendingList.innerHTML = pendingReviews.length
+      ? pendingReviews
+          .map((review) => `
+            <article class="admin-review-card">
+              <div class="admin-review-card-top">
+                <div>
+                  <strong>${escapeHtml(review.author)}</strong>
+                  <span>${escapeHtml(review.productName)} | ${escapeHtml(review.location)}</span>
+                </div>
+                <small>${escapeHtml(formatReviewDate(review.createdAt))}</small>
+              </div>
+              <div class="admin-review-card-rating">
+                <span>${escapeHtml(renderReviewStars(review.rating))}</span>
+                <strong>${review.rating}/5</strong>
+              </div>
+              <p>${escapeHtml(review.message)}</p>
+              <div class="admin-review-actions">
+                <button class="button button-primary" type="button" data-review-approve="${escapeHtml(review.sourceId || review.id)}">Approve</button>
+                <button class="button button-secondary" type="button" data-review-reject="${escapeHtml(review.sourceId || review.id)}">Reject</button>
+              </div>
+            </article>
+          `)
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No pending reviews</strong>
+            <p>New product feedback from shoppers will appear here when it is waiting for approval.</p>
+          </article>
+        `;
+
+    reviewApprovedList.innerHTML = approvedReviews.length
+      ? approvedReviews
+          .map((review) => `
+            <article class="admin-review-card is-approved">
+              <div class="admin-review-card-top">
+                <div>
+                  <strong>${escapeHtml(review.author)}</strong>
+                  <span>${escapeHtml(review.productName)} | ${escapeHtml(review.location)}</span>
+                </div>
+                <small>${escapeHtml(formatReviewDate(review.approvedAt || review.createdAt))}</small>
+              </div>
+              <div class="admin-review-card-rating">
+                <span>${escapeHtml(renderReviewStars(review.rating))}</span>
+                <strong>${review.rating}/5</strong>
+              </div>
+              <p>${escapeHtml(review.message)}</p>
+              <div class="admin-review-actions">
+                <button class="button button-secondary" type="button" data-review-remove="${escapeHtml(review.sourceId || review.id)}">Remove From Live</button>
+              </div>
+            </article>
+          `)
+          .join("")
+      : `
+          <article class="empty-state-card">
+            <strong>No approved reviews yet</strong>
+            <p>Approve a few strong reviews to start showing public trust signals on product cards and product pages.</p>
+          </article>
+        `;
+  }
+
+  async function refreshReviewModerationDashboard(options = {}) {
+    const config = options || {};
+    let nextApprovedReviews = loadLocalApprovedReviews();
+    let nextModerationState = loadLocalReviewModeration();
+    remoteReviewSubmissions = [];
+
+    if (
+      liveCatalogApi &&
+      typeof liveCatalogApi.isConfigured === "function" &&
+      liveCatalogApi.isConfigured()
+    ) {
+      if (typeof liveCatalogApi.fetchApprovedReviews === "function") {
+        try {
+          const remoteApprovedReviews = await liveCatalogApi.fetchApprovedReviews();
+          if (Array.isArray(remoteApprovedReviews)) {
+            nextApprovedReviews = remoteApprovedReviews.map(normalizeReviewRecord).filter((review) => review.productId && review.message);
+          }
+        } catch (error) {
+          console.error("Unable to load approved reviews from Supabase.", error);
+        }
+      }
+
+      if (typeof liveCatalogApi.fetchReviewModeration === "function") {
+        try {
+          const remoteModeration = await liveCatalogApi.fetchReviewModeration();
+          if (remoteModeration && typeof remoteModeration === "object" && !Array.isArray(remoteModeration)) {
+            nextModerationState = remoteModeration;
+          }
+        } catch (error) {
+          console.error("Unable to load review moderation state from Supabase.", error);
+        }
+      }
+
+      if (typeof liveCatalogApi.fetchReviewSubmissions === "function") {
+        try {
+          const remoteReviews = await liveCatalogApi.fetchReviewSubmissions(200);
+          remoteReviewSubmissions = Array.isArray(remoteReviews) ? remoteReviews.map(normalizeReviewRecord) : [];
+        } catch (error) {
+          console.error("Unable to load submitted product reviews from Supabase.", error);
+        }
+      }
+    }
+
+    approvedStorefrontReviews = nextApprovedReviews;
+    reviewModerationState = nextModerationState;
+    persistReviewCachesLocally();
+    renderReviewModerationDashboard();
+
+    if (config.showStatus) {
+      setStatus(
+        remoteReviewSubmissions.length || approvedStorefrontReviews.length
+          ? "Product reviews refreshed."
+          : "No live product reviews found yet."
+      );
+    }
+  }
+
+  async function publishReviewState(message) {
+    persistReviewCachesLocally();
+
+    if (
+      !liveCatalogApi ||
+      typeof liveCatalogApi.isConfigured !== "function" ||
+      !liveCatalogApi.isConfigured() ||
+      typeof liveCatalogApi.saveApprovedReviews !== "function" ||
+      typeof liveCatalogApi.saveReviewModeration !== "function"
+    ) {
+      setStatus(`${message} Saved in this browser only because Supabase live reviews are not configured here.`);
+      renderReviewModerationDashboard();
+      return false;
+    }
+
+    const user = currentLiveUser || (await refreshLiveUser());
+    if (!user) {
+      setStatus(`${message} Saved in this browser only. Sign in to Supabase to publish storefront reviews live.`);
+      renderReviewModerationDashboard();
+      return false;
+    }
+
+    try {
+      await liveCatalogApi.saveApprovedReviews(approvedStorefrontReviews);
+      await liveCatalogApi.saveReviewModeration(reviewModerationState);
+      if (window.SharonCraftUtils && typeof window.SharonCraftUtils.loadReviewSummaries === "function") {
+        await window.SharonCraftUtils.loadReviewSummaries({ force: true });
+      }
+      renderReviewModerationDashboard();
+      setStatus(`${message} Live storefront reviews updated too.`);
+      return true;
+    } catch (error) {
+      console.error("Unable to publish review moderation state to Supabase.", error);
+      renderReviewModerationDashboard();
+      setStatus(`${message} Saved in this browser only. Live review publish failed.`);
+      return false;
+    }
+  }
+
+  async function approveReview(reviewKey) {
+    const targetKey = String(reviewKey || "").trim();
+    const pendingReview = getPendingReviewQueue().find((review) => String(review.sourceId || review.id || "").trim() === targetKey);
+
+    if (!pendingReview) {
+      setStatus("That review is no longer in the pending queue.");
+      await refreshReviewModerationDashboard();
+      return;
+    }
+
+    const approvedAt = new Date().toISOString();
+    approvedStorefrontReviews = [
+      {
+        ...pendingReview,
+        id: targetKey,
+        sourceId: targetKey,
+        status: "approved",
+        approvedAt
+      }
+    ].concat(
+      approvedStorefrontReviews.filter((review) => String(review.sourceId || review.id || "").trim() !== targetKey)
+    );
+    reviewModerationState[targetKey] = "approved";
+    await publishReviewState(`${pendingReview.author}'s review for ${pendingReview.productName} approved.`);
+  }
+
+  async function rejectReview(reviewKey) {
+    const targetKey = String(reviewKey || "").trim();
+    reviewModerationState[targetKey] = "rejected";
+    await publishReviewState("Review rejected.");
+  }
+
+  async function removeApprovedReview(reviewKey) {
+    const targetKey = String(reviewKey || "").trim();
+    approvedStorefrontReviews = approvedStorefrontReviews.filter((review) => String(review.sourceId || review.id || "").trim() !== targetKey);
+    reviewModerationState[targetKey] = "removed";
+    await publishReviewState("Approved review removed from the storefront.");
+  }
+
   function getStorefrontAnalyticsEvents() {
     const sourceEvents = analyticsDataSource === "supabase" ? remoteStorefrontAnalyticsEvents : loadLocalStorefrontAnalyticsEvents();
     return sourceEvents.filter(isStorefrontAnalyticsEvent);
@@ -3088,7 +3408,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       add_to_cart: "Add To Cart",
       whatsapp_click: "WhatsApp Click",
       view_item_list: "List View",
-      select_item: "Product Open"
+      select_item: "Product Open",
+      review_submission: "Review Submission"
     };
 
     return labels[name] || String(name || "Event").replace(/_/g, " ");
@@ -3456,6 +3777,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         break;
       case "analytics":
         renderAnalyticsDashboard();
+        break;
+      case "reviews":
+        renderReviewModerationDashboard();
+        refreshReviewModerationDashboard();
         break;
       case "social":
         renderSocialCalendar();
@@ -5932,6 +6257,39 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
+  if (reviewRefreshButton) {
+    reviewRefreshButton.addEventListener("click", async function () {
+      await refreshReviewModerationDashboard({ showStatus: true });
+    });
+  }
+
+  if (reviewPendingList) {
+    reviewPendingList.addEventListener("click", async function (event) {
+      const approveButton = event.target.closest("[data-review-approve]");
+      const rejectButton = event.target.closest("[data-review-reject]");
+
+      if (approveButton) {
+        await approveReview(approveButton.dataset.reviewApprove);
+        return;
+      }
+
+      if (rejectButton) {
+        await rejectReview(rejectButton.dataset.reviewReject);
+      }
+    });
+  }
+
+  if (reviewApprovedList) {
+    reviewApprovedList.addEventListener("click", async function (event) {
+      const removeButton = event.target.closest("[data-review-remove]");
+      if (!removeButton) {
+        return;
+      }
+
+      await removeApprovedReview(removeButton.dataset.reviewRemove);
+    });
+  }
+
   if (inlineImageSearch) {
     inlineImageSearch.addEventListener("input", renderInlineImageLibrary);
     inlineImageSearch.addEventListener("change", renderInlineImageLibrary);
@@ -7287,6 +7645,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   renderGoalCard();
   renderAdminOverview();
   renderLiveAuthState();
+  renderReviewModerationDashboard();
   if (liveCatalogApi && typeof liveCatalogApi.onAuthStateChange === "function" && liveCatalogApi.isConfigured()) {
     liveCatalogApi.onAuthStateChange(async function (user) {
       currentLiveUser = user || null;
@@ -7295,13 +7654,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         await refreshOrdersFromLive();
       }
       await refreshStorefrontAnalytics();
+      await refreshReviewModerationDashboard();
     });
     refreshLiveUser().then(async function () {
       await refreshOrdersFromLive();
       refreshStorefrontAnalytics();
+      refreshReviewModerationDashboard();
     });
   } else {
     refreshStorefrontAnalytics();
+    refreshReviewModerationDashboard();
   }
   if (catalog[0] && socialProductSelect && socialCaption && socialToneSelect) {
     socialProductSelect.value = catalog[0].id;

@@ -390,12 +390,16 @@
         <div class="admin-tab-group" data-admin-group="marketing">
           <button class="admin-tab-group-toggle" type="button" data-admin-group-toggle="marketing" aria-expanded="true">
             <span>Marketing</span>
-            <small>3 tools</small>
+            <small>4 tools</small>
           </button>
           <div class="admin-tab-group-body">
             <button class="admin-tab-button" type="button" data-admin-tab="analytics">
               <span>Analytics</span>
               <small>Views, carts, and WhatsApp taps</small>
+            </button>
+            <button class="admin-tab-button" type="button" data-admin-tab="reviews">
+              <span>Reviews</span>
+              <small>Approve product feedback for the storefront</small>
             </button>
             <button class="admin-tab-button" type="button" data-admin-tab="social">
               <span>Social Tools</span>
@@ -2310,6 +2314,59 @@
         </section>
       </section>
 
+      <section class="admin-tab-panel" data-admin-panel="reviews">
+        <article class="admin-tab-intro">
+          <div>
+            <span class="section-kicker">Review Flow</span>
+            <h2>Approve strong client feedback before it goes live on the storefront.</h2>
+            <p>Customers can submit reviews from the product page. Use this desk to approve the good ones, reject weak or spammy ones, and keep product trust signals clean.</p>
+          </div>
+          <div class="admin-tab-tags">
+            <span>Moderation</span>
+            <span>Approved reviews</span>
+            <span>Product trust</span>
+          </div>
+        </article>
+
+        <section class="admin-panel">
+          <div class="admin-panel-header">
+            <div>
+              <span class="section-kicker">Review Center</span>
+              <h2>Product Reviews</h2>
+            </div>
+            <div class="admin-inline-actions">
+              <button class="button button-secondary" id="admin-reviews-refresh" type="button">Refresh Reviews</button>
+            </div>
+          </div>
+          <p class="admin-panel-muted">Sign in to Supabase first if you want approvals and removals to update the live website for every visitor.</p>
+          <div id="admin-reviews-summary" class="admin-analytics-summary"></div>
+          <div class="admin-review-shell">
+            <section class="admin-review-column">
+              <article class="admin-review-panel">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Pending Queue</span>
+                    <h3>Waiting for approval</h3>
+                  </div>
+                </div>
+                <div id="admin-review-pending-list" class="admin-review-list"></div>
+              </article>
+            </section>
+            <section class="admin-review-column">
+              <article class="admin-review-panel">
+                <div class="admin-analytics-card-head">
+                  <div>
+                    <span class="section-kicker">Live Reviews</span>
+                    <h3>Approved on the storefront</h3>
+                  </div>
+                </div>
+                <div id="admin-review-approved-list" class="admin-review-list"></div>
+              </article>
+            </section>
+          </div>
+        </section>
+      </section>
+
       <section class="admin-tab-panel" data-admin-panel="assets">
         <article class="admin-tab-intro">
           <div>
@@ -2402,15 +2459,15 @@
   <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase/supabase-config.js?v=20260330-folder-reorg"></script>
-  <script src="supabase/supabase-catalog.js?v=20260330-folder-reorg"></script>
+  <script src="supabase/supabase-catalog.js?v=20260401-reviews-sync"></script>
   <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
   <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
   <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
   <script src="assets/js/auth/admin-middleware.js?v=20260330-auth" defer></script>
   <script src="assets/js/admin-auth.js?v=20260330-auth" defer></script>
   <script src="assets/js/image-manifest.js?v=20260327-gallery"></script>
-  <script src="assets/js/app.js?v=20260401-update-cache-fix" defer></script>
-  <script src="assets/js/admin.js?v=20260331-premium-ui" defer></script>
+  <script src="assets/js/app.js?v=20260401-reviews-mobile-pass" defer></script>
+  <script src="assets/js/admin.js?v=20260401-reviews-desk" defer></script>
   <script src="assets/js/admin-dashboard-ui.js?v=20260331-premium" defer></script>
 </body>
 </html>

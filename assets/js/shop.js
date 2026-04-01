@@ -20,6 +20,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   await utils.waitForData();
+  if (typeof utils.loadReviewSummaries === "function") {
+    await utils.loadReviewSummaries();
+  }
 
   if (helpWhatsapp) {
     helpWhatsapp.href = utils.buildWhatsAppUrl(

@@ -11,6 +11,7 @@
   const analyticsSessionKey = "sharoncraft-analytics-session-id";
   const analyticsAcquisitionKey = "sharoncraft-analytics-acquisition";
   const analyticsDebugKey = "sharoncraft-ga-debug";
+  const approvedReviewsCacheKey = "sharoncraft-approved-reviews-cache";
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
@@ -20,6 +21,9 @@
   let mpesaStatusPollTimer = null;
   let mpesaStatusPollStartedAt = 0;
   let mpesaLastReference = "";
+  let approvedReviews = [];
+  let reviewSummaryMap = new Map();
+  let reviewSummaryPromise = null;
   const recentAnalyticsInteractions = new Map();
   const recentListViews = new Map();
   const analyticsDebugState = {
@@ -44,6 +48,152 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function clampRating(value) {
+    return Math.max(1, Math.min(5, Number(value) || 5));
+  }
+
+  function normalizeReviewRecord(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const reviewId = normalizeText(source.id || source.review_id || source.sourceId);
+
+    return {
+      id: reviewId || `review-${Date.now().toString(36)}`,
+      sourceId: normalizeText(source.sourceId || source.review_id || source.id) || reviewId,
+      productId: normalizeText(source.productId || source.product_id),
+      productName: normalizeText(source.productName || source.product_name),
+      author: normalizeText(source.author || source.review_author || source.name) || "SharonCraft client",
+      location: normalizeText(source.location || source.review_location) || "Kenya",
+      rating: clampRating(source.rating || source.review_rating),
+      message: normalizeText(source.message || source.review_message),
+      status: normalizeText(source.status || source.review_status || "approved") || "approved",
+      createdAt: normalizeText(source.createdAt || source.created_at) || new Date().toISOString(),
+      approvedAt: normalizeText(source.approvedAt || source.approved_at)
+    };
+  }
+
+  function getCachedApprovedReviews() {
+    try {
+      const raw = window.localStorage.getItem(approvedReviewsCacheKey) || "[]";
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map(normalizeReviewRecord).filter((review) => review.productId && review.message) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function cacheApprovedReviews(reviews) {
+    const safeReviews = (Array.isArray(reviews) ? reviews : [])
+      .map(normalizeReviewRecord)
+      .filter((review) => review.productId && review.message);
+
+    try {
+      window.localStorage.setItem(approvedReviewsCacheKey, JSON.stringify(safeReviews));
+    } catch (error) {
+      console.warn("Unable to cache approved reviews locally.", error);
+    }
+  }
+
+  function buildReviewSummaryMap(reviews) {
+    const summary = new Map();
+
+    (Array.isArray(reviews) ? reviews : []).forEach((review) => {
+      const normalizedReview = normalizeReviewRecord(review);
+      if (!normalizedReview.productId || !normalizedReview.message) {
+        return;
+      }
+
+      const existing = summary.get(normalizedReview.productId) || { count: 0, total: 0 };
+      existing.count += 1;
+      existing.total += clampRating(normalizedReview.rating);
+      summary.set(normalizedReview.productId, existing);
+    });
+
+    summary.forEach((value, key) => {
+      summary.set(key, {
+        count: value.count,
+        average: value.count ? value.total / value.count : 0
+      });
+    });
+
+    return summary;
+  }
+
+  async function loadReviewSummaries(options) {
+    const config = options || {};
+
+    if (reviewSummaryPromise && !config.force) {
+      return reviewSummaryPromise;
+    }
+
+    reviewSummaryPromise = (async function () {
+      let reviews = getCachedApprovedReviews();
+      const catalogApi = window.SharonCraftCatalog;
+
+      if (
+        catalogApi &&
+        typeof catalogApi.isConfigured === "function" &&
+        catalogApi.isConfigured() &&
+        typeof catalogApi.fetchApprovedReviews === "function"
+      ) {
+        try {
+          const remoteReviews = await catalogApi.fetchApprovedReviews();
+          if (Array.isArray(remoteReviews)) {
+            reviews = remoteReviews.map(normalizeReviewRecord).filter((review) => review.productId && review.message);
+            cacheApprovedReviews(reviews);
+          }
+        } catch (error) {
+          console.warn("Unable to load approved storefront reviews from Supabase.", error);
+        }
+      }
+
+      approvedReviews = reviews;
+      reviewSummaryMap = buildReviewSummaryMap(reviews);
+      return reviewSummaryMap;
+    }()).finally(function () {
+      reviewSummaryPromise = null;
+    });
+
+    return reviewSummaryPromise;
+  }
+
+  function getApprovedReviewsForProduct(productId) {
+    const targetId = normalizeText(productId);
+    return approvedReviews
+      .filter((review) => review.productId === targetId)
+      .sort((left, right) => Date.parse(right.approvedAt || right.createdAt || "") - Date.parse(left.approvedAt || left.createdAt || ""));
+  }
+
+  function getProductReviewSummary(productId) {
+    const targetId = normalizeText(productId);
+    return reviewSummaryMap.get(targetId) || { count: 0, average: 0 };
+  }
+
+  function renderReviewStars(value) {
+    const rating = Math.max(0, Math.min(5, Number(value) || 0));
+    return Array.from({ length: 5 }, (_, index) => `<span aria-hidden="true">${index < rating ? "★" : "☆"}</span>`).join("");
+  }
+
+  function buildProductCardReviewMarkup(productId) {
+    const summary = getProductReviewSummary(productId);
+
+    if (!summary.count) {
+      return `
+        <div class="product-card-rating is-empty" aria-label="No approved reviews yet">
+          <span class="product-card-rating-stars" aria-hidden="true">${renderReviewStars(0)}</span>
+          <span class="product-card-rating-count">No reviews yet</span>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="product-card-rating" aria-label="${summary.average.toFixed(1)} out of 5 stars from ${summary.count} reviews">
+        <span class="product-card-rating-stars" aria-hidden="true">${renderReviewStars(Math.round(summary.average))}</span>
+        <strong>${summary.average.toFixed(1)}</strong>
+        <span class="product-card-rating-count">(${summary.count})</span>
+      </div>
+    `;
   }
 
   function absoluteUrl(path) {
@@ -1290,6 +1440,7 @@
             <p class="product-card-category">${category ? category.name : "Collection"}</p>
             <h3 class="product-name"><a href="product.html?id=${product.id}"${analyticsAttributes}>${productName}</a></h3>
             <p class="product-card-caption">Handmade in Kenya</p>
+            ${buildProductCardReviewMarkup(product.id)}
           </div>
           <div class="product-card-price-row">
             <strong class="product-price product-price-pill">${formatCurrency(product.price)}</strong>
@@ -2564,6 +2715,7 @@
     bindCartEvents();
   }
 
+  loadReviewSummaries();
   document.addEventListener("DOMContentLoaded", hydrateSharedShell);
 
   window.SharonCraftUtils = {
@@ -2575,6 +2727,9 @@
     getCategoryBySlug,
     getProductsByCategory,
     getRelatedProducts,
+    loadReviewSummaries,
+    getApprovedReviewsForProduct,
+    getProductReviewSummary,
     createProductCard,
     createCategoryCard,
     getScarcityNote,

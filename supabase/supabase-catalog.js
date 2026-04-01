@@ -5,6 +5,8 @@
     productsTable: "products",
     settingsTable: "site_settings",
     analyticsTable: "analytics_events",
+    approvedReviewsSettingKey: "storefront_reviews",
+    reviewModerationSettingKey: "storefront_review_moderation",
     ordersTable: "orders",
     orderTrackingTable: "order_tracking",
     storageBucket: "product-images",
@@ -49,6 +51,27 @@
       return value;
     }
     return {};
+  };
+
+  const clampRating = (value) => Math.max(1, Math.min(5, Number(value) || 5));
+
+  const normalizeReview = (value) => {
+    const source = normalizeObject(value);
+    const reviewId = normalizeText(source.id || source.review_id || source.sourceId);
+    return {
+      id: reviewId || `review-${Date.now().toString(36)}`,
+      sourceId: normalizeText(source.sourceId || source.review_id || source.id) || reviewId,
+      productId: normalizeText(source.productId || source.product_id),
+      productName: normalizeText(source.productName || source.product_name),
+      category: normalizeText(source.category),
+      author: normalizeText(source.author || source.review_author || source.name) || "SharonCraft client",
+      location: normalizeText(source.location || source.review_location) || "Kenya",
+      rating: clampRating(source.rating || source.review_rating),
+      message: normalizeText(source.message || source.review_message),
+      status: normalizeText(source.status || source.review_status || "approved") || "approved",
+      createdAt: normalizeText(source.createdAt || source.created_at) || new Date().toISOString(),
+      approvedAt: normalizeText(source.approvedAt || source.approved_at),
+    };
   };
 
   const ORDER_STATUSES = ["new", "confirmed", "paid", "delivered", "cancelled"];
@@ -173,6 +196,12 @@
       visitor_id: normalizeText(safePayload.visitor_id),
       session_id: normalizeText(safePayload.session_id),
       transport_type: normalizeText(safePayload.transport_type),
+      review_id: normalizeText(safePayload.review_id),
+      review_author: normalizeText(safePayload.review_author),
+      review_location: normalizeText(safePayload.review_location),
+      review_rating: Number(safePayload.review_rating) || 0,
+      review_message: normalizeText(safePayload.review_message),
+      review_status: normalizeText(safePayload.review_status),
       items,
     };
   };
@@ -758,6 +787,98 @@
     }
   };
 
+  const fetchApprovedReviews = async () => {
+    const config = getConfig();
+    const value = await fetchSetting(config.approvedReviewsSettingKey || "storefront_reviews");
+    return Array.isArray(value) ? value.map(normalizeReview).filter((review) => review.productId && review.message) : [];
+  };
+
+  const saveApprovedReviews = async (reviews) => {
+    const config = getConfig();
+    const normalized = (Array.isArray(reviews) ? reviews : [])
+      .map(normalizeReview)
+      .filter((review) => review.productId && review.message);
+    return saveSetting(config.approvedReviewsSettingKey || "storefront_reviews", normalized);
+  };
+
+  const fetchReviewModeration = async () => {
+    const config = getConfig();
+    const value = await fetchSetting(config.reviewModerationSettingKey || "storefront_review_moderation");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  };
+
+  const saveReviewModeration = async (moderationMap) => {
+    const config = getConfig();
+    const nextValue = moderationMap && typeof moderationMap === "object" && !Array.isArray(moderationMap)
+      ? moderationMap
+      : {};
+    return saveSetting(config.reviewModerationSettingKey || "storefront_review_moderation", nextValue);
+  };
+
+  const submitProductReview = async (review) => {
+    const normalized = normalizeReview(review);
+
+    await saveAnalyticsEvents([{
+      name: "review_submission",
+      timestamp: normalized.createdAt || new Date().toISOString(),
+      payload: {
+        page_type: "product",
+        page_path: normalized.productId ? `/product.html?id=${encodeURIComponent(normalized.productId)}` : "/product.html",
+        product_id: normalized.productId,
+        product_name: normalized.productName,
+        category: normalized.category,
+        review_id: normalized.id,
+        review_author: normalized.author,
+        review_location: normalized.location,
+        review_rating: normalized.rating,
+        review_message: normalized.message,
+        review_status: normalized.status || "pending",
+      }
+    }]);
+
+    return normalized;
+  };
+
+  const fetchReviewSubmissions = async (limit = 200) => {
+    const supabase = getClient();
+    if (!supabase) {
+      return [];
+    }
+
+    const config = getConfig();
+    const { data, error } = await supabase
+      .from(config.analyticsTable)
+      .select("id, name, event_payload, created_at")
+      .eq("name", "review_submission")
+      .order("created_at", { ascending: false })
+      .limit(Math.max(1, Number(limit) || 200));
+
+    if (error) {
+      throw error;
+    }
+
+    return Array.isArray(data)
+      ? data
+          .map((row) => {
+            const payload = buildAnalyticsPayload(row && row.event_payload);
+            return normalizeReview({
+              id: normalizeText(row && row.id) || payload.review_id,
+              sourceId: payload.review_id || normalizeText(row && row.id),
+              productId: payload.product_id,
+              productName: payload.product_name,
+              category: payload.category,
+              author: payload.review_author,
+              location: payload.review_location,
+              rating: payload.review_rating,
+              message: payload.review_message,
+              status: payload.review_status || "pending",
+              createdAt: normalizeText(row && row.created_at),
+            });
+          })
+          .filter((review) => review.productId && review.message)
+      : [];
+  };
+
   const uploadProductImage = async (file) => {
     const supabase = getClient();
     if (!supabase) {
@@ -896,6 +1017,12 @@
     saveAnalyticsEvents,
     fetchAnalyticsEvents,
     clearAnalyticsEvents,
+    submitProductReview,
+    fetchReviewSubmissions,
+    fetchApprovedReviews,
+    saveApprovedReviews,
+    fetchReviewModeration,
+    saveReviewModeration,
     uploadProductImage,
     signInWithPassword,
     signUpWithPassword,

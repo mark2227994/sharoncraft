@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const testimonialStack = document.getElementById("home-testimonials");
 
   await utils.waitForData();
+  if (typeof utils.loadReviewSummaries === "function") {
+    await utils.loadReviewSummaries();
+  }
   const addImageVersion = (image, version) => {
     const source = String(image || "").trim();
     const cacheVersion = String(version || "").trim();
