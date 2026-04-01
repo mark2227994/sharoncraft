@@ -34,6 +34,137 @@ document.addEventListener("DOMContentLoaded", async function () {
   const customerProof = document.getElementById("product-customer-proof");
   const mpesaCopy = document.getElementById("product-mpesa-copy");
   const limitedCopy = document.getElementById("product-limited-copy");
+  const reviewSummary = document.getElementById("product-review-summary");
+  const reviewList = document.getElementById("product-review-list");
+  const reviewEmpty = document.getElementById("product-review-empty");
+  const reviewForm = document.getElementById("product-review-form");
+  const reviewNameField = document.getElementById("product-review-name");
+  const reviewLocationField = document.getElementById("product-review-location");
+  const reviewRatingField = document.getElementById("product-review-rating");
+  const reviewMessageField = document.getElementById("product-review-message");
+  const reviewWhatsAppButton = document.getElementById("product-review-whatsapp");
+  const reviewStorageKey = "sharoncraft_product_reviews";
+
+  const normalizeReviewText = (value) => String(value || "").trim();
+  const escapeReviewHtml = (value) =>
+    normalizeReviewText(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  const formatReviewDate = (value) => {
+    if (!value) {
+      return "Just now";
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return "Recently";
+    }
+    return new Intl.DateTimeFormat("en-KE", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }).format(parsed);
+  };
+  const clampReviewRating = (value) => Math.max(1, Math.min(5, Number(value) || 5));
+  const createStarsMarkup = (value) => {
+    const ratingValue = clampReviewRating(value);
+    return `
+      <span class="review-stars" aria-label="${ratingValue} out of 5 stars">
+        ${Array.from({ length: 5 }, (_, index) => `<span aria-hidden="true">${index < ratingValue ? "★" : "☆"}</span>`).join("")}
+      </span>
+    `;
+  };
+  const loadStoredReviewMap = () => {
+    try {
+      const raw = window.localStorage.getItem(reviewStorageKey);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  };
+  const saveStoredReviewMap = (reviewMap) => {
+    try {
+      window.localStorage.setItem(reviewStorageKey, JSON.stringify(reviewMap));
+    } catch (error) {
+      console.warn("Could not save product review locally.", error);
+    }
+  };
+  const getLocalProductReviews = (id) => {
+    const reviewMap = loadStoredReviewMap();
+    const productReviews = reviewMap[id];
+    return Array.isArray(productReviews)
+      ? productReviews.filter((item) => item && normalizeReviewText(item.message))
+      : [];
+  };
+  const saveLocalProductReview = (id, review) => {
+    const reviewMap = loadStoredReviewMap();
+    const existing = Array.isArray(reviewMap[id]) ? reviewMap[id] : [];
+    reviewMap[id] = [review, ...existing].slice(0, 20);
+    saveStoredReviewMap(reviewMap);
+    return reviewMap[id];
+  };
+  const buildReviewMarkup = (review) => {
+    const author = escapeReviewHtml(review.author || "SharonCraft client");
+    const location = escapeReviewHtml(review.location || "Kenya");
+    const message = escapeReviewHtml(review.message || "");
+    const badge = review.featured
+      ? '<span class="review-badge">Verified SharonCraft client</span>'
+      : '<span class="review-badge">Product feedback</span>';
+    return `
+      <article class="review-card reveal">
+        <div class="review-card-top">
+          <div>
+            <strong>${author}</strong>
+            <span>${location}</span>
+          </div>
+          <time datetime="${escapeReviewHtml(review.createdAt || "")}">${formatReviewDate(review.createdAt)}</time>
+        </div>
+        <div class="review-card-rating">
+          ${createStarsMarkup(review.rating)}
+          ${badge}
+        </div>
+        <p>${message}</p>
+      </article>
+    `;
+  };
+  const renderReviews = (reviews, averageRating) => {
+    if (!reviewList || !reviewSummary || !reviewEmpty) {
+      return;
+    }
+
+    if (!reviews.length) {
+      reviewList.innerHTML = "";
+      reviewEmpty.hidden = false;
+      reviewSummary.textContent = "Reviews from SharonCraft clients will appear here as they come in.";
+      return;
+    }
+
+    reviewEmpty.hidden = true;
+    reviewList.innerHTML = reviews.map(buildReviewMarkup).join("");
+    const averageLabel = Number.isFinite(averageRating) ? averageRating.toFixed(1) : "5.0";
+    reviewSummary.textContent = `${reviews.length} review${reviews.length === 1 ? "" : "s"} so far with an average of ${averageLabel}/5. Clients can quickly scan real buying feedback before ordering.`;
+  };
+  const syncReviewWhatsAppLink = (currentProductName) => {
+    if (!reviewWhatsAppButton) {
+      return;
+    }
+
+    const reviewName = normalizeReviewText(reviewNameField && reviewNameField.value) || "A SharonCraft client";
+    const reviewLocation = normalizeReviewText(reviewLocationField && reviewLocationField.value) || "Kenya";
+    const reviewRating = clampReviewRating(reviewRatingField && reviewRatingField.value);
+    const reviewMessage = normalizeReviewText(reviewMessageField && reviewMessageField.value) || `I would like to review ${currentProductName}.`;
+    const reviewLines = [
+      `Hello SharonCraft, I would like to leave a review for ${currentProductName}.`,
+      `Name: ${reviewName}`,
+      `Location: ${reviewLocation}`,
+      `Rating: ${reviewRating}/5`,
+      `Review: ${reviewMessage}`
+    ];
+    reviewWhatsAppButton.href = utils.buildWhatsAppUrl(reviewLines.join("\n"));
+  };
 
   if (!product) {
     if (stickyBar) {
@@ -44,7 +175,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         title: "Product Not Found | SharonCraft",
         description: "This SharonCraft product link may be old. Browse the full collection and order on WhatsApp.",
         path: "/product.html",
-        image: "assets/images/IMG-20260226-WA0005.webp",
+        image: "assets/images/custom-occasion-beadwork-46mokm.webp",
         type: "website"
       });
     }
@@ -52,7 +183,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     description.textContent = "The product link may be old. Please return to the shop and choose another item.";
     price.textContent = "";
     category.textContent = "";
-    mainImage.src = "assets/images/IMG-20260226-WA0005.webp";
+    mainImage.src = "assets/images/custom-occasion-beadwork-46mokm.webp";
     mainImage.alt = "SharonCraft featured piece";
     breadcrumb.innerHTML = `<a href="index.html">Home</a><span>/</span><a href="shop.html">Shop</a><span>/</span><strong>Not found</strong>`;
     const fallbackProducts = utils.data.products.slice(0, 4);
@@ -80,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const productDescription = product.description || product.shortDescription || "Handmade by SharonCraft artisans.";
   const productImages = Array.isArray(product.images) && product.images.length
     ? product.images
-    : ["assets/images/IMG-20260226-WA0005.webp"];
+    : ["assets/images/custom-occasion-beadwork-46mokm.webp"];
   const productDetails = Array.isArray(product.details) && product.details.length
     ? product.details
     : ["Handmade in Kenya", "Shared with care by SharonCraft"];
@@ -94,6 +225,32 @@ document.addEventListener("DOMContentLoaded", async function () {
   const availabilityUrl = product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
   const categoryName = productCategory ? productCategory.name : "Collection";
   const seoDescription = `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
+  const featuredReviews = (site && Array.isArray(site.testimonials) ? site.testimonials : [])
+    .slice(0, 2)
+    .map((item, index) => ({
+      id: `featured-${index + 1}`,
+      author: normalizeReviewText(item && item.name) || "SharonCraft client",
+      location: normalizeReviewText(item && item.location) || "Kenya",
+      rating: 5,
+      message: normalizeReviewText(item && item.quote) || `Loved the finish and service for ${productName}.`,
+      createdAt: normalizeReviewText(item && item.date) || "",
+      featured: true
+    }));
+  const localReviews = getLocalProductReviews(product.id)
+    .map((item, index) => ({
+      id: item.id || `local-${index + 1}`,
+      author: normalizeReviewText(item.author) || "SharonCraft client",
+      location: normalizeReviewText(item.location) || "Kenya",
+      rating: clampReviewRating(item.rating),
+      message: normalizeReviewText(item.message),
+      createdAt: normalizeReviewText(item.createdAt) || "",
+      featured: false
+    }))
+    .filter((item) => item.message);
+  const allReviews = [...localReviews, ...featuredReviews];
+  const averageRating = allReviews.length
+    ? allReviews.reduce((sum, item) => sum + clampReviewRating(item.rating), 0) / allReviews.length
+    : 0;
 
   document.title = `${productName} | SharonCraft`;
   title.textContent = productName;
@@ -127,6 +284,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (limitedCopy) {
     limitedCopy.textContent = utils.getScarcityNote(product);
   }
+
+  renderReviews(allReviews, averageRating);
+  syncReviewWhatsAppLink(productName);
 
   if (customerProof) {
     const testimonials = (utils.data.site && Array.isArray(utils.data.site.testimonials) ? utils.data.site.testimonials : []).slice(0, 2);
@@ -171,6 +331,69 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   if (giftButton) {
     giftButton.href = utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "gift" }));
+  }
+
+  if (reviewForm) {
+    const syncReviewLink = () => syncReviewWhatsAppLink(productName);
+    [reviewNameField, reviewLocationField, reviewRatingField, reviewMessageField].forEach((field) => {
+      if (field) {
+        field.addEventListener("input", syncReviewLink);
+        field.addEventListener("change", syncReviewLink);
+      }
+    });
+
+    reviewForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const nextReview = {
+        id: `review-${Date.now()}`,
+        author: normalizeReviewText(reviewNameField && reviewNameField.value) || "SharonCraft client",
+        location: normalizeReviewText(reviewLocationField && reviewLocationField.value) || "Kenya",
+        rating: clampReviewRating(reviewRatingField && reviewRatingField.value),
+        message: normalizeReviewText(reviewMessageField && reviewMessageField.value),
+        createdAt: new Date().toISOString(),
+        featured: false
+      };
+
+      if (!nextReview.message) {
+        if (typeof window.showToast === "function") {
+          window.showToast("Please write a short review before posting.", "warning");
+        }
+        return;
+      }
+
+      const updatedLocalReviews = saveLocalProductReview(product.id, nextReview).map((item, index) => ({
+        id: item.id || `local-${index + 1}`,
+        author: normalizeReviewText(item.author) || "SharonCraft client",
+        location: normalizeReviewText(item.location) || "Kenya",
+        rating: clampReviewRating(item.rating),
+        message: normalizeReviewText(item.message),
+        createdAt: normalizeReviewText(item.createdAt) || "",
+        featured: false
+      }));
+      const mergedReviews = [...updatedLocalReviews, ...featuredReviews];
+      const mergedAverage = mergedReviews.reduce((sum, item) => sum + clampReviewRating(item.rating), 0) / mergedReviews.length;
+
+      renderReviews(mergedReviews, mergedAverage);
+      reviewForm.reset();
+      if (reviewRatingField) {
+        reviewRatingField.value = "5";
+      }
+      syncReviewWhatsAppLink(productName);
+      utils.refreshReveal();
+
+      if (typeof window.showToast === "function") {
+        window.showToast("Your review has been added on this device.", "success");
+      }
+
+      if (typeof utils.trackEvent === "function") {
+        utils.trackEvent("submit_review", {
+          product_id: product.id,
+          product_name: productName,
+          rating: nextReview.rating
+        });
+      }
+    });
   }
 
   if (typeof utils.setPageMetadata === "function") {

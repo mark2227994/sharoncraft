@@ -78,6 +78,14 @@ Available scripts:
   Starts the server and opens the browser
 - `npm run serve:5500`
   Starts the server explicitly on port `5500`
+- `npm run build:seo`
+  Rebuilds both `sitemap.xml` and `google-merchant-feed.xml`
+- `npm run build:release`
+  Runs the SEO build, then checks critical storefront pages and local HTML asset references before release
+- `npm run generate:sitemap`
+  Rebuilds `sitemap.xml` from public HTML pages, articles, and shared catalog products
+- `npm run generate:merchant-feed`
+  Rebuilds `google-merchant-feed.xml` from the shared catalog products
 
 When testing locally, verify:
 
@@ -112,4 +120,5 @@ If you update schema, auth behavior, or storage rules:
 - [SUPABASE_SETUP.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/SUPABASE_SETUP.md)
 - [SUPABASE_BACKUP_CHECKLIST.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/SUPABASE_BACKUP_CHECKLIST.md)
 - [WHATSAPP_SETUP.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/WHATSAPP_SETUP.md)
+- [SEO_VISIBILITY_CHECKLIST.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/SEO_VISIBILITY_CHECKLIST.md)
 - [DEPLOYMENT.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/DEPLOYMENT.md)
