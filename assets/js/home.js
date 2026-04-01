@@ -172,6 +172,11 @@ document.addEventListener("DOMContentLoaded", async function () {
           addressLocality: utils.data.site.location || "Nairobi, Kenya",
           addressCountry: "KE"
         },
+        founder: {
+          "@type": "Person",
+          name: "Kelvin Mark",
+          jobTitle: "CEO"
+        },
         sameAs: socialLinks
       });
 
