@@ -75,7 +75,7 @@
         slug: "necklaces",
         name: "Necklaces",
         description: "Colorful collars and layered statement pieces for daily wear and special days.",
-        image: "assets/images/IMG-20260304-WA0001.jpg",
+        image: "assets/images/handmade-african-souvenir-7dgi8p.jpg",
         tip: "Statement style",
         accent: "coral"
       },
@@ -83,7 +83,7 @@
         slug: "bracelets",
         name: "Bracelets",
         description: "Easy-to-wear beaded bands with bright Kenyan color stories.",
-        image: "assets/images/WhatsApp Image 2026-03-21 at 14.22.49.jpeg",
+        image: "assets/images/authentic-maasai-bracelet-77ao7w.jpeg",
         tip: "Easy gifting",
         accent: "teal"
       },
@@ -91,7 +91,7 @@
         slug: "home-decor",
         name: "Home Decor",
         description: "Mirrors, table pieces, and wall styling made to warm up your space.",
-        image: "assets/images/IMG-20260214-WA0005.jpg",
+        image: "assets/images/sharoncraft-african-necklace-gilyu6.jpg",
         tip: "Warm spaces",
         accent: "ochre"
       },
@@ -99,7 +99,7 @@
         slug: "bags-accessories",
         name: "Bags & Accessories",
         description: "Hand-beaded carry pieces and tassel styles with everyday personality.",
-        image: "assets/images/IMG_20250606_113910.jpg",
+        image: "assets/images/kenyan-bead-decor-yhip8u.jpg",
         tip: "Daily carry",
         accent: "terracotta"
       },
@@ -107,7 +107,7 @@
         slug: "gift-sets",
         name: "Gift Sets",
         description: "Matching pieces that make gifting feel thoughtful and easy.",
-        image: "assets/images/IMG-20260317-WA0003.jpg",
+        image: "assets/images/handmade-kenyan-beadwork-jrpr9r.jpg",
         tip: "Ready gifts",
         accent: "teal"
       },
@@ -138,8 +138,8 @@
           "Made to order in 2 to 4 days"
         ],
         images: [
-          "assets/images/IMG-20260317-WA0003.jpg",
-          "assets/images/IMG_20250712_135532.jpg",
+          "assets/images/handmade-kenyan-beadwork-jrpr9r.jpg",
+          "assets/images/handmade-kenyan-beadwork-mi86cs.jpg",
           "assets/images/IMG-20260226-WA0005.jpg"
         ]
       },
@@ -160,9 +160,9 @@
           "Popular for events and gifting"
         ],
         images: [
-          "assets/images/IMG_20260116_135153.jpg",
-          "assets/images/IMG_20260116_135140.jpg",
-          "assets/images/IMG_20260116_135132.jpg"
+          "assets/images/nairobi-artisan-jewelry-9e1bft.jpg",
+          "assets/images/handmade-african-souvenir-ldj58p.jpg",
+          "assets/images/custom-occasion-beadwork-96fk0x.jpg"
         ]
       },
       {
@@ -182,9 +182,9 @@
           "Made for simple outfits that need one statement piece"
         ],
         images: [
-          "assets/images/IMG-20260304-WA0001.jpg",
-          "assets/images/IMG-20260221-WA0003.jpg",
-          "assets/images/IMG_20230923_150524.jpg"
+          "assets/images/handmade-african-souvenir-7dgi8p.jpg",
+          "assets/images/custom-occasion-beadwork-kqufsh.jpg",
+          "assets/images/kenyan-bead-decor-nxwcav.jpg"
         ]
       },
       {
@@ -204,9 +204,9 @@
           "Can be reordered in larger quantities"
         ],
         images: [
-          "assets/images/WhatsApp Image 2026-03-21 at 14.22.49.jpeg",
-          "assets/images/IMG-20260305-WA0001.jpg",
-          "assets/images/IMG_20250610_114035.jpg"
+          "assets/images/authentic-maasai-bracelet-77ao7w.jpeg",
+          "assets/images/nairobi-artisan-jewelry-36egyo.jpg",
+          "assets/images/nairobi-artisan-jewelry-xfka7l.jpg"
         ]
       },
       {
@@ -226,9 +226,9 @@
           "Good choice for birthdays and thank-you gifts"
         ],
         images: [
-          "assets/images/IMG_20240316_151041.jpg",
-          "assets/images/WhatsApp Image 2026-03-21 at 14.21.15.jpeg",
-          "assets/images/IMG_20230923_150542.jpg"
+          "assets/images/traditional-bridal-bead-set-knimvb.jpg",
+          "assets/images/handmade-kenyan-beadwork-k7amrw.jpeg",
+          "assets/images/traditional-bridal-bead-set-d35cq5.jpg"
         ]
       },
       {
@@ -249,8 +249,8 @@
         ],
         images: [
           "assets/images/IMG-20260214-WA0006.jpg",
-          "assets/images/IMG-20260214-WA0005.jpg",
-          "assets/images/IMG-20260214-WA0007.jpg"
+          "assets/images/sharoncraft-african-necklace-gilyu6.jpg",
+          "assets/images/kenyan-bead-decor-mw9yuq.jpg"
         ]
       },
       {
@@ -270,9 +270,9 @@
           "Popular for housewarming gifts"
         ],
         images: [
-          "assets/images/IMG-20260214-WA0004.jpg",
-          "assets/images/IMG_20250712_135532.jpg",
-          "assets/images/IMG_20260116_135153.jpg"
+          "assets/images/authentic-maasai-bracelet-8ei1qd.jpg",
+          "assets/images/handmade-kenyan-beadwork-mi86cs.jpg",
+          "assets/images/nairobi-artisan-jewelry-9e1bft.jpg"
         ]
       },
       {
@@ -292,9 +292,9 @@
           "Pairs well with matching jewelry"
         ],
         images: [
-          "assets/images/IMG_20250606_113904.jpg",
-          "assets/images/IMG_20250606_113910.jpg",
-          "assets/images/IMG_20250606_113919.jpg"
+          "assets/images/sharoncraft-african-necklace-n95vta.jpg",
+          "assets/images/kenyan-bead-decor-yhip8u.jpg",
+          "assets/images/traditional-bridal-bead-set-492otc.jpg"
         ]
       },
       {
@@ -314,9 +314,9 @@
           "Handmade in small batches"
         ],
         images: [
-          "assets/images/IMG_20250606_113933.jpg",
-          "assets/images/IMG_20250606_113919.jpg",
-          "assets/images/IMG_20250606_113948.jpg"
+          "assets/images/custom-occasion-beadwork-46mokm.jpg",
+          "assets/images/traditional-bridal-bead-set-492otc.jpg",
+          "assets/images/handmade-african-souvenir-brt5k2.jpg"
         ]
       },
       {
@@ -337,8 +337,8 @@
         ],
         images: [
           "assets/images/IMG-20260226-WA0005.jpg",
-          "assets/images/IMG-20260317-WA0003.jpg",
-          "assets/images/IMG_20250712_135532.jpg"
+          "assets/images/handmade-kenyan-beadwork-jrpr9r.jpg",
+          "assets/images/handmade-kenyan-beadwork-mi86cs.jpg"
         ]
       },
       {
@@ -358,9 +358,9 @@
           "Gift-ready look with strong color contrast"
         ],
         images: [
-          "assets/images/IMG-20260221-WA0000.jpg",
-          "assets/images/IMG-20260221-WA0003.jpg",
-          "assets/images/WhatsApp Image 2026-03-21 at 14.21.15.jpeg"
+          "assets/images/traditional-bridal-bead-set-pner91.jpg",
+          "assets/images/custom-occasion-beadwork-kqufsh.jpg",
+          "assets/images/handmade-kenyan-beadwork-k7amrw.jpeg"
         ]
       }
     ]
