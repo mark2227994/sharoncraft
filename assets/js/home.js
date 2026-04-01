@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const favoriteFallbackImage =
       favoriteProduct && Array.isArray(favoriteProduct.images) && favoriteProduct.images[0]
         ? favoriteProduct.images[0]
-        : "assets/images/IMG-20260214-WA0006.jpg";
+        : "assets/images/IMG-20260214-WA0006.webp";
 
     if (heroKicker) {
       heroKicker.textContent = hero.kicker || "Welcome to SharonCraft";
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       heroSecondary.href = hero.secondaryHref || "about.html";
     }
     if (heroImage) {
-      heroImage.src = addImageVersion(hero.image || "assets/images/IMG-20260226-WA0005.jpg", visuals.version);
+      heroImage.src = addImageVersion(hero.image || "assets/images/IMG-20260226-WA0005.webp", visuals.version);
       heroImage.alt = hero.imageAlt || "Model wearing SharonCraft occasion beadwork";
     }
     if (favoriteKicker) {
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         description:
           "Shop SharonCraft for handmade beaded necklaces, bracelets, decor, gift sets, and occasion pieces with easy WhatsApp ordering in Kenya.",
         path: "/",
-        image: hero.image || "assets/images/IMG-20260226-WA0005.jpg",
+        image: hero.image || "assets/images/IMG-20260226-WA0005.webp",
         imageAlt: hero.imageAlt || "SharonCraft handmade beadwork hero image",
         type: "website"
       });
@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         "@type": "OnlineStore",
         name: utils.data.site.name || "SharonCraft",
         url: new URL("/", window.location.origin).href,
-        logo: new URL("assets/images/sharoncraft-logo-transparent.png", window.location.origin).href,
-        image: new URL(hero.image || "assets/images/IMG-20260226-WA0005.jpg", window.location.origin).href,
+        logo: new URL("assets/images/sharoncraft-logo-transparent.webp", window.location.origin).href,
+        image: new URL(hero.image || "assets/images/IMG-20260226-WA0005.webp", window.location.origin).href,
         telephone: utils.data.site.phone || "",
         email: utils.data.site.email || "",
         description: utils.data.site.tagline || "",

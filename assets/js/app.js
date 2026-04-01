@@ -824,7 +824,7 @@
     const title = normalizeText(settings.title) || document.title || data.site.name;
     const description = normalizeText(settings.description) || data.site.tagline;
     const path = normalizeText(settings.path) || window.location.pathname;
-    const image = normalizeText(settings.image) || "assets/images/IMG-20260226-WA0005.jpg";
+    const image = normalizeText(settings.image) || "assets/images/IMG-20260226-WA0005.webp";
     const imageAlt = normalizeText(settings.imageAlt) || title;
     const type = normalizeText(settings.type) || "website";
     const robots = normalizeText(settings.robots) || "index,follow";
@@ -946,7 +946,7 @@
       .filter(Boolean);
 
     const uniqueImages = imageList.filter((image, index) => imageList.indexOf(image) === index);
-    return uniqueImages.length ? uniqueImages : ["assets/images/IMG-20260226-WA0005.jpg"];
+    return uniqueImages.length ? uniqueImages : ["assets/images/IMG-20260226-WA0005.webp"];
   }
 
   function formatCurrency(value) {
@@ -1967,7 +1967,7 @@
             `
             }
             <a class="brand-mark" href="index.html" aria-label="SharonCraft home">
-              <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.png" alt="SharonCraft logo" />
+              <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.webp" alt="SharonCraft logo" />
               <span class="brand-copy">
                 <strong>${data.site.name}</strong>
                 <small>Handmade joy from Kenya</small>

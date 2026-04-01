@@ -13,5 +13,8 @@
     "postcss": "^8.5.8",
     "postcss-scss": "^4.0.9",
     "prettier": "^3.8.1"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
   }
 }
