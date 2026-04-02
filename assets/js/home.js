@@ -17,9 +17,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   const testimonialStack = document.getElementById("home-testimonials");
 
   await utils.waitForData();
-  if (typeof utils.loadReviewSummaries === "function") {
-    await utils.loadReviewSummaries();
-  }
+  const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
+    ? utils.loadReviewSummaries().catch(function () { return null; })
+    : Promise.resolve(null);
   const addImageVersion = (image, version) => {
     const source = String(image || "").trim();
     const cacheVersion = String(version || "").trim();
@@ -216,6 +216,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   renderHome();
+
+  reviewSummaryPromise.then(function () {
+    renderHome();
+  });
 
   if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
     await window.SharonCraftLiveSync.ready;

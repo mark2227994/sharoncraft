@@ -24,6 +24,7 @@
   let mpesaStatusPollTimer = null;
   let mpesaStatusPollStartedAt = 0;
   let mpesaLastReference = "";
+  let cartEventsBound = false;
   let approvedReviews = [];
   let reviewSummaryMap = new Map();
   let reviewSummaryPromise = null;
@@ -2968,6 +2969,11 @@
   }
 
   function bindCartEvents() {
+    if (cartEventsBound) {
+      return;
+    }
+    cartEventsBound = true;
+
     document.addEventListener("click", function (event) {
       const addButton = event.target.closest("[data-add-to-cart]");
       const wishlistButton = event.target.closest("[data-toggle-wishlist]");
@@ -3046,15 +3052,21 @@
     }
   }
 
-  async function hydrateSharedShell() {
-    if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
-      try {
-        await window.SharonCraftLiveSync.ready;
-      } catch (error) {
-        console.warn("Unable to finish live storefront sync before rendering.", error);
-      }
+  function scheduleBackgroundTask(task, timeout) {
+    const safeTask = typeof task === "function" ? task : function () {};
+    const delay = Math.max(0, Number(timeout) || 0);
+
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(function () {
+        safeTask();
+      }, { timeout: Math.max(1000, delay || 1000) });
+      return;
     }
 
+    window.setTimeout(safeTask, delay);
+  }
+
+  async function hydrateSharedShell() {
     siteContentOverrides = readStoredSiteContent();
     if (siteContentOverrides) {
       mergeBrandingIntoSiteData(siteContentOverrides.branding);
@@ -3091,9 +3103,32 @@
     renderCartUi();
     startCartTimer();
     bindCartEvents();
+
+    if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+      window.SharonCraftLiveSync.ready
+        .then(function () {
+          siteContentOverrides = readStoredSiteContent();
+          if (siteContentOverrides) {
+            mergeBrandingIntoSiteData(siteContentOverrides.branding);
+          }
+          renderHeader();
+          renderFooter();
+          applySiteContentOverrides(siteContentOverrides);
+          renderCartUi();
+          bindCartEvents();
+          initReveal();
+        })
+        .catch(function (error) {
+          console.warn("Unable to refresh shared shell after live storefront sync.", error);
+        });
+    }
   }
 
-  loadReviewSummaries();
+  scheduleBackgroundTask(function () {
+    loadReviewSummaries().catch(function (error) {
+      console.warn("Unable to load review summaries in the background.", error);
+    });
+  }, 900);
   document.addEventListener("DOMContentLoaded", hydrateSharedShell);
 
   window.SharonCraftUtils = {
