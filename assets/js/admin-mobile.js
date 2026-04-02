@@ -961,7 +961,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const categorySlug = normalizeText(normalizeText(product.notes).split("|")[0]);
         return `
           <article class="admin-mobile-product-card">
-            <img src="${escapeHtml(normalizeText(product.image) || "assets/images/custom-occasion-beadwork-46mokm.webp")}" alt="${escapeHtml(product.name)}" loading="lazy" />
+            <img src="${escapeHtml(normalizeText(product.image) || "assets/images/custom-occasion-beadwork-46mokm-opt.webp")}" alt="${escapeHtml(product.name)}" loading="lazy" />
             <div class="admin-mobile-product-copy">
               <div class="admin-mobile-inline-meta">
                 <strong>${escapeHtml(product.name)}</strong>

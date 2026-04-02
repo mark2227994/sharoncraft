@@ -75,7 +75,7 @@
         title: String(config.title || document.title),
         description: String(config.description || ""),
         path: String(config.path || window.location.pathname),
-        image: String(config.image || "assets/images/custom-occasion-beadwork-46mokm.webp"),
+        image: String(config.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp"),
         imageAlt: String(config.imageAlt || config.heading || "SharonCraft collection"),
         type: "website"
       });
