@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SharonCraft Assistant Admin</title>
+  <meta name="description" content="Simple SharonCraft assistant admin for adding products, checking orders, and viewing live analytics." />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260401-mobile-ui-refresh" />
+  <link rel="stylesheet" href="assets/css/assistant-admin.css?v=20260403-assistant-admin" />
+</head>
+<body class="assistant-admin-page">
+  <main class="assistant-shell">
+    <section class="assistant-auth" id="assistant-auth">
+      <article class="assistant-auth-card">
+        <div class="assistant-brand">
+          <img src="assets/images/sharoncraft-logo-transparent.webp" alt="SharonCraft logo" />
+          <div>
+            <span class="section-kicker">Assistant Workspace</span>
+            <h1>Simple admin for daily help</h1>
+            <p>Use this page when someone needs to add products, check orders, or see quick analytics without opening the full admin panel.</p>
+          </div>
+        </div>
+
+        <form id="assistant-login-form" class="assistant-auth-form">
+          <label>
+            <span>Email</span>
+            <input id="assistant-email" type="email" autocomplete="username" placeholder="you@example.com" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="assistant-password" type="password" autocomplete="current-password" placeholder="Admin password" required />
+          </label>
+          <button class="button button-primary" type="submit">Open Assistant Admin</button>
+        </form>
+
+        <p id="assistant-auth-status" class="assistant-status">Checking live access...</p>
+
+        <div class="assistant-auth-notes">
+          <article>
+            <strong>Add products</strong>
+            <p>Name, price, image, and a simple description are enough to publish.</p>
+          </article>
+          <article>
+            <strong>See orders</strong>
+            <p>Track recent customer orders without the heavier operations tools.</p>
+          </article>
+          <article>
+            <strong>Read analytics</strong>
+            <p>See quick storefront activity and top products in one calm view.</p>
+          </article>
+        </div>
+      </article>
+    </section>
+
+    <section class="assistant-app" id="assistant-app" hidden>
+      <header class="assistant-topbar">
+        <div class="assistant-topbar-copy">
+          <span class="section-kicker">SharonCraft Assistant Admin</span>
+          <h1>Beginner-friendly control room</h1>
+          <p id="assistant-user-copy">Signed in</p>
+        </div>
+        <div class="assistant-topbar-actions">
+          <span class="assistant-live-chip" id="assistant-live-chip">Live Supabase</span>
+          <button class="button button-secondary" id="assistant-sign-out" type="button">Sign Out</button>
+        </div>
+      </header>
+
+      <p id="assistant-app-status" class="assistant-status">Loading live products, orders, and analytics...</p>
+
+      <nav class="assistant-tabs" aria-label="Assistant admin sections">
+        <button class="assistant-tab is-active" type="button" data-assistant-tab="add">Add Product</button>
+        <button class="assistant-tab" type="button" data-assistant-tab="orders">Orders</button>
+        <button class="assistant-tab" type="button" data-assistant-tab="catalog">Catalog</button>
+        <button class="assistant-tab" type="button" data-assistant-tab="analytics">Analytics</button>
+      </nav>
+
+      <section class="assistant-panel is-active" data-assistant-panel="add">
+        <div class="assistant-grid">
+          <article class="assistant-card assistant-card-form">
+            <div class="assistant-card-head">
+              <div>
+                <span class="section-kicker" id="assistant-form-kicker">New Product</span>
+                <h2 id="assistant-form-title">Add a product simply</h2>
+              </div>
+              <button class="button button-secondary" id="assistant-reset-form" type="button">Start Fresh</button>
+            </div>
+
+            <form id="assistant-product-form" class="assistant-form">
+              <input id="assistant-product-id" type="hidden" />
+              <label>
+                <span>Product name</span>
+                <input id="assistant-name" type="text" maxlength="90" placeholder="Beaded Necklace" required />
+              </label>
+              <div class="assistant-two-up">
+                <label>
+                  <span>Category</span>
+                  <select id="assistant-category" required></select>
+                </label>
+                <label>
+                  <span>Price (KES)</span>
+                  <input id="assistant-price" type="number" min="0" step="1" placeholder="3200" required />
+                </label>
+              </div>
+              <label>
+                <span>Main image path</span>
+                <input id="assistant-image" type="text" placeholder="assets/images/product-photo.webp" required />
+              </label>
+              <div class="assistant-upload-block">
+                <div>
+                  <strong>Upload from this computer</strong>
+                  <p>Pick a photo and it will upload to the live product image library.</p>
+                </div>
+                <label class="assistant-file-field">
+                  <span>Choose image</span>
+                  <input id="assistant-image-file" type="file" accept="image/*" />
+                </label>
+              </div>
+              <label>
+                <span>Extra gallery images</span>
+                <textarea id="assistant-gallery" rows="3" placeholder="Optional extra image links separated by commas"></textarea>
+              </label>
+              <label>
+                <span>Short description</span>
+                <textarea id="assistant-description" rows="5" maxlength="500" placeholder="Simple client-friendly description" required></textarea>
+              </label>
+              <label>
+                <span>Short details</span>
+                <textarea id="assistant-details" rows="3" placeholder="Handmade in Kenya, Lightweight, Gift-ready"></textarea>
+              </label>
+              <div class="assistant-two-up">
+                <label>
+                  <span>Badge</span>
+                  <input id="assistant-badge" type="text" maxlength="40" placeholder="New" />
+                </label>
+                <div class="assistant-checks">
+                  <label><input id="assistant-featured" type="checkbox" /> Featured</label>
+                  <label><input id="assistant-new" type="checkbox" /> New</label>
+                  <label><input id="assistant-soldout" type="checkbox" /> Sold out</label>
+                </div>
+              </div>
+              <div class="assistant-form-actions">
+                <button class="button button-primary" id="assistant-save-product" type="submit">Save To Live Catalog</button>
+              </div>
+            </form>
+          </article>
+
+          <aside class="assistant-stack">
+            <article class="assistant-card">
+              <div class="assistant-card-head">
+                <div>
+                  <span class="section-kicker">Quick Help</span>
+                  <h2>Best simple flow</h2>
+                </div>
+              </div>
+              <ol class="assistant-steps">
+                <li>Add the product name, category, and price.</li>
+                <li>Upload one clear photo first.</li>
+                <li>Write one short description the customer can understand quickly.</li>
+                <li>Save, then check the Catalog tab to confirm it looks right.</li>
+              </ol>
+            </article>
+
+            <article class="assistant-card">
+              <div class="assistant-card-head">
+                <div>
+                  <span class="section-kicker">Image Preview</span>
+                  <h2>Main photo</h2>
+                </div>
+              </div>
+              <div class="assistant-image-preview" id="assistant-image-preview-wrap" hidden>
+                <img id="assistant-image-preview" src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="Selected product preview" />
+              </div>
+              <p class="assistant-muted">The first image becomes the main product photo customers see.</p>
+            </article>
+
+            <article class="assistant-card">
+              <div class="assistant-card-head">
+                <div>
+                  <span class="section-kicker">Live Snapshot</span>
+                  <h2>Current totals</h2>
+                </div>
+              </div>
+              <div class="assistant-mini-metrics" id="assistant-mini-metrics"></div>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="assistant-panel" data-assistant-panel="orders">
+        <article class="assistant-card">
+          <div class="assistant-card-head">
+            <div>
+              <span class="section-kicker">Recent Orders</span>
+              <h2>Clear order view for helpers</h2>
+            </div>
+            <button class="button button-secondary" id="assistant-refresh-orders" type="button">Refresh</button>
+          </div>
+          <div class="assistant-toolbar">
+            <label>
+              <span>Search</span>
+              <input id="assistant-order-search" type="search" placeholder="Customer, phone, or product" />
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="assistant-order-filter">
+                <option value="all">All statuses</option>
+                <option value="new">New</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="paid">Paid</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </label>
+          </div>
+          <div id="assistant-order-summary" class="assistant-summary-grid"></div>
+          <div id="assistant-order-list" class="assistant-list"></div>
+        </article>
+      </section>
+
+      <section class="assistant-panel" data-assistant-panel="catalog">
+        <article class="assistant-card">
+          <div class="assistant-card-head">
+            <div>
+              <span class="section-kicker">Live Catalog</span>
+              <h2>Search or edit products</h2>
+            </div>
+            <button class="button button-secondary" id="assistant-refresh-products" type="button">Refresh</button>
+          </div>
+          <label class="assistant-search">
+            <span>Search products</span>
+            <input id="assistant-product-search" type="search" placeholder="Search by name or category" />
+          </label>
+          <div id="assistant-product-list" class="assistant-list"></div>
+        </article>
+      </section>
+
+      <section class="assistant-panel" data-assistant-panel="analytics">
+        <article class="assistant-card">
+          <div class="assistant-card-head">
+            <div>
+              <span class="section-kicker">Live Analytics</span>
+              <h2>Quick storefront signals</h2>
+            </div>
+            <button class="button button-secondary" id="assistant-refresh-analytics" type="button">Refresh</button>
+          </div>
+          <div class="assistant-range-row" role="group" aria-label="Analytics range">
+            <button class="assistant-range is-active" type="button" data-assistant-range="7d">7d</button>
+            <button class="assistant-range" type="button" data-assistant-range="30d">30d</button>
+            <button class="assistant-range" type="button" data-assistant-range="90d">90d</button>
+          </div>
+          <div id="assistant-analytics-summary" class="assistant-summary-grid"></div>
+          <div class="assistant-analytics-grid">
+            <section class="assistant-subcard">
+              <div class="assistant-subhead">
+                <span class="section-kicker">Top Products</span>
+                <h3>Most attention</h3>
+              </div>
+              <div id="assistant-analytics-products" class="assistant-rank-list"></div>
+            </section>
+            <section class="assistant-subcard">
+              <div class="assistant-subhead">
+                <span class="section-kicker">Top Pages</span>
+                <h3>Most visits</h3>
+              </div>
+              <div id="assistant-analytics-pages" class="assistant-rank-list"></div>
+            </section>
+          </div>
+          <section class="assistant-subcard">
+            <div class="assistant-subhead">
+              <span class="section-kicker">Recent Activity</span>
+              <h3>Latest storefront events</h3>
+            </div>
+            <div id="assistant-analytics-feed" class="assistant-feed"></div>
+          </section>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
+  <script src="supabase/supabase-catalog.js?v=20260401-reviews-sync" defer></script>
+  <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
+  <script src="assets/js/assistant-admin.js?v=20260403-assistant-admin" defer></script>
+</body>
+</html>

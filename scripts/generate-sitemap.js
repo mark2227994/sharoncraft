@@ -13,6 +13,7 @@ const excludedRootPages = new Set([
   "account.html",
   "admin.html",
   "admin-mobile.html",
+  "assistant-admin.html",
   "cart.html",
   "login.html",
   "order.html",
