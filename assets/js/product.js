@@ -1,16 +1,12 @@
 document.addEventListener("DOMContentLoaded", async function () {
-  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
-    await window.SharonCraftLiveSync.ready;
-  }
-
   const utils = window.SharonCraftUtils;
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");
 
   await utils.waitForData();
-  if (typeof utils.loadReviewSummaries === "function") {
-    await utils.loadReviewSummaries();
-  }
+  const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
+    ? utils.loadReviewSummaries().catch(function () { return null; })
+    : Promise.resolve(null);
 
   const product = await utils.getProductById(productId);
   const breadcrumb = document.getElementById("product-breadcrumb");
@@ -282,7 +278,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     .filter((url) => url && url !== "#");
   const availabilityUrl = product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock";
   const categoryName = productCategory ? productCategory.name : "Collection";
-  const seoOverride = await loadProductSeoOverride(product.id);
+  let seoOverride = normalizeSeoOverride({});
   const seoTitle = seoOverride.title || `${productName} | SharonCraft`;
   const seoDescription = seoOverride.description || `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
   const seoKeywords = seoOverride.keywords.length
@@ -550,7 +546,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       }
     });
-
     utils.setStructuredData("product-breadcrumb", {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -581,6 +576,71 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
       ]
     });
+  }
+
+  async function refreshDeferredProductContent() {
+    if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+      try {
+        await window.SharonCraftLiveSync.ready;
+      } catch (error) {
+        console.warn("Unable to finish live product sync.", error);
+      }
+    }
+
+    await reviewSummaryPromise;
+
+    seoOverride = await loadProductSeoOverride(product.id);
+    const nextSeoTitle = seoOverride.title || `${productName} | SharonCraft`;
+    const nextSeoDescription = seoOverride.description || `${productName} by SharonCraft. ${productDescription.slice(0, 120)} Order handmade ${categoryName.toLowerCase()} in Kenya on WhatsApp.`;
+    const nextSeoKeywords = seoOverride.keywords.length
+      ? seoOverride.keywords.join(", ")
+      : [categoryName, "handmade beadwork", "Kenya", "SharonCraft"].join(", ");
+    const nextApprovedReviews = typeof utils.getApprovedReviewsForProduct === "function"
+      ? utils.getApprovedReviewsForProduct(product.id).map((item) => ({
+          id: normalizeReviewText(item.id || item.sourceId),
+          author: normalizeReviewText(item.author) || "SharonCraft client",
+          location: normalizeReviewText(item.location) || "Kenya",
+          rating: clampReviewRating(item.rating),
+          message: normalizeReviewText(item.message),
+          createdAt: normalizeReviewText(item.approvedAt || item.createdAt),
+          status: "approved"
+        }))
+      : [];
+    const nextApprovedIds = new Set(nextApprovedReviews.map((item) => item.id).filter(Boolean));
+    const nextLocalReviews = getLocalProductReviews(product.id)
+      .map((item, index) => ({
+        id: normalizeReviewText(item.id) || `local-${index + 1}`,
+        author: normalizeReviewText(item.author) || "SharonCraft client",
+        location: normalizeReviewText(item.location) || "Kenya",
+        rating: clampReviewRating(item.rating),
+        message: normalizeReviewText(item.message),
+        createdAt: normalizeReviewText(item.createdAt) || "",
+        status: normalizeReviewText(item.status) || "pending"
+      }))
+      .filter((item) => item.message && !nextApprovedIds.has(item.id));
+    const nextReviewMetrics = {
+      approvedCount: nextApprovedReviews.length,
+      pendingCount: nextLocalReviews.length,
+      averageRating: nextApprovedReviews.length
+        ? nextApprovedReviews.reduce((sum, item) => sum + clampReviewRating(item.rating), 0) / nextApprovedReviews.length
+        : 0
+    };
+
+    renderReviews([...nextLocalReviews, ...nextApprovedReviews], nextReviewMetrics);
+
+    if (typeof utils.setPageMetadata === "function") {
+      utils.setPageMetadata({
+        title: nextSeoTitle,
+        description: nextSeoDescription,
+        keywords: nextSeoKeywords,
+        path: `/product.html?id=${encodeURIComponent(product.id)}`,
+        image: productImages[0],
+        imageAlt: productName,
+        type: "product"
+      });
+    }
+
+    utils.refreshReveal();
   }
 
   if (typeof utils.trackEvent === "function") {
@@ -731,4 +791,5 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   utils.ensureCartTimer();
   utils.refreshReveal();
+  refreshDeferredProductContent();
 });

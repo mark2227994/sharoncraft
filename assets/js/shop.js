@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", async function () {
-  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
-    await window.SharonCraftLiveSync.ready;
-  }
   const utils = window.SharonCraftUtils;
   const grid = document.getElementById("shop-grid");
   const searchInput = document.getElementById("shop-search");
@@ -20,9 +17,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   await utils.waitForData();
-  if (typeof utils.loadReviewSummaries === "function") {
-    await utils.loadReviewSummaries();
-  }
+  const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
+    ? utils.loadReviewSummaries().catch(function () { return null; })
+    : Promise.resolve(null);
 
   if (helpWhatsapp) {
     helpWhatsapp.href = utils.buildWhatsAppUrl(
@@ -411,4 +408,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   renderProducts();
+
+  reviewSummaryPromise.then(function () {
+    renderProducts();
+  });
+
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    window.SharonCraftLiveSync.ready
+      .then(function () {
+        renderProducts();
+      })
+      .catch(function () {
+        return null;
+      });
+  }
 });

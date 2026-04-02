@@ -2,13 +2,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const utils = window.SharonCraftUtils;
   if (!utils) return;
 
-  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
-    await window.SharonCraftLiveSync.ready;
-  }
   await utils.waitForData();
-  if (typeof utils.loadReviewSummaries === "function") {
-    await utils.loadReviewSummaries();
-  }
+  const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
+    ? utils.loadReviewSummaries().catch(function () { return null; })
+    : Promise.resolve(null);
 
   const emptyState = document.getElementById("wishlist-page-empty");
   const listNode = document.getElementById("wishlist-page-list");
@@ -57,4 +54,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Initial render
   renderWishlistUi();
+
+  reviewSummaryPromise.then(renderWishlistUi);
+
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    window.SharonCraftLiveSync.ready
+      .then(renderWishlistUi)
+      .catch(function () {
+        return null;
+      });
+  }
 });
