@@ -264,16 +264,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     productList.innerHTML = filtered.map(function (product) {
       const categoryName = getCategoryName(getCategorySlug(product));
+      const unavailableLabel = product && product.soldOut ? ' <span class="assistant-unavailable-tag">Unavailable</span>' : "";
       return `
         <article class="assistant-list-item assistant-product-row">
           <img class="assistant-product-media" src="${escapeHtml(normalizeText(product.image) || "assets/images/custom-occasion-beadwork-46mokm-opt.webp")}" alt="${escapeHtml(normalizeText(product.name) || "Product image")}" loading="lazy" decoding="async" />
           <div class="assistant-product-copy">
-            <strong>${escapeHtml(normalizeText(product.name) || "Untitled product")}</strong>
-            <div class="assistant-product-meta">${escapeHtml(categoryName)} · ${escapeHtml(formatCurrency(product.price))}</div>
+            <strong>${escapeHtml(normalizeText(product.name) || "Untitled product")}${unavailableLabel}</strong>
+            <div class="assistant-product-meta">${escapeHtml(categoryName)} - ${escapeHtml(formatCurrency(product.price))}</div>
             <div class="assistant-product-meta">${escapeHtml(normalizeText(product.story) || "No description yet.")}</div>
           </div>
           <div class="assistant-list-actions">
             <button class="button button-secondary" type="button" data-product-edit="${escapeHtml(normalizeText(product.id))}">Edit</button>
+            <button class="button button-secondary" type="button" data-product-delete="${escapeHtml(normalizeText(product.id))}">Delete</button>
           </div>
         </article>
       `;
@@ -499,6 +501,43 @@ document.addEventListener("DOMContentLoaded", async function () {
     activateTab("catalog");
   }
 
+  async function deleteProduct(productId) {
+    const normalizedId = normalizeText(productId);
+    if (!normalizedId) {
+      return;
+    }
+
+    const product = products.find(function (item) {
+      return normalizeText(item.id) === normalizedId;
+    });
+
+    if (!product) {
+      setStatus(appStatus, "That product could not be found anymore.", "error");
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete "${normalizeText(product.name) || "this product"}" from the live catalog?`);
+    if (!confirmed) {
+      return;
+    }
+
+    const nextProducts = products.filter(function (item) {
+      return normalizeText(item.id) !== normalizedId;
+    });
+
+    setStatus(appStatus, `Deleting ${normalizeText(product.name) || "product"} from the live catalog...`, "info");
+    await catalogApi.saveProducts(nextProducts);
+    products = nextProducts;
+    renderProducts();
+    renderMiniMetrics();
+
+    if (normalizeText(productIdInput.value) === normalizedId) {
+      resetForm();
+    }
+
+    setStatus(appStatus, `${normalizeText(product.name) || "Product"} was removed from the live catalog.`, "success");
+  }
+
   async function uploadImage(file) {
     if (!file) {
       return;
@@ -689,14 +728,21 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (productList) {
     productList.addEventListener("click", function (event) {
       const editButton = event.target.closest("[data-product-edit]");
-      if (!editButton) {
+      if (editButton) {
+        const product = products.find(function (item) {
+          return normalizeText(item.id) === normalizeText(editButton.dataset.productEdit);
+        });
+        if (product) {
+          fillForm(product);
+        }
         return;
       }
-      const product = products.find(function (item) {
-        return normalizeText(item.id) === normalizeText(editButton.dataset.productEdit);
-      });
-      if (product) {
-        fillForm(product);
+
+      const deleteButton = event.target.closest("[data-product-delete]");
+      if (deleteButton) {
+        deleteProduct(deleteButton.dataset.productDelete).catch(function (error) {
+          setStatus(appStatus, error && error.message ? error.message : "Could not delete the product right now.", "error");
+        });
       }
     });
   }

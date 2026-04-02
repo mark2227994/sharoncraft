@@ -390,6 +390,18 @@ body.assistant-admin-page {
   margin-bottom: 4px;
 }
 
+.assistant-unavailable-tag {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(177, 90, 81, 0.12);
+  color: #8b352e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 .assistant-product-meta,
 .assistant-order-meta,
 .assistant-feed-copy span,
