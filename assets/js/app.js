@@ -2792,10 +2792,6 @@
         </div>
       </footer>
       <nav class="mobile-bottom-nav" aria-label="Mobile quick navigation">
-        <button class="mobile-bottom-nav-link mobile-bottom-menu" type="button" id="mobile-bottom-menu-button" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">
-          ${menuIconMarkup()}
-          <span>Menu</span>
-        </button>
         <a class="mobile-bottom-nav-link ${currentPage === "home" ? "is-active" : ""}" href="index.html">
           ${navIconMarkup("home")}
           <span>Home</span>
