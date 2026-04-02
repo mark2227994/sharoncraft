@@ -47,6 +47,7 @@ body.cart-open {
 img {
   display: block;
   width: 100%;
+  height: auto;
 }
 
 a {
@@ -101,6 +102,24 @@ summary:focus-visible,
 
 .section {
   padding: 3.5rem 0;
+}
+
+main > .section:not(:first-of-type),
+.customer-proof-section,
+.categories-showcase-section,
+.product-reviews-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 900px;
+}
+
+.story-card,
+.landing-link-card,
+.customer-proof-card,
+.review-card,
+.testimonial-card,
+.live-product-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 320px;
 }
 
 .section-heading {

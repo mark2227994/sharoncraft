@@ -2579,7 +2579,7 @@
             `
             }
             <a class="brand-mark" href="index.html" aria-label="SharonCraft home">
-              <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.webp" alt="SharonCraft logo" />
+              <img class="brand-logo" src="assets/images/sharoncraft-logo-transparent.webp" alt="SharonCraft logo" decoding="async" />
               <span class="brand-copy">
                 <strong>${data.site.name}</strong>
                 <small>Handmade joy from Kenya</small>

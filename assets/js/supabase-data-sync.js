@@ -382,10 +382,29 @@
     return results;
   }
 
+  function scheduleLiveSync() {
+    const runSync = function () {
+      return syncFromSupabase().catch(function (error) {
+        console.error("Unable to sync storefront catalog from Supabase.", error);
+        return null;
+      });
+    };
+
+    return new Promise(function (resolve) {
+      const start = function () {
+        runSync().then(resolve);
+      };
+
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(start, { timeout: 1200 });
+        return;
+      }
+
+      window.setTimeout(start, 250);
+    });
+  }
+
   window.SharonCraftLiveSync = {
-    ready: syncFromSupabase().catch(function (error) {
-      console.error("Unable to sync storefront catalog from Supabase.", error);
-      return null;
-    }),
+    ready: scheduleLiveSync(),
   };
 }());

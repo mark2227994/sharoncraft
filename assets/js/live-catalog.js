@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return `
       <article class="product-card live-product-card reveal">
         <div class="product-card-media">
-          <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy" />
+          <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" fetchpriority="low" />
           <div class="live-product-badge-row">
             ${getBadges(product)}
           </div>
