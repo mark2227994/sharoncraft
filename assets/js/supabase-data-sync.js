@@ -2,7 +2,7 @@
   const data = window.SharonCraftData;
   const storage = window.SharonCraftStorage;
   const liveCatalog = window.SharonCraftCatalog;
-  const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm.webp";
+  const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
   const siteContentSettingsKey = (storage && storage.siteContentSettingsKey) || "sharoncraft-site-content";
   const liveSiteContentCacheKey = (storage && storage.liveSiteContentCacheKey) || "sharoncraft-live-site-content-cache";
   const normalizeText = (value) => String(value || "").trim();
@@ -125,8 +125,8 @@
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
         secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
         image:
-          String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm.webp").trim() ||
-          "assets/images/custom-occasion-beadwork-46mokm.webp",
+          String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
+          "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt:
           String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
           "SharonCraft welcoming beadwork photo",
@@ -136,8 +136,8 @@
         title: String(favorite.title || fallbackFavorite.title || "").trim(),
         description: String(favorite.description || fallbackFavorite.description || "").trim(),
         image:
-          String(favorite.image || fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u.webp").trim() ||
-          "assets/images/kenyan-bead-decor-yhip8u.webp",
+          String(favorite.image || fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u-opt.webp").trim() ||
+          "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
         imageAlt:
           String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
           "SharonCraft favorite product photo",

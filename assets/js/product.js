@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         title: "Product Not Found | SharonCraft",
         description: "This SharonCraft product link may be old. Browse the full collection and order on WhatsApp.",
         path: "/product.html",
-        image: "assets/images/custom-occasion-beadwork-46mokm.webp",
+        image: "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         type: "website"
       });
     }
@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     description.textContent = "The product link may be old. Please return to the shop and choose another item.";
     price.textContent = "";
     category.textContent = "";
-    mainImage.src = "assets/images/custom-occasion-beadwork-46mokm.webp";
+    mainImage.src = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
     mainImage.alt = "SharonCraft featured piece";
     breadcrumb.innerHTML = `<a href="index.html">Home</a><span>/</span><a href="shop.html">Shop</a><span>/</span><strong>Not found</strong>`;
     const fallbackProducts = utils.data.products.slice(0, 4);
@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const productDescription = product.description || product.shortDescription || "Handmade by SharonCraft artisans.";
   const productImages = Array.isArray(product.images) && product.images.length
     ? product.images
-    : ["assets/images/custom-occasion-beadwork-46mokm.webp"];
+    : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
   const productDetails = Array.isArray(product.details) && product.details.length
     ? product.details
     : ["Handmade in Kenya", "Shared with care by SharonCraft"];

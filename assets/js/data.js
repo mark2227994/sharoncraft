@@ -60,14 +60,14 @@
         primaryHref: "shop.html",
         secondaryLabel: "Our Story",
         secondaryHref: "about.html",
-        image: "assets/images/custom-occasion-beadwork-46mokm.webp",
+        image: "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt: "Model wearing SharonCraft occasion beadwork"
       },
       favorite: {
         kicker: "Client Favorite",
         title: "Kijani Mirror Duo",
         description: "Bright decor with a clean modern finish for bedrooms and living rooms.",
-        image: "assets/images/kenyan-bead-decor-yhip8u.webp",
+        image: "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
         imageAlt: "Beaded mirror from SharonCraft",
         productId: "kijani-mirror-duo"
       }
@@ -85,7 +85,7 @@
         slug: "bracelets",
         name: "Bracelets",
         description: "Easy-to-wear beaded bands with bright Kenyan color stories.",
-        image: "assets/images/kenya bracelete.webp",
+        image: "assets/images/kenya bracelete-opt.webp",
         tip: "Easy gifting",
         accent: "teal"
       },
@@ -117,7 +117,7 @@
         slug: "bridal-occasion",
         name: "Bridal & Occasion",
         description: "Celebration-ready beadwork for events, brides, and standout moments.",
-        image: "assets/images/traditional-bridal-bead-set-knimvb.webp",
+        image: "assets/images/traditional-bridal-bead-set-knimvb-opt.webp",
         tip: "Event glow",
         accent: "coral"
       }
@@ -142,7 +142,7 @@
         images: [
           "assets/images/handmade-kenyan-beadwork-jrpr9r.webp",
           "assets/images/handmade-african-souvenir-joswzj.webp",
-          "assets/images/kenyan-bead-decor-hkewyc.webp"
+          "assets/images/kenyan-bead-decor-hkewyc-opt.webp"
         ]
       },
       {
@@ -185,8 +185,8 @@
         ],
         images: [
           "assets/images/sharoncraft-african-necklace-p1sw79.webp",
-          "assets/images/sharoncraft-african-necklace-wmwmaf.webp",
-          "assets/images/sharoncraft-african-necklace-e8twpi.webp"
+          "assets/images/sharoncraft-african-necklace-wmwmaf-opt.webp",
+          "assets/images/sharoncraft-african-necklace-e8twpi-opt.webp"
         ]
       },
       {
@@ -206,7 +206,7 @@
           "Can be reordered in larger quantities"
         ],
         images: [
-          "assets/images/kenya bracelete.webp",
+          "assets/images/kenya bracelete-opt.webp",
           "assets/images/authentic-maasai-bracelet-77ao7w.webp",
           "assets/images/authentic-maasai-bracelet-67j4r9.webp"
         ]
@@ -229,8 +229,8 @@
         ],
         images: [
           "assets/images/authentic-maasai-bracelet-8ei1qd.webp",
-          "assets/images/authentic-maasai-bracelet-ptfkru.webp",
-          "assets/images/authentic-maasai-bracelet-eb9hav.webp"
+          "assets/images/authentic-maasai-bracelet-ptfkru-opt.webp",
+          "assets/images/authentic-maasai-bracelet-eb9hav-opt.webp"
         ]
       },
       {
@@ -250,7 +250,7 @@
           "Dispatch usually within 3 to 5 days"
         ],
         images: [
-          "assets/images/kenyan-bead-decor-yhip8u.webp",
+          "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
           "assets/images/kenyan-bead-decor-kwwvkk.webp",
           "assets/images/kenyan-bead-decor-mw9yuq.webp"
         ]
@@ -273,8 +273,8 @@
         ],
         images: [
           "assets/images/kenyan-bead-decor-nxwcav.webp",
-          "assets/images/kenyan-bead-decor-hkewyc.webp",
-          "assets/images/kenyan-bead-decor-9kag7s.webp"
+          "assets/images/kenyan-bead-decor-hkewyc-opt.webp",
+          "assets/images/kenyan-bead-decor-9kag7s-opt.webp"
         ]
       },
       {
@@ -294,7 +294,7 @@
           "Pairs well with matching jewelry"
         ],
         images: [
-          "assets/images/handmade-african-souvenir-ldj58p.webp",
+          "assets/images/handmade-african-souvenir-ldj58p-opt.webp",
           "assets/images/handmade-african-souvenir-joswzj.webp",
           "assets/images/handmade-african-souvenir-7dgi8p.webp"
         ]
@@ -316,9 +316,9 @@
           "Handmade in small batches"
         ],
         images: [
-          "assets/images/handmade-african-souvenir-brt5k2.webp",
+          "assets/images/handmade-african-souvenir-brt5k2-opt.webp",
           "assets/images/handmade-african-souvenir-7dgi8p.webp",
-          "assets/images/handmade-african-souvenir-b84ai7.webp"
+          "assets/images/handmade-african-souvenir-b84ai7-opt.webp"
         ]
       },
       {
@@ -338,8 +338,8 @@
           "Made with care for special-order clients"
         ],
         images: [
-          "assets/images/custom-occasion-beadwork-46mokm.webp",
-          "assets/images/traditional-bridal-bead-set-knimvb.webp",
+          "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
+          "assets/images/traditional-bridal-bead-set-knimvb-opt.webp",
           "assets/images/traditional-bridal-bead-set-pner91.webp"
         ]
       },
@@ -360,9 +360,9 @@
           "Gift-ready look with strong color contrast"
         ],
         images: [
-          "assets/images/custom-occasion-beadwork-wap9kh.webp",
+          "assets/images/custom-occasion-beadwork-wap9kh-opt.webp",
           "assets/images/traditional-bridal-bead-set-jzgne1.webp",
-          "assets/images/sharoncraft-african-necklace-wmwmaf.webp"
+          "assets/images/sharoncraft-african-necklace-wmwmaf-opt.webp"
         ]
       }
     ]
@@ -394,7 +394,7 @@
       shortDescription: product.shortDescription || product.description || "",
       description: product.description || product.shortDescription || "",
       details,
-      images: images.length ? images : ["assets/images/custom-occasion-beadwork-46mokm.webp"],
+      images: images.length ? images : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"],
       analytics: product.analytics || null
     };
   }
@@ -409,8 +409,8 @@
       name: String(category.name || fallback.name || "Category").trim() || "Category",
       description: String(category.description || fallback.description || "").trim(),
       image:
-        String(category.image || fallback.image || "assets/images/custom-occasion-beadwork-46mokm.webp").trim() ||
-        "assets/images/custom-occasion-beadwork-46mokm.webp",
+        String(category.image || fallback.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
+        "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
       tip: String(category.tip || category.homeTip || fallback.tip || "").trim(),
       accent: allowedAccents.includes(accent) ? accent : "coral"
     };
@@ -434,8 +434,8 @@
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
         secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
         image:
-          String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm.webp").trim() ||
-          "assets/images/custom-occasion-beadwork-46mokm.webp",
+          String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
+          "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt:
           String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
           "SharonCraft welcoming beadwork photo"
@@ -445,8 +445,8 @@
         title: String(favorite.title || fallbackFavorite.title || "").trim(),
         description: String(favorite.description || fallbackFavorite.description || "").trim(),
         image:
-          String(favorite.image || fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u.webp").trim() ||
-          "assets/images/kenyan-bead-decor-yhip8u.webp",
+          String(favorite.image || fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u-opt.webp").trim() ||
+          "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
         imageAlt:
           String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
           "SharonCraft favorite product photo",

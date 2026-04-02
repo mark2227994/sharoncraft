@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const favoriteFallbackImage =
       favoriteProduct && Array.isArray(favoriteProduct.images) && favoriteProduct.images[0]
         ? favoriteProduct.images[0]
-        : "assets/images/kenyan-bead-decor-yhip8u.webp";
+        : "assets/images/kenyan-bead-decor-yhip8u-opt.webp";
 
     if (heroKicker) {
       heroKicker.textContent = hero.kicker || "Welcome to SharonCraft";
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       heroSecondary.href = hero.secondaryHref || "about.html";
     }
     if (heroImage) {
-      heroImage.src = addImageVersion(hero.image || "assets/images/custom-occasion-beadwork-46mokm.webp", visuals.version);
+      heroImage.src = addImageVersion(hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp", visuals.version);
       heroImage.alt = hero.imageAlt || "Model wearing SharonCraft occasion beadwork";
     }
     if (favoriteKicker) {
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         description:
           "Shop SharonCraft for handmade beaded necklaces, bracelets, decor, gift sets, and occasion pieces with easy WhatsApp ordering in Kenya.",
         path: "/",
-        image: hero.image || "assets/images/custom-occasion-beadwork-46mokm.webp",
+        image: hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt: hero.imageAlt || "SharonCraft handmade beadwork hero image",
         type: "website"
       });
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         name: utils.data.site.name || "SharonCraft",
         url: new URL("/", window.location.origin).href,
         logo: new URL("assets/images/sharoncraft-logo-transparent.webp", window.location.origin).href,
-        image: new URL(hero.image || "assets/images/custom-occasion-beadwork-46mokm.webp", window.location.origin).href,
+        image: new URL(hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp", window.location.origin).href,
         telephone: utils.data.site.phone || "",
         email: utils.data.site.email || "",
         description: utils.data.site.tagline || "",

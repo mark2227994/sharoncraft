@@ -32,11 +32,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     "assets/images/IMG-20260212-WA0020.jpeg",
     "assets/images/IMG-20260214-WA0004.jpg",
     "assets/images/IMG-20260214-WA0005.jpg",
-    "assets/images/kenyan-bead-decor-yhip8u.webp",
+    "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
     "assets/images/IMG-20260214-WA0007.jpg",
     "assets/images/IMG-20260221-WA0000.jpg",
     "assets/images/IMG-20260221-WA0003.jpg",
-    "assets/images/custom-occasion-beadwork-46mokm.webp",
+    "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
     "assets/images/sharoncraft-african-necklace-p1sw79.webp",
     "assets/images/IMG-20260305-WA0001.jpg",
     "assets/images/IMG-20260317-WA0003.jpg",
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     "assets/images/WhatsApp Image 2026-03-21 at 15.48.32.jpeg"
   ];
   let availableImages = [];
-  const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm.webp";
+  const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
   const defaultCategorySource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
   const defaultHomeVisualSource =
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             href: "kenyan-artifacts.html"
           },
           {
-            image: "assets/images/custom-occasion-beadwork-wap9kh.webp",
+            image: "assets/images/custom-occasion-beadwork-wap9kh-opt.webp",
             imageAlt: "Beaded earrings and jewelry ideas from SharonCraft",
             title: "Beaded earrings",
             text: "Matching jewelry looks and custom-order support for accessory-led shoppers.",
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             href: "articles/how-to-choose-maasai-jewelry.html"
           },
           {
-            image: "assets/images/custom-occasion-beadwork-46mokm.webp",
+            image: "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
             imageAlt: "Guide about handmade Kenyan gifts",
             title: "Best handmade Kenyan gifts",
             text: "See which gift ideas work best for weddings, birthdays, and housewarming moments.",
@@ -179,9 +179,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         secondaryLabel: "Contact Us",
         secondaryHref: "contact.html",
         images: [
-          { src: "assets/images/sharoncraft-african-necklace-n95vta.webp", alt: "Beaded accessory display" },
-          { src: "assets/images/nairobi-artisan-jewelry-9e1bft.webp", alt: "Hanging beaded necklaces" },
-          { src: "assets/images/traditional-bridal-bead-set-knimvb.webp", alt: "Colorful bracelet selection" }
+          { src: "assets/images/sharoncraft-african-necklace-n95vta-opt.webp", alt: "Beaded accessory display" },
+          { src: "assets/images/nairobi-artisan-jewelry-9e1bft-opt.webp", alt: "Hanging beaded necklaces" },
+          { src: "assets/images/traditional-bridal-bead-set-knimvb-opt.webp", alt: "Colorful bracelet selection" }
         ]
       },
       ordering: {
@@ -217,8 +217,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         text1: "SharonCraft celebrates African beadwork in a way that feels warm, clean, and easy for modern clients to shop. The goal is simple: make beautiful handmade work easier to discover, gift, and enjoy at home.",
         text2: "Our pieces are inspired by market color, ceremonial styling, family celebrations, and the pride of Kenyan craftsmanship. We keep the language simple, the ordering process friendly, and the design bright enough to feel alive.",
         gallery: [
-          { src: "assets/images/kenyan-bead-decor-yhip8u.webp", alt: "SharonCraft beaded bags and accessories" },
-          { src: "assets/images/nairobi-artisan-jewelry-9e1bft.webp", alt: "SharonCraft layered necklaces" }
+          { src: "assets/images/kenyan-bead-decor-yhip8u-opt.webp", alt: "SharonCraft beaded bags and accessories" },
+          { src: "assets/images/nairobi-artisan-jewelry-9e1bft-opt.webp", alt: "SharonCraft layered necklaces" }
         ]
       },
       values: [
@@ -231,8 +231,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         title: "Bright patterns, proud colors, and beadwork that feels full of life.",
         text: "The SharonCraft look takes inspiration from market displays, event bead sets, home pieces, and the joyful use of color seen across East African creative spaces. The mood is modern, but the heart stays rooted in craft traditions.",
         images: [
-          { src: "assets/images/custom-occasion-beadwork-46mokm.webp", alt: "Model wearing a SharonCraft occasion set" },
-          { src: "assets/images/traditional-bridal-bead-set-knimvb.webp", alt: "Bracelet display with many colors" },
+          { src: "assets/images/custom-occasion-beadwork-46mokm-opt.webp", alt: "Model wearing a SharonCraft occasion set" },
+          { src: "assets/images/traditional-bridal-bead-set-knimvb-opt.webp", alt: "Bracelet display with many colors" },
           { src: "assets/images/authentic-maasai-bracelet-8ei1qd.webp", alt: "Beaded table decor set" }
         ]
       },
@@ -283,7 +283,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             href: "articles/how-to-choose-maasai-jewelry.html"
           },
           {
-            image: "assets/images/custom-occasion-beadwork-46mokm.webp",
+            image: "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
             imageAlt: "Guide about handmade Kenyan gifts",
             title: "Best handmade Kenyan gifts",
             text: "Helpful when you are shopping for someone else and need the safest gift path.",
@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             href: "articles/best-handmade-kenyan-gifts.html"
           },
           {
-            image: "assets/images/kenyan-bead-decor-yhip8u.webp",
+            image: "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
             imageAlt: "Guide about styling beaded home decor",
             title: "How to style beaded home decor",
             text: "Great for decor buyers who want a modern space to still feel warm and expressive.",
@@ -1480,11 +1480,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeTextField("homeVisuals.hero.primaryHref", "Hero primary link", "shop.html"),
         makeTextField("homeVisuals.hero.secondaryLabel", "Hero secondary button", "Our Story"),
         makeTextField("homeVisuals.hero.secondaryHref", "Hero secondary link", "about.html"),
-        makeImageField("homeVisuals.hero.image", "Hero image", "assets/images/custom-occasion-beadwork-46mokm.webp", "homeVisuals.hero.imageAlt", "Hero image alt"),
+        makeImageField("homeVisuals.hero.image", "Hero image", "assets/images/custom-occasion-beadwork-46mokm-opt.webp", "homeVisuals.hero.imageAlt", "Hero image alt"),
         makeTextField("homeVisuals.favorite.kicker", "Favorite kicker", "Client Favorite"),
         makeTextField("homeVisuals.favorite.title", "Favorite title", "Kijani Mirror Duo"),
         makeTextareaField("homeVisuals.favorite.description", "Favorite description", "Bright decor with a clean modern finish..."),
-        makeImageField("homeVisuals.favorite.image", "Favorite image", "assets/images/kenyan-bead-decor-yhip8u.webp", "homeVisuals.favorite.imageAlt", "Favorite image alt")
+        makeImageField("homeVisuals.favorite.image", "Favorite image", "assets/images/kenyan-bead-decor-yhip8u-opt.webp", "homeVisuals.favorite.imageAlt", "Favorite image alt")
       ]
     },
     {
@@ -5424,7 +5424,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const images = getFormGalleryImages();
     const currentCategory = categoryMap.get(categoryInput.value) || "Collection";
     const currentBadge = badgeInput.value.trim() || "New";
-    const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/custom-occasion-beadwork-46mokm.webp";
+    const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
     const currentMomPrice = Number(momPriceInput.value) || 0;
     const currentDeliveryCharge = Number(deliveryChargeInput.value) || 0;
     const currentDeliveryCost = Number(deliveryCostInput.value) || 0;
@@ -7360,7 +7360,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     badgeInput.value = "New";
     featuredInput.checked = false;
     newInput.checked = true;
-    imageInput.value = "assets/images/custom-occasion-beadwork-46mokm.webp";
+    imageInput.value = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
     galleryInput.value = "";
     temporaryMainPreviewSrc = "";
     renderDraftPreview();
@@ -7444,7 +7444,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (button.dataset.action === "remove") {
       images = images.filter((item) => item !== image);
-      imageInput.value = toFormImageValue(images[0] || "assets/images/custom-occasion-beadwork-46mokm.webp");
+      imageInput.value = toFormImageValue(images[0] || "assets/images/custom-occasion-beadwork-46mokm-opt.webp");
       temporaryMainPreviewSrc = "";
       syncGalleryTextarea(images.length ? images : [imageInput.value]);
       renderDraftPreview();

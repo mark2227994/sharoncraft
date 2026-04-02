@@ -1343,7 +1343,7 @@
     const description = normalizeText(settings.description) || data.site.tagline;
     const keywords = normalizeText(settings.keywords);
     const path = normalizeText(settings.path) || window.location.pathname;
-    const image = normalizeText(settings.image) || "assets/images/custom-occasion-beadwork-46mokm.webp";
+    const image = normalizeText(settings.image) || "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
     const imageAlt = normalizeText(settings.imageAlt) || title;
     const type = normalizeText(settings.type) || "website";
     const robots = normalizeText(settings.robots) || "index,follow";
@@ -1475,7 +1475,7 @@
     const organizationId = `${siteUrl}#organization`;
     const storeId = `${siteUrl}#store`;
     const websiteId = `${siteUrl}#website`;
-    const storeImage = absoluteUrl("assets/images/custom-occasion-beadwork-46mokm.webp");
+    const storeImage = absoluteUrl("assets/images/custom-occasion-beadwork-46mokm-opt.webp");
     const socialUrls = getPublicSocialUrls();
     const description = [
       `${data.site.name} is a handmade Kenyan beadwork shop based in Nairobi.`,
@@ -1557,7 +1557,7 @@
       .filter(Boolean);
 
     const uniqueImages = imageList.filter((image, index) => imageList.indexOf(image) === index);
-    return uniqueImages.length ? uniqueImages : ["assets/images/custom-occasion-beadwork-46mokm.webp"];
+    return uniqueImages.length ? uniqueImages : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
   }
 
   function formatCurrency(value) {

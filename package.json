@@ -9,6 +9,7 @@
     "generate:merchant-feed": "node scripts/generate-merchant-feed.js",
     "notify:indexnow": "node scripts/notify-indexnow.js",
     "notify:indexnow:dry": "node scripts/notify-indexnow.js --dry-run",
+    "optimize:webp-assets": "node scripts/optimize-webp-assets.js",
     "generate:sitemap": "node scripts/generate-sitemap.js",
     "dev": "node scripts/dev-server.js",
     "dev:open": "node scripts/dev-server.js --open",

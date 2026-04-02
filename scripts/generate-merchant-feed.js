@@ -44,7 +44,7 @@ function escapeXml(unsafe) {
 function generateItem(product) {
   if (!product || !product.id) return '';
   const url = `${siteUrl}/product.html?id=${encodeURIComponent(product.id)}`;
-  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : "assets/images/custom-occasion-beadwork-46mokm.webp";
+  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
   // The replace-image-paths.js will convert existing .jpg paths inside codebase, but just to be safe in the XML generation:
   const webpImage = firstImage.replace(/\.(jpg|jpeg|png)$/i, '.webp');
   const imgUrl = `${siteUrl}/${webpImage}`;
