@@ -1627,6 +1627,10 @@ main > .section:not(:first-of-type),
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .landing-insight-grid,
   .landing-faq-grid,
   .landing-link-grid,
@@ -1859,6 +1863,64 @@ main > .section:not(:first-of-type),
   object-fit: cover;
   border-radius: 28px;
   box-shadow: var(--shadow-card);
+}
+
+.profile-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.profile-card {
+  display: grid;
+  gap: 1.15rem;
+  align-items: center;
+}
+
+.profile-photo-wrap {
+  overflow: hidden;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 250, 243, 0.95), rgba(244, 236, 226, 0.9));
+  box-shadow: var(--shadow-card);
+}
+
+.profile-photo {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 62% 36%;
+  display: block;
+}
+
+.profile-copy {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.profile-copy h2 {
+  margin: 0;
+}
+
+.profile-copy p {
+  margin: 0;
+}
+
+.profile-monogram {
+  display: grid;
+  place-items: center;
+  width: min(100%, 320px);
+  aspect-ratio: 4 / 5;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.95), transparent 26%),
+    radial-gradient(circle at 72% 74%, rgba(242, 201, 76, 0.18), transparent 28%),
+    linear-gradient(160deg, rgba(217, 108, 72, 0.18), rgba(255, 250, 243, 0.98));
+  border: 1px solid rgba(217, 108, 72, 0.14);
+  box-shadow: var(--shadow-card);
+  color: var(--terracotta);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(2.8rem, 8vw, 4.4rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
 }
 
 .shop-toolbar {
