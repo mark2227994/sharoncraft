@@ -7008,7 +7008,25 @@ body.admin-guidance-hidden .admin-panel {
   }
 
   .product-card-media {
-    aspect-ratio: 3.5 / 4 !important;
+    aspect-ratio: 1 / 1.08 !important;
+    padding: 0.38rem;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 249, 244, 0.96), rgba(245, 234, 225, 0.92));
+    box-shadow: inset 0 0 0 1px rgba(120, 82, 62, 0.08);
+  }
+
+  .product-card-media img {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    object-position: center 28%;
+    transform: scale(1.01);
+  }
+
+  .product-card:hover .product-card-media img,
+  .product-card:active .product-card-media img {
+    transform: scale(1.03);
   }
 
   .product-card-copy {
