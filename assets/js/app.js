@@ -1854,14 +1854,18 @@
       `,
       "bracelets": `
         <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
-          <circle cx="40" cy="49" r="18" fill="none" stroke="currentColor" stroke-width="4"/>
-          <circle cx="56" cy="47" r="18" fill="none" stroke="currentColor" stroke-width="4" opacity="0.9"/>
-          <circle cx="32" cy="34" r="3.5" fill="currentColor"/>
-          <circle cx="45" cy="29" r="3.5" fill="currentColor"/>
-          <circle cx="61" cy="34" r="3.5" fill="currentColor"/>
-          <circle cx="66" cy="49" r="3.5" fill="currentColor"/>
-          <circle cx="53" cy="65" r="3.5" fill="currentColor"/>
-          <circle cx="37" cy="64" r="3.5" fill="currentColor"/>
+          <ellipse cx="34" cy="40" rx="17" ry="6" fill="none" stroke="currentColor" stroke-width="3.5"/>
+          <path d="M17 40v14c0 4 8 7 17 7s17-3 17-7V40" fill="none" stroke="currentColor" stroke-width="3.5"/>
+          <path d="M23 50c3 1 7 2 11 2s8-1 11-2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3"/>
+          <circle cx="30" cy="54" r="1.9" fill="currentColor"/>
+          <circle cx="35" cy="54.5" r="1.9" fill="currentColor"/>
+          <circle cx="40" cy="54" r="1.9" fill="currentColor"/>
+          <ellipse cx="62" cy="38" rx="17" ry="6" fill="none" stroke="currentColor" stroke-width="3.5"/>
+          <path d="M45 38v14c0 4 8 7 17 7s17-3 17-7V38" fill="none" stroke="currentColor" stroke-width="3.5"/>
+          <path d="M51 48c3 1 7 2 11 2s8-1 11-2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3"/>
+          <circle cx="58" cy="52" r="1.9" fill="currentColor"/>
+          <circle cx="63" cy="52.5" r="1.9" fill="currentColor"/>
+          <circle cx="68" cy="52" r="1.9" fill="currentColor"/>
         </svg>
       `,
       "home-decor": `
