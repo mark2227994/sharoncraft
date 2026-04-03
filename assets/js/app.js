@@ -2752,14 +2752,6 @@
               <a href="contact.html">Need help choosing?</a>
               <a href="${buildWhatsAppUrl("Hello SharonCraft, I need help choosing the right products.")}" target="_blank" rel="noreferrer" data-analytics-label="Header Drawer WhatsApp">Chat on WhatsApp</a>
             </div>
-            <a class="button button-primary nav-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer" data-analytics-label="Header WhatsApp">
-              <span class="nav-cta-icon">
-                ${whatsappIconMarkup()}
-              </span>
-              <span class="nav-cta-copy">
-              <strong>Order on WhatsApp</strong>
-              </span>
-            </a>
           </nav>
           <button class="site-nav-backdrop" type="button" aria-label="Close menu"></button>
           `
@@ -2805,6 +2797,17 @@
         `
             : ""
         }
+        <div class="container header-support-wrap">
+          <a class="header-support-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer" data-analytics-label="Header WhatsApp">
+            <span class="header-support-icon">
+              ${whatsappIconMarkup()}
+            </span>
+            <span class="header-support-copy">
+              <strong>Order on WhatsApp</strong>
+              <small>Quick help with choosing, pricing, and custom requests</small>
+            </span>
+          </a>
+        </div>
       </header>
     `;
 
