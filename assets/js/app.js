@@ -1866,13 +1866,18 @@
       `,
       "home-decor": `
         <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
-          <path d="M25 61c0-15 10-28 23-31" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
-          <path d="M71 61c0-15-10-28-23-31" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
-          <path d="M34 37c4 3 9 5 14 5s10-2 14-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
-          <circle cx="48" cy="56" r="14" fill="none" stroke="currentColor" stroke-width="4"/>
-          <path d="M42 58c2-4 7-7 10-7 0 5-4 9-10 11-3-1-4-3-4-5 0-2 2-4 4-5z" fill="currentColor" opacity="0.88"/>
-          <circle cx="33" cy="50" r="4" fill="currentColor" opacity="0.78"/>
-          <circle cx="63" cy="50" r="4" fill="currentColor" opacity="0.78"/>
+          <path d="M18 32h18l-4-12H22z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <path d="M27 32v29" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M21 76h12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M27 61c-4 0-7 3-7 7v8h14v-8c0-4-3-7-7-7z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <rect x="48" y="18" width="28" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+          <path d="M54 31l7-7 9 9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+          <path d="M24 74h52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4" opacity="0.82"/>
+          <path d="M36 54c0-5 4-9 9-9h14c5 0 9 4 9 9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <rect x="39" y="49" width="26" height="16" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>
+          <path d="M43 53v16M61 53v16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M47 58h10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M36 54v17M68 54v17" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
         </svg>
       `,
       "bags-accessories": `
