@@ -253,8 +253,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             answer: "Our mission is to make beautiful, authentic African beadwork accessible and easy to purchase. We simplify the shopping journey by offering direct, conversational ordering so every customer gets personal attention and exactly what they want."
           },
           {
-            question: "Who is the CEO of SharonCraft?",
-            answer: "SharonCraft was founded and is led by CEO <strong>Kelvin Mark</strong>, who is dedicated to elevating the visibility of Kenyan craftsmanship on the global stage."
+            question: "Who founded and leads SharonCraft?",
+            answer: "<strong>Kelvin Mark</strong> is the Founder &amp; CEO of SharonCraft and leads the business overall, while <strong>Sharon Ruth</strong> serves as Lead Designer and guides the brand's signature beadwork style."
           }
         ]
       }
@@ -1593,8 +1593,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeTextareaField("siteContent.about.faq.items.1.answer", "FAQ 2 answer", "Every single item in the SharonCraft collection..."),
         makeTextField("siteContent.about.faq.items.2.question", "FAQ 3 question", "What is SharonCraft's core mission?"),
         makeTextareaField("siteContent.about.faq.items.2.answer", "FAQ 3 answer", "Our mission is to make beautiful, authentic African beadwork accessible..."),
-        makeTextField("siteContent.about.faq.items.3.question", "FAQ 4 question", "Who is the CEO of SharonCraft?"),
-        makeTextareaField("siteContent.about.faq.items.3.answer", "FAQ 4 answer", "SharonCraft was founded and is led by CEO <strong>Kelvin Mark</strong>...")
+        makeTextField("siteContent.about.faq.items.3.question", "FAQ 4 question", "Who founded and leads SharonCraft?"),
+        makeTextareaField("siteContent.about.faq.items.3.answer", "FAQ 4 answer", "<strong>Kelvin Mark</strong> is the Founder &amp; CEO of SharonCraft...")
       ]
     },
     {
