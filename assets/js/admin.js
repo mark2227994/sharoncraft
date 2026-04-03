@@ -2454,6 +2454,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const categoryTypeMap = {
       necklaces: "necklace",
       bracelets: "bracelet",
+      earrings: "earrings",
       "home-decor": "decor piece",
       "bags-accessories": "beaded bag",
       "gift-sets": "gift set",
@@ -2495,6 +2496,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const defaultLabelMap = {
       necklaces: "Beaded",
       bracelets: "Handmade",
+      earrings: "Beaded",
       "home-decor": "Handmade",
       "bags-accessories": "Artisan",
       "gift-sets": "Gift",
@@ -2506,6 +2508,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       "placemat set": "Placemat Set",
       "beaded bag": "Bag",
       bracelet: "Bracelet",
+      earrings: "Earrings",
       "collar necklace": "Collar Necklace",
       necklace: "Necklace",
       "gift set": "Gift Set",
@@ -7523,13 +7526,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     const categoryNames = {
       "necklaces": "Necklaces",
       "bracelets": "Bracelets",
+      "earrings": "Earrings",
       "home-decor": "Home Decor",
       "bags-accessories": "Bags & Accessories",
       "gift-sets": "Gift Sets",
       "bridal-occasion": "Bridal & Occasion"
     };
 
-    const validCategories = Object.keys(categoryEmojis);
+    const validCategories = defaultCategorySource.map((category) => category.slug);
     const uncategorizedProducts = catalog.filter((p) => !validCategories.includes(p.category));
     const totalProducts = catalog.length;
 
@@ -7653,6 +7657,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const categoryNames = {
           "necklaces": "Necklaces",
           "bracelets": "Bracelets",
+          "earrings": "Earrings",
           "home-decor": "Home Decor",
           "bags-accessories": "Bags & Accessories",
           "gift-sets": "Gift Sets",
