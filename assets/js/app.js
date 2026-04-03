@@ -1837,6 +1837,63 @@
     `;
   }
 
+  function getCategoryIconMarkup(slug, name) {
+    const label = escapeHtml(name || "Category");
+    const icons = {
+      "necklaces": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <path d="M28 28c0 11 9 20 20 20s20-9 20-20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M21 34c7 23 22 40 27 44 5-4 20-21 27-44" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+          <circle cx="48" cy="52" r="8" fill="currentColor"/>
+          <circle cx="31" cy="38" r="4" fill="currentColor" opacity="0.8"/>
+          <circle cx="65" cy="38" r="4" fill="currentColor" opacity="0.8"/>
+        </svg>
+      `,
+      "bracelets": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <circle cx="48" cy="48" r="24" fill="none" stroke="currentColor" stroke-width="4"/>
+          <circle cx="48" cy="48" r="14" fill="none" stroke="currentColor" stroke-width="4" opacity="0.55"/>
+          <circle cx="48" cy="20" r="4" fill="currentColor"/>
+          <circle cx="72" cy="48" r="4" fill="currentColor"/>
+          <circle cx="48" cy="76" r="4" fill="currentColor"/>
+          <circle cx="24" cy="48" r="4" fill="currentColor"/>
+        </svg>
+      `,
+      "home-decor": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <path d="M20 44L48 22l28 22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+          <path d="M28 40v32h40V40" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <rect x="40" y="50" width="16" height="22" rx="2" fill="none" stroke="currentColor" stroke-width="4"/>
+          <circle cx="68" cy="30" r="5" fill="currentColor" opacity="0.7"/>
+        </svg>
+      `,
+      "bags-accessories": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <rect x="24" y="34" width="48" height="38" rx="10" fill="none" stroke="currentColor" stroke-width="4"/>
+          <path d="M36 34c0-10 5-16 12-16s12 6 12 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M37 48h22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <circle cx="65" cy="52" r="5" fill="currentColor"/>
+        </svg>
+      `,
+      "gift-sets": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <rect x="24" y="38" width="48" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>
+          <path d="M48 38v34M24 50h48" fill="none" stroke="currentColor" stroke-width="4"/>
+          <path d="M48 38c-7 0-13-4-13-10 0-4 3-7 7-7 6 0 8 7 6 17zm0 0c7 0 13-4 13-10 0-4-3-7-7-7-6 0-8 7-6 17z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+        </svg>
+      `,
+      "bridal-occasion": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <path d="M48 20l6 15 16 1-12 10 4 16-14-9-14 9 4-16-12-10 16-1z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <path d="M48 57v15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M36 73h24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+        </svg>
+      `
+    };
+
+    return `<span class="category-card-icon" aria-label="${label} icon">${icons[slug] || icons["gift-sets"]}</span>`;
+  }
+
   function createCategoryCard(category) {
     const suggestion = normalizeText(category.tip) || "Explore";
 
@@ -1847,7 +1904,7 @@
             <span class="category-card-ring"></span>
             <span class="category-card-ring category-card-ring-secondary"></span>
             <div class="category-card-media">
-              <img src="${category.image}" alt="${category.name}" loading="lazy" decoding="async" />
+              ${getCategoryIconMarkup(category.slug, category.name)}
             </div>
           </div>
           <div class="category-card-body">
