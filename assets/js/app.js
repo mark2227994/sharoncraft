@@ -2882,6 +2882,10 @@
       .join("");
 
     const mpesaMarkup = data.site.mpesaSteps.map((step) => `<li>${step}</li>`).join("");
+    const founderName = normalizeText(data.site.founderName) || "Kelvin Mark";
+    const founderTitle = normalizeText(data.site.founderTitle) || "Founder & CEO";
+    const leadDesignerName = normalizeText(data.site.leadDesignerName) || "Sharon Ruth";
+    const leadDesignerTitle = normalizeText(data.site.leadDesignerTitle) || "Lead Designer";
     const featuredSearchMarkup = [
       { href: "kenyan-artifacts.html", label: "Kenyan artifacts" },
       { href: "beaded-earrings-kenya.html", label: "Beaded earrings" },
@@ -2900,6 +2904,10 @@
             <span class="section-kicker">${data.site.name || "SharonCraft"}</span>
             <h2>${data.site.tagline || "Colorful handmade beadwork for homes, gifts, and joyful moments."}</h2>
             <p>${data.site.promo || data.site.tagline}</p>
+            <div class="footer-leadership" aria-label="SharonCraft leadership">
+              <p><strong>${founderName}</strong> is SharonCraft's ${founderTitle}.</p>
+              <p><strong>${leadDesignerName}</strong> is SharonCraft's ${leadDesignerTitle}.</p>
+            </div>
           </section>
           <div class="footer-columns">
             <section class="footer-panel footer-panel-contact">
