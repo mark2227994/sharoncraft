@@ -1903,14 +1903,21 @@
       `,
       "bridal-occasion": `
         <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
-          <path d="M27 44l7-11 14 8 14-8 7 11" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-          <path d="M29 44h38v7c0 5-4 9-9 9H38c-5 0-9-4-9-9z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
-          <circle cx="34" cy="33" r="3.5" fill="currentColor"/>
-          <circle cx="48" cy="29" r="4.5" fill="currentColor"/>
-          <circle cx="62" cy="33" r="3.5" fill="currentColor"/>
-          <path d="M48 60v12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
-          <circle cx="48" cy="78" r="7" fill="none" stroke="currentColor" stroke-width="4"/>
-          <circle cx="48" cy="78" r="2.6" fill="currentColor"/>
+          <path d="M24 72c4-16 9-28 17-38 3-4 5-8 7-12 2 4 4 8 7 12 8 10 13 22 17 38" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+          <path d="M37 48c3-4 7-6 11-6s8 2 11 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M40 56c2 2 5 3 8 3s6-1 8-3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3.5"/>
+          <path d="M43 62c2 2 3 3 5 3s3-1 5-3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="3.5"/>
+          <path d="M37 48c0 9 5 17 11 17s11-8 11-17" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M48 18l4 6 7 1-5 5 2 7-8-5-8 5 2-7-5-5 7-1z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <circle cx="48" cy="28" r="2.6" fill="currentColor"/>
+          <path d="M31 52l-4 5 4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+          <path d="M65 52l4 5-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+          <circle cx="33" cy="57" r="2" fill="currentColor"/>
+          <circle cx="63" cy="57" r="2" fill="currentColor"/>
+          <path d="M36 72c4-3 8-4 12-4s8 1 12 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <circle cx="40" cy="74" r="2.4" fill="currentColor"/>
+          <circle cx="48" cy="77" r="2.8" fill="currentColor"/>
+          <circle cx="56" cy="74" r="2.4" fill="currentColor"/>
         </svg>
       `
     };
