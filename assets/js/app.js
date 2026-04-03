@@ -1866,11 +1866,13 @@
       `,
       "home-decor": `
         <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
-          <path d="M22 42L48 24l26 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-          <path d="M28 41v30h40V41" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
-          <rect x="36" y="46" width="24" height="16" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>
-          <path d="M44 55c2-3 6-5 8-5 0 4-3 7-8 8-2-1-3-2-3-4 0-2 1-3 3-4z" fill="currentColor" opacity="0.88"/>
-          <path d="M66 34c3 1 5 4 5 8-4 0-7-2-8-5 1-2 2-3 3-3z" fill="currentColor" opacity="0.78"/>
+          <path d="M25 61c0-15 10-28 23-31" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M71 61c0-15-10-28-23-31" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <path d="M34 37c4 3 9 5 14 5s10-2 14-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"/>
+          <circle cx="48" cy="56" r="14" fill="none" stroke="currentColor" stroke-width="4"/>
+          <path d="M42 58c2-4 7-7 10-7 0 5-4 9-10 11-3-1-4-3-4-5 0-2 2-4 4-5z" fill="currentColor" opacity="0.88"/>
+          <circle cx="33" cy="50" r="4" fill="currentColor" opacity="0.78"/>
+          <circle cx="63" cy="50" r="4" fill="currentColor" opacity="0.78"/>
         </svg>
       `,
       "bags-accessories": `
