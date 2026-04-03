@@ -61,7 +61,7 @@
         kicker: "Welcome to SharonCraft",
         title: "Clean, colorful handmade beadwork for happy homes and beautiful gifting.",
         description:
-          "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.",
+          "Discover earrings, bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.",
         primaryLabel: "Shop Now",
         primaryHref: "shop.html",
         secondaryLabel: "Our Story",
@@ -94,6 +94,14 @@
         image: "assets/images/kenya bracelete-opt.webp",
         tip: "Easy gifting",
         accent: "teal"
+      },
+      {
+        slug: "earrings",
+        name: "Earrings",
+        description: "Light, colorful bead earrings for easy styling, gifting, and everyday shine.",
+        image: "assets/images/custom-occasion-beadwork-wap9kh-opt.webp",
+        tip: "Easy sparkle",
+        accent: "terracotta"
       },
       {
         slug: "home-decor",
@@ -237,6 +245,50 @@
           "assets/images/authentic-maasai-bracelet-8ei1qd.webp",
           "assets/images/authentic-maasai-bracelet-ptfkru-opt.webp",
           "assets/images/authentic-maasai-bracelet-eb9hav-opt.webp"
+        ]
+      },
+      {
+        id: "sunlit-drop-earrings",
+        name: "Sunlit Drop Earrings",
+        category: "earrings",
+        price: 1400,
+        badge: "New",
+        featured: true,
+        newArrival: true,
+        shortDescription: "Bright drop earrings with a light feel and a joyful handmade finish.",
+        description:
+          "The Sunlit Drop Earrings are designed for easy styling, gifting, and day-to-night wear. They bring color without feeling heavy, making them a comfortable first pick for shoppers who want beadwork that is simple and expressive.",
+        details: [
+          "Lightweight for comfortable wear",
+          "Easy to pair with dresses, shirts, and occasion looks",
+          "A strong gift option for birthdays and thank-you moments"
+        ],
+        images: [
+          "assets/images/custom-occasion-beadwork-wap9kh-opt.webp",
+          "assets/images/nairobi-artisan-jewelry-zocas6-opt.webp",
+          "assets/images/nairobi-artisan-jewelry-xfka7l-opt.webp"
+        ]
+      },
+      {
+        id: "twiga-statement-earrings",
+        name: "Twiga Statement Earrings",
+        category: "earrings",
+        price: 1850,
+        badge: "Best Seller",
+        featured: false,
+        newArrival: false,
+        shortDescription: "Bold beaded earrings with stronger shape, color, and event-ready character.",
+        description:
+          "These statement earrings are made for clients who want a richer, more visible accessory. The shape stands out in photos and events while still keeping the handmade SharonCraft feel.",
+        details: [
+          "Statement size with balanced wear",
+          "Works beautifully for events, shoots, and gifting",
+          "Handmade in Kenya with vibrant bead detail"
+        ],
+        images: [
+          "assets/images/custom-occasion-beadwork-96fk0x-opt.webp",
+          "assets/images/nairobi-artisan-jewelry-9e1bft-opt.webp",
+          "assets/images/custom-occasion-beadwork-xmia2u-opt.webp"
         ]
       },
       {

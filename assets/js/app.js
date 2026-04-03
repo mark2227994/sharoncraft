@@ -1916,6 +1916,19 @@
           <circle cx="68" cy="52" r="1.9" fill="currentColor"/>
         </svg>
       `,
+      "earrings": `
+        <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+          <path d="M33 23c0-5 4-9 9-9s9 4 9 9c0 4-2 7-5 8v7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+          <path d="M28 47c0-7 6-12 14-12s14 5 14 12c0 8-6 15-14 20-8-5-14-12-14-20z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <circle cx="42" cy="23" r="3" fill="currentColor"/>
+          <path d="M57 30c0-4 3-7 7-7s7 3 7 7c0 3-2 6-4 7v5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" opacity="0.9"/>
+          <path d="M53 52c0-6 5-11 11-11s11 5 11 11c0 6-5 12-11 16-6-4-11-10-11-16z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
+          <circle cx="64" cy="30" r="2.6" fill="currentColor"/>
+          <circle cx="42" cy="56" r="3" fill="currentColor" opacity="0.88"/>
+          <circle cx="64" cy="59" r="3" fill="currentColor" opacity="0.88"/>
+          <path d="M37 69l5 7 5-7M59 72l5 6 5-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.4" opacity="0.7"/>
+        </svg>
+      `,
       "home-decor": `
         <svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
           <path d="M18 32h18l-4-12H22z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"/>
