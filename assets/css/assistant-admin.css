@@ -331,6 +331,50 @@ body.assistant-admin-page {
   margin-top: 12px;
 }
 
+.assistant-photo-card {
+  background:
+    radial-gradient(circle at top right, rgba(255, 238, 218, 0.7), transparent 34%),
+    rgba(255, 250, 245, 0.92);
+}
+
+.assistant-photo-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.assistant-photo-grid article,
+.assistant-photo-rules {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(101, 63, 50, 0.08);
+}
+
+.assistant-photo-grid article {
+  padding: 14px 15px;
+}
+
+.assistant-photo-grid strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: "Poppins", sans-serif;
+}
+
+.assistant-photo-grid p {
+  margin: 0;
+  color: var(--assistant-muted);
+}
+
+.assistant-photo-rules {
+  margin: 0;
+  padding: 14px 16px 14px 34px;
+  color: var(--assistant-muted);
+}
+
+.assistant-photo-rules li + li {
+  margin-top: 10px;
+}
+
 .assistant-image-preview {
   overflow: hidden;
   border-radius: 22px;
