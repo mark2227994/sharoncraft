@@ -1,0 +1,57 @@
+{
+  "brandName": "SharonCraft",
+  "displayName": "SharonCraft",
+  "website": "https://www.sharoncraft.co.ke",
+  "domain": "sharoncraft.co.ke",
+  "tagline": "Bright handmade beadwork for gifts, home styling, and joyful African-inspired looks.",
+  "brandDescription": "SharonCraft is a Kenyan handmade beadwork brand offering jewelry, earrings, bridal bead sets, gifts, decor, and WhatsApp-friendly ordering.",
+  "location": {
+    "city": "Nairobi",
+    "country": "Kenya",
+    "full": "Nairobi, Kenya"
+  },
+  "leadership": {
+    "founder": {
+      "name": "Kelvin Mark",
+      "title": "Founder & CEO",
+      "description": "Founder and CEO of SharonCraft, leading brand direction, operations, growth, and customer experience."
+    },
+    "leadDesigner": {
+      "name": "Sharon Ruth",
+      "title": "Lead Designer",
+      "description": "Lead Designer at SharonCraft, guiding the creative direction, color stories, and handcrafted beadwork aesthetic."
+    }
+  },
+  "contact": {
+    "phone": "+254 112 222 572",
+    "whatsapp": "254112222572",
+    "email": "hello@sharoncraft.co.ke"
+  },
+  "ordering": {
+    "primaryChannel": "WhatsApp",
+    "paymentMethod": "M-Pesa",
+    "mpesaSteps": [
+      "Add your favorite pieces to cart and tap Pay with M-Pesa.",
+      "Enter your name, Safaricom phone number, and delivery area.",
+      "Approve the STK prompt on your phone, then wait for SharonCraft to confirm your order."
+    ]
+  },
+  "bios": {
+    "short": "Kelvin Mark is the Founder & CEO of SharonCraft. Sharon Ruth is the Lead Designer.",
+    "standard": "SharonCraft is a Kenyan handmade beadwork brand founded by Kelvin Mark, who serves as Founder & CEO. Sharon Ruth is the Lead Designer behind the brand's creative direction and handcrafted beadwork style.",
+    "long": "SharonCraft is a Kenyan handmade beadwork brand founded by Kelvin Mark, who serves as Founder & CEO and leads the company's direction, operations, growth, and customer experience. Sharon Ruth is the Lead Designer, guiding the creative direction, color stories, and handcrafted beadwork style across the SharonCraft collection."
+  },
+  "socials": {
+    "whatsapp": "https://wa.me/254112222572?text=Hello%20SharonCraft%2C%20I%20would%20like%20to%20shop%20your%20beadwork.",
+    "instagram": "#",
+    "facebook": "#",
+    "tiktok": "#"
+  },
+  "seo": {
+    "preferredBrandTitle": "SharonCraft",
+    "founderSearchName": "Kelvin Mark",
+    "founderSearchTitle": "Founder & CEO of SharonCraft",
+    "leadDesignerSearchName": "Sharon Ruth",
+    "leadDesignerSearchTitle": "Lead Designer at SharonCraft"
+  }
+}
