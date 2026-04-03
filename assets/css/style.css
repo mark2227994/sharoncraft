@@ -2063,6 +2063,36 @@ body.cart-open .product-sticky-bar {
   gap: 1.5rem;
 }
 
+.footer-brand {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.footer-panel {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 250, 243, 0.08);
+}
+
+.footer-panel-contact {
+  grid-column: 1 / -1;
+}
+
+.footer-contact-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.1rem;
+}
+
 .footer-socials {
   display: flex;
   flex-wrap: wrap;
@@ -2079,6 +2109,25 @@ body.cart-open .product-sticky-bar {
 .footer-link-list a,
 .footer-social-placeholder {
   color: rgba(255, 250, 243, 0.86);
+}
+
+@media (max-width: 700px) {
+  .footer-columns,
+  .footer-contact-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-panel {
+    padding: 0.95rem;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .footer-columns,
+  .footer-contact-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 .cart-backdrop {

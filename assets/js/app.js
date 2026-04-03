@@ -2848,42 +2848,48 @@
     target.innerHTML = `
       <footer class="site-footer">
         <div class="container footer-grid">
-          <section>
+          <section class="footer-brand">
             <span class="section-kicker">${data.site.name || "SharonCraft"}</span>
             <h2>${data.site.tagline || "Colorful handmade beadwork for homes, gifts, and joyful moments."}</h2>
             <p>${data.site.promo || data.site.tagline}</p>
           </section>
-          <section>
-            <h3>Contact</h3>
-            <ul class="footer-list">
-              <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
-              <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
-              <li><a href="order.html">Track an order</a></li>
-              <li><a href="faq.html">FAQ</a></li>
-              <li><a href="returns.html">Returns & Refunds</a></li>
-              <li><a href="terms.html">Terms</a></li>
-              <li><a href="privacy.html">Privacy</a></li>
-              <li>${data.site.location}</li>
-            </ul>
-          </section>
-          <section>
-            <h3>M-Pesa</h3>
-            <ol class="footer-list footer-steps">
-              ${mpesaMarkup}
-            </ol>
-          </section>
-          <section>
-            <h3>Popular Searches</h3>
-            <ul class="footer-list footer-link-list">
-              ${featuredSearchMarkup}
-            </ul>
-          </section>
-          <section>
-            <h3>Social</h3>
-            <div class="footer-socials">
-              ${socialMarkup || '<span class="footer-social-placeholder">Add Facebook and Instagram links in the admin social section.</span>'}
-            </div>
-          </section>
+          <div class="footer-columns">
+            <section class="footer-panel footer-panel-contact">
+              <h3>Contact</h3>
+              <div class="footer-contact-columns">
+                <ul class="footer-list">
+                  <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
+                  <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
+                  <li><a href="order.html">Track an order</a></li>
+                  <li><a href="faq.html">FAQ</a></li>
+                </ul>
+                <ul class="footer-list">
+                  <li><a href="returns.html">Returns & Refunds</a></li>
+                  <li><a href="terms.html">Terms</a></li>
+                  <li><a href="privacy.html">Privacy</a></li>
+                  <li>${data.site.location}</li>
+                </ul>
+              </div>
+            </section>
+            <section class="footer-panel">
+              <h3>M-Pesa</h3>
+              <ol class="footer-list footer-steps">
+                ${mpesaMarkup}
+              </ol>
+            </section>
+            <section class="footer-panel">
+              <h3>Popular Searches</h3>
+              <ul class="footer-list footer-link-list">
+                ${featuredSearchMarkup}
+              </ul>
+            </section>
+            <section class="footer-panel">
+              <h3>Social</h3>
+              <div class="footer-socials">
+                ${socialMarkup || '<span class="footer-social-placeholder">Add Facebook and Instagram links in the admin social section.</span>'}
+              </div>
+            </section>
+          </div>
         </div>
       </footer>
       <nav class="mobile-bottom-nav" aria-label="Mobile quick navigation">
