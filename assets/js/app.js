@@ -2693,7 +2693,7 @@
     const primaryNavMarkup = primaryNavLinks
       .map(
         (link) =>
-          `<a href="${link.href}" class="${link.isActive ? "is-active" : ""}">${navIconMarkup(link.icon)}<span>${link.label}</span></a>`
+          `<a href="${link.href}" class="${link.isActive ? "is-active" : ""}"><span>${link.label}</span></a>`
       )
       .join("");
     const searchValue = normalizeText(new URL(window.location.href).searchParams.get("q"));
@@ -2702,9 +2702,6 @@
       <div class="promo-bar">
         <div class="container promo-bar-inner">
           <p>${data.site.promo}</p>
-          <a href="${buildWhatsAppUrl("Hello SharonCraft, I would like to claim the current delivery offer.")}" target="_blank" rel="noreferrer" data-analytics-label="Promo WhatsApp">
-            Claim on WhatsApp
-          </a>
         </div>
       </div>
       <header class="site-header">
@@ -2733,24 +2730,16 @@
               ? ""
               : `
           <nav id="site-nav" class="site-nav" aria-label="Main navigation">
-            <div class="site-nav-topcard">
-              <span class="site-nav-title">Quick Access</span>
-              <strong>Shop faster on mobile</strong>
-              <p>Jump into your account, track an order, or open a category without digging through long links.</p>
-              <div class="site-nav-top-actions">
-                <a href="account.html">My Account</a>
-                <a href="order.html">Track Order</a>
-              </div>
-            </div>
             <div class="site-nav-section">
-              <span class="site-nav-title">Shop by Category</span>
-              <div class="site-nav-category-grid">
-                ${categoryCardsMarkup}
+              <span class="site-nav-title">Browse</span>
+              <div class="site-nav-links">
+                ${primaryNavMarkup}
               </div>
             </div>
             <div class="site-nav-utility-links">
-              <a href="contact.html">Need help choosing?</a>
-              <a href="${buildWhatsAppUrl("Hello SharonCraft, I need help choosing the right products.")}" target="_blank" rel="noreferrer" data-analytics-label="Header Drawer WhatsApp">Chat on WhatsApp</a>
+              <a href="account.html">My Account</a>
+              <a href="order.html">Track Order</a>
+              <a href="contact.html">Contact</a>
             </div>
           </nav>
           <button class="site-nav-backdrop" type="button" aria-label="Close menu"></button>
@@ -2764,10 +2753,6 @@
               <input type="search" name="q" placeholder="Search products..." value="${escapeHtml(searchValue)}" aria-label="Search keyword" />
               <button type="submit">Find</button>
             </form>
-            <a class="account-header-button ${currentPage === "wishlist" ? "is-active" : ""}" href="wishlist.html" aria-label="Open your wishlist">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-              <span class="account-header-label">Wishlist</span>
-            </a>
             <a class="account-header-button ${currentPage === "account" ? "is-active" : ""}" href="account.html" aria-label="Open your SharonCraft account">
               ${navIconMarkup("account")}
               <span class="account-header-label">Account</span>
@@ -2797,17 +2782,6 @@
         `
             : ""
         }
-        <div class="container header-support-wrap">
-          <a class="header-support-cta" href="${buildWhatsAppUrl("Hello SharonCraft, I would like help choosing a product.")}" target="_blank" rel="noreferrer" data-analytics-label="Header WhatsApp">
-            <span class="header-support-icon">
-              ${whatsappIconMarkup()}
-            </span>
-            <span class="header-support-copy">
-              <strong>Order on WhatsApp</strong>
-              <small>Quick help with choosing, pricing, and custom requests</small>
-            </span>
-          </a>
-        </div>
       </header>
     `;
 
