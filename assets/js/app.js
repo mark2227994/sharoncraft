@@ -2766,7 +2766,11 @@
           }
           <div class="header-actions">
             <form action="shop.html" method="get" class="global-desktop-search" aria-label="Sitewide search">
+              <span class="header-search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              </span>
               <input type="search" name="q" placeholder="Search products..." value="${escapeHtml(searchValue)}" aria-label="Search keyword" />
+              <button type="submit">Find</button>
             </form>
             <a class="account-header-button ${currentPage === "wishlist" ? "is-active" : ""}" href="wishlist.html" aria-label="Open your wishlist">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
@@ -2791,8 +2795,11 @@
             ? `
           <div class="container mobile-header-search-wrap">
             <form class="mobile-header-search" action="shop.html" method="get">
+              <span class="header-search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              </span>
               <input type="search" name="q" placeholder="Search products, gifts, decor..." value="${escapeHtml(searchValue)}" aria-label="Search SharonCraft products" />
-              <button type="submit">Search</button>
+              <button type="submit">Find</button>
             </form>
           </div>
         `
