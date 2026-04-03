@@ -847,6 +847,48 @@ main > .section:not(:first-of-type),
   color: var(--deep-brown);
 }
 
+.leadership-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.leadership-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.leadership-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.28rem;
+  background: linear-gradient(90deg, rgba(217, 108, 72, 0.92), rgba(242, 201, 76, 0.82), rgba(18, 122, 99, 0.78));
+}
+
+.leadership-card h3 {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+}
+
+.leadership-card p {
+  margin: 0.75rem 0 0;
+}
+
+.leadership-role {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.1rem;
+  padding: 0.38rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(217, 108, 72, 0.12);
+  border: 1px solid rgba(217, 108, 72, 0.16);
+  color: var(--terracotta);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .stat-pill {
   display: inline-flex;
   align-items: center;
@@ -1580,7 +1622,8 @@ main > .section:not(:first-of-type),
 
 @media (min-width: 760px) {
   .marketing-proof-grid,
-  .product-assurance-grid {
+  .product-assurance-grid,
+  .leadership-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
