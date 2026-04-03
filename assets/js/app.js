@@ -2907,9 +2907,12 @@
             </div>
           </section>
           <div class="footer-columns">
-            <section class="footer-panel footer-panel-contact">
-              <h3>Contact</h3>
-              <div class="footer-contact-columns">
+            <section class="footer-panel footer-panel-contact footer-accordion-panel is-open">
+              <button class="footer-accordion-toggle" type="button" aria-expanded="true">
+                <span>Contact</span>
+                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
+              </button>
+              <div class="footer-contact-columns footer-accordion-content">
                 <ul class="footer-list">
                   <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
                   <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
@@ -2924,21 +2927,30 @@
                 </ul>
               </div>
             </section>
-            <section class="footer-panel">
-              <h3>M-Pesa</h3>
-              <ol class="footer-list footer-steps">
+            <section class="footer-panel footer-accordion-panel">
+              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
+                <span>M-Pesa</span>
+                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
+              </button>
+              <ol class="footer-list footer-steps footer-accordion-content">
                 ${mpesaMarkup}
               </ol>
             </section>
-            <section class="footer-panel">
-              <h3>Popular Searches</h3>
-              <ul class="footer-list footer-link-list">
+            <section class="footer-panel footer-accordion-panel">
+              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
+                <span>Popular Searches</span>
+                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
+              </button>
+              <ul class="footer-list footer-link-list footer-accordion-content">
                 ${featuredSearchMarkup}
               </ul>
             </section>
-            <section class="footer-panel">
-              <h3>Social</h3>
-              <div class="footer-socials">
+            <section class="footer-panel footer-accordion-panel">
+              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
+                <span>Social</span>
+                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
+              </button>
+              <div class="footer-socials footer-accordion-content">
                 ${socialMarkup || '<span class="footer-social-placeholder">Add Facebook and Instagram links in the admin social section.</span>'}
               </div>
             </section>
@@ -3039,6 +3051,22 @@
     const mpesaOpenButton = target.querySelector("#cart-mpesa-open");
     const mpesaCancelButton = target.querySelector("#cart-mpesa-cancel");
     const mpesaForm = target.querySelector("#cart-mpesa-form");
+
+    target.querySelectorAll(".footer-accordion-toggle").forEach(function (button) {
+      button.addEventListener("click", function () {
+        if (window.innerWidth > 700) {
+          return;
+        }
+
+        const panel = button.closest(".footer-accordion-panel");
+        if (!panel) {
+          return;
+        }
+
+        const isOpen = panel.classList.toggle("is-open");
+        button.setAttribute("aria-expanded", String(isOpen));
+      });
+    });
 
     if (scrollButton) {
       scrollButton.addEventListener("click", function () {
