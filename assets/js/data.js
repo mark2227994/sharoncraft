@@ -16,6 +16,12 @@
     site: {
       name: "SharonCraft",
       tagline: "Bright handmade beadwork for gifts, home styling, and joyful African-inspired looks.",
+      founderName: "Kelvin Mark",
+      founderTitle: "Founder & CEO",
+      founderDescription: "Founder and CEO of SharonCraft, leading brand direction, operations, growth, and customer experience.",
+      leadDesignerName: "Sharon Ruth",
+      leadDesignerTitle: "Lead Designer",
+      leadDesignerDescription: "Lead Designer at SharonCraft, guiding the creative direction, color stories, and handcrafted beadwork aesthetic.",
       whatsapp: "254112222572",
       phone: "+254 112 222 572",
       email: "hello@sharoncraft.co.ke",

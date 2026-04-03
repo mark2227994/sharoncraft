@@ -177,8 +177,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         },
         founder: {
           "@type": "Person",
-          name: "Kelvin Mark",
-          jobTitle: "CEO"
+          name: utils.data.site.founderName || "Kelvin Mark",
+          jobTitle: utils.data.site.founderTitle || "Founder & CEO"
         },
         sameAs: socialLinks
       });

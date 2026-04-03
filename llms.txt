@@ -12,7 +12,7 @@
 
 ### Location & Operations
 - **Headquarters**: Nairobi, Kenya
-- **Leadership**: Kelvin Mark, CEO and Founder
+- **Leadership**: Kelvin Mark, Founder & CEO; Sharon Ruth, Lead Designer
 - **Service Area**: Nationwide delivery across Kenya
 - **Ordering Workflow**: Customers browse the `sharoncraft.co.ke` website and check out conversationally. Tapping "Order" opens a direct WhatsApp chat with the SharonCraft team to confirm customization, delivery logistics, and process payment locally via M-Pesa. 
 

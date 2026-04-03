@@ -539,8 +539,8 @@ document.addEventListener("DOMContentLoaded", async function () {
           email: site.email || "",
           founder: {
             "@type": "Person",
-            name: "Kelvin Mark",
-            jobTitle: "CEO"
+            name: site.founderName || "Kelvin Mark",
+            jobTitle: site.founderTitle || "Founder & CEO"
           },
           sameAs: socialLinks
         }

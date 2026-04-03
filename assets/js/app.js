@@ -1475,12 +1475,44 @@
     const organizationId = `${siteUrl}#organization`;
     const storeId = `${siteUrl}#store`;
     const websiteId = `${siteUrl}#website`;
+    const founderId = `${siteUrl}#founder`;
+    const leadDesignerId = `${siteUrl}#lead-designer`;
     const storeImage = absoluteUrl("assets/images/custom-occasion-beadwork-46mokm-opt.webp");
     const socialUrls = getPublicSocialUrls();
+    const founderName = normalizeText(data.site.founderName) || "Kelvin Mark";
+    const founderTitle = normalizeText(data.site.founderTitle) || "Founder & CEO";
+    const founderDescription =
+      normalizeText(data.site.founderDescription) ||
+      "Founder and CEO of SharonCraft, leading brand direction, operations, growth, and customer experience.";
+    const leadDesignerName = normalizeText(data.site.leadDesignerName) || "Sharon Ruth";
+    const leadDesignerTitle = normalizeText(data.site.leadDesignerTitle) || "Lead Designer";
+    const leadDesignerDescription =
+      normalizeText(data.site.leadDesignerDescription) ||
+      "Lead Designer at SharonCraft, guiding the creative direction, color stories, and handcrafted beadwork aesthetic.";
     const description = [
       `${data.site.name} is a handmade Kenyan beadwork shop based in Nairobi.`,
       "The store offers jewelry, bridal bead sets, gift ideas, cultural decor, and WhatsApp-friendly ordering."
     ].join(" ");
+    const founder = {
+      "@type": "Person",
+      "@id": founderId,
+      name: founderName,
+      jobTitle: founderTitle,
+      description: founderDescription,
+      worksFor: {
+        "@id": organizationId
+      }
+    };
+    const leadDesigner = {
+      "@type": "Person",
+      "@id": leadDesignerId,
+      name: leadDesignerName,
+      jobTitle: leadDesignerTitle,
+      description: leadDesignerDescription,
+      worksFor: {
+        "@id": organizationId
+      }
+    };
     const organization = {
       "@type": "Organization",
       "@id": organizationId,
@@ -1502,7 +1534,18 @@
         telephone: normalizeText(data.site.phone),
         areaServed: "KE",
         availableLanguage: ["en"]
-      }
+      },
+      founder: {
+        "@id": founderId
+      },
+      employee: [
+        {
+          "@id": founderId
+        },
+        {
+          "@id": leadDesignerId
+        }
+      ]
     };
 
     if (socialUrls.length) {
@@ -1512,6 +1555,8 @@
     setStructuredData("site-organization", {
       "@context": "https://schema.org",
       "@graph": [
+        founder,
+        leadDesigner,
         organization,
         {
           "@type": "OnlineStore",
@@ -1523,6 +1568,9 @@
           slogan: normalizeText(data.site.tagline),
           brand: {
             "@id": organizationId
+          },
+          founder: {
+            "@id": founderId
           },
           areaServed: {
             "@type": "Country",
