@@ -21,14 +21,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260401-mobile-ui-refresh" />
-  <link rel="stylesheet" href="assets/css/shop-filters.css" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260403-site-marketplace" />
+  <link rel="stylesheet" href="assets/css/shop-filters.css?v=20260403-shop-marketplace" />
 </head>
 <body data-page="shop">
   <div data-site-header></div>
 
   <main>
-    <section class="page-hero">
+    <section class="page-hero shop-hero-compact">
       <div class="container">
         <div class="page-hero-copy">
           <span id="shop-hero-kicker" class="section-kicker">Shop SharonCraft</span>
@@ -38,67 +38,75 @@
       </div>
     </section>
 
-    <section class="section">
+    <div class="shop-marketplace-divider" aria-hidden="true"></div>
+
+    <section class="section shop-marketplace-section">
       <div class="container">
-        <div class="shop-refine-bar">
-          <div class="shop-refine-copy">
-            <span id="shop-refine-kicker" class="section-kicker">Browse & Refine</span>
-            <h2 id="shop-refine-title">See the pieces first. Fine-tune only when needed.</h2>
+        <div class="shop-marketplace">
+          <div class="shop-marketplace-search">
+            <label class="shop-search-label" for="shop-search">Search the catalog</label>
+            <div class="shop-search-box shop-search-box--prominent">
+              <input id="shop-search" type="search" placeholder="Search by name, style, or category…" aria-label="Search products" autocomplete="off" />
+              <span class="shop-search-icon" aria-hidden="true">Search</span>
+            </div>
           </div>
-          <div class="shop-refine-tools">
-            <span id="shop-count" class="shop-product-count">0 pieces</span>
-            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
-              <span class="shop-filter-toggle-text">Refine</span>
-            </button>
-            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
+
+          <div class="shop-refine-bar shop-refine-bar--toolbar">
+            <div class="shop-refine-copy">
+              <span id="shop-refine-kicker" class="section-kicker">Browse &amp; refine</span>
+              <h2 id="shop-refine-title">Sort, price, and category when you need them.</h2>
+            </div>
+            <div class="shop-refine-tools">
+              <span id="shop-count" class="shop-product-count">0 pieces</span>
+              <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
+                <span class="shop-filter-toggle-text">Filters</span>
+              </button>
+              <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear all</button>
+            </div>
           </div>
+
+          <div class="shop-filter-chips-wrap">
+            <p class="shop-chips-label" id="shop-chips-label">Categories</p>
+            <div class="shop-filter-chips" id="shop-chips" role="group" aria-labelledby="shop-chips-label"></div>
+          </div>
+
+          <div class="shop-filter-panels" id="shop-filter-grid">
+            <div class="shop-filter-cards">
+              <div class="shop-filter-card">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Category</h3>
+                </div>
+                <select id="shop-category" class="filter-card-select" aria-label="Filter by category"></select>
+              </div>
+
+              <div class="shop-filter-card">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Price</h3>
+                </div>
+                <select id="shop-price" class="filter-card-select" aria-label="Filter by price">
+                  <option value="">All prices</option>
+                  <option value="under-2000">Under KES 2,000</option>
+                  <option value="2000-5000">KES 2,000 to 5,000</option>
+                  <option value="over-5000">Above KES 5,000</option>
+                </select>
+              </div>
+
+              <div class="shop-filter-card">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Sort</h3>
+                </div>
+                <select id="shop-sort" class="filter-card-select" aria-label="Sort products">
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="shop-grid" class="product-grid shop-product-grid"></div>
         </div>
-
-        <div class="shop-filter-chips" id="shop-chips"></div>
-
-        <div class="shop-filter-panels" id="shop-filter-grid">
-          <div class="shop-filter-search-section">
-            <div class="shop-search-box">
-              <input id="shop-search" type="search" placeholder="Search pieces..." aria-label="Search products" />
-              <span class="shop-search-icon">Search</span>
-            </div>
-          </div>
-
-          <div class="shop-filter-cards">
-            <div class="shop-filter-card">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">Category</h3>
-              </div>
-              <select id="shop-category" class="filter-card-select" aria-label="Filter by category"></select>
-            </div>
-
-            <div class="shop-filter-card">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">Price</h3>
-              </div>
-              <select id="shop-price" class="filter-card-select" aria-label="Filter by price">
-                <option value="">All prices</option>
-                <option value="under-2000">Under KES 2,000</option>
-                <option value="2000-5000">KES 2,000 to 5,000</option>
-                <option value="over-5000">Above KES 5,000</option>
-              </select>
-            </div>
-
-            <div class="shop-filter-card">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">Sort</h3>
-              </div>
-              <select id="shop-sort" class="filter-card-select" aria-label="Sort products">
-                <option value="featured">Featured</option>
-                <option value="newest">Newest</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div id="shop-grid" class="product-grid"></div>
       </div>
     </section>
 
@@ -177,7 +185,7 @@
   <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
   <script src="supabase/supabase-catalog.js?v=20260401-reviews-sync" defer></script>
   <script src="assets/js/supabase-data-sync.js?v=20260401-site-content" defer></script>
-  <script src="assets/js/app.js?v=20260401-site-content-studio" defer></script>
+  <script src="assets/js/app.js?v=20260403-site-marketplace" defer></script>
   <script src="assets/js/mobile-ux.js?v=20260327-live-fix" defer></script>
   <script src="assets/js/shop.js?v=20260401-ratings-pass" defer></script>
 </body>

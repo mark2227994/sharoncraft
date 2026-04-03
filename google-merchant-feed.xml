@@ -71,6 +71,32 @@
       <g:google_product_category>188</g:google_product_category>
     </item>
     <item>
+      <g:id>sunlit-drop-earrings</g:id>
+      <g:title>Sunlit Drop Earrings</g:title>
+      <g:description>The Sunlit Drop Earrings are designed for easy styling, gifting, and day-to-night wear. They bring color without feeling heavy, making them a comfortable first pick for shoppers who want beadwork that is simple and expressive.</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=sunlit-drop-earrings</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-wap9kh-opt.webp</g:image_link>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>1400 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <!-- Standardized jewelry category mapped by standard feed specifications -->
+      <g:google_product_category>188</g:google_product_category>
+    </item>
+    <item>
+      <g:id>twiga-statement-earrings</g:id>
+      <g:title>Twiga Statement Earrings</g:title>
+      <g:description>These statement earrings are made for clients who want a richer, more visible accessory. The shape stands out in photos and events while still keeping the handmade SharonCraft feel.</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=twiga-statement-earrings</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-96fk0x-opt.webp</g:image_link>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>1850 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <!-- Standardized jewelry category mapped by standard feed specifications -->
+      <g:google_product_category>188</g:google_product_category>
+    </item>
+    <item>
       <g:id>kijani-mirror-duo</g:id>
       <g:title>Kijani Mirror Duo</g:title>
       <g:description>The Kijani Mirror Duo mixes practical mirror use with joyful bead color. The round frame feels warm and modern, making it easy to fit into homes, salons, and gift projects.</g:description>

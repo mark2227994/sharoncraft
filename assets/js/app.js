@@ -2683,7 +2683,28 @@
     const currentPage = document.body.dataset.page || "";
     const isShopFamilyPage = currentPage === "shop" || currentPage === "product";
     const useMinimalCategoriesHeader = currentPage === "categories";
-    const showMobileSearch = ["home", "shop", "product"].includes(currentPage);
+    const showMobileSearch = [
+      "home",
+      "shop",
+      "product",
+      "categories",
+      "cart",
+      "wishlist",
+      "journal",
+      "landing",
+      "about",
+      "contact",
+      "faq",
+      "account",
+      "order",
+      "login",
+      "terms",
+      "privacy",
+      "returns",
+      "article",
+      "leadership",
+      "404"
+    ].includes(currentPage);
     const primaryNavLinks = [
       { href: "index.html", icon: "home", label: "Home", isActive: currentPage === "home" },
       { href: "categories.html", icon: "categories", label: "Categories", isActive: currentPage === "categories" },

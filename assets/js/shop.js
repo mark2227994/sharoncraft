@@ -76,16 +76,18 @@ document.addEventListener("DOMContentLoaded", async function () {
       ...Array.from(categorySelect.options)
         .filter((option) => option.value)
         .map((option) => ({ value: option.value, label: option.textContent }))
-        .slice(0, 4)
     ];
 
     chipContainer.innerHTML = categories
       .map(
-        (cat) => `
-          <button type="button" class="filter-chip ${cat.value === categorySelect.value ? "is-active" : ""}" data-chip="${cat.value}">
+        (cat) => {
+          const active = cat.value === categorySelect.value;
+          return `
+          <button type="button" class="filter-chip ${active ? "is-active" : ""}" data-chip="${cat.value}" aria-pressed="${active ? "true" : "false"}">
             ${cat.label}
           </button>
-        `
+        `;
+        }
       )
       .join("");
   }
@@ -95,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Refine";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filters";
     }
   }
 
