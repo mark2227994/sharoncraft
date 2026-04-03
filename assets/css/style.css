@@ -2111,6 +2111,17 @@ body.cart-open .product-sticky-bar {
   gap: 0.65rem;
 }
 
+.footer-leadership {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.footer-leadership p {
+  margin: 0;
+  color: rgba(255, 250, 243, 0.82);
+}
+
 .footer-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2152,6 +2163,14 @@ body.cart-open .product-sticky-bar {
 .footer-link-list a,
 .footer-social-placeholder {
   color: rgba(255, 250, 243, 0.86);
+}
+
+.contact-leadership-card {
+  gap: 0.85rem;
+}
+
+.contact-leadership-card p {
+  margin: 0;
 }
 
 @media (max-width: 700px) {
