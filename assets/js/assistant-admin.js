@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const imageFileInput = document.getElementById("assistant-image-file");
   const galleryInput = document.getElementById("assistant-gallery");
   const descriptionInput = document.getElementById("assistant-description");
+  const templateHint = document.getElementById("assistant-template-hint");
+  const templateButtons = Array.from(document.querySelectorAll("[data-assistant-description-template]"));
   const detailsInput = document.getElementById("assistant-details");
   const badgeInput = document.getElementById("assistant-badge");
   const featuredInput = document.getElementById("assistant-featured");
@@ -243,6 +245,56 @@ document.addEventListener("DOMContentLoaded", async function () {
     return match ? match.name : "Handmade";
   }
 
+  function getRecommendedTemplateKey(categorySlug) {
+    const normalized = normalizeText(categorySlug).toLowerCase();
+    if (normalized === "home-decor") {
+      return "decor";
+    }
+    if (normalized === "gift-sets" || normalized === "bridal-occasion") {
+      return "gift";
+    }
+    return "everyday";
+  }
+
+  function buildDescriptionTemplate(templateKey) {
+    const categorySlug = normalizeText(categoryInput && categoryInput.value);
+    const categoryName = getCategoryName(categorySlug).toLowerCase();
+    const productName = normalizeText(nameInput && nameInput.value);
+    const subject = productName || `This ${categoryName} piece`;
+
+    if (templateKey === "gift") {
+      return `${subject} makes a thoughtful gift for birthdays, thank-you moments, weddings, and simple surprises. SharonCraft made it by hand so it feels warm, personal, and easy to remember.`;
+    }
+
+    if (templateKey === "decor") {
+      return `${subject} adds color and handmade character without making the space feel busy. It works well when you want a home piece that feels warm, memorable, and easy to place.`;
+    }
+
+    if (templateKey === "custom") {
+      return `${subject} is handmade by SharonCraft and you can still ask about colors, gifting, delivery, or the right match before you order. It is a simple choice when you want something personal with clear help along the way.`;
+    }
+
+    return `${subject} is handmade by SharonCraft with a comfortable feel and a clean finish. It is easy to wear, gift, or keep for days when you want something personal and full of color.`;
+  }
+
+  function updateTemplateRecommendation() {
+    const recommendedKey = getRecommendedTemplateKey(categoryInput && categoryInput.value);
+    templateButtons.forEach(function (button) {
+      button.classList.toggle("is-recommended", button.dataset.assistantDescriptionTemplate === recommendedKey);
+    });
+
+    if (templateHint) {
+      const categoryName = getCategoryName(categoryInput && categoryInput.value);
+      const labels = {
+        everyday: "Everyday",
+        gift: "Gift-ready",
+        decor: "Home styling",
+        custom: "Custom help"
+      };
+      templateHint.textContent = `Recommended now: ${labels[recommendedKey] || "Everyday"} for ${categoryName}. Pick a starter, then edit it to match the photo.`;
+    }
+  }
+
   function populateCategorySelect() {
     if (!categoryInput) {
       return;
@@ -293,6 +345,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     formKicker.textContent = "New Product";
     formTitle.textContent = "Add a product simply";
     saveProductButton.textContent = "Save To Live Catalog";
+    updateTemplateRecommendation();
     updatePreview();
   }
 
@@ -318,6 +371,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     formKicker.textContent = "Editing Product";
     formTitle.textContent = normalizeText(product.name) || "Edit product";
     saveProductButton.textContent = "Update Live Product";
+    updateTemplateRecommendation();
     updatePreview();
     activateTab("add");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -795,6 +849,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageInput.addEventListener("input", updatePreview);
     imageInput.addEventListener("change", updatePreview);
   }
+
+  if (categoryInput) {
+    categoryInput.addEventListener("change", updateTemplateRecommendation);
+    categoryInput.addEventListener("input", updateTemplateRecommendation);
+  }
+
+  templateButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      if (!descriptionInput) {
+        return;
+      }
+      descriptionInput.value = buildDescriptionTemplate(button.dataset.assistantDescriptionTemplate);
+      descriptionInput.focus();
+      descriptionInput.setSelectionRange(descriptionInput.value.length, descriptionInput.value.length);
+      setStatus(appStatus, "Description starter added. Edit it to match the photo.", "info");
+    });
+  });
 
   if (imageStageInput) {
     imageStageInput.addEventListener("change", function () {
