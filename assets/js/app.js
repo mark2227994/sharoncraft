@@ -1872,9 +1872,6 @@
             <a class="button button-primary product-card-view" href="product.html?id=${product.id}"${analyticsAttributes}>
               <span class="product-card-action-label">View Piece</span>
             </a>
-            <a class="product-card-order-link" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
-              <span class="product-card-action-label">Order on WhatsApp</span>
-            </a>
           </div>
         </div>
       </article>
@@ -2895,20 +2892,23 @@
       )
       .join("");
 
-    const mpesaMarkup = data.site.mpesaSteps.map((step) => `<li>${step}</li>`).join("");
-    const founderName = normalizeText(data.site.founderName) || "Kelvin Mark";
-    const founderTitle = normalizeText(data.site.founderTitle) || "Founder & CEO";
-    const leadDesignerName = normalizeText(data.site.leadDesignerName) || "Sharon Ruth";
-    const leadDesignerTitle = normalizeText(data.site.leadDesignerTitle) || "Lead Designer";
-    const featuredSearchMarkup = [
-      { href: "kenyan-artifacts.html", label: "Kenyan artifacts" },
-      { href: "beaded-earrings-kenya.html", label: "Beaded earrings" },
-      { href: "maasai-jewelry-kenya.html", label: "Maasai jewelry" },
-      { href: "handmade-kenyan-gifts.html", label: "Handmade Kenyan gifts" },
-      { href: "african-home-decor-nairobi.html", label: "African home decor" },
-      { href: "bridal-bead-sets-kenya.html", label: "Bridal bead sets" }
+    const shopLinkMarkup = [
+      { href: "shop.html", label: "Shop all" },
+      { href: "maasai-jewelry-kenya.html", label: "Jewelry" },
+      { href: "gift-sets-kenya.html", label: "Gift sets" },
+      { href: "african-home-decor-nairobi.html", label: "Home decor" }
     ]
       .map((link) => `<li><a href="${link.href}">${link.label}</a></li>`)
+      .join("");
+    const helpLinkMarkup = [
+      { href: `https://wa.me/${data.site.whatsapp}?text=${encodeURIComponent("Hello SharonCraft, I would like help choosing a product.")}`, label: "WhatsApp help", external: true },
+      { href: "contact.html", label: "Contact" },
+      { href: "order.html", label: "Track order" },
+      { href: "faq.html", label: "FAQ" },
+      { href: "returns.html", label: "Returns" },
+      { href: "privacy.html", label: "Privacy" }
+    ]
+      .map((link) => `<li><a href="${link.href}"${link.external ? ' target="_blank" rel="noreferrer"' : ""}>${link.label}</a></li>`)
       .join("");
 
     target.innerHTML = `
@@ -2917,11 +2917,7 @@
           <section class="footer-brand">
             <span class="section-kicker">${data.site.name || "SharonCraft"}</span>
             <h2>${data.site.tagline || "Colorful handmade beadwork for homes, gifts, and joyful moments."}</h2>
-            <p>${data.site.promo || data.site.tagline}</p>
-            <div class="footer-leadership" aria-label="SharonCraft leadership">
-              <p><strong>${founderName}</strong> is SharonCraft's ${founderTitle}.</p>
-              <p><strong>${leadDesignerName}</strong> is SharonCraft's ${leadDesignerTitle}.</p>
-            </div>
+            <p>Browse the collection, ask what you need, and finish your order in a simple personal way.</p>
           </section>
           <div class="footer-columns">
             <section class="footer-panel footer-panel-contact footer-accordion-panel is-open">
@@ -2929,42 +2925,33 @@
                 <span>Contact</span>
                 <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
               </button>
-              <div class="footer-contact-columns footer-accordion-content">
-                <ul class="footer-list">
-                  <li><a href="tel:${data.site.whatsapp}">${data.site.phone}</a></li>
-                  <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
-                  <li><a href="order.html">Track an order</a></li>
-                  <li><a href="faq.html">FAQ</a></li>
-                </ul>
-                <ul class="footer-list">
-                  <li><a href="returns.html">Returns & Refunds</a></li>
-                  <li><a href="terms.html">Terms</a></li>
-                  <li><a href="privacy.html">Privacy</a></li>
-                  <li>${data.site.location}</li>
-                </ul>
-              </div>
-            </section>
-            <section class="footer-panel footer-accordion-panel">
-              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
-                <span>M-Pesa</span>
-                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
-              </button>
-              <ol class="footer-list footer-steps footer-accordion-content">
-                ${mpesaMarkup}
-              </ol>
-            </section>
-            <section class="footer-panel footer-accordion-panel">
-              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
-                <span>Popular Searches</span>
-                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
-              </button>
-              <ul class="footer-list footer-link-list footer-accordion-content">
-                ${featuredSearchMarkup}
+              <ul class="footer-list footer-accordion-content">
+                <li><a href="tel:${data.site.phone}">${data.site.phone}</a></li>
+                <li><a href="mailto:${data.site.email}">${data.site.email}</a></li>
+                <li>${data.site.location}</li>
               </ul>
             </section>
             <section class="footer-panel footer-accordion-panel">
               <button class="footer-accordion-toggle" type="button" aria-expanded="false">
-                <span>Social</span>
+                <span>Shop</span>
+                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
+              </button>
+              <ul class="footer-list footer-link-list footer-accordion-content">
+                ${shopLinkMarkup}
+              </ul>
+            </section>
+            <section class="footer-panel footer-accordion-panel">
+              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
+                <span>Help</span>
+                <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
+              </button>
+              <ul class="footer-list footer-link-list footer-accordion-content">
+                ${helpLinkMarkup}
+              </ul>
+            </section>
+            <section class="footer-panel footer-accordion-panel">
+              <button class="footer-accordion-toggle" type="button" aria-expanded="false">
+                <span>Follow</span>
                 <span class="footer-accordion-icon" aria-hidden="true">&plus;</span>
               </button>
               <div class="footer-socials footer-accordion-content">
