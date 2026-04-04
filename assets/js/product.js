@@ -17,11 +17,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const detailList = document.getElementById("product-details");
   const buyButton = document.getElementById("product-buy");
   const customizeButton = document.getElementById("product-customize");
-  const giftButton = document.getElementById("product-gift");
-  const shareButton = document.getElementById("product-share");
   const addCartButton = document.getElementById("product-add-cart");
-  const viewCartButton = document.getElementById("product-view-cart");
-  const wishlistButton = document.getElementById("product-wishlist");
   const stickyBar = document.getElementById("product-sticky-bar");
   const stickyBuyButton = document.getElementById("product-sticky-buy");
   const stickyCartButton = document.getElementById("product-sticky-cart");
@@ -30,18 +26,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const mainImage = document.getElementById("product-main-image");
   const thumbGrid = document.getElementById("product-thumbs");
   const relatedGrid = document.getElementById("related-products");
-  const customerProof = document.getElementById("product-customer-proof");
   const mpesaCopy = document.getElementById("product-mpesa-copy");
   const limitedCopy = document.getElementById("product-limited-copy");
   const reviewSummary = document.getElementById("product-review-summary");
   const reviewList = document.getElementById("product-review-list");
   const reviewEmpty = document.getElementById("product-review-empty");
-  const reviewForm = document.getElementById("product-review-form");
-  const reviewNameField = document.getElementById("product-review-name");
-  const reviewLocationField = document.getElementById("product-review-location");
-  const reviewRatingField = document.getElementById("product-review-rating");
-  const reviewMessageField = document.getElementById("product-review-message");
-  const reviewWhatsAppButton = document.getElementById("product-review-whatsapp");
   const reviewStorageKey = "sharoncraft_product_reviews";
   const liveCatalogApi = window.SharonCraftCatalog || null;
 
@@ -128,26 +117,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       return {};
     }
   };
-  const saveStoredReviewMap = (reviewMap) => {
-    try {
-      window.localStorage.setItem(reviewStorageKey, JSON.stringify(reviewMap));
-    } catch (error) {
-      console.warn("Could not save product review locally.", error);
-    }
-  };
   const getLocalProductReviews = (id) => {
     const reviewMap = loadStoredReviewMap();
     const productReviews = reviewMap[id];
     return Array.isArray(productReviews)
       ? productReviews.filter((item) => item && normalizeReviewText(item.message))
       : [];
-  };
-  const saveLocalProductReview = (id, review) => {
-    const reviewMap = loadStoredReviewMap();
-    const existing = Array.isArray(reviewMap[id]) ? reviewMap[id] : [];
-    reviewMap[id] = [review, ...existing].slice(0, 20);
-    saveStoredReviewMap(reviewMap);
-    return reviewMap[id];
   };
   const buildReviewMarkup = (review) => {
     const author = escapeReviewHtml(review.author || "SharonCraft client");
@@ -198,26 +173,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     reviewSummary.textContent = pendingCount
-      ? `${pendingCount} review${pendingCount === 1 ? "" : "s"} waiting for approval. Clients can still submit feedback below.`
+      ? `${pendingCount} review${pendingCount === 1 ? "" : "s"} waiting for approval.`
       : "Reviews from SharonCraft clients will appear here as they come in.";
-  };
-  const syncReviewWhatsAppLink = (currentProductName) => {
-    if (!reviewWhatsAppButton) {
-      return;
-    }
-
-    const reviewName = normalizeReviewText(reviewNameField && reviewNameField.value) || "A SharonCraft client";
-    const reviewLocation = normalizeReviewText(reviewLocationField && reviewLocationField.value) || "Kenya";
-    const reviewRating = clampReviewRating(reviewRatingField && reviewRatingField.value);
-    const reviewMessage = normalizeReviewText(reviewMessageField && reviewMessageField.value) || `I would like to review ${currentProductName}.`;
-    const reviewLines = [
-      `Hello SharonCraft, I would like to leave a review for ${currentProductName}.`,
-      `Name: ${reviewName}`,
-      `Location: ${reviewLocation}`,
-      `Rating: ${reviewRating}/5`,
-      `Review: ${reviewMessage}`
-    ];
-    reviewWhatsAppButton.href = utils.buildWhatsAppUrl(reviewLines.join("\n"));
   };
 
   if (!product) {
@@ -334,46 +291,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     stickyPrice.textContent = utils.formatCurrency(product.price);
   }
 
-  if (wishlistButton) {
-    wishlistButton.dataset.toggleWishlist = product.id;
-    const updateWishlistUI = () => {
-      const isSaved = utils.getWishlist().includes(product.id);
-      wishlistButton.classList.toggle("is-active", isSaved);
-      wishlistButton.textContent = isSaved ? "Remove from Wishlist" : "Save to Wishlist";
-    };
-    updateWishlistUI();
-    window.addEventListener("sharoncraft-wishlist-updated", updateWishlistUI);
-  }
-
   if (limitedCopy) {
     limitedCopy.textContent = utils.getScarcityNote(product);
   }
 
   renderReviews(allReviews, reviewMetrics);
-  syncReviewWhatsAppLink(productName);
-
-  if (customerProof) {
-    const testimonials = (utils.data.site && Array.isArray(utils.data.site.testimonials) ? utils.data.site.testimonials : []).slice(0, 2);
-    customerProof.innerHTML = `
-      <article class="customer-proof-card reveal">
-        <span class="section-kicker">Before You Commit</span>
-        <h3>Ask before you order</h3>
-        <p>Buyers can confirm availability, delivery area, and gifting details on WhatsApp before they pay for ${productName}.</p>
-      </article>
-      <article class="customer-proof-card reveal">
-        <span class="section-kicker">Clear Product View</span>
-        <h3>See the piece properly first</h3>
-        <p>${productName} is shown with close-up images, clear pricing, and a straightforward support path so first-time shoppers know what to expect.</p>
-      </article>
-      ${testimonials.map((item) => `
-        <article class="customer-proof-card reveal">
-          <span class="section-kicker">Client Review</span>
-          <h3>${item.name}</h3>
-          <p>"${item.quote}"</p>
-        </article>
-      `).join("")}
-    `;
-  }
 
   breadcrumb.innerHTML = `
     <a href="index.html">Home</a>
@@ -392,98 +314,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   if (customizeButton) {
     customizeButton.href = utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "custom" }));
-  }
-  if (giftButton) {
-    giftButton.href = utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "gift" }));
-  }
-
-  if (reviewForm) {
-    const syncReviewLink = () => syncReviewWhatsAppLink(productName);
-    [reviewNameField, reviewLocationField, reviewRatingField, reviewMessageField].forEach((field) => {
-      if (field) {
-        field.addEventListener("input", syncReviewLink);
-        field.addEventListener("change", syncReviewLink);
-      }
-    });
-
-    reviewForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      const nextReview = {
-        id: `review-${Date.now()}`,
-        productId: product.id,
-        productName,
-        category: categoryName,
-        author: normalizeReviewText(reviewNameField && reviewNameField.value) || "SharonCraft client",
-        location: normalizeReviewText(reviewLocationField && reviewLocationField.value) || "Kenya",
-        rating: clampReviewRating(reviewRatingField && reviewRatingField.value),
-        message: normalizeReviewText(reviewMessageField && reviewMessageField.value),
-        createdAt: new Date().toISOString(),
-        status: "pending"
-      };
-
-      if (!nextReview.message) {
-        if (typeof window.showToast === "function") {
-          window.showToast("Please write a short review before posting.", "warning");
-        }
-        return;
-      }
-
-      const updatedLocalReviews = saveLocalProductReview(product.id, nextReview).map((item, index) => ({
-        id: normalizeReviewText(item.id) || `local-${index + 1}`,
-        author: normalizeReviewText(item.author) || "SharonCraft client",
-        location: normalizeReviewText(item.location) || "Kenya",
-        rating: clampReviewRating(item.rating),
-        message: normalizeReviewText(item.message),
-        createdAt: normalizeReviewText(item.createdAt) || "",
-        status: normalizeReviewText(item.status) || "pending"
-      }));
-      const mergedReviews = [...updatedLocalReviews, ...approvedReviews];
-
-      let submittedToLive = false;
-      if (
-        liveCatalogApi &&
-        typeof liveCatalogApi.isConfigured === "function" &&
-        liveCatalogApi.isConfigured() &&
-        typeof liveCatalogApi.submitProductReview === "function"
-      ) {
-        try {
-          await liveCatalogApi.submitProductReview(nextReview);
-          submittedToLive = true;
-        } catch (error) {
-          console.warn("Unable to send review submission to Supabase.", error);
-        }
-      }
-
-      renderReviews(mergedReviews, {
-        approvedCount: approvedReviews.length,
-        pendingCount: updatedLocalReviews.length,
-        averageRating: reviewMetrics.averageRating
-      });
-      reviewForm.reset();
-      if (reviewRatingField) {
-        reviewRatingField.value = "5";
-      }
-      syncReviewWhatsAppLink(productName);
-      utils.refreshReveal();
-
-      if (typeof window.showToast === "function") {
-        window.showToast(
-          submittedToLive
-            ? "Your review was sent for approval and saved on this device."
-            : "Your review was saved on this device. You can also send it on WhatsApp.",
-          "success"
-        );
-      }
-
-      if (typeof utils.trackEvent === "function") {
-        utils.trackEvent("submit_review", {
-          product_id: product.id,
-          product_name: productName,
-          rating: nextReview.rating
-        });
-      }
-    });
   }
 
   if (typeof utils.setPageMetadata === "function") {
@@ -685,60 +515,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
 
-  if (viewCartButton) {
-    viewCartButton.addEventListener("click", function () {
-      utils.openCart();
-    });
-  }
-
-  if (shareButton) {
-    shareButton.addEventListener("click", async function () {
-      const sharePayload = {
-        title: `${productName} | SharonCraft`,
-        text: `I found this handmade SharonCraft piece: ${productName}`,
-        url: productUrl
-      };
-
-      try {
-        if (navigator.share) {
-          await navigator.share(sharePayload);
-          if (typeof utils.trackEvent === "function") {
-            utils.trackEvent("share", {
-              method: "native",
-              product_id: product.id,
-              product_name: productName
-            });
-          }
-          if (typeof window.showToast === "function") {
-            window.showToast("Product ready to share.", "success");
-          }
-          return;
-        }
-      } catch (error) {
-        if (error && error.name === "AbortError") {
-          return;
-        }
-      }
-
-      window.open(
-        utils.buildWhatsAppUrl(utils.buildProductWhatsAppMessage(product, { intent: "share" })),
-        "_blank",
-        "noopener"
-      );
-      if (typeof utils.trackEvent === "function") {
-        utils.trackEvent("share", {
-          method: "whatsapp",
-          product_id: product.id,
-          product_name: productName
-        });
-      }
-    });
-  }
-
   [
     { node: buyButton, label: "Product WhatsApp" },
     { node: customizeButton, label: "Product Custom Colors WhatsApp" },
-    { node: giftButton, label: "Product Gift WhatsApp" },
     { node: stickyBuyButton, label: "Sticky Product WhatsApp" }
   ].forEach(function (entry) {
     if (!entry.node) {

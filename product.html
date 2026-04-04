@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260403-site-marketplace" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260404-product-simplify" />
   <link rel="stylesheet" href="assets/css/payment-status-badge.css?v=20260404-mpesa-badge" />
   <link rel="stylesheet" href="assets/css/mobile-product-grid-comfort.css?v=20260404-mobile-grid-comfort" />
 </head>
@@ -57,17 +57,6 @@
               <a id="product-buy" class="button button-whatsapp" href="#" target="_blank" rel="noreferrer">Order on WhatsApp</a>
               <a id="product-customize" class="button button-secondary" href="#" target="_blank" rel="noreferrer">Ask About Custom Colors</a>
             </div>
-            <div class="product-conversion-strip">
-              <div class="product-conversion-copy">
-                <strong>Need a moment before you decide?</strong>
-                <span>Save the piece, open your cart, or share it with someone else before you order.</span>
-              </div>
-              <div class="product-micro-actions">
-                <button id="product-wishlist" class="button button-secondary" type="button" data-toggle-wishlist="">Save to Wishlist</button>
-                <button id="product-view-cart" class="button button-secondary" type="button">View Cart</button>
-                <button id="product-share" class="button button-secondary" type="button">Share This Piece</button>
-              </div>
-            </div>
             <div class="mpesa-box">
               <strong>M-Pesa</strong>
               <span class="payment-status-badge">M-Pesa temporarily unavailable</span>
@@ -82,25 +71,9 @@
                 <strong>Simple next steps</strong>
                 <p>Once you choose your piece, SharonCraft will guide you through delivery and payment clearly.</p>
               </article>
-              <article class="product-assurance-card">
-                <strong>Handmade in Kenya</strong>
-                <p>Each piece keeps the crafted detail and warm finish that make SharonCraft feel personal.</p>
-              </article>
             </div>
           </section>
         </div>
-      </div>
-    </section>
-
-    <!-- Related products -->
-    <section class="section">
-      <div class="container">
-        <div class="section-heading">
-          <span class="section-kicker">Why Clients Buy</span>
-          <h2>A few reasons people feel comfortable ordering here.</h2>
-          <p>These notes help first-time shoppers understand what the experience feels like before they commit.</p>
-        </div>
-        <div id="product-customer-proof" class="customer-proof-section"></div>
       </div>
     </section>
 
@@ -110,85 +83,12 @@
           <section class="product-reviews-panel">
             <div class="section-heading product-reviews-heading">
               <span class="section-kicker">Client Reviews</span>
-              <h2>Read what other shoppers noticed in real life.</h2>
+              <h2>Read what other shoppers noticed.</h2>
               <p id="product-review-summary">Reviews from SharonCraft clients will appear here as they come in.</p>
             </div>
             <div id="product-review-list" class="review-list" aria-live="polite"></div>
-            <p id="product-review-empty" class="review-empty">No reviews yet for this piece. Be the first client to share how it looked, felt, and arrived.</p>
+            <p id="product-review-empty" class="review-empty">No reviews yet for this piece.</p>
           </section>
-
-          <aside class="review-form-card">
-            <span class="section-kicker">Leave A Review</span>
-            <h3>How did this piece feel in real life?</h3>
-            <p>Short, honest feedback helps the next client shop with more trust.</p>
-            <form id="product-review-form" class="review-form">
-              <div class="review-form-grid">
-                <label>
-                  <span>Your name</span>
-                  <input id="product-review-name" name="name" type="text" maxlength="50" placeholder="Jane W." required />
-                </label>
-                <label>
-                  <span>Location</span>
-                  <input id="product-review-location" name="location" type="text" maxlength="50" placeholder="Nairobi" />
-                </label>
-              </div>
-              <label>
-                <span>Rating</span>
-                <select id="product-review-rating" name="rating" required>
-                  <option value="5">5 stars - Excellent</option>
-                  <option value="4">4 stars - Very good</option>
-                  <option value="3">3 stars - Good</option>
-                  <option value="2">2 stars - Fair</option>
-                  <option value="1">1 star - Needs work</option>
-                </select>
-              </label>
-              <label>
-                <span>Your review</span>
-                <textarea id="product-review-message" name="message" maxlength="500" placeholder="Tell other clients about the size, finish, comfort, delivery, or gifting experience." required></textarea>
-              </label>
-              <div class="review-form-actions">
-                <button class="button button-primary" type="submit">Post My Review</button>
-                <a id="product-review-whatsapp" class="button button-secondary" href="#" target="_blank" rel="noreferrer">Send On WhatsApp</a>
-              </div>
-              <small>Reviews stay simple and product-specific so clients can scan them quickly.</small>
-            </form>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-heading">
-          <span class="section-kicker">Guides & Inspiration</span>
-          <h2>Helpful reads if you want a little more confidence first.</h2>
-          <p>These short guides answer common questions about jewelry, gifts, decor, and handmade buying.</p>
-        </div>
-        <div class="landing-link-grid">
-          <article class="landing-link-card reveal">
-            <img src="assets/images/sharoncraft-african-necklace-p1sw79.webp" alt="Guide about choosing Maasai jewelry" loading="lazy" decoding="async" />
-            <div>
-              <h3>How to choose Maasai jewelry</h3>
-              <p>Useful for occasion wear, coordinated sets, and gift-led jewelry buying.</p>
-            </div>
-            <a class="button button-secondary" href="articles/how-to-choose-maasai-jewelry.html">Read Guide</a>
-          </article>
-          <article class="landing-link-card reveal">
-            <img src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="Guide about handmade Kenyan gifts" loading="lazy" decoding="async" />
-            <div>
-              <h3>Best handmade Kenyan gifts</h3>
-              <p>Helpful when this piece might be part of a birthday, wedding, or housewarming gift.</p>
-            </div>
-            <a class="button button-secondary" href="articles/best-handmade-kenyan-gifts.html">Read Guide</a>
-          </article>
-          <article class="landing-link-card reveal">
-            <img src="assets/images/handmade-african-souvenir-7dgi8p.webp" alt="Guide about where to buy Kenyan artifacts" loading="lazy" decoding="async" />
-            <div>
-              <h3>Where to buy Kenyan artifacts</h3>
-              <p>Good for buyers comparing handmade decor, display pieces, and culture-led gift ideas.</p>
-            </div>
-            <a class="button button-secondary" href="articles/where-to-buy-kenyan-artifacts.html">Read Guide</a>
-          </article>
         </div>
       </div>
     </section>
@@ -225,6 +125,6 @@
   <script src="assets/js/supabase-data-sync.js?v=20260327-live-fix" defer></script>
   <script src="assets/js/app.js?v=20260403-site-marketplace" defer></script>
   <script src="assets/js/mobile-ux.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/product.js?v=20260401-shared-reviews" defer></script>
+  <script src="assets/js/product.js?v=20260404-product-simplify" defer></script>
 </body>
 </html>
