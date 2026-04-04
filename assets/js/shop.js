@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const categorySelect = document.getElementById("shop-category");
   const priceSelect = document.getElementById("shop-price");
   const sortSelect = document.getElementById("shop-sort");
+  const newOnlyInput = document.getElementById("shop-new-only");
   const countLabel = document.getElementById("shop-count");
   const clearButton = document.getElementById("clear-shop-filters");
   const helpWhatsapp = document.getElementById("shop-help-whatsapp");
-  const customerProof = document.getElementById("shop-customer-proof");
   let discoveryAnalyticsTimer = null;
   let lastDiscoverySignature = "";
 
@@ -28,29 +28,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   utils.renderCategorySelect(categorySelect);
-
-  if (customerProof) {
-    const testimonials = (utils.data.site && Array.isArray(utils.data.site.testimonials) ? utils.data.site.testimonials : []).slice(0, 2);
-    customerProof.innerHTML = `
-      ${testimonials.map((item) => `
-        <article class="customer-proof-card reveal">
-          <span class="section-kicker">Client Review</span>
-          <h3>${item.name}</h3>
-          <p>"${item.quote}"</p>
-        </article>
-      `).join("")}
-      <article class="customer-proof-card reveal">
-        <span class="section-kicker">Order Support</span>
-        <h3>Ask before you commit</h3>
-        <p>Buyers can ask about budget, delivery area, custom colors, and gifting before they place the order.</p>
-      </article>
-      <article class="customer-proof-card reveal">
-        <span class="section-kicker">Payment Update</span>
-        <h3>WhatsApp is the easiest route right now</h3>
-        <p>M-Pesa is taking a short break, so SharonCraft can guide shoppers to the best available payment option on WhatsApp.</p>
-      </article>
-    `;
-  }
 
   const url = new URL(window.location.href);
   const initialCategory = url.searchParams.get("category") || "";
@@ -73,16 +50,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const categories = [
       { value: "", label: "All" },
+      { value: "__new__", label: "New" },
       ...Array.from(categorySelect.options)
         .filter((option) => option.value)
         .map((option) => ({ value: option.value, label: option.textContent }))
-        .slice(0, 4)
+        .slice(0, 3)
     ];
 
     chipContainer.innerHTML = categories
       .map(
         (cat) => `
-          <button type="button" class="filter-chip ${cat.value === categorySelect.value ? "is-active" : ""}" data-chip="${cat.value}">
+          <button type="button" class="filter-chip ${(cat.value === "__new__" ? Boolean(newOnlyInput && newOnlyInput.checked) : cat.value === categorySelect.value) ? "is-active" : ""}" data-chip="${cat.value}">
             ${cat.label}
           </button>
         `
@@ -95,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Refine";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "More filters";
     }
   }
 
@@ -112,7 +90,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       const button = event.target.closest("[data-chip]");
       if (!button) return;
       const value = button.dataset.chip;
-      categorySelect.value = value;
+      if (value === "__new__") {
+        if (newOnlyInput) {
+          newOnlyInput.checked = !newOnlyInput.checked;
+        }
+      } else {
+        categorySelect.value = value;
+      }
       renderProducts();
     });
   }
@@ -174,6 +158,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const category = categorySelect.value;
     const price = priceSelect.value;
     const sort = sortSelect.value;
+    const newOnly = Boolean(newOnlyInput && newOnlyInput.checked);
     const site = utils.data && utils.data.site ? utils.data.site : {};
     const siteName = site.name || "SharonCraft";
     const siteUrl = new URL("/", window.location.origin).href;
@@ -193,7 +178,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         categoryLabel.toLowerCase().includes(keyword);
       const categoryMatch = !category || product.category === category;
       const priceMatch = matchesPrice(product, price);
-      return textMatch && categoryMatch && priceMatch;
+      const newMatch = !newOnly || Boolean(product.newArrival);
+      return textMatch && categoryMatch && priceMatch && newMatch;
     });
 
     const sorted = applySort(filtered, sort);
@@ -228,6 +214,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       category,
       price,
       sort,
+      newOnly,
       results: sorted.map((product) => product.id)
     });
 
@@ -248,7 +235,8 @@ document.addEventListener("DOMContentLoaded", async function () {
           results_count: sorted.length,
           category_filter: category || "all",
           price_filter: price || "all",
-          sort_order: sort || "featured"
+          sort_order: sort || "featured",
+          new_only: newOnly
         });
       }
 
@@ -260,16 +248,18 @@ document.addEventListener("DOMContentLoaded", async function () {
           results_count: sorted.length,
           search_term: keyword,
           price_filter: price || "all",
-          sort_order: sort || "featured"
+          sort_order: sort || "featured",
+          new_only: newOnly
         });
       }
 
-      if (keyword || category || price || sort !== "featured") {
+      if (keyword || category || price || newOnly || sort !== "featured") {
         utils.trackEvent("filter_products", {
           search_term: keyword,
           category_filter: category || "all",
           price_filter: price || "all",
           sort_order: sort || "featured",
+          new_only: newOnly,
           results_count: sorted.length
         });
       }
@@ -397,13 +387,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     element.addEventListener("change", renderProducts);
   });
 
+  if (newOnlyInput) {
+    newOnlyInput.addEventListener("change", renderProducts);
+  }
+
   if (clearButton) {
     clearButton.addEventListener("click", function () {
       searchInput.value = "";
       categorySelect.value = "";
       priceSelect.value = "";
       sortSelect.value = "featured";
+      if (newOnlyInput) {
+        newOnlyInput.checked = false;
+      }
       renderProducts();
+      setFilterOpen(false);
     });
   }
 

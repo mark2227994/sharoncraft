@@ -45,28 +45,16 @@
         <div class="shop-refine-bar">
           <div class="shop-refine-copy">
             <span id="shop-refine-kicker" class="section-kicker">Browse & Refine</span>
-            <h2 id="shop-refine-title">Browse first. Narrow it down when you're ready.</h2>
+            <h2 id="shop-refine-title">Search first. Filter only when you need to.</h2>
+            <p class="shop-refine-note">Start with the product name or category, then make the list smaller only if it helps.</p>
           </div>
-          <div class="shop-refine-tools">
-            <span id="shop-count" class="shop-product-count">0 pieces</span>
-            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
-              <span class="shop-filter-toggle-text">Refine</span>
-            </button>
-            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
-          </div>
-        </div>
-
-        <div class="shop-filter-chips" id="shop-chips"></div>
-
-        <div class="shop-filter-panels" id="shop-filter-grid">
           <div class="shop-filter-search-section">
             <div class="shop-search-box">
               <input id="shop-search" type="search" placeholder="Search pieces..." aria-label="Search products" />
               <span class="shop-search-icon">Search</span>
             </div>
           </div>
-
-          <div class="shop-filter-cards">
+          <div class="shop-filter-cards shop-filter-cards-essential">
             <div class="shop-filter-card">
               <div class="filter-card-header">
                 <h3 class="filter-card-title">Category</h3>
@@ -86,6 +74,27 @@
               </select>
             </div>
 
+            <label class="shop-filter-card shop-filter-card-check" for="shop-new-only">
+              <div class="filter-card-header">
+                <h3 class="filter-card-title">New only</h3>
+              </div>
+              <span class="shop-filter-check-copy">Show only fresh arrivals</span>
+              <input id="shop-new-only" type="checkbox" />
+            </label>
+          </div>
+          <div class="shop-refine-tools">
+            <span id="shop-count" class="shop-product-count">0 pieces</span>
+            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
+              <span class="shop-filter-toggle-text">More filters</span>
+            </button>
+            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="shop-filter-chips" id="shop-chips"></div>
+
+        <div class="shop-filter-panels" id="shop-filter-grid">
+          <div class="shop-filter-cards">
             <div class="shop-filter-card">
               <div class="filter-card-header">
                 <h3 class="filter-card-title">Sort</h3>
@@ -106,47 +115,11 @@
 
     <section class="section">
       <div class="container">
-        <div class="section-heading">
-          <span id="shop-guides-kicker" class="section-kicker">Need A Little Help?</span>
-          <h2 id="shop-guides-title">A few short guides for shoppers who are still deciding.</h2>
-          <p id="shop-guides-description">Use these if you want a little more confidence before you choose a piece.</p>
-        </div>
-        <div class="landing-link-grid">
-          <article class="landing-link-card reveal">
-            <img id="shop-guide-card-1-image" src="assets/images/sharoncraft-african-necklace-p1sw79.webp" alt="Guide about choosing Maasai jewelry" loading="lazy" decoding="async" />
-            <div>
-              <h3 id="shop-guide-card-1-title">How to choose Maasai jewelry</h3>
-              <p id="shop-guide-card-1-text">Use this guide if you are comparing occasion wear, personal style, or gift-ready jewelry.</p>
-            </div>
-            <a id="shop-guide-card-1-link" class="button button-secondary" href="articles/how-to-choose-maasai-jewelry.html">Read Guide</a>
-          </article>
-          <article class="landing-link-card reveal">
-            <img id="shop-guide-card-2-image" src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="Guide about handmade Kenyan gifts" loading="lazy" decoding="async" />
-            <div>
-              <h3 id="shop-guide-card-2-title">Best handmade Kenyan gifts</h3>
-              <p id="shop-guide-card-2-text">Helpful when you are shopping for someone else and need the safest gift path.</p>
-            </div>
-            <a id="shop-guide-card-2-link" class="button button-secondary" href="articles/best-handmade-kenyan-gifts.html">Read Guide</a>
-          </article>
-          <article class="landing-link-card reveal">
-            <img id="shop-guide-card-3-image" src="assets/images/kenyan-bead-decor-yhip8u-opt.webp" alt="Guide about styling beaded home decor" loading="lazy" decoding="async" />
-            <div>
-              <h3 id="shop-guide-card-3-title">How to style beaded home decor</h3>
-              <p id="shop-guide-card-3-text">Great for decor buyers who want a modern space to still feel warm and expressive.</p>
-            </div>
-            <a id="shop-guide-card-3-link" class="button button-secondary" href="articles/how-to-style-beaded-home-decor.html">Read Guide</a>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
         <article class="story-card reveal shop-support-card">
           <span id="shop-help-kicker" class="section-kicker">Need Help Choosing?</span>
-          <h2 id="shop-help-title">Send a quick WhatsApp message and we will help you choose well.</h2>
-          <p id="shop-help-description">If you are not sure what to buy, we can help by budget, occasion, delivery area, or custom color ideas.</p>
-          <span class="payment-status-badge">M-Pesa coming back soon</span>
+          <h2 id="shop-help-title">Ask one quick question and keep moving.</h2>
+          <p id="shop-help-description">We can help with budget, gifts, custom colors, or delivery before you commit to a piece.</p>
+          <span class="payment-status-badge">M-Pesa temporarily unavailable</span>
           <div class="shop-help-tags">
             <span>Gift ideas</span>
             <span>Custom colors</span>
@@ -155,20 +128,14 @@
           </div>
           <div class="cta-row">
             <a id="shop-help-whatsapp" class="button button-whatsapp" href="#" target="_blank" rel="noreferrer" data-analytics-label="Shop Help WhatsApp">Get WhatsApp Help</a>
-            <a class="button button-secondary" href="contact.html">Contact Page</a>
+            <a class="button button-secondary" href="articles/how-to-choose-maasai-jewelry.html">Read One Guide</a>
+          </div>
+          <div class="shop-support-points">
+            <span>Clear photos</span>
+            <span>Warm replies</span>
+            <span>Simple next steps</span>
           </div>
         </article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-heading">
-          <span id="shop-trust-kicker" class="section-kicker">Client Trust</span>
-          <h2 id="shop-trust-title">A calmer way to shop makes it easier to choose.</h2>
-          <p id="shop-trust-description">Clear photos, quick answers, and simple order support help people buy with more confidence.</p>
-        </div>
-        <div id="shop-customer-proof" class="customer-proof-section"></div>
       </div>
     </section>
   </main>
