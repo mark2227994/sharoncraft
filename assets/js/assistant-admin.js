@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const categoryInput = document.getElementById("assistant-category");
   const priceInput = document.getElementById("assistant-price");
   const imageInput = document.getElementById("assistant-image");
+  const imageStageInput = document.getElementById("assistant-image-stage");
+  const imageStageStatus = document.getElementById("assistant-image-stage-status");
   const imageFileInput = document.getElementById("assistant-image-file");
   const galleryInput = document.getElementById("assistant-gallery");
   const descriptionInput = document.getElementById("assistant-description");
@@ -52,6 +54,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   const categories = window.SharonCraftData && Array.isArray(window.SharonCraftData.categories)
     ? window.SharonCraftData.categories
     : [];
+  const imageWorkflowFolders = Object.freeze({
+    ready: "assets/images/ready-for-sale",
+    live: "assets/images/live-products",
+    archive: "assets/images/archive"
+  });
+  const imageWorkflowStages = Object.freeze(["ready", "live", "archive"]);
 
   let currentUser = null;
   let products = [];
@@ -86,6 +94,97 @@ document.addEventListener("DOMContentLoaded", async function () {
         return normalizeText(item);
       })
       .filter(Boolean);
+  }
+
+  function normalizeImageStage(stage) {
+    const normalized = normalizeText(stage).toLowerCase();
+    return imageWorkflowStages.includes(normalized) ? normalized : "";
+  }
+
+  function getImageStageLabel(stage) {
+    const normalized = normalizeImageStage(stage);
+    if (normalized === "archive") {
+      return "Archive";
+    }
+    if (normalized === "live") {
+      return "Live in market";
+    }
+    return "Ready for sale";
+  }
+
+  function getImageStageFolder(stage) {
+    const normalized = normalizeImageStage(stage) || "ready";
+    return imageWorkflowFolders[normalized] || imageWorkflowFolders.ready;
+  }
+
+  function getImageStageFromNotes(notes) {
+    const stageEntry = normalizeText(notes)
+      .split("|")
+      .find(function (part) {
+        return /^stage:/i.test(normalizeText(part));
+      });
+    return normalizeImageStage(normalizeText(stageEntry).replace(/^stage:/i, ""));
+  }
+
+  function inferImageStageFromPath(path) {
+    const normalized = normalizeText(path).toLowerCase();
+    if (!normalized) {
+      return "ready";
+    }
+    if (normalized.includes("/ready-for-sale/")) {
+      return "ready";
+    }
+    if (normalized.includes("/archive/")) {
+      return "archive";
+    }
+    if (normalized.includes("/live-products/")) {
+      return "live";
+    }
+    if (
+      normalized.startsWith("http://") ||
+      normalized.startsWith("https://") ||
+      normalized.startsWith("assets/images/")
+    ) {
+      return "live";
+    }
+    if (normalized.startsWith("data:") || normalized.startsWith("blob:")) {
+      return "ready";
+    }
+    return "live";
+  }
+
+  function isManagedWorkflowImage(path) {
+    const normalized = normalizeText(path).toLowerCase();
+    return normalized.includes("/ready-for-sale/") || normalized.includes("/live-products/") || normalized.includes("/archive/");
+  }
+
+  function rewriteImagePathForStage(path, stage) {
+    const normalizedPath = normalizeText(path);
+    const normalizedStage = normalizeImageStage(stage) || "ready";
+    if (!normalizedPath || !isManagedWorkflowImage(normalizedPath)) {
+      return normalizedPath;
+    }
+    const fileName = normalizedPath.split("/").pop();
+    return fileName ? `${getImageStageFolder(normalizedStage)}/${fileName}` : normalizedPath;
+  }
+
+  function rewriteImagesForStage(images, stage) {
+    return Array.from(new Set((Array.isArray(images) ? images : []).map(function (image) {
+      return rewriteImagePathForStage(image, stage);
+    }).filter(Boolean)));
+  }
+
+  function getSelectedImageStage() {
+    return normalizeImageStage(imageStageInput && imageStageInput.value) || "ready";
+  }
+
+  function buildProductNotes(categorySlug, imageStage) {
+    const parts = [normalizeText(categorySlug), "assistant-admin"].filter(Boolean);
+    const normalizedStage = normalizeImageStage(imageStage);
+    if (normalizedStage) {
+      parts.push(`stage:${normalizedStage}`);
+    }
+    return parts.join("|");
   }
 
   function formatCurrency(value) {
@@ -166,6 +265,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     imagePreviewWrap.hidden = false;
     imagePreview.src = source;
+    if (imageStageStatus) {
+      if (!source) {
+        imageStageStatus.textContent = `Fresh local project photos usually begin in ${imageWorkflowFolders.ready}.`;
+      } else if (source.startsWith("data:") || source.startsWith("blob:")) {
+        imageStageStatus.textContent = "This upload is still a browser draft preview until you save a real project path or live URL.";
+      } else if (isManagedWorkflowImage(source)) {
+        imageStageStatus.textContent = `This product is marked ${getImageStageLabel(getSelectedImageStage()).toLowerCase()} and the current path is using ${getImageStageFolder(getSelectedImageStage())}.`;
+      } else {
+        imageStageStatus.textContent = `This image is outside the local stage folders. The product will still work, but the clearest local workflow is ${imageWorkflowFolders.ready} first, then ${imageWorkflowFolders.live}.`;
+      }
+    }
   }
 
   function resetForm() {
@@ -176,6 +286,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     productIdInput.value = "";
     if (categories[0]) {
       categoryInput.value = categories[0].slug;
+    }
+    if (imageStageInput) {
+      imageStageInput.value = "ready";
     }
     formKicker.textContent = "New Product";
     formTitle.textContent = "Add a product simply";
@@ -192,6 +305,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     categoryInput.value = getCategorySlug(product);
     priceInput.value = Number(product.price) || 0;
     imageInput.value = normalizeText(product.image);
+    if (imageStageInput) {
+      imageStageInput.value = normalizeImageStage(product.imageStage || getImageStageFromNotes(product.notes) || inferImageStageFromPath(product.image)) || "live";
+    }
     galleryInput.value = Array.isArray(product.gallery) ? product.gallery.join(", ") : "";
     descriptionInput.value = normalizeText(product.story);
     detailsInput.value = Array.isArray(product.specs) ? product.specs.join(", ") : "";
@@ -211,19 +327,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     const productId = normalizeText(productIdInput.value) || slugify(nameInput.value);
     const categorySlug = normalizeText(categoryInput.value) || (categories[0] && categories[0].slug) || "necklaces";
     const now = Date.now();
+    const imageStage = getSelectedImageStage();
+    const image = rewriteImagePathForStage(normalizeText(imageInput.value), imageStage);
+    const gallery = rewriteImagesForStage(parseList(galleryInput.value), imageStage);
     return {
       id: productId,
-      image: normalizeText(imageInput.value),
+      image,
       name: normalizeText(nameInput.value),
       price: Number(priceInput.value) || 0,
       material: getCategoryName(categorySlug),
       story: normalizeText(descriptionInput.value),
       specs: parseList(detailsInput.value),
-      gallery: parseList(galleryInput.value),
+      gallery,
       soldOut: soldOutInput.checked,
       spotlightUntil: featuredInput.checked ? new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString() : "",
       spotlightText: normalizeText(badgeInput.value) || (featuredInput.checked ? "Featured" : ""),
-      notes: `${categorySlug}|assistant-admin`,
+      imageStage,
+      notes: buildProductNotes(categorySlug, imageStage),
       updatedAt: new Date().toISOString(),
       newUntil: newInput.checked ? new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString() : "",
       sortOrder: existingProduct && Number.isFinite(Number(existingProduct.sortOrder)) ? Number(existingProduct.sortOrder) : 0
@@ -237,11 +357,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     const activeOrders = orders.filter(function (order) {
       return ["new", "confirmed", "paid"].includes(normalizeText(order.status));
     }).length;
+    const readyPhotos = products.filter(function (product) {
+      return normalizeImageStage(product.imageStage || getImageStageFromNotes(product.notes) || inferImageStageFromPath(product.image)) === "ready";
+    }).length;
     miniMetrics.innerHTML = [
       { label: "Products", value: products.length },
       { label: "Orders", value: orders.length },
       { label: "Active Orders", value: activeOrders },
-      { label: "Events", value: analyticsEvents.length }
+      { label: "Ready Photos", value: readyPhotos }
     ].map(function (item) {
       return `<article><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(String(item.value))}</strong></article>`;
     }).join("");
@@ -264,6 +387,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     productList.innerHTML = filtered.map(function (product) {
       const categoryName = getCategoryName(getCategorySlug(product));
+      const imageStage = normalizeImageStage(product.imageStage || getImageStageFromNotes(product.notes) || inferImageStageFromPath(product.image)) || "live";
       const unavailableLabel = product && product.soldOut ? ' <span class="assistant-unavailable-tag">Unavailable</span>' : "";
       return `
         <article class="assistant-list-item assistant-product-row">
@@ -271,6 +395,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           <div class="assistant-product-copy">
             <strong>${escapeHtml(normalizeText(product.name) || "Untitled product")}${unavailableLabel}</strong>
             <div class="assistant-product-meta">${escapeHtml(categoryName)} - ${escapeHtml(formatCurrency(product.price))}</div>
+            <div class="assistant-product-meta">${escapeHtml(getImageStageLabel(imageStage))}</div>
             <div class="assistant-product-meta">${escapeHtml(normalizeText(product.story) || "No description yet.")}</div>
           </div>
           <div class="assistant-list-actions">
@@ -497,7 +622,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderProducts();
     renderMiniMetrics();
     resetForm();
-    setStatus(appStatus, `${payload.name} is live in the catalog.`, "success");
+    setStatus(appStatus, `${payload.name} is live in the catalog with photo stage set to ${getImageStageLabel(payload.imageStage)}.`, "success");
     activateTab("catalog");
   }
 
@@ -556,7 +681,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     imageInput.value = publicUrl;
     updatePreview();
-    setStatus(appStatus, `${file.name} uploaded and ready to save with the product.`, "success");
+    setStatus(
+      appStatus,
+      `${file.name} uploaded and ready to save with the product. If you also keep local project files, match its stage in ${getImageStageFolder(getSelectedImageStage())}.`,
+      "success"
+    );
   }
 
   async function enterApp(user) {
@@ -665,6 +794,24 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (imageInput) {
     imageInput.addEventListener("input", updatePreview);
     imageInput.addEventListener("change", updatePreview);
+  }
+
+  if (imageStageInput) {
+    imageStageInput.addEventListener("change", function () {
+      const image = normalizeText(imageInput && imageInput.value);
+      const gallery = parseList(galleryInput && galleryInput.value);
+      const stage = getSelectedImageStage();
+      const nextImage = rewriteImagePathForStage(image, stage);
+      const nextGallery = rewriteImagesForStage(gallery, stage);
+      if (nextImage !== image) {
+        imageInput.value = nextImage;
+      }
+      if (galleryInput) {
+        galleryInput.value = nextGallery.join(", ");
+      }
+      updatePreview();
+      setStatus(appStatus, `Photo stage set to ${getImageStageLabel(stage)}.`, "info");
+    });
   }
 
   if (imageFileInput) {

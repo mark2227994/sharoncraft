@@ -4909,6 +4909,37 @@ body.admin-guidance-hidden .admin-panel {
   word-break: break-word;
 }
 
+.admin-library-stage {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(92, 64, 51, 0.08);
+  color: var(--deep-brown);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-library-stage[data-stage="ready"],
+.admin-item-chip[data-stage="ready"] {
+  background: rgba(211, 170, 86, 0.18);
+  color: #7a511d;
+}
+
+.admin-library-stage[data-stage="live"],
+.admin-item-chip[data-stage="live"] {
+  background: rgba(84, 160, 111, 0.14);
+  color: #2c6a46;
+}
+
+.admin-library-stage[data-stage="archive"],
+.admin-item-chip[data-stage="archive"] {
+  background: rgba(92, 64, 51, 0.12);
+  color: rgba(92, 64, 51, 0.92);
+}
+
 @media (min-width: 760px) {
   .admin-gallery-picker-head {
     grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);

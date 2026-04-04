@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260403-site-marketplace" />
-  <link rel="stylesheet" href="assets/css/assistant-admin.css?v=20260403-assistant-admin" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260404-image-workflow" />
+  <link rel="stylesheet" href="assets/css/assistant-admin.css?v=20260404-image-workflow" />
 </head>
 <body class="assistant-admin-page">
   <main class="assistant-shell">
@@ -112,6 +112,15 @@
                 <span>Main image path</span>
                 <input id="assistant-image" type="text" placeholder="assets/images/product-photo.webp" required />
               </label>
+              <label>
+                <span>Photo stage</span>
+                <select id="assistant-image-stage">
+                  <option value="ready">Ready for sale</option>
+                  <option value="live">Live in market</option>
+                  <option value="archive">Archive</option>
+                </select>
+              </label>
+              <p id="assistant-image-stage-status" class="assistant-muted assistant-stage-status">Fresh local project photos usually begin in <code>assets/images/ready-for-sale/</code>.</p>
               <div class="assistant-upload-block">
                 <div>
                   <strong>Upload from this computer</strong>
@@ -165,6 +174,21 @@
                 <li>Write one short description the customer can understand quickly.</li>
                 <li>Save, then check the Catalog tab to confirm it looks right.</li>
               </ol>
+            </article>
+
+            <article class="assistant-card">
+              <div class="assistant-card-head">
+                <div>
+                  <span class="section-kicker">Folder Workflow</span>
+                  <h2>Keep sale-ready photos organized</h2>
+                </div>
+              </div>
+              <ul class="assistant-photo-rules assistant-folder-rules">
+                <li>Put fresh project photos in <code>assets/images/ready-for-sale/</code>.</li>
+                <li>When the product is already selling, move or copy the chosen files into <code>assets/images/live-products/</code>.</li>
+                <li>Move replaced photos into <code>assets/images/archive/</code>.</li>
+                <li>This assistant follows the same stage labels, even when the image itself is already a live Supabase URL.</li>
+              </ul>
             </article>
 
             <article class="assistant-card assistant-photo-card">
@@ -377,6 +401,6 @@
   <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
   <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
   <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
-  <script src="assets/js/assistant-admin.js?v=20260403-assistant-admin" defer></script>
+  <script src="assets/js/assistant-admin.js?v=20260404-image-workflow" defer></script>
 </body>
 </html>

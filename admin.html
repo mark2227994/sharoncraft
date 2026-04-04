@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260403-site-marketplace" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260404-image-workflow" />
   <link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20260401-site-content-studio" />
 </head>
 <body class="admin-dashboard-page">
@@ -541,6 +541,15 @@
                       <input id="admin-image" type="text" placeholder="Main image path or uploaded image" required />
                     </div>
                     <div class="admin-form-group">
+                      <label for="admin-image-stage">Photo stage</label>
+                      <select id="admin-image-stage">
+                        <option value="ready">Ready for sale</option>
+                        <option value="live">Live in market</option>
+                        <option value="archive">Archive</option>
+                      </select>
+                      <p id="admin-image-stage-status" class="admin-field-tip">Fresh product photos usually begin in `assets/images/ready-for-sale/`.</p>
+                    </div>
+                    <div class="admin-form-group">
                       <label for="admin-gallery-images">Gallery images</label>
                       <textarea id="admin-gallery-images" placeholder="More gallery image paths separated by commas"></textarea>
                     </div>
@@ -560,6 +569,15 @@
                         <li>Use `Selected gallery images` to choose the first image customers will see.</li>
                       </ol>
                     </div>
+                    <div class="admin-beginner-steps">
+                      <strong>Folder workflow</strong>
+                      <ol class="admin-mini-steps">
+                        <li>Put fresh product photos in `assets/images/ready-for-sale/`.</li>
+                        <li>Build the product draft with those photos first.</li>
+                        <li>When the product is truly live, move or copy the chosen files into `assets/images/live-products/`.</li>
+                        <li>Use `Archive` for old or replaced photos in `assets/images/archive/`.</li>
+                      </ol>
+                    </div>
                     <div class="admin-image-preview-wrap admin-image-preview-stage">
                       <img id="admin-image-preview" src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="Selected image preview" />
                     </div>
@@ -573,7 +591,7 @@
                   <div class="admin-gallery-picker-head">
                     <div>
                       <label for="admin-inline-image-search">Quick pick from project gallery</label>
-                      <p class="admin-field-tip">Search the saved product photos here and send them straight into the draft without leaving this step.</p>
+                      <p class="admin-field-tip">Search the saved product photos here and send them straight into the draft without leaving this step. After adding files to `ready-for-sale` or `live-products`, refresh the gallery first.</p>
                     </div>
                     <div class="admin-gallery-picker-actions">
                       <input id="admin-inline-image-search" type="search" placeholder="Search product photos while editing" />
@@ -2722,8 +2740,8 @@
   <script src="assets/js/auth/admin-middleware.js?v=20260330-auth" defer></script>
   <script src="assets/js/admin-auth.js?v=20260330-auth" defer></script>
   <script src="assets/js/image-manifest.js?v=20260327-gallery"></script>
-  <script src="assets/js/app.js?v=20260403-site-marketplace" defer></script>
-  <script src="assets/js/admin.js?v=20260401-site-content-studio" defer></script>
+  <script src="assets/js/app.js?v=20260404-image-workflow" defer></script>
+  <script src="assets/js/admin.js?v=20260404-image-workflow" defer></script>
   <script src="assets/js/admin-dashboard-ui.js?v=20260331-premium" defer></script>
 </body>
 </html>
