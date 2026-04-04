@@ -47,15 +47,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       heroKicker.textContent = hero.kicker || "Welcome to SharonCraft";
     }
     if (heroTitle) {
-      heroTitle.textContent = hero.title || "Handmade beadwork you can browse easily, gift warmly, and enjoy every day.";
+      heroTitle.textContent = hero.title || "Step into handmade color.";
     }
     if (heroDescription) {
       heroDescription.textContent =
         hero.description ||
-        "Find jewelry, gifts, and home pieces made in Kenya. Start with what catches your eye, ask anything on WhatsApp, and order in a simple, personal way.";
+        "Jewelry, gifts, and home pieces made in Kenya. Browse slowly, ask what you need, and choose what feels right.";
     }
     if (heroPrimary) {
-      heroPrimary.textContent = hero.primaryLabel || "Shop Collection";
+      heroPrimary.textContent = hero.primaryLabel || "Enter Collection";
       heroPrimary.href = hero.primaryHref || "shop.html";
     }
     if (heroWhatsapp) {
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       heroImage.alt = hero.imageAlt || "Model wearing SharonCraft occasion beadwork";
     }
     if (favoriteKicker) {
-      favoriteKicker.textContent = favorite.kicker || "Client Favorite";
+      favoriteKicker.textContent = favorite.kicker || "A quiet favorite";
     }
     if (favoriteTitle) {
       favoriteTitle.textContent = favorite.title || (favoriteProduct && favoriteProduct.name) || "Client Favorite";
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       utils.setPageMetadata({
         title: "SharonCraft | Handmade Beadwork and African-Inspired Gifts in Kenya",
         description:
-          "Shop SharonCraft for handmade beaded jewelry, gift ideas, and home decor with clear WhatsApp support in Kenya.",
+          "Shop SharonCraft for handmade beadwork, warm gift ideas, and home decor with clear WhatsApp support in Kenya.",
         path: "/",
         image: hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt: hero.imageAlt || "SharonCraft handmade beadwork hero image",
