@@ -47,15 +47,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       heroKicker.textContent = hero.kicker || "Welcome to SharonCraft";
     }
     if (heroTitle) {
-      heroTitle.textContent = hero.title || "Clean, colorful handmade beadwork for happy homes and beautiful gifting.";
+      heroTitle.textContent = hero.title || "Handmade beadwork you can browse easily, gift warmly, and enjoy every day.";
     }
     if (heroDescription) {
       heroDescription.textContent =
         hero.description ||
-        "Discover bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.";
+        "Find jewelry, gifts, and home pieces made in Kenya. Start with what catches your eye, ask anything on WhatsApp, and order in a simple, personal way.";
     }
     if (heroPrimary) {
-      heroPrimary.textContent = hero.primaryLabel || "Shop Now";
+      heroPrimary.textContent = hero.primaryLabel || "Shop Collection";
       heroPrimary.href = hero.primaryHref || "shop.html";
     }
     if (heroWhatsapp) {
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       utils.setPageMetadata({
         title: "SharonCraft | Handmade Beadwork and African-Inspired Gifts in Kenya",
         description:
-          "Shop SharonCraft for handmade beaded necklaces, bracelets, decor, gift sets, and occasion pieces with easy WhatsApp ordering in Kenya.",
+          "Shop SharonCraft for handmade beaded jewelry, gift ideas, and home decor with clear WhatsApp support in Kenya.",
         path: "/",
         image: hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt: hero.imageAlt || "SharonCraft handmade beadwork hero image",

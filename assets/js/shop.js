@@ -41,13 +41,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       `).join("")}
       <article class="customer-proof-card reveal">
         <span class="section-kicker">Order Support</span>
-        <h3>WhatsApp first, confusion last</h3>
-        <p>Buyers can ask about budget, delivery area, custom colors, and gifting before they commit, which reduces hesitation and improves conversion.</p>
+        <h3>Ask before you commit</h3>
+        <p>Buyers can ask about budget, delivery area, custom colors, and gifting before they place the order.</p>
       </article>
       <article class="customer-proof-card reveal">
-        <span class="section-kicker">Payment Clarity</span>
-        <h3>M-Pesa checkout stays familiar</h3>
-        <p>The checkout flow keeps payment in a trusted local flow with STK push support, then SharonCraft confirms the order details after payment.</p>
+        <span class="section-kicker">Payment Update</span>
+        <h3>WhatsApp is the easiest route right now</h3>
+        <p>M-Pesa is taking a short break, so SharonCraft can guide shoppers to the best available payment option on WhatsApp.</p>
       </article>
     `;
   }
@@ -76,18 +76,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       ...Array.from(categorySelect.options)
         .filter((option) => option.value)
         .map((option) => ({ value: option.value, label: option.textContent }))
+        .slice(0, 4)
     ];
 
     chipContainer.innerHTML = categories
       .map(
-        (cat) => {
-          const active = cat.value === categorySelect.value;
-          return `
-          <button type="button" class="filter-chip ${active ? "is-active" : ""}" data-chip="${cat.value}" aria-pressed="${active ? "true" : "false"}">
+        (cat) => `
+          <button type="button" class="filter-chip ${cat.value === categorySelect.value ? "is-active" : ""}" data-chip="${cat.value}">
             ${cat.label}
           </button>
-        `;
-        }
+        `
       )
       .join("");
   }
@@ -97,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filters";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Refine";
     }
   }
 

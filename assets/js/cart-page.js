@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const totalNode = document.getElementById("cart-page-total");
   const clearButton = document.getElementById("cart-page-clear");
   const whatsappNode = document.getElementById("cart-page-whatsapp");
+  const mpesaWhatsappNode = document.getElementById("cart-page-mpesa-whatsapp");
   const statusNode = document.getElementById("cart-page-mpesa-status");
   const form = document.getElementById("cart-page-mpesa-form");
   const submitButton = document.getElementById("cart-page-mpesa-submit");
@@ -181,6 +182,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     if (whatsappNode) {
       whatsappNode.href = buildWhatsAppUrl();
+    }
+    if (mpesaWhatsappNode) {
+      mpesaWhatsappNode.href = buildWhatsAppUrl();
     }
     if (clearButton) {
       clearButton.disabled = items.length === 0;
@@ -366,7 +370,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
-          submitButton.textContent = "Send STK Push";
+          submitButton.textContent = "Continue";
         }
       }
     });

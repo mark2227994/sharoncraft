@@ -1864,19 +1864,15 @@
           <div class="product-card-copy">
             <p class="product-card-category">${category ? category.name : "Collection"}</p>
             <h3 class="product-name"><a href="product.html?id=${product.id}"${analyticsAttributes}>${productName}</a></h3>
-            <p class="product-card-caption">Handmade in Kenya</p>
-            ${buildProductCardReviewMarkup(product.id)}
           </div>
           <div class="product-card-price-row">
             <strong class="product-price product-price-pill">${formatCurrency(product.price)}</strong>
           </div>
           <div class="product-card-actions">
             <a class="button button-primary product-card-view" href="product.html?id=${product.id}"${analyticsAttributes}>
-              <span class="product-card-action-icon" aria-hidden="true">${viewPieceIconMarkup()}</span>
               <span class="product-card-action-label">View Piece</span>
             </a>
             <a class="product-card-order-link" href="${buildProductOrderUrl(product)}" target="_blank" rel="noreferrer" data-analytics-label="Product Card WhatsApp" data-product-id="${product.id}" data-product-name="${productName}">
-              <span class="product-card-action-icon product-card-action-icon-whatsapp" aria-hidden="true">${whatsappIconMarkup()}</span>
               <span class="product-card-action-label">Order on WhatsApp</span>
             </a>
           </div>
@@ -2453,7 +2449,7 @@
     }
     if (submitButton) {
       submitButton.disabled = false;
-      submitButton.textContent = "Send STK Push";
+      submitButton.textContent = "Continue";
     }
     stopMpesaStatusPolling();
     setMpesaCheckoutStatus("", "info");
@@ -2526,7 +2522,7 @@
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "Send STK Push";
+        submitButton.textContent = "Continue";
       }
     }
   }
@@ -2652,8 +2648,8 @@
     if (mpesaMetaNode) {
       const { itemCount } = getCartCheckoutSnapshot();
       mpesaMetaNode.textContent = itemCount
-        ? `${itemCount} item${itemCount === 1 ? "" : "s"} ready for STK push`
-        : "Add a few favorites before you pay";
+        ? `${itemCount} item${itemCount === 1 ? "" : "s"} ready for easy follow-up`
+        : "Add a few favorites before you message SharonCraft";
     }
 
     const mpesaPanel = document.getElementById("cart-mpesa-panel");
@@ -3002,7 +2998,7 @@
         <div class="cart-drawer-header">
           <div>
             <span class="section-kicker">Your Cart</span>
-            <h3>Comfortable, quick checkout</h3>
+            <h3>Review your picks and finish the order comfortably</h3>
           </div>
           <button class="cart-close-button" type="button" id="cart-close-button" aria-label="Close cart">Close</button>
         </div>
@@ -3018,45 +3014,26 @@
             <strong id="cart-total-price">${formatCurrency(0)}</strong>
           </div>
           <div class="cart-summary-actions">
-            <button id="cart-mpesa-open" class="button button-primary" type="button">Pay with M-Pesa</button>
-            <a id="cart-checkout" class="button button-secondary" href="${buildCartMessage()}" target="_blank" rel="noreferrer" data-analytics-label="Cart Checkout WhatsApp">Checkout on WhatsApp</a>
+            <button id="cart-mpesa-open" class="button button-secondary" type="button">Payment update</button>
+            <a id="cart-checkout" class="button button-primary" href="${buildCartMessage()}" target="_blank" rel="noreferrer" data-analytics-label="Cart Checkout WhatsApp">Continue on WhatsApp</a>
           </div>
           <span class="payment-status-badge">M-Pesa temporarily unavailable</span>
         </div>
         <section id="cart-mpesa-panel" class="cart-mpesa-panel" hidden>
           <div class="cart-mpesa-head">
             <div>
-              <span class="section-kicker">Quick M-Pesa</span>
-              <h4>Approve the STK prompt on your phone</h4>
+              <span class="section-kicker">Payment Update</span>
+              <h4>M-Pesa is taking a short break</h4>
             </div>
-            <strong id="cart-mpesa-meta">Add a few favorites before you pay</strong>
+            <strong id="cart-mpesa-meta">Add a few favorites before you message SharonCraft</strong>
           </div>
-          <p class="cart-mpesa-copy">Use the Safaricom number that should receive the prompt. We keep the flow simple: name, phone, area, then send.</p>
-          <form id="cart-mpesa-form" class="cart-mpesa-form" novalidate>
-            <div class="auth-grid">
-              <div class="form-group">
-                <label for="cart-mpesa-name">Full Name</label>
-                <input id="cart-mpesa-name" type="text" autocomplete="name" required />
-              </div>
-              <div class="form-group">
-                <label for="cart-mpesa-phone">Safaricom Phone</label>
-                <input id="cart-mpesa-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="07..., 01..., or 254..." required />
-              </div>
-              <div class="form-group">
-                <label for="cart-mpesa-area">Delivery Area</label>
-                <input id="cart-mpesa-area" type="text" autocomplete="address-level2" placeholder="Nairobi, Westlands, Kiambu..." required />
-              </div>
-              <div class="form-group">
-                <label for="cart-mpesa-email">Email</label>
-                <input id="cart-mpesa-email" type="email" autocomplete="email" placeholder="Optional" />
-              </div>
-            </div>
+          <p class="cart-mpesa-copy">For now, the quickest way to finish your order is on WhatsApp. SharonCraft will guide you to the best available payment option there.</p>
+          <div class="cart-mpesa-form">
             <div class="cart-mpesa-actions">
-              <button id="cart-mpesa-submit" class="button button-primary" type="submit">Send STK Push</button>
+              <a id="cart-mpesa-whatsapp" class="button button-primary" href="${buildCartMessage()}" target="_blank" rel="noreferrer">Continue on WhatsApp</a>
               <button id="cart-mpesa-cancel" class="button button-secondary" type="button">Close</button>
             </div>
-            <p id="cart-mpesa-status" class="cart-mpesa-status" hidden></p>
-          </form>
+          </div>
         </section>
       </aside>
       <a class="floating-whatsapp" href="${buildWhatsAppUrl("Hello SharonCraft, I would like to chat about your products.")}" target="_blank" rel="noreferrer" data-analytics-label="Floating WhatsApp">

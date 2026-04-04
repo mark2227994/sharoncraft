@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   category.textContent = categoryName;
   mainImage.src = productImages[0];
   mainImage.alt = productName;
-  mpesaCopy.textContent = `Add ${productName} to cart, open the cart, and pay by M-Pesa with the STK prompt sent to your phone.`;
+  mpesaCopy.textContent = `If you want ${productName} now, order on WhatsApp and SharonCraft will guide you to the best available payment option.`;
   if (stickyBar) {
     stickyBar.hidden = false;
   }
@@ -356,14 +356,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     const testimonials = (utils.data.site && Array.isArray(utils.data.site.testimonials) ? utils.data.site.testimonials : []).slice(0, 2);
     customerProof.innerHTML = `
       <article class="customer-proof-card reveal">
-        <span class="section-kicker">Delivery Confidence</span>
+        <span class="section-kicker">Before You Commit</span>
         <h3>Ask before you order</h3>
-        <p>Buyers can confirm availability, delivery area, and gifting details on WhatsApp before paying for ${productName}.</p>
+        <p>Buyers can confirm availability, delivery area, and gifting details on WhatsApp before they pay for ${productName}.</p>
       </article>
       <article class="customer-proof-card reveal">
-        <span class="section-kicker">Handmade Detail</span>
-        <h3>Every piece keeps a crafted finish</h3>
-        <p>${productName} is presented with close-up images, clear pricing, and a simple support path so first-time shoppers know what to expect.</p>
+        <span class="section-kicker">Clear Product View</span>
+        <h3>See the piece properly first</h3>
+        <p>${productName} is shown with close-up images, clear pricing, and a straightforward support path so first-time shoppers know what to expect.</p>
       </article>
       ${testimonials.map((item) => `
         <article class="customer-proof-card reveal">
