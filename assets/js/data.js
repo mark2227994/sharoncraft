@@ -59,10 +59,10 @@
     homeVisuals: {
       hero: {
         kicker: "Welcome to SharonCraft",
-        title: "Handmade beadwork you can browse easily, gift warmly, and enjoy every day.",
+        title: "Step into handmade color.",
         description:
-          "Find jewelry, gifts, and home pieces made in Kenya. Start with what catches your eye, ask anything on WhatsApp, and order in a simple, personal way.",
-        primaryLabel: "Shop Collection",
+          "Jewelry, gifts, and home pieces made in Kenya. Browse slowly, ask what you need, and choose what feels right.",
+        primaryLabel: "Enter Collection",
         primaryHref: "shop.html",
         secondaryLabel: "Our Story",
         secondaryHref: "about.html",
@@ -70,9 +70,9 @@
         imageAlt: "Model wearing SharonCraft occasion beadwork"
       },
       favorite: {
-        kicker: "Client Favorite",
+        kicker: "A quiet favorite",
         title: "Kijani Mirror Duo",
-        description: "Bright decor with a clean modern finish for bedrooms and living rooms.",
+        description: "A calm way to bring beadwork into bedrooms, living rooms, and gift corners.",
         image: "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
         imageAlt: "Beaded mirror from SharonCraft",
         productId: "kijani-mirror-duo"
