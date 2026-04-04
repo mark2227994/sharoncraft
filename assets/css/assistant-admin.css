@@ -72,6 +72,17 @@ body.assistant-admin-page {
   color: var(--assistant-muted);
 }
 
+.assistant-stage-status {
+  margin-top: -6px;
+}
+
+.assistant-stage-status code,
+.assistant-folder-rules code {
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  color: var(--assistant-text);
+}
+
 .assistant-auth-form,
 .assistant-form,
 .assistant-auth-form label,
@@ -369,6 +380,10 @@ body.assistant-admin-page {
   margin: 0;
   padding: 14px 16px 14px 34px;
   color: var(--assistant-muted);
+}
+
+.assistant-folder-rules {
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .assistant-photo-rules li + li {

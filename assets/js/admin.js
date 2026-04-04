@@ -362,6 +362,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   };
   const defaultProductSource = (window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || utils.data.products;
+  const imageWorkflowFolders = Object.freeze({
+    ready: "assets/images/ready-for-sale",
+    live: "assets/images/live-products",
+    archive: "assets/images/archive"
+  });
+  const imageWorkflowStages = Object.freeze(["ready", "live", "archive"]);
   let curatedLibraryImages = [];
   let categoryCatalog = (utils.data.categories || []).map((category) => normalizeCategory(category));
   let categoryMap = new Map(categoryCatalog.map((category) => [category.slug, category.name]));
@@ -401,7 +407,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     const rawGallery = Array.isArray(product.gallery) ? product.gallery : [];
     const noteParts = String(product.notes || "").split("|");
     const categoryFromNotes = String(noteParts[0] || "").trim();
-    const sourceFromNotes = String(noteParts[1] || "").trim();
+    const sourceFromNotes = String(
+      noteParts.find(function (part, partIndex) {
+        return partIndex > 0 && !/^stage:/i.test(String(part || "").trim());
+      }) || ""
+    ).trim();
+    const imageStageFromNotes = getImageStageFromNotes(noteParts);
     const material = String(product.material || "").trim().toLowerCase();
     const fallbackCategory =
       categoryFromNotes ||
@@ -435,6 +446,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       description: product.description || product.shortDescription || product.story || "",
       details: Array.isArray(product.details) ? product.details : Array.isArray(product.specs) ? product.specs : [],
       images: gallery,
+      imageStage: normalizeImageStage(product.imageStage || imageStageFromNotes || inferImageStageFromImages(gallery)) || "live",
       analytics: product.analytics || defaultAnalytics(product, index)
     };
   }
@@ -961,6 +973,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const reservedQtyInput = document.getElementById("admin-reserved-qty");
   const badgeInput = document.getElementById("admin-badge");
   const imageInput = document.getElementById("admin-image");
+  const imageStageInput = document.getElementById("admin-image-stage");
+  const imageStageStatus = document.getElementById("admin-image-stage-status");
   const galleryInput = document.getElementById("admin-gallery-images");
   const imageFileInput = document.getElementById("admin-image-file");
   const imagePreview = document.getElementById("admin-image-preview");
@@ -1604,8 +1618,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeTextField("siteContent.shop.hero.kicker", "Shop hero kicker", "Shop SharonCraft"),
         makeTextField("siteContent.shop.hero.title", "Shop hero title", "Find beadwork you can scan quickly..."),
         makeTextareaField("siteContent.shop.hero.description", "Shop hero description", "Browse the collection first..."),
-        makeTextField("siteContent.shop.refine.kicker", "Refine kicker", "Browse & refine"),
-        makeTextField("siteContent.shop.refine.title", "Refine title", "Sort, price, and category when you need them."),
+        makeTextField("siteContent.shop.refine.kicker", "Refine kicker", "Browse & Refine"),
+        makeTextField("siteContent.shop.refine.title", "Refine title", "See the pieces first. Fine-tune only when needed."),
         makeTextField("siteContent.shop.guides.kicker", "Shop guides kicker", "Shopping Guides"),
         makeTextField("siteContent.shop.guides.title", "Shop guides title", "Helpful articles for shoppers who are still deciding."),
         makeTextareaField("siteContent.shop.guides.description", "Shop guides description", "These guides support question-style searches..."),
@@ -1721,6 +1735,97 @@ document.addEventListener("DOMContentLoaded", async function () {
     return (path || "").trim();
   }
 
+  function normalizeImageStage(stage) {
+    const normalized = String(stage || "").trim().toLowerCase();
+    return imageWorkflowStages.includes(normalized) ? normalized : "";
+  }
+
+  function getImageStageLabel(stage) {
+    const normalized = normalizeImageStage(stage);
+    if (normalized === "archive") {
+      return "Archive";
+    }
+    if (normalized === "live") {
+      return "Live in market";
+    }
+    return "Ready for sale";
+  }
+
+  function getImageStageFolder(stage) {
+    const normalized = normalizeImageStage(stage) || "ready";
+    return imageWorkflowFolders[normalized] || imageWorkflowFolders.ready;
+  }
+
+  function getImageStageFromNotes(noteParts) {
+    const parts = Array.isArray(noteParts) ? noteParts : String(noteParts || "").split("|");
+    const stageEntry = parts.find((part) => /^stage:/i.test(String(part || "").trim()));
+    return normalizeImageStage(String(stageEntry || "").replace(/^stage:/i, ""));
+  }
+
+  function inferImageStageFromPath(path) {
+    const normalized = cleanImagePath(path).toLowerCase();
+    if (!normalized) {
+      return "ready";
+    }
+    if (normalized.includes("/ready-for-sale/")) {
+      return "ready";
+    }
+    if (normalized.includes("/archive/")) {
+      return "archive";
+    }
+    if (normalized.includes("/live-products/")) {
+      return "live";
+    }
+    if (
+      normalized.startsWith("http://") ||
+      normalized.startsWith("https://") ||
+      normalized.startsWith("assets/images/")
+    ) {
+      return "live";
+    }
+    if (normalized.startsWith("data:") || normalized.startsWith("blob:")) {
+      return "ready";
+    }
+    return "live";
+  }
+
+  function inferImageStageFromImages(images) {
+    const firstImage = Array.isArray(images) ? images.find(Boolean) : "";
+    return normalizeImageStage(inferImageStageFromPath(firstImage)) || "live";
+  }
+
+  function isManagedWorkflowImage(path) {
+    const normalized = cleanImagePath(path).toLowerCase();
+    return (
+      normalized.includes("/ready-for-sale/") ||
+      normalized.includes("/live-products/") ||
+      normalized.includes("/archive/")
+    );
+  }
+
+  function rewriteImagePathForStage(path, stage) {
+    const normalizedPath = cleanImagePath(path);
+    const normalizedStage = normalizeImageStage(stage) || "ready";
+    if (!normalizedPath || !isManagedWorkflowImage(normalizedPath)) {
+      return normalizedPath;
+    }
+    const fileName = normalizedPath.split("/").pop();
+    return fileName ? `${getImageStageFolder(normalizedStage)}/${fileName}` : normalizedPath;
+  }
+
+  function rewriteImagesForStage(images, stage) {
+    return dedupeImages((Array.isArray(images) ? images : []).map((image) => rewriteImagePathForStage(image, stage)));
+  }
+
+  function buildProductWorkflowNotes(category, source, imageStage) {
+    const parts = [String(category || "").trim(), String(source || "").trim()].filter(Boolean);
+    const normalizedStage = normalizeImageStage(imageStage);
+    if (normalizedStage) {
+      parts.push(`stage:${normalizedStage}`);
+    }
+    return parts.join("|");
+  }
+
   function escapeHtml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -1763,6 +1868,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               <img src="${escapeHtml(image)}" alt="${escapeHtml(getImageLabel(image))}" loading="lazy" />
               <div class="admin-library-copy">
                 <span>${escapeHtml(getImageLabel(image))}</span>
+                <small class="admin-library-stage" data-stage="${escapeHtml(inferImageStageFromPath(image))}">${escapeHtml(getImageStageLabel(inferImageStageFromPath(image)))}</small>
                 <div class="admin-library-actions">
                   <button type="button" data-action="main" data-image="${escapeHtml(image)}">Use as Main</button>
                   <button type="button" data-action="gallery" data-image="${escapeHtml(image)}">Add to Gallery</button>
@@ -2793,6 +2899,68 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join(", ");
   }
 
+  function getSelectedImageStage() {
+    return normalizeImageStage(imageStageInput && imageStageInput.value) || "ready";
+  }
+
+  function updateImageStageStatus(message) {
+    if (!imageStageStatus) {
+      return;
+    }
+
+    const selectedStage = getSelectedImageStage();
+    const selectedFolder = getImageStageFolder(selectedStage);
+    const mainImage = cleanImagePath(imageInput && imageInput.value);
+    const detectedStage = normalizeImageStage(inferImageStageFromPath(mainImage)) || selectedStage;
+
+    if (message) {
+      imageStageStatus.textContent = message;
+      return;
+    }
+
+    if (!mainImage) {
+      imageStageStatus.textContent = `Fresh product photos usually begin in ${imageWorkflowFolders.ready}.`;
+      return;
+    }
+
+    if (mainImage.startsWith("data:") || mainImage.startsWith("blob:")) {
+      imageStageStatus.textContent = "This is still a browser-only preview image. Save a real project path when you are ready to organize it into the folders.";
+      return;
+    }
+
+    if (isManagedWorkflowImage(mainImage) && detectedStage !== selectedStage) {
+      imageStageStatus.textContent = `This draft is marked ${getImageStageLabel(selectedStage)}, but the main image still points to ${getImageStageFolder(detectedStage)}. Move or copy the file into ${selectedFolder} before publishing if needed.`;
+      return;
+    }
+
+    if (isManagedWorkflowImage(mainImage)) {
+      imageStageStatus.textContent = `This draft is using the ${getImageStageLabel(selectedStage).toLowerCase()} folder: ${selectedFolder}.`;
+      return;
+    }
+
+    imageStageStatus.textContent = `This image is outside the staged folders. The product will still work, but the clearest workflow is ${imageWorkflowFolders.ready} first, then ${imageWorkflowFolders.live} when the product is in market.`;
+  }
+
+  function syncImageStagePaths(options) {
+    const settings = options || {};
+    const selectedStage = getSelectedImageStage();
+    const currentImages = getFormGalleryImages();
+    const nextImages = rewriteImagesForStage(currentImages, selectedStage);
+    const changed = JSON.stringify(currentImages) !== JSON.stringify(nextImages);
+
+    if (changed && nextImages.length) {
+      imageInput.value = toFormImageValue(nextImages[0]);
+      temporaryMainPreviewSrc = "";
+      syncGalleryTextarea(nextImages);
+    }
+
+    updateImageStageStatus(
+      changed
+        ? `Image paths were updated to ${getImageStageFolder(selectedStage)}. Move or copy the matching files there before publishing if they still live in another stage folder.`
+        : settings.message
+    );
+  }
+
   function applyGalleryImageToDraft(image, action) {
     const normalizedImage = cleanImagePath(image);
     if (!normalizedImage) {
@@ -3510,7 +3678,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         soldOut: hasTrackedStock ? reservedStock >= trackedStock : false,
         spotlightUntil: product.featured ? new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString() : "",
         spotlightText: product.badge || "Featured",
-        notes: `${product.category || ""}|${product.source || ""}`,
+        notes: buildProductWorkflowNotes(
+          product.category || "",
+          product.source || "",
+          product.imageStage || inferImageStageFromImages(product.images)
+        ),
         updatedAt: new Date().toISOString(),
         newUntil: product.newArrival ? new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString() : "",
         sortOrder: index,
@@ -5450,6 +5622,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .join("");
     imagePreview.src = previewSource;
     renderSelectedGallery();
+    updateImageStageStatus();
   }
 
   function renderList() {
@@ -5555,6 +5728,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const categoryName = categoryMap.get(product.category) || product.category;
         const statusLabel = product.featured ? "Featured" : "Standard";
         const freshnessLabel = product.newArrival ? "New Arrival" : "Catalog";
+        const imageStage = normalizeImageStage(product.imageStage || inferImageStageFromImages(product.images)) || "live";
         const description = String(product.shortDescription || product.description || "No description yet.")
           .trim()
           .slice(0, 120);
@@ -5577,6 +5751,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               <div class="admin-item-meta-row">
                 <span class="admin-item-chip">${statusLabel}</span>
                 <span class="admin-item-chip">${freshnessLabel}</span>
+                <span class="admin-item-chip" data-stage="${imageStage}">${getImageStageLabel(imageStage)}</span>
                 <span class="admin-item-chip">Profit ${formatPrice(getTotalProfit(product))}</span>
               </div>
             </div>
@@ -7364,6 +7539,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     featuredInput.checked = false;
     newInput.checked = true;
     imageInput.value = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
+    if (imageStageInput) {
+      imageStageInput.value = "ready";
+    }
     galleryInput.value = "";
     temporaryMainPreviewSrc = "";
     renderDraftPreview();
@@ -7384,6 +7562,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     reservedQtyInput.value = product.reservedQty || "";
     badgeInput.value = product.badge || "";
     imageInput.value = toFormImageValue(product.images[0]);
+    if (imageStageInput) {
+      imageStageInput.value = normalizeImageStage(product.imageStage || inferImageStageFromImages(product.images)) || "live";
+    }
     syncGalleryTextarea(product.images);
     descriptionInput.value = product.description;
     detailsInput.value = product.details.join(", ");
@@ -7420,6 +7601,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       syncGalleryTextarea(images);
       temporaryMainPreviewSrc = uploadedSource;
       renderDraftPreview();
+      updateImageStageStatus("This uploaded file is still a browser-only draft. Save a real project path inside ready-for-sale or live-products when you want it tracked by folder.");
       setStatus(`${file.name} uploaded and saved in this browser, so product cards can show it immediately.`);
       imageFileInput.value = "";
     });
@@ -7478,6 +7660,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       input.addEventListener("change", renderDraftPreview);
     }
   );
+
+  if (imageStageInput) {
+    imageStageInput.addEventListener("change", function () {
+      syncImageStagePaths();
+      renderDraftPreview();
+      setStatus(`Photo stage set to ${getImageStageLabel(getSelectedImageStage())}.`);
+    });
+  }
 
   // Visual category chip selector
   document.querySelectorAll(".admin-category-chip").forEach((chip) => {
@@ -9191,7 +9381,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean);
-    const images = getFormGalleryImages();
+    const imageStage = getSelectedImageStage();
+    const images = rewriteImagesForStage(getFormGalleryImages(), imageStage);
     const existingAnalytics = editingId ? (catalog.find((product) => product.id === editingId) || {}).analytics : null;
 
     const payload = normalizeProduct(
@@ -9213,6 +9404,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         description: descriptionInput.value.trim(),
         details,
         images,
+        imageStage,
+        notes: buildProductWorkflowNotes(categoryInput.value, sourceInput.value, imageStage),
         analytics: existingAnalytics || defaultAnalytics({ price: Number(priceInput.value), featured: featuredInput.checked, newArrival: newInput.checked }, catalog.length)
       },
       catalog.length
