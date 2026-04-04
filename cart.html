@@ -22,8 +22,8 @@
       <div class="container">
         <div class="page-hero-copy">
           <span class="section-kicker">Your Cart</span>
-          <h1>One calm place to review, update, and pay.</h1>
-          <p>See every SharonCraft piece clearly, adjust quantities comfortably, then choose M-Pesa or WhatsApp checkout.</p>
+          <h1>One clear place to review your pieces and finish the order comfortably.</h1>
+          <p>Check your selections, adjust quantities, and use WhatsApp checkout while M-Pesa comes back.</p>
         </div>
       </div>
     </section>
@@ -53,7 +53,7 @@
         <aside class="cart-page-side">
           <article class="cart-page-card cart-page-summary-card">
             <span class="section-kicker">Summary</span>
-            <h2>Checkout overview</h2>
+            <h2>Your order at a glance</h2>
             <div class="cart-page-summary-row">
               <span>Items</span>
               <strong id="cart-page-summary-count">0</strong>
@@ -69,32 +69,17 @@
           </article>
 
           <article class="cart-page-card cart-page-mpesa-card">
-            <span class="section-kicker">Quick M-Pesa</span>
-            <h2>Approve the prompt on your phone</h2>
+            <span class="section-kicker">Payment Update</span>
+            <h2>M-Pesa is taking a short break</h2>
             <span class="payment-status-badge">M-Pesa temporarily unavailable</span>
-            <p>Use the Safaricom number that should receive the STK prompt. Keep it simple: name, phone, area, then send.</p>
-            <form id="cart-page-mpesa-form" class="cart-page-mpesa-form" novalidate>
-              <div class="auth-grid">
-                <div class="form-group">
-                  <label for="cart-page-name">Full Name</label>
-                  <input id="cart-page-name" type="text" autocomplete="name" required />
-                </div>
-                <div class="form-group">
-                  <label for="cart-page-phone">Safaricom Phone</label>
-                  <input id="cart-page-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="07..., 01..., or 254..." required />
-                </div>
-                <div class="form-group">
-                  <label for="cart-page-area">Delivery Area</label>
-                  <input id="cart-page-area" type="text" autocomplete="address-level2" placeholder="Nairobi, Westlands, Kiambu..." required />
-                </div>
-                <div class="form-group">
-                  <label for="cart-page-email">Email</label>
-                  <input id="cart-page-email" type="email" autocomplete="email" placeholder="Optional" />
-                </div>
+            <p>For now, the quickest way to finish your order is on WhatsApp. We will guide you to the best available payment option there.</p>
+            <div class="cart-page-mpesa-form">
+              <p>Use WhatsApp to share your cart and delivery area, then SharonCraft will confirm the next step clearly.</p>
+              <div class="account-actions">
+                <a id="cart-page-mpesa-whatsapp" class="button button-primary" href="https://wa.me/254112222572?text=Hello%20SharonCraft%2C%20I%20would%20like%20help%20finishing%20my%20order." target="_blank" rel="noreferrer">Continue On WhatsApp</a>
+                <a class="button button-secondary" href="shop.html">Add More Pieces</a>
               </div>
-              <button id="cart-page-mpesa-submit" class="button button-primary" type="submit">Send STK Push</button>
-              <p id="cart-page-mpesa-status" class="cart-page-mpesa-status" hidden></p>
-            </form>
+            </div>
           </article>
         </aside>
       </div>

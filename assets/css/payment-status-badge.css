@@ -5,13 +5,13 @@
   min-height: 32px;
   margin-top: 0.7rem;
   padding: 0.38rem 0.8rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(217, 108, 72, 0.12), rgba(242, 201, 76, 0.16));
+  border-radius: 10px;
+  background: rgba(255, 247, 239, 0.96);
   border: 1px solid rgba(217, 108, 72, 0.18);
   color: var(--terracotta-dark, #9b4f34);
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 

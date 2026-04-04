@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     managePanel.hidden = !open;
     if (editToggleButton) {
-      editToggleButton.textContent = open ? "Hide Edit Form" : "Update Saved Details";
+      editToggleButton.textContent = open ? "Close Edit Form" : "Edit Saved Details";
     }
   }
 
@@ -105,13 +105,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const profile = await userController.getCustomerProfile();
     renderSummary(user, profile);
-    setStatus(statusMessage || "You are signed in. Your details stay saved privately for future orders.", "success");
+    setStatus(statusMessage || "You are signed in. Your details stay saved privately for when you come back.", "success");
   }
 
   if (utils && typeof utils.setPageMetadata === "function") {
     utils.setPageMetadata({
-      title: "SharonCraft Account | Login or Register",
-      description: "Create or sign in to your SharonCraft customer account and keep your details ready for future orders.",
+      title: "SharonCraft Account | Sign In Or Register",
+      description: "Create or sign in to your SharonCraft account and keep your details ready for the next order.",
       path: "/account.html",
       image: "assets/images/sharoncraft-logo-transparent.webp",
       type: "website",
@@ -169,14 +169,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    setStatus("Creating your SharonCraft account...");
+    setStatus("Creating your account...");
 
     try {
       const result = await userController.signUpCustomer(profile, password);
       registerForm.reset();
 
       if (result && result.session && result.user) {
-        await loadSignedInState("Your account has been created and your details were saved.");
+        await loadSignedInState("Your account is ready and your details have been saved.");
         return;
       }
 
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    setStatus("Saving your profile...");
+    setStatus("Saving your details...");
 
     try {
       const savedProfile = await userController.saveCustomerProfile(profile);
@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (user) {
         renderSummary(user, savedProfile);
       }
-      setStatus("Your customer details are saved privately.", "success");
+      setStatus("Your details are saved privately.", "success");
     } catch (error) {
       setStatus((error && error.message) || "We could not save your profile right now.", "error");
     }
@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         await userController.signOut();
         setManagePanel(false);
         switchPanel("login");
-        setStatus("You are now logged out.");
+        setStatus("You are now signed out.");
       } catch (error) {
         setStatus((error && error.message) || "We could not log you out cleanly.", "error");
       }

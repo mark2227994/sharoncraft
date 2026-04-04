@@ -31,9 +31,9 @@
       },
       promo: "Free Nairobi delivery for orders above KES 3,500 this week.",
       mpesaSteps: [
-        "Add your favorite pieces to cart and tap Pay with M-Pesa.",
-        "Enter your name, Safaricom phone number, and delivery area.",
-        "Approve the STK prompt on your phone, then wait for SharonCraft to confirm your order."
+        "Add your favorite pieces to cart and review them in one calm place.",
+        "Use WhatsApp if you want help with delivery, gifting, or custom details.",
+        "SharonCraft will guide you through the best available payment option while M-Pesa comes back."
       ],
       socials: [
         { label: "WhatsApp", url: "https://wa.me/254112222572?text=Hello%20SharonCraft%2C%20I%20would%20like%20to%20shop%20your%20beadwork." },
@@ -59,10 +59,10 @@
     homeVisuals: {
       hero: {
         kicker: "Welcome to SharonCraft",
-        title: "Clean, colorful handmade beadwork for happy homes and beautiful gifting.",
+        title: "Handmade beadwork you can browse easily, gift warmly, and enjoy every day.",
         description:
-          "Discover earrings, bracelets, necklaces, decor, and occasion sets made with a bright East African spirit. Ordering is simple, mobile-friendly, and ready for WhatsApp and M-Pesa.",
-        primaryLabel: "Shop Now",
+          "Find jewelry, gifts, and home pieces made in Kenya. Start with what catches your eye, ask anything on WhatsApp, and order in a simple, personal way.",
+        primaryLabel: "Shop Collection",
         primaryHref: "shop.html",
         secondaryLabel: "Our Story",
         secondaryHref: "about.html",
