@@ -363,8 +363,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
   const defaultProductSource = (window.SharonCraftDefaultData && window.SharonCraftDefaultData.products) || utils.data.products;
   const imageWorkflowFolders = Object.freeze({
-    ready: "assets/images/ready-for-sale",
-    live: "assets/images/live-products",
+    ready: "assets/images/ready",
+    live: "assets/images/live",
     archive: "assets/images/archive"
   });
   const imageWorkflowStages = Object.freeze(["ready", "live", "archive"]);
@@ -1767,13 +1767,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!normalized) {
       return "ready";
     }
-    if (normalized.includes("/ready-for-sale/")) {
+    if (normalized.includes("/ready/") || normalized.includes("/ready-for-sale/")) {
       return "ready";
     }
     if (normalized.includes("/archive/")) {
       return "archive";
     }
-    if (normalized.includes("/live-products/")) {
+    if (normalized.includes("/live/") || normalized.includes("/live-products/")) {
       return "live";
     }
     if (
@@ -1797,7 +1797,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   function isManagedWorkflowImage(path) {
     const normalized = cleanImagePath(path).toLowerCase();
     return (
+      normalized.includes("/ready/") ||
       normalized.includes("/ready-for-sale/") ||
+      normalized.includes("/live/") ||
       normalized.includes("/live-products/") ||
       normalized.includes("/archive/")
     );
@@ -7601,7 +7603,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       syncGalleryTextarea(images);
       temporaryMainPreviewSrc = uploadedSource;
       renderDraftPreview();
-      updateImageStageStatus("This uploaded file is still a browser-only draft. Save a real project path inside ready-for-sale or live-products when you want it tracked by folder.");
+      updateImageStageStatus("This uploaded file is still a browser-only draft. Save a real project path inside ready or live when you want it tracked by folder.");
       setStatus(`${file.name} uploaded and saved in this browser, so product cards can show it immediately.`);
       imageFileInput.value = "";
     });
