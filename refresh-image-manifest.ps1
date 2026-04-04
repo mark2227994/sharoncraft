@@ -14,14 +14,16 @@ if (-not (Test-Path $imagesRoot)) {
   throw "Could not find image folder at $imagesRoot"
 }
 
-$images = Get-ChildItem -Path $imagesRoot -File |
+$images = Get-ChildItem -Path $imagesRoot -File -Recurse |
   Where-Object {
     $allowedExtensions -contains $_.Extension.ToLowerInvariant() -and
-    $_.Name -notmatch $excludePattern
+    $_.Name -notmatch $excludePattern -and
+    $_.Name -ne ".gitkeep"
   } |
   Sort-Object Name |
   ForEach-Object {
-    "assets/images/$($_.Name)"
+    $relativePath = $_.FullName.Substring($imagesRoot.Length).TrimStart('\', '/').Replace('\', '/')
+    "assets/images/$relativePath"
   }
 
 $manifestLines = @("window.SharonCraftImageManifest = [")

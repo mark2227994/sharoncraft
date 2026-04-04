@@ -57,8 +57,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     ? window.SharonCraftData.categories
     : [];
   const imageWorkflowFolders = Object.freeze({
-    ready: "assets/images/ready-for-sale",
-    live: "assets/images/live-products",
+    ready: "assets/images/ready",
+    live: "assets/images/live",
     archive: "assets/images/archive"
   });
   const imageWorkflowStages = Object.freeze(["ready", "live", "archive"]);
@@ -133,13 +133,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!normalized) {
       return "ready";
     }
-    if (normalized.includes("/ready-for-sale/")) {
+    if (normalized.includes("/ready/") || normalized.includes("/ready-for-sale/")) {
       return "ready";
     }
     if (normalized.includes("/archive/")) {
       return "archive";
     }
-    if (normalized.includes("/live-products/")) {
+    if (normalized.includes("/live/") || normalized.includes("/live-products/")) {
       return "live";
     }
     if (
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function isManagedWorkflowImage(path) {
     const normalized = normalizeText(path).toLowerCase();
-    return normalized.includes("/ready-for-sale/") || normalized.includes("/live-products/") || normalized.includes("/archive/");
+    return normalized.includes("/ready/") || normalized.includes("/ready-for-sale/") || normalized.includes("/live/") || normalized.includes("/live-products/") || normalized.includes("/archive/");
   }
 
   function rewriteImagePathForStage(path, stage) {
