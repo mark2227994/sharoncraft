@@ -3021,6 +3021,7 @@
             <button id="cart-mpesa-open" class="button button-primary" type="button">Pay with M-Pesa</button>
             <a id="cart-checkout" class="button button-secondary" href="${buildCartMessage()}" target="_blank" rel="noreferrer" data-analytics-label="Cart Checkout WhatsApp">Checkout on WhatsApp</a>
           </div>
+          <span class="payment-status-badge">M-Pesa temporarily unavailable</span>
         </div>
         <section id="cart-mpesa-panel" class="cart-mpesa-panel" hidden>
           <div class="cart-mpesa-head">
