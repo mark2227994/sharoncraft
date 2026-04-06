@@ -4,7 +4,7 @@ SharonCraft is a mobile-friendly handcrafted beadwork storefront built as a stat
 
 ## What this repo contains
 
-- Public storefront pages like `index.html`, `shop.html`, `product.html`, `categories.html`, and `contact.html`
+- Public storefront pages like `index.html`, `shop.html`, `product.html`, and `contact.html`
 - Customer account and auth pages like `account.html` and `login.html`
 - Admin publishing flow in `admin.html`
 - Shared JS and CSS in `assets/js` and `assets/css`

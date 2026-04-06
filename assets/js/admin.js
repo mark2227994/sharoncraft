@@ -982,6 +982,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const priceInput = document.getElementById("admin-price");
   const autoPriceInput = document.getElementById("admin-auto-price");
   const priceFormulaNote = document.getElementById("admin-price-formula");
+  const calculatedPriceInput = document.getElementById("admin-calculated-price");
   const momPriceInput = document.getElementById("admin-mom-price");
   const deliveryChargeInput = document.getElementById("admin-delivery-charge");
   const deliveryCostInput = document.getElementById("admin-delivery-cost");
@@ -2586,6 +2587,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     const settings = getPricingSettings();
     const basePrice = getDraftBasePriceValue();
     const sellingPrice = getDraftSellingPrice();
+
+    if (calculatedPriceInput) {
+      calculatedPriceInput.value = formatPrice(sellingPrice);
+    }
 
     if (autoPriceInput && autoPriceInput.checked && settings.enabled) {
       priceFormulaNote.textContent = `Website price = (${formatPrice(basePrice)} + ${formatPrice(settings.deliveryFee)} delivery + ${formatPrice(settings.packagingFee)} packaging) x ${settings.multiplier} = ${formatPrice(sellingPrice)}.`;
