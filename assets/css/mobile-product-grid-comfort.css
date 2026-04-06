@@ -23,7 +23,7 @@
   body[data-page="home"] .product-card-media img,
   body[data-page="shop"] .product-card-media img,
   body[data-page="product"] .product-card-media img {
-    aspect-ratio: 1 / 1.12;
+    aspect-ratio: 1 / 1;
   }
 
   body[data-page="home"] .product-card-body,
@@ -58,6 +58,13 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: 2.5em;
+  }
+
+  body[data-page="home"] .product-name a,
+  body[data-page="shop"] .product-name a,
+  body[data-page="product"] .product-name a {
+    min-height: 2.5em;
+    max-height: 2.5em;
   }
 
   body[data-page="home"] .product-price-pill,
