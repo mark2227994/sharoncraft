@@ -11,6 +11,8 @@
   const analyticsSessionKey = "sharoncraft-analytics-session-id";
   const analyticsAcquisitionKey = "sharoncraft-analytics-acquisition";
   const analyticsDebugKey = "sharoncraft-ga-debug";
+  const cookieConsentStorageKey = "sharoncraft-cookie-consent";
+  const cookieConsentVersion = "2026-04-07";
   const approvedReviewsCacheKey = "sharoncraft-approved-reviews-cache";
   const storageConfig = window.SharonCraftStorage || {};
   const siteContentSettingsKey = storageConfig.siteContentSettingsKey || "sharoncraft-site-content";
@@ -40,11 +42,347 @@
     lastGtagHit: "",
     lastGtagHitAt: ""
   };
+  let cookieConsent = null;
+  const cookieConsentState = {
+    root: null,
+    banner: null,
+    dialog: null,
+    overlay: null,
+    analyticsToggle: null,
+    status: null,
+    dialogOpen: false
+  };
   let siteContentOverrides = null;
   const pricingUtils = window.SharonCraftPricing || {};
 
   function normalizeText(value) {
     return String(value || "").trim();
+  }
+
+  function getDefaultCookieConsent() {
+    return {
+      version: cookieConsentVersion,
+      essential: true,
+      analytics: null,
+      updatedAt: ""
+    };
+  }
+
+  function normalizeCookieConsent(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const analytics = source.analytics === true ? true : source.analytics === false ? false : null;
+    return {
+      version: normalizeText(source.version) || cookieConsentVersion,
+      essential: true,
+      analytics,
+      updatedAt: normalizeText(source.updatedAt)
+    };
+  }
+
+  function getCookieConsent() {
+    if (cookieConsent) {
+      return cookieConsent;
+    }
+
+    try {
+      cookieConsent = normalizeCookieConsent(JSON.parse(window.localStorage.getItem(cookieConsentStorageKey) || "null"));
+      return cookieConsent;
+    } catch (error) {
+      cookieConsent = getDefaultCookieConsent();
+      return cookieConsent;
+    }
+  }
+
+  function hasCookieConsentDecision() {
+    return typeof getCookieConsent().analytics === "boolean";
+  }
+
+  function isAnalyticsConsentGranted() {
+    return getCookieConsent().analytics === true;
+  }
+
+  function persistCookieConsent(nextConsent) {
+    cookieConsent = normalizeCookieConsent({
+      ...nextConsent,
+      version: cookieConsentVersion,
+      updatedAt: new Date().toISOString()
+    });
+
+    try {
+      window.localStorage.setItem(cookieConsentStorageKey, JSON.stringify(cookieConsent));
+    } catch (error) {
+      console.warn("Unable to store cookie consent locally.", error);
+    }
+
+    return cookieConsent;
+  }
+
+  function removeStorageKey(storageArea, key) {
+    try {
+      storageArea.removeItem(key);
+    } catch (error) {
+      // Ignore browser storage limitations.
+    }
+  }
+
+  function clearAnalyticsCookies() {
+    const cookiePairs = normalizeText(document.cookie)
+      .split(";")
+      .map((entry) => normalizeText(entry.split("=")[0]))
+      .filter((name) => /^_ga($|_)/i.test(name) || /^_gid$/i.test(name) || /^_gat/i.test(name) || /^_gac_/i.test(name));
+    const cookieNames = cookiePairs.filter((name, index) => cookiePairs.indexOf(name) === index);
+    const hostname = normalizeText(window.location.hostname);
+    const domainCandidates = ["", hostname, hostname ? `.${hostname}` : ""].filter((value, index, list) => value || index === 0).filter((value, index, list) => list.indexOf(value) === index);
+
+    cookieNames.forEach((name) => {
+      domainCandidates.forEach((domain) => {
+        const domainSegment = domain ? `; domain=${domain}` : "";
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainSegment}`;
+      });
+    });
+  }
+
+  function clearAnalyticsLocalState() {
+    removeStorageKey(window.localStorage, analyticsStorageKey);
+    removeStorageKey(window.localStorage, analyticsQueueStorageKey);
+    removeStorageKey(window.localStorage, analyticsVisitorKey);
+    removeStorageKey(window.sessionStorage, analyticsSessionKey);
+    removeStorageKey(window.sessionStorage, analyticsAcquisitionKey);
+    recentAnalyticsInteractions.clear();
+    recentListViews.clear();
+    clearAnalyticsCookies();
+  }
+
+  function setGa4Disabled(disabled) {
+    const config = getAnalyticsConfig();
+    if (config.ga4MeasurementId) {
+      window[`ga-disable-${config.ga4MeasurementId}`] = !!disabled;
+    }
+  }
+
+  function syncAnalyticsConsentWithGoogle() {
+    const granted = isAnalyticsConsentGranted();
+    setGa4Disabled(!granted);
+
+    if (typeof window.gtag === "function") {
+      window.gtag("consent", "update", {
+        analytics_storage: granted ? "granted" : "denied"
+      });
+    }
+  }
+
+  function closeCookieSettings() {
+    cookieConsentState.dialogOpen = false;
+    if (document.body) {
+      document.body.classList.remove("cookie-consent-dialog-open");
+    }
+    updateCookieConsentUi();
+  }
+
+  function openCookieSettings() {
+    ensureCookieConsentUi();
+    cookieConsentState.dialogOpen = true;
+    if (document.body) {
+      document.body.classList.add("cookie-consent-dialog-open");
+    }
+    updateCookieConsentUi();
+  }
+
+  function getCookieConsentStatusText(consent) {
+    if (consent.analytics === true) {
+      return "Analytics is currently on. Essential storage stays on to support cart, checkout, sign-in, and saved preferences.";
+    }
+
+    if (consent.analytics === false) {
+      return "Analytics is currently off. Essential storage stays on to support cart, checkout, sign-in, and saved preferences.";
+    }
+
+    return "No analytics choice has been saved yet. Essential storage stays on because the shop needs it to work properly.";
+  }
+
+  function updateCookieConsentUi() {
+    if (!cookieConsentState.root) {
+      return;
+    }
+
+    const consent = getCookieConsent();
+    const undecided = !hasCookieConsentDecision();
+    const dialogOpen = !!cookieConsentState.dialogOpen;
+
+    if (cookieConsentState.banner) {
+      cookieConsentState.banner.hidden = !undecided || dialogOpen;
+    }
+
+    if (cookieConsentState.overlay) {
+      cookieConsentState.overlay.hidden = !dialogOpen;
+    }
+
+    if (cookieConsentState.dialog) {
+      cookieConsentState.dialog.hidden = !dialogOpen;
+    }
+
+    if (cookieConsentState.analyticsToggle) {
+      cookieConsentState.analyticsToggle.checked = consent.analytics === true;
+    }
+
+    if (cookieConsentState.status) {
+      cookieConsentState.status.textContent = getCookieConsentStatusText(consent);
+    }
+  }
+
+  function bindCookieSettingsTriggers(scope) {
+    if (!scope || typeof scope.querySelectorAll !== "function") {
+      return;
+    }
+
+    scope.querySelectorAll("[data-open-cookie-settings]").forEach((button) => {
+      if (button.dataset.cookieSettingsBound === "true") {
+        return;
+      }
+
+      button.dataset.cookieSettingsBound = "true";
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        openCookieSettings();
+      });
+    });
+  }
+
+  function applyCookieConsentChoice(analyticsEnabled) {
+    const previousConsent = getCookieConsent().analytics;
+    persistCookieConsent({ analytics: !!analyticsEnabled });
+    syncAnalyticsConsentWithGoogle();
+
+    if (!analyticsEnabled) {
+      clearAnalyticsLocalState();
+      analyticsDebugState.note = "Analytics is off until a visitor opts in.";
+    } else if (previousConsent !== true) {
+      analyticsDebugState.note = "Analytics was enabled from the consent banner.";
+    }
+
+    closeCookieSettings();
+    updateAnalyticsDebugPanel();
+
+    if (!analyticsEnabled) {
+      return;
+    }
+
+    scheduleAnalyticsFlush(200);
+
+    if (previousConsent !== true) {
+      trackEvent("page_view", {
+        page_title: document.title,
+        page_location: window.location.href
+      });
+    }
+  }
+
+  function ensureCookieConsentUi() {
+    if (!document.body) {
+      return;
+    }
+
+    if (cookieConsentState.root) {
+      updateCookieConsentUi();
+      return;
+    }
+
+    const root = document.createElement("div");
+    root.className = "cookie-consent-root";
+    root.innerHTML = `
+      <section class="cookie-consent-banner" aria-label="Cookie consent" hidden>
+        <div class="cookie-consent-copy">
+          <span class="section-kicker">Privacy choices</span>
+          <h2>Choose how SharonCraft uses cookies and browser storage.</h2>
+          <p>Essential storage keeps your cart, checkout, sign-in, and saved preferences working. Analytics helps us understand which pages and products are useful, but it stays off until you allow it.</p>
+        </div>
+        <div class="cookie-consent-actions">
+          <button class="button button-secondary" type="button" data-cookie-consent-action="reject">Reject non-essential</button>
+          <button class="button button-secondary" type="button" data-cookie-consent-action="manage">Manage choices</button>
+          <button class="button button-primary" type="button" data-cookie-consent-action="accept">Accept analytics</button>
+        </div>
+      </section>
+      <div class="cookie-consent-overlay" hidden></div>
+      <section class="cookie-consent-dialog" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title" hidden>
+        <div class="cookie-consent-dialog-head">
+          <div>
+            <span class="section-kicker">Cookies & browser storage</span>
+            <h2 id="cookie-consent-title">Manage your privacy choices</h2>
+          </div>
+          <button class="cookie-consent-close" type="button" aria-label="Close cookie settings" data-cookie-consent-action="close">Close</button>
+        </div>
+        <p class="cookie-consent-status" data-cookie-consent-status></p>
+        <div class="cookie-consent-option-list">
+          <label class="cookie-consent-option">
+            <div class="cookie-consent-option-copy">
+              <strong>Essential</strong>
+              <p>Needed for your cart, sign-in, payment flow, and core site preferences.</p>
+            </div>
+            <span class="cookie-consent-pill is-required">Always on</span>
+          </label>
+          <label class="cookie-consent-option">
+            <div class="cookie-consent-option-copy">
+              <strong>Analytics</strong>
+              <p>Lets SharonCraft measure page views, product interest, and site performance using first-party analytics and Google Analytics.</p>
+            </div>
+            <span class="cookie-consent-switch">
+              <input type="checkbox" data-cookie-consent-analytics />
+              <span aria-hidden="true"></span>
+            </span>
+          </label>
+        </div>
+        <div class="cookie-consent-dialog-actions">
+          <button class="button button-secondary" type="button" data-cookie-consent-action="reject">Reject non-essential</button>
+          <button class="button button-primary" type="button" data-cookie-consent-action="save">Save choices</button>
+        </div>
+      </section>
+    `;
+
+    document.body.appendChild(root);
+    cookieConsentState.root = root;
+    cookieConsentState.banner = root.querySelector(".cookie-consent-banner");
+    cookieConsentState.dialog = root.querySelector(".cookie-consent-dialog");
+    cookieConsentState.overlay = root.querySelector(".cookie-consent-overlay");
+    cookieConsentState.analyticsToggle = root.querySelector("[data-cookie-consent-analytics]");
+    cookieConsentState.status = root.querySelector("[data-cookie-consent-status]");
+
+    root.addEventListener("click", function (event) {
+      const actionTrigger = event.target.closest("[data-cookie-consent-action]");
+      if (actionTrigger) {
+        const action = normalizeText(actionTrigger.dataset.cookieConsentAction);
+
+        if (action === "accept") {
+          applyCookieConsentChoice(true);
+          return;
+        }
+
+        if (action === "reject") {
+          applyCookieConsentChoice(false);
+          return;
+        }
+
+        if (action === "manage") {
+          openCookieSettings();
+          return;
+        }
+
+        if (action === "close") {
+          closeCookieSettings();
+          return;
+        }
+
+        if (action === "save") {
+          applyCookieConsentChoice(cookieConsentState.analyticsToggle && cookieConsentState.analyticsToggle.checked);
+        }
+      }
+
+      if (event.target === cookieConsentState.overlay) {
+        closeCookieSettings();
+      }
+    });
+
+    bindCookieSettingsTriggers(document);
+    updateCookieConsentUi();
   }
 
   function escapeHtml(value) {
@@ -466,6 +804,10 @@
   }
 
   async function flushAnalyticsQueue() {
+    if (!isAnalyticsConsentGranted()) {
+      return false;
+    }
+
     const catalogApi = window.SharonCraftCatalog;
     if (
       !catalogApi ||
@@ -532,7 +874,7 @@
       return false;
     }
 
-    return true;
+    return isAnalyticsConsentGranted();
   }
 
   function getAnalyticsBlockReason() {
@@ -545,6 +887,14 @@
 
     if (pathname.endsWith("/admin.html") || pathname === "/admin.html" || pageType === "admin") {
       return "Blocked on admin pages by design.";
+    }
+
+    if (!hasCookieConsentDecision()) {
+      return "Blocked until the visitor chooses whether analytics cookies and browser storage can be used.";
+    }
+
+    if (!isAnalyticsConsentGranted()) {
+      return "Blocked because the visitor rejected non-essential analytics storage.";
     }
 
     return "Tracking allowed on this page.";
@@ -624,6 +974,13 @@
   }
 
   function loadGa4IfNeeded() {
+    if (!isAnalyticsConsentGranted()) {
+      analyticsDebugState.status = "blocked_by_consent";
+      analyticsDebugState.note = getAnalyticsBlockReason();
+      updateAnalyticsDebugPanel();
+      return Promise.resolve(false);
+    }
+
     const config = getAnalyticsConfig();
     if (!config.ga4MeasurementId) {
       analyticsDebugState.status = "missing_id";
@@ -654,6 +1011,10 @@
       window.gtag = function gtag() {
         window.dataLayer.push(arguments);
       };
+      setGa4Disabled(false);
+      window.gtag("consent", "default", {
+        analytics_storage: "granted"
+      });
       window.gtag("js", new Date());
       window.gtag("config", config.ga4MeasurementId);
       analyticsDebugState.status = "loading";
@@ -2960,9 +3321,16 @@
       { href: "order.html", label: "Track order" },
       { href: "faq.html", label: "FAQ" },
       { href: "returns.html", label: "Returns" },
-      { href: "privacy.html", label: "Privacy" }
+      { href: "privacy.html", label: "Privacy" },
+      { href: "#", label: "Cookie settings", settings: true }
     ]
-      .map((link) => `<li><a href="${link.href}"${link.external ? ' target="_blank" rel="noreferrer"' : ""}>${link.label}</a></li>`)
+      .map((link) => {
+        if (link.settings) {
+          return `<li><button class="footer-link-button" type="button" data-open-cookie-settings="true">${link.label}</button></li>`;
+        }
+
+        return `<li><a href="${link.href}"${link.external ? ' target="_blank" rel="noreferrer"' : ""}>${link.label}</a></li>`;
+      })
       .join("");
 
     target.innerHTML = `
@@ -3114,6 +3482,8 @@
         button.setAttribute("aria-expanded", String(isOpen));
       });
     });
+
+    bindCookieSettingsTriggers(target);
 
     if (scrollButton) {
       scrollButton.addEventListener("click", function () {
@@ -3303,8 +3673,11 @@
     }
 
     await unregisterLegacyRootServiceWorker();
+    ensureCookieConsentUi();
+    syncAnalyticsConsentWithGoogle();
     ensureAnalyticsDebugPanel();
     bindAnalyticsEvents();
+    bindCookieSettingsTriggers(document);
     window.addEventListener("online", function () {
       scheduleAnalyticsFlush(200);
       analyticsDebugState.note = "Browser is online. Retrying queued analytics sync.";
