@@ -92,11 +92,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function normalizeLiveProduct(product) {
-    return {
+    const normalized = {
       id: normalizeText(product && product.id),
       image: normalizeText(product && product.image),
       name: normalizeText(product && product.name),
       price: Number(product && product.price) || 0,
+      basePrice:
+        product &&
+        product.basePrice !== null &&
+        product.basePrice !== "" &&
+        typeof product.basePrice !== "undefined" &&
+        Number.isFinite(Number(product.basePrice))
+          ? Math.max(0, Number(product.basePrice))
+          : null,
+      pricingMode: normalizeText(product && product.pricingMode),
       material: normalizeText(product && product.material) || "handmade",
       story: normalizeText(product && product.story),
       specs: Array.isArray(product && product.specs) ? product.specs.filter(Boolean) : [],
@@ -108,6 +117,10 @@ document.addEventListener("DOMContentLoaded", function () {
       newUntil: normalizeText(product && product.newUntil),
       catalogSource: "live"
     };
+
+    return typeof utils.applyPricingToProduct === "function"
+      ? utils.applyPricingToProduct(normalized)
+      : normalized;
   }
 
   function buildPrimaryMessage(product) {

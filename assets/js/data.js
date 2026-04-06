@@ -29,6 +29,12 @@
       analytics: {
         ga4MeasurementId: "G-B3JW5DJ52P"
       },
+      pricing: {
+        enabled: true,
+        deliveryFee: 200,
+        packagingFee: 100,
+        multiplier: 2
+      },
       promo: "Free Nairobi delivery for orders above KES 3,500 this week.",
       mpesaSteps: [
         "Add your favorite pieces to cart and review them in one calm place.",
@@ -430,6 +436,65 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function normalizePricingSettings(value) {
+    const source = value && typeof value === "object" ? value : {};
+
+    return {
+      enabled: source.enabled !== false,
+      deliveryFee: Math.max(0, Number(source.deliveryFee) || 0),
+      packagingFee: Math.max(0, Number(source.packagingFee) || 0),
+      multiplier: Math.max(1, Number(source.multiplier) || 1)
+    };
+  }
+
+  const defaultPricingSettings = normalizePricingSettings(defaultData.site.pricing);
+
+  function hasDefinedNumber(value) {
+    return value !== null && value !== "" && typeof value !== "undefined" && Number.isFinite(Number(value));
+  }
+
+  function getPricingSettings(siteData) {
+    const site = siteData && typeof siteData === "object" ? siteData : {};
+    return normalizePricingSettings(site.pricing || defaultPricingSettings);
+  }
+
+  function shouldUseFormulaPricing(product) {
+    const pricingMode = String(product && product.pricingMode || "").trim().toLowerCase();
+    const hasBasePrice = hasDefinedNumber(product && product.basePrice);
+    return pricingMode === "formula" || hasBasePrice;
+  }
+
+  function calculateWebsitePrice(basePrice, siteData) {
+    const settings = getPricingSettings(siteData);
+    const normalizedBasePrice = Math.max(0, Number(basePrice) || 0);
+
+    if (!settings.enabled) {
+      return Math.round(normalizedBasePrice);
+    }
+
+    return Math.round((normalizedBasePrice + settings.deliveryFee + settings.packagingFee) * settings.multiplier);
+  }
+
+  function applyPricingToProduct(product, siteData) {
+    const source = product && typeof product === "object" ? product : {};
+    const useFormulaPricing = shouldUseFormulaPricing(source);
+    const rawBasePrice = Number(source.basePrice);
+    const fallbackBasePrice = Number(source.price);
+    const basePrice = useFormulaPricing
+      ? Math.max(0, hasDefinedNumber(source.basePrice) ? rawBasePrice : fallbackBasePrice || 0)
+      : (hasDefinedNumber(source.basePrice) ? Math.max(0, rawBasePrice) : 0);
+    const finalPrice = useFormulaPricing
+      ? calculateWebsitePrice(basePrice, siteData)
+      : Math.max(0, Number(source.price) || 0);
+
+    return {
+      ...source,
+      basePrice,
+      pricingMode: useFormulaPricing ? "formula" : "manual",
+      price: finalPrice
+    };
+  }
+
   function normalizeProduct(product) {
     const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
     const details = Array.isArray(product.details) ? product.details.filter(Boolean) : [];
@@ -439,6 +504,8 @@
       name: product.name || "",
       category: product.category || "",
       price: Number(product.price) || 0,
+      basePrice: hasDefinedNumber(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
+      pricingMode: String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual",
       soldOut: Boolean(product.soldOut),
       momPrice: Number(product.momPrice) || 0,
       deliveryCharge: Number(product.deliveryCharge) || 0,
@@ -581,6 +648,30 @@
     }
   }
 
+  function loadSavedPricing(defaultPricing) {
+    const fallback = normalizePricingSettings(defaultPricing);
+
+    try {
+      const raw = window.localStorage.getItem(siteContentSettingsKey) || window.localStorage.getItem(liveSiteContentCacheKey);
+      if (!raw) {
+        return fallback;
+      }
+
+      const parsed = JSON.parse(raw);
+      const pricing = parsed && typeof parsed === "object" ? parsed.pricing : null;
+      if (!pricing || typeof pricing !== "object") {
+        return fallback;
+      }
+
+      return normalizePricingSettings({
+        ...fallback,
+        ...pricing
+      });
+    } catch (error) {
+      return fallback;
+    }
+  }
+
   function loadSavedCategories(defaultCategories) {
     try {
       const raw = window.localStorage.getItem(categoriesSettingsKey);
@@ -648,6 +739,11 @@
   data.homeVisuals = normalizeHomeVisuals(savedHomeVisuals, defaultData.homeVisuals);
 
   data.site.socials = loadSavedSocials(defaultData.site.socials);
+  data.site.pricing = loadSavedPricing(defaultData.site.pricing);
+  defaultData.site.pricing = getPricingSettings(defaultData.site);
+  data.products = (Array.isArray(data.products) ? data.products : []).map(function (product) {
+    return applyPricingToProduct(product, data.site);
+  });
 
   window.SharonCraftDefaultData = defaultData;
   window.SharonCraftStorage = {
@@ -660,6 +756,12 @@
     liveHomeVisualsCacheKey,
     liveSocialSettingsCacheKey,
     liveSiteContentCacheKey
+  };
+  window.SharonCraftPricing = {
+    getPricingSettings,
+    calculateWebsitePrice,
+    applyPricingToProduct,
+    shouldUseFormulaPricing
   };
   window.SharonCraftData = data;
 })();

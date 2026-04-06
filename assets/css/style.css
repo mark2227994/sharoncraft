@@ -2137,12 +2137,31 @@ body.cart-open .product-sticky-bar {
   }
 
   .footer-panel {
-    padding: 0.95rem;
-    border-radius: 20px;
+    gap: 0;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: rgba(62, 42, 33, 0.96);
+    border-color: rgba(255, 250, 243, 0.12);
   }
 
   .footer-accordion-panel {
     gap: 0;
+  }
+
+  .footer-accordion-toggle > span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .footer-accordion-toggle {
+    gap: 0.9rem;
+  }
+
+  .footer-accordion-icon {
+    flex: 0 0 1.7rem;
+    margin-left: auto;
+    background: rgba(92, 64, 51, 0.98);
+    border: 1px solid rgba(255, 250, 243, 0.12);
   }
 
   .footer-accordion-panel .footer-accordion-content {
@@ -2156,7 +2175,8 @@ body.cart-open .product-sticky-bar {
 
   .footer-accordion-panel.is-open .footer-accordion-icon {
     transform: rotate(45deg);
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(92, 64, 51, 0.98);
+    border-color: rgba(255, 250, 243, 0.22);
   }
 }
 

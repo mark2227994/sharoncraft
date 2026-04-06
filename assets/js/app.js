@@ -41,6 +41,7 @@
     lastGtagHitAt: ""
   };
   let siteContentOverrides = null;
+  const pricingUtils = window.SharonCraftPricing || {};
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -1087,6 +1088,31 @@
     }
   }
 
+  function mergePricingIntoSiteData(content) {
+    const source = content && typeof content === "object" ? content.pricing : null;
+    if (!source || typeof source !== "object" || typeof pricingUtils.getPricingSettings !== "function") {
+      return;
+    }
+
+    data.site.pricing = pricingUtils.getPricingSettings({
+      ...data.site,
+      pricing: {
+        ...data.site.pricing,
+        ...source
+      }
+    });
+  }
+
+  function refreshProductPricesFromSitePricing() {
+    if (typeof pricingUtils.applyPricingToProduct !== "function") {
+      return;
+    }
+
+    data.products = (Array.isArray(data.products) ? data.products : []).map(function (product) {
+      return pricingUtils.applyPricingToProduct(product, data.site);
+    });
+  }
+
   function applyBrandingOverrides(branding) {
     const source = branding && typeof branding === "object" ? branding : {};
     const logoImage = normalizeText(source.logoImage);
@@ -1619,6 +1645,35 @@
       currency: "KES",
       maximumFractionDigits: 0,
     }).format(amount);
+  }
+
+  function getPricingSettings() {
+    if (typeof pricingUtils.getPricingSettings === "function") {
+      return pricingUtils.getPricingSettings(data.site);
+    }
+
+    return {
+      enabled: false,
+      deliveryFee: 0,
+      packagingFee: 0,
+      multiplier: 1
+    };
+  }
+
+  function calculateWebsitePrice(basePrice) {
+    if (typeof pricingUtils.calculateWebsitePrice === "function") {
+      return pricingUtils.calculateWebsitePrice(basePrice, data.site);
+    }
+
+    return Math.max(0, Number(basePrice) || 0);
+  }
+
+  function applyPricingToProduct(product) {
+    if (typeof pricingUtils.applyPricingToProduct === "function") {
+      return pricingUtils.applyPricingToProduct(product, data.site);
+    }
+
+    return product;
   }
 
   function buildWhatsAppUrl(message) {
@@ -3237,6 +3292,8 @@
     siteContentOverrides = readStoredSiteContent();
     if (siteContentOverrides) {
       mergeBrandingIntoSiteData(siteContentOverrides.branding);
+      mergePricingIntoSiteData(siteContentOverrides);
+      refreshProductPricesFromSitePricing();
     }
 
     await unregisterLegacyRootServiceWorker();
@@ -3274,9 +3331,12 @@
     if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
       window.SharonCraftLiveSync.ready
         .then(function () {
+          data.products = (Array.isArray(data.products) ? data.products : []).map(applyPricingToProduct);
           siteContentOverrides = readStoredSiteContent();
           if (siteContentOverrides) {
             mergeBrandingIntoSiteData(siteContentOverrides.branding);
+            mergePricingIntoSiteData(siteContentOverrides);
+            refreshProductPricesFromSitePricing();
           }
           renderHeader();
           renderFooter();
@@ -3319,6 +3379,9 @@
     trackProductListView,
     buildAnalyticsItem,
     getTrackedEvents: getStoredAnalyticsEvents,
+    getPricingSettings,
+    calculateWebsitePrice,
+    applyPricingToProduct,
     renderCategorySelect,
     refreshReveal: initReveal,
     addToCart,

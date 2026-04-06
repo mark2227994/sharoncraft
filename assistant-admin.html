@@ -153,10 +153,14 @@
                   <select id="assistant-category" required></select>
                 </label>
                 <label>
-                  <span>Price (KES)</span>
+                  <span>Base price / website price (KES)</span>
                   <input id="assistant-price" type="number" min="0" step="1" placeholder="3200" required />
                 </label>
               </div>
+              <div class="assistant-checks">
+                <label><input id="assistant-auto-price" type="checkbox" checked /> Auto-calculate website price</label>
+              </div>
+              <p id="assistant-price-formula" class="assistant-muted">Website price will be calculated from the base price.</p>
               <label>
                 <span>Short details</span>
                 <textarea id="assistant-details" rows="3" placeholder="Handmade in Kenya, Lightweight, Gift-ready"></textarea>
