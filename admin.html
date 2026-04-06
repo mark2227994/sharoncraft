@@ -521,7 +521,11 @@
                   </div>
                 </div>
                 <div class="admin-inline">
-                  <input id="admin-price" type="number" min="0" placeholder="Price in KES" required />
+                  <input id="admin-price" type="number" min="0" placeholder="Base price or manual website price in KES" required />
+                </div>
+                <div class="admin-form-group">
+                  <label><input id="admin-auto-price" type="checkbox" checked /> Auto-calculate website price</label>
+                  <p id="admin-price-formula" class="admin-field-tip">Website price will be calculated from the base price.</p>
                 </div>
                 <div class="admin-inline">
                   <input id="admin-badge" type="text" placeholder="Badge, for example New" />

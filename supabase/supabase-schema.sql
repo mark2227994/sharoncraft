@@ -13,6 +13,8 @@ create table if not exists public.products (
   image text not null default '',
   name text not null,
   price integer not null default 0 check (price >= 0),
+  base_price integer not null default 0 check (base_price >= 0),
+  pricing_mode text not null default 'manual' check (pricing_mode = any (array['manual', 'formula'])),
   material text not null default 'wood',
   story text not null default 'Handmade by SharonCraft artisans.',
   specs jsonb not null default '[]'::jsonb,
@@ -25,6 +27,9 @@ create table if not exists public.products (
   new_until timestamptz,
   sort_order integer not null default 0
 );
+
+alter table public.products add column if not exists base_price integer not null default 0;
+alter table public.products add column if not exists pricing_mode text not null default 'manual';
 
 create index if not exists products_sort_order_idx on public.products(sort_order);
 create index if not exists products_updated_at_idx on public.products(updated_at desc);

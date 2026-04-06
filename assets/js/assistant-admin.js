@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const nameInput = document.getElementById("assistant-name");
   const categoryInput = document.getElementById("assistant-category");
   const priceInput = document.getElementById("assistant-price");
+  const autoPriceInput = document.getElementById("assistant-auto-price");
+  const priceFormulaNote = document.getElementById("assistant-price-formula");
   const imageInput = document.getElementById("assistant-image");
   const imageStageInput = document.getElementById("assistant-image-stage");
   const imageStageStatus = document.getElementById("assistant-image-stage-status");
@@ -52,6 +54,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const analyticsFeed = document.getElementById("assistant-analytics-feed");
 
   const catalogApi = window.SharonCraftCatalog || null;
+  const pricing = window.SharonCraftPricing || null;
   const userController = window.SharonCraftUserController || null;
   const categories = window.SharonCraftData && Array.isArray(window.SharonCraftData.categories)
     ? window.SharonCraftData.categories
@@ -195,6 +198,68 @@ document.addEventListener("DOMContentLoaded", async function () {
       currency: "KES",
       maximumFractionDigits: 0
     }).format(Number(value) || 0);
+  }
+
+  function getProductPricingMode(product) {
+    if (product && typeof product === "object") {
+      const hasBasePrice =
+        product.basePrice !== null &&
+        product.basePrice !== "" &&
+        typeof product.basePrice !== "undefined" &&
+        Number.isFinite(Number(product.basePrice));
+      return normalizeText(product.pricingMode).toLowerCase() === "formula" || hasBasePrice ? "formula" : "manual";
+    }
+
+    return autoPriceInput && autoPriceInput.checked ? "formula" : "manual";
+  }
+
+  function getEditablePrice(product) {
+    if (getProductPricingMode(product) === "formula") {
+      return Math.max(0, Number(product && (product.basePrice ?? product.price)) || 0);
+    }
+
+    return Math.max(0, Number(product && product.price) || 0);
+  }
+
+  function getPublishedPrice(basePrice, pricingMode) {
+    const normalizedBasePrice = Math.max(0, Number(basePrice) || 0);
+
+    if (pricingMode === "formula" && pricing && typeof pricing.calculateWebsitePrice === "function") {
+      return pricing.calculateWebsitePrice(normalizedBasePrice, window.SharonCraftData && window.SharonCraftData.site);
+    }
+
+    return normalizedBasePrice;
+  }
+
+  function getPricingSettings() {
+    if (pricing && typeof pricing.getPricingSettings === "function") {
+      return pricing.getPricingSettings(window.SharonCraftData && window.SharonCraftData.site);
+    }
+
+    return {
+      enabled: false,
+      deliveryFee: 0,
+      packagingFee: 0,
+      multiplier: 1
+    };
+  }
+
+  function updatePricingFormulaNote() {
+    if (!priceFormulaNote) {
+      return;
+    }
+
+    const pricingMode = getProductPricingMode();
+    const basePrice = Math.max(0, Number(priceInput && priceInput.value) || 0);
+    const websitePrice = getPublishedPrice(basePrice, pricingMode);
+    const settings = getPricingSettings();
+
+    if (pricingMode === "formula" && settings.enabled) {
+      priceFormulaNote.textContent = `Website price = (${formatCurrency(basePrice)} + ${formatCurrency(settings.deliveryFee)} delivery + ${formatCurrency(settings.packagingFee)} packaging) x ${settings.multiplier} = ${formatCurrency(websitePrice)}.`;
+      return;
+    }
+
+    priceFormulaNote.textContent = `Manual website price is ${formatCurrency(websitePrice)}. Turn auto pricing on to calculate from the base price.`;
   }
 
   function formatTimeAgo(value) {
@@ -342,11 +407,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (imageStageInput) {
       imageStageInput.value = "ready";
     }
+    if (autoPriceInput) {
+      autoPriceInput.checked = true;
+    }
     formKicker.textContent = "New Product";
     formTitle.textContent = "Add a product simply";
     saveProductButton.textContent = "Save To Live Catalog";
     updateTemplateRecommendation();
     updatePreview();
+    updatePricingFormulaNote();
   }
 
   function fillForm(product) {
@@ -356,7 +425,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     productIdInput.value = normalizeText(product.id);
     nameInput.value = normalizeText(product.name);
     categoryInput.value = getCategorySlug(product);
-    priceInput.value = Number(product.price) || 0;
+    priceInput.value = getEditablePrice(product);
+    if (autoPriceInput) {
+      autoPriceInput.checked = getProductPricingMode(product) === "formula";
+    }
     imageInput.value = normalizeText(product.image);
     if (imageStageInput) {
       imageStageInput.value = normalizeImageStage(product.imageStage || getImageStageFromNotes(product.notes) || inferImageStageFromPath(product.image)) || "live";
@@ -373,6 +445,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     saveProductButton.textContent = "Update Live Product";
     updateTemplateRecommendation();
     updatePreview();
+    updatePricingFormulaNote();
     activateTab("add");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -384,11 +457,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     const imageStage = getSelectedImageStage();
     const image = rewriteImagePathForStage(normalizeText(imageInput.value), imageStage);
     const gallery = rewriteImagesForStage(parseList(galleryInput.value), imageStage);
+    const pricingMode = getProductPricingMode();
+    const basePrice = Math.max(0, Number(priceInput.value) || 0);
     return {
       id: productId,
       image,
       name: normalizeText(nameInput.value),
-      price: Number(priceInput.value) || 0,
+      price: getPublishedPrice(basePrice, pricingMode),
+      basePrice: pricingMode === "formula" ? basePrice : null,
+      pricingMode,
       material: getCategoryName(categorySlug),
       story: normalizeText(descriptionInput.value),
       specs: parseList(detailsInput.value),
@@ -854,6 +931,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     categoryInput.addEventListener("change", updateTemplateRecommendation);
     categoryInput.addEventListener("input", updateTemplateRecommendation);
   }
+
+  [priceInput, autoPriceInput].forEach(function (input) {
+    if (!input) {
+      return;
+    }
+
+    input.addEventListener("input", updatePricingFormulaNote);
+    input.addEventListener("change", updatePricingFormulaNote);
+  });
 
   templateButtons.forEach(function (button) {
     button.addEventListener("click", function () {

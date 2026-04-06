@@ -121,29 +121,52 @@
     return client;
   };
 
-  const mapRowToProduct = (row) => ({
-    id: normalizeText(row && row.id),
-    image: normalizeText(row && row.image),
-    name: normalizeText(row && row.name),
-    price: Number(row && row.price) || 0,
-    material: normalizeText(row && row.material) || "wood",
-    story: normalizeText(row && row.story) || "Handmade by SharonCraft artisans.",
-    specs: normalizeList(row && row.specs),
-    gallery: normalizeList(row && row.gallery),
-    soldOut: Boolean(row && row.sold_out),
-    spotlightUntil: normalizeText(row && row.spotlight_until),
-    spotlightText: normalizeText(row && row.spotlight_text),
-    notes: normalizeText(row && row.notes),
-    updatedAt: normalizeText(row && row.updated_at),
-    newUntil: normalizeText(row && row.new_until),
-    sortOrder: Number(row && row.sort_order) || 0,
-  });
+  const mapRowToProduct = (row) => {
+    const pricingMode = normalizeText(row && row.pricing_mode).toLowerCase() === "formula" ? "formula" : "manual";
+    const hasBasePrice =
+      row &&
+      row.base_price !== null &&
+      row.base_price !== "" &&
+      typeof row.base_price !== "undefined" &&
+      Number.isFinite(Number(row.base_price));
+
+    return {
+      id: normalizeText(row && row.id),
+      image: normalizeText(row && row.image),
+      name: normalizeText(row && row.name),
+      price: Number(row && row.price) || 0,
+      basePrice: pricingMode === "formula"
+        ? (hasBasePrice ? Math.max(0, Number(row.base_price)) : Math.max(0, Number(row && row.price) || 0))
+        : null,
+      pricingMode,
+      material: normalizeText(row && row.material) || "wood",
+      story: normalizeText(row && row.story) || "Handmade by SharonCraft artisans.",
+      specs: normalizeList(row && row.specs),
+      gallery: normalizeList(row && row.gallery),
+      soldOut: Boolean(row && row.sold_out),
+      spotlightUntil: normalizeText(row && row.spotlight_until),
+      spotlightText: normalizeText(row && row.spotlight_text),
+      notes: normalizeText(row && row.notes),
+      updatedAt: normalizeText(row && row.updated_at),
+      newUntil: normalizeText(row && row.new_until),
+      sortOrder: Number(row && row.sort_order) || 0,
+    };
+  };
 
   const mapProductToRow = (product, index) => ({
     id: normalizeText(product && product.id) || `product-${Date.now().toString(36)}-${index}`,
     image: normalizeText(product && product.image),
     name: normalizeText(product && product.name),
     price: Number(product && product.price) || 0,
+    base_price:
+      product &&
+      product.basePrice !== null &&
+      product.basePrice !== "" &&
+      typeof product.basePrice !== "undefined" &&
+      Number.isFinite(Number(product.basePrice))
+        ? Math.max(0, Number(product.basePrice))
+        : 0,
+    pricing_mode: normalizeText(product && product.pricingMode) || "manual",
     material: normalizeText(product && product.material) || "wood",
     story: normalizeText(product && product.story) || "Handmade by SharonCraft artisans.",
     specs: normalizeList(product && product.specs),

@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const rangeButtons = Array.from(document.querySelectorAll("[data-mobile-range]"));
 
   const catalogApi = window.SharonCraftCatalog || null;
+  const pricing = window.SharonCraftPricing || null;
   const userController = window.SharonCraftUserController || null;
   const categories = window.SharonCraftData && Array.isArray(window.SharonCraftData.categories)
     ? window.SharonCraftData.categories
@@ -122,6 +123,34 @@ document.addEventListener("DOMContentLoaded", async function () {
       currency: "KES",
       maximumFractionDigits: 0
     }).format(Number(value) || 0);
+  }
+
+  function getProductPricingMode(product) {
+    const hasBasePrice =
+      product &&
+      product.basePrice !== null &&
+      product.basePrice !== "" &&
+      typeof product.basePrice !== "undefined" &&
+      Number.isFinite(Number(product.basePrice));
+    return normalizeText(product && product.pricingMode).toLowerCase() === "formula" || hasBasePrice ? "formula" : "manual";
+  }
+
+  function getEditablePrice(product) {
+    if (getProductPricingMode(product) === "formula") {
+      return Math.max(0, Number(product && (product.basePrice ?? product.price)) || 0);
+    }
+
+    return Math.max(0, Number(product && product.price) || 0);
+  }
+
+  function getPublishedPrice(basePrice, pricingMode) {
+    const normalizedBasePrice = Math.max(0, Number(basePrice) || 0);
+
+    if (pricingMode === "formula" && pricing && typeof pricing.calculateWebsitePrice === "function") {
+      return pricing.calculateWebsitePrice(normalizedBasePrice, window.SharonCraftData && window.SharonCraftData.site);
+    }
+
+    return normalizedBasePrice;
   }
 
   function formatBytes(value) {
@@ -258,7 +287,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     productIdInput.value = normalizeText(product.id);
     nameInput.value = normalizeText(product.name);
     categoryInput.value = categorySlug;
-    priceInput.value = Number(product.price) || 0;
+    priceInput.value = getEditablePrice(product);
     badgeInput.value = normalizeText(product.spotlightText);
     imageInput.value = normalizeText(product.image);
     galleryInput.value = Array.isArray(product.gallery) ? product.gallery.join(", ") : "";
@@ -869,12 +898,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     const productId = normalizeText(productIdInput.value) || slugify(nameInput.value);
     const categorySlug = normalizeText(categoryInput.value) || categories[0] && categories[0].slug || "necklaces";
     const now = Date.now();
+    const pricingMode = getProductPricingMode(existingProduct);
+    const basePrice = Math.max(0, Number(priceInput.value) || 0);
 
     return {
       id: productId,
       image: normalizeText(imageInput.value),
       name: normalizeText(nameInput.value),
-      price: Number(priceInput.value) || 0,
+      price: getPublishedPrice(basePrice, pricingMode),
+      basePrice: pricingMode === "formula" ? basePrice : null,
+      pricingMode,
       material: getCategoryName(categorySlug),
       story: normalizeText(descriptionInput.value),
       specs: parseList(detailsInput.value),

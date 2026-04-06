@@ -2,6 +2,7 @@
   const data = window.SharonCraftData;
   const storage = window.SharonCraftStorage;
   const liveCatalog = window.SharonCraftCatalog;
+  const pricing = window.SharonCraftPricing || null;
   const fallbackImage = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
   const siteContentSettingsKey = (storage && storage.siteContentSettingsKey) || "sharoncraft-site-content";
   const liveSiteContentCacheKey = (storage && storage.liveSiteContentCacheKey) || "sharoncraft-live-site-content-cache";
@@ -169,11 +170,20 @@
     const spotlightUntil = Date.parse(product && product.spotlightUntil);
     const newUntil = Date.parse(product && product.newUntil);
 
-    return {
+    const normalizedProduct = {
       id,
       name: normalizeText(product && product.name) || "SharonCraft Product",
       category: categoryMatch.slug,
       price: Number(product && product.price) || 0,
+      basePrice:
+        product &&
+        product.basePrice !== null &&
+        product.basePrice !== "" &&
+        typeof product.basePrice !== "undefined" &&
+        Number.isFinite(Number(product.basePrice))
+          ? Math.max(0, Number(product.basePrice))
+          : null,
+      pricingMode: normalizeText(product && product.pricingMode),
       soldOut: Boolean(product && product.soldOut),
       material,
       story,
@@ -194,6 +204,10 @@
       details: Array.isArray(product && product.specs) ? product.specs.filter(Boolean) : [],
       images: finalImages,
     };
+
+    return pricing && typeof pricing.applyPricingToProduct === "function"
+      ? pricing.applyPricingToProduct(normalizedProduct, data.site)
+      : normalizedProduct;
   };
 
   async function syncProductsFromSupabase() {

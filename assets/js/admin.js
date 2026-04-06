@@ -88,6 +88,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.categories) || utils.data.categories;
   const defaultHomeVisualSource =
     (window.SharonCraftDefaultData && window.SharonCraftDefaultData.homeVisuals) || utils.data.homeVisuals || {};
+  const defaultPricingSource =
+    (window.SharonCraftDefaultData && window.SharonCraftDefaultData.site && window.SharonCraftDefaultData.site.pricing) ||
+    (utils.data && utils.data.site && utils.data.site.pricing) ||
+    { enabled: true, deliveryFee: 200, packagingFee: 100, multiplier: 2 };
   const defaultSiteContentSource = {
     branding: {
       siteName: "SharonCraft",
@@ -101,6 +105,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       logoAlt: "SharonCraft logo",
       faviconImage: "assets/images/sharoncraft-favicon.webp",
       appleTouchIcon: "assets/images/sharoncraft-logo-transparent.webp"
+    },
+    pricing: {
+      deliveryFee: Number(defaultPricingSource.deliveryFee) || 200,
+      packagingFee: Number(defaultPricingSource.packagingFee) || 100,
+      multiplier: Number(defaultPricingSource.multiplier) || 2
     },
     home: {
       heroNotes: [
@@ -428,11 +437,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       cleanImagePath(rawGallery[0]) ||
       fallbackImage;
     const gallery = dedupeImages([mainImage].concat(rawImages, rawGallery));
-    return {
+    const normalizedProduct = {
       id: product.id,
       name: product.name,
       category: fallbackCategory,
       price: Number(product.price) || 0,
+      basePrice: hasBasePriceValue(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
+      pricingMode: String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual",
       momPrice: Number(product.momPrice) || 0,
       deliveryCharge: Number(product.deliveryCharge) || 0,
       deliveryCost: Number(product.deliveryCost) || 0,
@@ -449,6 +460,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       imageStage: normalizeImageStage(product.imageStage || imageStageFromNotes || inferImageStageFromImages(gallery)) || "live",
       analytics: product.analytics || defaultAnalytics(product, index)
     };
+
+    return typeof utils.applyPricingToProduct === "function"
+      ? utils.applyPricingToProduct(normalizedProduct)
+      : normalizedProduct;
   }
 
   function normalizeCategory(category) {
@@ -964,6 +979,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const suggestNameButton = document.getElementById("admin-suggest-name");
   const categoryInput = document.getElementById("admin-category");
   const priceInput = document.getElementById("admin-price");
+  const autoPriceInput = document.getElementById("admin-auto-price");
+  const priceFormulaNote = document.getElementById("admin-price-formula");
   const momPriceInput = document.getElementById("admin-mom-price");
   const deliveryChargeInput = document.getElementById("admin-delivery-charge");
   const deliveryCostInput = document.getElementById("admin-delivery-cost");
@@ -1456,6 +1473,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   const makeTextField = (path, label, placeholder) => ({ type: "text", path, label, placeholder });
+  const makeNumberField = (path, label, placeholder) => ({ type: "number", path, label, placeholder });
   const makeTextareaField = (path, label, placeholder) => ({ type: "textarea", path, label, placeholder });
   const makeImageField = (path, label, placeholder, altPath, altLabel) => ({
     type: "image",
@@ -1481,6 +1499,15 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeImageField("siteContent.branding.logoImage", "Logo image", "assets/images/sharoncraft-logo-transparent.webp", "siteContent.branding.logoAlt", "Logo alt text"),
         makeImageField("siteContent.branding.faviconImage", "Favicon image", "assets/images/sharoncraft-favicon.webp"),
         makeImageField("siteContent.branding.appleTouchIcon", "Apple touch icon", "assets/images/sharoncraft-logo-transparent.webp")
+      ]
+    },
+    {
+      title: "Pricing Rules",
+      description: "Adjust the automatic website pricing formula used when a product has auto pricing turned on.",
+      fields: [
+        makeNumberField("siteContent.pricing.deliveryFee", "Delivery fee", "200"),
+        makeNumberField("siteContent.pricing.packagingFee", "Packaging fee", "100"),
+        makeNumberField("siteContent.pricing.multiplier", "Price multiplier", "2")
       ]
     },
     {
@@ -2497,6 +2524,98 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function formatPrice(value) {
     return utils.formatCurrency(Number(value) || 0);
+  }
+
+  function hasBasePriceValue(value) {
+    return value !== null && value !== "" && typeof value !== "undefined" && Number.isFinite(Number(value));
+  }
+
+  function getPricingSettings() {
+    if (typeof utils.getPricingSettings === "function") {
+      const siteOverrides =
+        siteContent &&
+        siteContent.pricing &&
+        typeof siteContent.pricing === "object" &&
+        window.SharonCraftPricing &&
+        typeof window.SharonCraftPricing.getPricingSettings === "function"
+          ? { ...utils.data.site, pricing: siteContent.pricing }
+          : null;
+      return siteOverrides ? window.SharonCraftPricing.getPricingSettings(siteOverrides) : utils.getPricingSettings();
+    }
+
+    return {
+      enabled: false,
+      deliveryFee: 0,
+      packagingFee: 0,
+      multiplier: 1
+    };
+  }
+
+  function isFormulaPricingEnabled(product) {
+    if (product && typeof product === "object") {
+      return String(product.pricingMode || "").trim().toLowerCase() === "formula" || hasBasePriceValue(product.basePrice);
+    }
+
+    return Boolean(autoPriceInput && autoPriceInput.checked);
+  }
+
+  function getDraftBasePriceValue() {
+    return Math.max(0, Number(priceInput && priceInput.value) || 0);
+  }
+
+  function getDraftSellingPrice(product) {
+    const basePrice = product && typeof product === "object"
+      ? Math.max(0, Number(product.basePrice ?? product.price) || 0)
+      : getDraftBasePriceValue();
+
+    if (isFormulaPricingEnabled(product) && typeof utils.calculateWebsitePrice === "function") {
+      return utils.calculateWebsitePrice(basePrice);
+    }
+
+    return product && typeof product === "object"
+      ? Math.max(0, Number(product.price) || 0)
+      : basePrice;
+  }
+
+  function updatePricingFormulaNote() {
+    if (!priceFormulaNote) {
+      return;
+    }
+
+    const settings = getPricingSettings();
+    const basePrice = getDraftBasePriceValue();
+    const sellingPrice = getDraftSellingPrice();
+
+    if (autoPriceInput && autoPriceInput.checked && settings.enabled) {
+      priceFormulaNote.textContent = `Website price = (${formatPrice(basePrice)} + ${formatPrice(settings.deliveryFee)} delivery + ${formatPrice(settings.packagingFee)} packaging) x ${settings.multiplier} = ${formatPrice(sellingPrice)}.`;
+      return;
+    }
+
+    priceFormulaNote.textContent = `Manual website price is ${formatPrice(sellingPrice)}. Turn auto pricing on to calculate from base price.`;
+  }
+
+  function syncPricingRuntimeData() {
+    const sitePricing = siteContent && siteContent.pricing && typeof siteContent.pricing === "object"
+      ? siteContent.pricing
+      : defaultSiteContentSource.pricing;
+
+    if (window.SharonCraftPricing && typeof window.SharonCraftPricing.getPricingSettings === "function") {
+      utils.data.site.pricing = window.SharonCraftPricing.getPricingSettings({
+        ...utils.data.site,
+        pricing: sitePricing
+      });
+    } else {
+      utils.data.site.pricing = {
+        enabled: true,
+        deliveryFee: Math.max(0, Number(sitePricing && sitePricing.deliveryFee) || 0),
+        packagingFee: Math.max(0, Number(sitePricing && sitePricing.packagingFee) || 0),
+        multiplier: Math.max(1, Number(sitePricing && sitePricing.multiplier) || 1)
+      };
+    }
+
+    catalog = catalog.map(function (product, index) {
+      return normalizeProduct(product, index);
+    });
   }
 
   function formatDate(value) {
@@ -3673,6 +3792,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         image: product.images && product.images.length ? product.images[0] : "",
         name: product.name,
         price: Number(product.price) || 0,
+        basePrice: hasBasePriceValue(product.basePrice) ? Math.max(0, Number(product.basePrice)) : 0,
+        pricingMode: String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual",
         material: categoryMap.get(product.category) || product.category || "Handmade",
         story: product.description || product.shortDescription || "Handmade by SharonCraft artisans.",
         specs: Array.isArray(product.details) ? product.details : [],
@@ -4075,7 +4196,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 <span>${escapeHtml(field.label)}</span>
                 <input
                   id="${fieldId}"
-                  type="text"
+                  type="${field.type === "number" ? "number" : "text"}"
                   value="${escapeHtml(String(value || ""))}"
                   data-site-content-path="${escapeHtml(field.path)}"
                   data-site-content-type="${field.type}"
@@ -4148,6 +4269,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function saveSiteContentState(message) {
     homeVisuals = normalizeHomeVisuals(homeVisuals);
     siteContent = mergeContentShape(siteContent, defaultSiteContentSource);
+    syncPricingRuntimeData();
 
     const savedVisuals = safeLocalStorageSetItem(homeVisualsSettingsKey, JSON.stringify(homeVisuals), "homepage visuals");
     const savedContent = safeLocalStorageSetItem(siteContentSettingsKey, JSON.stringify(siteContent), "site content");
@@ -4156,6 +4278,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     populateVisualStoryForm();
     renderVisualPreview();
     renderSiteContentStudio();
+    renderDraftPreview();
+    renderList();
+    renderFeaturedManager();
+    renderProfitProductSelect();
+    syncProfitCalculatorFromSelection();
+    renderProfitDashboard();
+    renderOrderProductSelect();
+    renderOrders();
 
     const localMessage = message || "Site content saved locally.";
     if (!savedVisuals || !savedContent) {
@@ -5602,10 +5732,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const currentCategory = categoryMap.get(categoryInput.value) || "Collection";
     const currentBadge = badgeInput.value.trim() || "New";
     const previewSource = temporaryMainPreviewSrc || images[0] || "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
+    const currentSellingPrice = getDraftSellingPrice();
     const currentMomPrice = Number(momPriceInput.value) || 0;
     const currentDeliveryCharge = Number(deliveryChargeInput.value) || 0;
     const currentDeliveryCost = Number(deliveryCostInput.value) || 0;
-    const currentProductProfit = Math.max(0, (Number(priceInput.value) || 0) - currentMomPrice);
+    const currentProductProfit = Math.max(0, currentSellingPrice - currentMomPrice);
     const currentDeliveryProfit = Math.max(0, currentDeliveryCharge - currentDeliveryCost);
     const currentTotalProfit = currentProductProfit + currentDeliveryProfit;
     draftBadge.className = badgeClass(currentBadge);
@@ -5615,7 +5746,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     draftTitle.textContent = nameInput.value.trim() || "Your product title";
     draftDescription.textContent =
       descriptionInput.value.trim() || "Your short product description will appear here as you type.";
-    draftPrice.textContent = formatPrice(priceInput.value);
+    draftPrice.textContent = formatPrice(currentSellingPrice);
     draftProfit.textContent = `Product profit ${formatPrice(currentProductProfit)} + delivery profit ${formatPrice(currentDeliveryProfit)} = total ${formatPrice(currentTotalProfit)}`;
     totalProfitInput.value = formatPrice(currentTotalProfit);
     draftGallery.innerHTML = images
@@ -5625,6 +5756,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     imagePreview.src = previewSource;
     renderSelectedGallery();
     updateImageStageStatus();
+    updatePricingFormulaNote();
   }
 
   function renderList() {
@@ -7540,6 +7672,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     badgeInput.value = "New";
     featuredInput.checked = false;
     newInput.checked = true;
+    if (autoPriceInput) {
+      autoPriceInput.checked = true;
+    }
     imageInput.value = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
     if (imageStageInput) {
       imageStageInput.value = "ready";
@@ -7550,12 +7685,16 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function populateForm(product) {
+    const formulaPricing = isFormulaPricingEnabled(product);
     editingId = product.id;
     formTitle.textContent = `Edit ${product.name}`;
     nameInput.value = product.name;
     categoryInput.value = product.category;
     updateCategoryChipSelection();
-    priceInput.value = product.price;
+    priceInput.value = formulaPricing ? (Number(product.basePrice ?? product.price) || 0) : (Number(product.price) || 0);
+    if (autoPriceInput) {
+      autoPriceInput.checked = formulaPricing;
+    }
     momPriceInput.value = product.momPrice || "";
     deliveryChargeInput.value = product.deliveryCharge || "";
     deliveryCostInput.value = product.deliveryCost || "";
@@ -7656,7 +7795,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     inlineImageLibrary.addEventListener("click", handleImageLibrarySelection);
   }
 
-  [nameInput, categoryInput, priceInput, momPriceInput, deliveryChargeInput, deliveryCostInput, sourceInput, stockQtyInput, reservedQtyInput, badgeInput, imageInput, galleryInput, descriptionInput, detailsInput, featuredInput, newInput].forEach(
+  [nameInput, categoryInput, priceInput, autoPriceInput, momPriceInput, deliveryChargeInput, deliveryCostInput, sourceInput, stockQtyInput, reservedQtyInput, badgeInput, imageInput, galleryInput, descriptionInput, detailsInput, featuredInput, newInput].filter(Boolean).forEach(
     (input) => {
       input.addEventListener("input", renderDraftPreview);
       input.addEventListener("change", renderDraftPreview);
@@ -8251,9 +8390,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     siteContentResetButton.addEventListener("click", function () {
       homeVisuals = normalizeHomeVisuals(defaultHomeVisualSource);
       siteContent = cloneContent(defaultSiteContentSource);
+      syncPricingRuntimeData();
       populateVisualStoryForm();
       renderVisualPreview();
       renderSiteContentStudio();
+      renderDraftPreview();
+      renderList();
       setStatus("Site content studio reset to the default draft. Save when you are ready.");
     });
   }
@@ -9386,13 +9528,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     const imageStage = getSelectedImageStage();
     const images = rewriteImagesForStage(getFormGalleryImages(), imageStage);
     const existingAnalytics = editingId ? (catalog.find((product) => product.id === editingId) || {}).analytics : null;
+    const formulaPricing = Boolean(autoPriceInput && autoPriceInput.checked);
+    const basePrice = getDraftBasePriceValue();
+    const sellingPrice = getDraftSellingPrice();
 
     const payload = normalizeProduct(
       {
         id: editingId || slugify(nameInput.value) || `product-${Date.now()}`,
         name: resolvedName,
         category: categoryInput.value,
-        price: Number(priceInput.value),
+        price: sellingPrice,
+        basePrice: formulaPricing ? basePrice : null,
+        pricingMode: formulaPricing ? "formula" : "manual",
         momPrice: Number(momPriceInput.value),
         deliveryCharge: Number(deliveryChargeInput.value),
         deliveryCost: Number(deliveryCostInput.value),
@@ -9408,7 +9555,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         images,
         imageStage,
         notes: buildProductWorkflowNotes(categoryInput.value, sourceInput.value, imageStage),
-        analytics: existingAnalytics || defaultAnalytics({ price: Number(priceInput.value), featured: featuredInput.checked, newArrival: newInput.checked }, catalog.length)
+        analytics: existingAnalytics || defaultAnalytics({ price: sellingPrice, featured: featuredInput.checked, newArrival: newInput.checked }, catalog.length)
       },
       catalog.length
     );
@@ -9429,6 +9576,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   syncCategoryRuntimeData(false);
   syncHomeVisualsRuntimeData(false);
+  syncPricingRuntimeData();
   renderCategorySelectControls();
   renderCategoryImageLibrary();
   populateCategoryForm(editingCategorySlug);
