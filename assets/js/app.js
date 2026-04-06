@@ -3080,7 +3080,14 @@
       <a class="floating-whatsapp" href="${buildWhatsAppUrl("Hello SharonCraft, I would like to chat about your products.")}" target="_blank" rel="noreferrer" data-analytics-label="Floating WhatsApp">
         WhatsApp
       </a>
-      <button class="scroll-top" type="button" aria-label="Scroll to top">Top</button>
+      <button class="scroll-top" type="button" aria-label="Scroll to top">
+        <span class="scroll-top-label">Top</span>
+        <span class="scroll-top-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </span>
+      </button>
     `;
 
     const scrollButton = target.querySelector(".scroll-top");
