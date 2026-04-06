@@ -460,8 +460,7 @@
 
   function shouldUseFormulaPricing(product) {
     const pricingMode = String(product && product.pricingMode || "").trim().toLowerCase();
-    const hasBasePrice = hasDefinedNumber(product && product.basePrice);
-    return pricingMode === "formula" || hasBasePrice;
+    return pricingMode === "formula";
   }
 
   function calculateWebsitePrice(basePrice, siteData) {
@@ -482,7 +481,7 @@
     const fallbackBasePrice = Number(source.price);
     const basePrice = useFormulaPricing
       ? Math.max(0, hasDefinedNumber(source.basePrice) ? rawBasePrice : fallbackBasePrice || 0)
-      : (hasDefinedNumber(source.basePrice) ? Math.max(0, rawBasePrice) : 0);
+      : null;
     const finalPrice = useFormulaPricing
       ? calculateWebsitePrice(basePrice, siteData)
       : Math.max(0, Number(source.price) || 0);
@@ -499,13 +498,15 @@
     const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
     const details = Array.isArray(product.details) ? product.details.filter(Boolean) : [];
 
+    const pricingMode = String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual";
+
     return {
       id: product.id,
       name: product.name || "",
       category: product.category || "",
       price: Number(product.price) || 0,
-      basePrice: hasDefinedNumber(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
-      pricingMode: String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual",
+      basePrice: pricingMode === "formula" && hasDefinedNumber(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
+      pricingMode,
       soldOut: Boolean(product.soldOut),
       momPrice: Number(product.momPrice) || 0,
       deliveryCharge: Number(product.deliveryCharge) || 0,

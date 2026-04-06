@@ -437,13 +437,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       cleanImagePath(rawGallery[0]) ||
       fallbackImage;
     const gallery = dedupeImages([mainImage].concat(rawImages, rawGallery));
+    const pricingMode = String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual";
     const normalizedProduct = {
       id: product.id,
       name: product.name,
       category: fallbackCategory,
       price: Number(product.price) || 0,
-      basePrice: hasBasePriceValue(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
-      pricingMode: String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual",
+      basePrice: pricingMode === "formula" && hasBasePriceValue(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
+      pricingMode,
       momPrice: Number(product.momPrice) || 0,
       deliveryCharge: Number(product.deliveryCharge) || 0,
       deliveryCost: Number(product.deliveryCost) || 0,
@@ -2553,7 +2554,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function isFormulaPricingEnabled(product) {
     if (product && typeof product === "object") {
-      return String(product.pricingMode || "").trim().toLowerCase() === "formula" || hasBasePriceValue(product.basePrice);
+      return String(product.pricingMode || "").trim().toLowerCase() === "formula";
     }
 
     return Boolean(autoPriceInput && autoPriceInput.checked);
@@ -3787,13 +3788,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       const reservedStock = Number(product.reservedQty) || 0;
       const hasTrackedStock = trackedStock > 0;
 
+      const pricingMode = String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual";
+
       return {
         id: product.id,
         image: product.images && product.images.length ? product.images[0] : "",
         name: product.name,
         price: Number(product.price) || 0,
-        basePrice: hasBasePriceValue(product.basePrice) ? Math.max(0, Number(product.basePrice)) : 0,
-        pricingMode: String(product.pricingMode || "").trim().toLowerCase() === "formula" ? "formula" : "manual",
+        basePrice: pricingMode === "formula" && hasBasePriceValue(product.basePrice) ? Math.max(0, Number(product.basePrice)) : null,
+        pricingMode,
         material: categoryMap.get(product.category) || product.category || "Handmade",
         story: product.description || product.shortDescription || "Handmade by SharonCraft artisans.",
         specs: Array.isArray(product.details) ? product.details : [],

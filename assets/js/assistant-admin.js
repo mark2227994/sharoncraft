@@ -202,12 +202,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function getProductPricingMode(product) {
     if (product && typeof product === "object") {
-      const hasBasePrice =
-        product.basePrice !== null &&
-        product.basePrice !== "" &&
-        typeof product.basePrice !== "undefined" &&
-        Number.isFinite(Number(product.basePrice));
-      return normalizeText(product.pricingMode).toLowerCase() === "formula" || hasBasePrice ? "formula" : "manual";
+      return normalizeText(product.pricingMode).toLowerCase() === "formula" ? "formula" : "manual";
     }
 
     return autoPriceInput && autoPriceInput.checked ? "formula" : "manual";
