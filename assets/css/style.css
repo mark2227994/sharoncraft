@@ -2216,6 +2216,199 @@ body.cart-open .product-sticky-bar {
   color: rgba(255, 250, 243, 0.86);
 }
 
+.footer-link-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(255, 250, 243, 0.86);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.footer-link-button:hover,
+.footer-link-button:focus-visible {
+  color: #fffaf3;
+}
+
+.cookie-consent-root {
+  position: relative;
+  z-index: 62;
+}
+
+.cookie-consent-banner,
+.cookie-consent-dialog {
+  position: fixed;
+  left: 50%;
+  width: min(960px, calc(100vw - 2rem));
+  transform: translateX(-50%);
+  border: 1px solid rgba(92, 64, 51, 0.14);
+  box-shadow: 0 22px 48px rgba(48, 31, 23, 0.24);
+}
+
+.cookie-consent-banner {
+  bottom: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem 1.25rem;
+  align-items: end;
+  padding: 1.1rem 1.15rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(255, 244, 229, 0.98)),
+    #fff8ef;
+}
+
+.cookie-consent-copy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.cookie-consent-copy h2,
+.cookie-consent-dialog h2 {
+  margin: 0;
+  color: var(--deep-brown);
+}
+
+.cookie-consent-copy p,
+.cookie-consent-status,
+.cookie-consent-option-copy p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.cookie-consent-actions,
+.cookie-consent-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.cookie-consent-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 24, 19, 0.48);
+}
+
+.cookie-consent-dialog {
+  top: 50%;
+  max-width: 720px;
+  padding: 1.3rem;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.99), rgba(255, 246, 232, 0.99)),
+    #fffaf3;
+  transform: translate(-50%, -50%);
+}
+
+.cookie-consent-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cookie-consent-close {
+  min-height: 44px;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid rgba(92, 64, 51, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--deep-brown);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cookie-consent-option-list {
+  display: grid;
+  gap: 0.9rem;
+  margin: 1rem 0 1.2rem;
+}
+
+.cookie-consent-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(92, 64, 51, 0.08);
+}
+
+.cookie-consent-option-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cookie-consent-option-copy strong {
+  color: var(--deep-brown);
+}
+
+.cookie-consent-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(199, 132, 72, 0.16);
+  color: var(--deep-brown);
+  font-size: 0.92rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cookie-consent-switch {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.cookie-consent-switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.cookie-consent-switch span {
+  position: relative;
+  display: inline-flex;
+  width: 58px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(92, 64, 51, 0.22);
+  transition: background-color 0.2s ease;
+}
+
+.cookie-consent-switch span::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 6px 12px rgba(48, 31, 23, 0.18);
+  transition: transform 0.2s ease;
+}
+
+.cookie-consent-switch input:checked + span {
+  background: rgba(199, 132, 72, 0.92);
+}
+
+.cookie-consent-switch input:checked + span::after {
+  transform: translateX(24px);
+}
+
+body.cookie-consent-dialog-open {
+  overflow: hidden;
+}
+
 .contact-leadership-card {
   gap: 0.85rem;
 }
@@ -2276,6 +2469,37 @@ body.cart-open .product-sticky-bar {
 @media (max-width: 520px) {
   .footer-columns {
     grid-template-columns: 1fr;
+  }
+
+  .cookie-consent-banner {
+    bottom: calc(5.8rem + env(safe-area-inset-bottom, 0px));
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .cookie-consent-actions,
+  .cookie-consent-dialog-actions {
+    justify-content: stretch;
+  }
+
+  .cookie-consent-actions .button,
+  .cookie-consent-dialog-actions .button {
+    width: 100%;
+  }
+
+  .cookie-consent-dialog {
+    width: min(720px, calc(100vw - 1rem));
+    padding: 1rem;
+  }
+
+  .cookie-consent-option {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cookie-consent-switch,
+  .cookie-consent-pill {
+    align-self: flex-start;
   }
 }
 
