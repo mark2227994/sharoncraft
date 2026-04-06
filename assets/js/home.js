@@ -20,6 +20,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
     ? utils.loadReviewSummaries().catch(function () { return null; })
     : Promise.resolve(null);
+
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    try {
+      await window.SharonCraftLiveSync.ready;
+    } catch (error) {
+      console.warn("Unable to complete live homepage sync before first render.", error);
+    }
+  }
+
   const addImageVersion = (image, version) => {
     const source = String(image || "").trim();
     const cacheVersion = String(version || "").trim();
@@ -220,9 +229,4 @@ document.addEventListener("DOMContentLoaded", async function () {
   reviewSummaryPromise.then(function () {
     renderHome();
   });
-
-  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
-    await window.SharonCraftLiveSync.ready;
-    renderHome();
-  }
 });
