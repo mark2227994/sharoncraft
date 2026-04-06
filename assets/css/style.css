@@ -2236,6 +2236,12 @@ body.cart-open .product-sticky-bar {
   z-index: 62;
 }
 
+.cookie-consent-banner[hidden],
+.cookie-consent-dialog[hidden],
+.cookie-consent-overlay[hidden] {
+  display: none !important;
+}
+
 .cookie-consent-banner,
 .cookie-consent-dialog {
   position: fixed;
