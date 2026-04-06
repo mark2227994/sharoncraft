@@ -10,7 +10,6 @@
 - **beaded-earrings-kenya.html** - Earrings product category
 - **bridal-bead-sets-kenya.html** - Wedding/bridal products
 - **cart.html** - Shopping cart management
-- **categories.html** - Product category overview
 - **contact.html** - Customer contact form
 - **faq.html** - Frequently asked questions
 - **gift-sets-kenya.html** - Gift product collections

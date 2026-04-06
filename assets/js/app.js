@@ -2755,7 +2755,6 @@
     ].includes(currentPage);
     const primaryNavLinks = [
       { href: "index.html", icon: "home", label: "Home", isActive: currentPage === "home" },
-      { href: "categories.html", icon: "categories", label: "Categories", isActive: currentPage === "categories" },
       { href: "shop.html", icon: "shop", label: "Shop", isActive: isShopFamilyPage },
       { href: "about.html", icon: "about", label: "About", isActive: currentPage === "about" },
       { href: "contact.html", icon: "contact", label: "Contact", isActive: currentPage === "contact" }

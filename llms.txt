@@ -26,7 +26,6 @@
 - [Homepage](https://www.sharoncraft.co.ke/) - Overview of the SharonCraft brand, featured artifacts, and the WhatsApp buying process.
 - [Shop](https://www.sharoncraft.co.ke/shop.html) - The complete catalog of handmade beadwork, jewelry, and home gifts.
 - [About Us](https://www.sharoncraft.co.ke/about.html) - The cultural inspiration, mission, and traditional story behind SharonCraft.
-- [Categories](https://www.sharoncraft.co.ke/categories.html) - Browse products by specific collections such as Home Decor, Occasion Sets, and Bridal.
 - [Contact](https://www.sharoncraft.co.ke/contact.html) - Contact information, business details, and conversational ordering guidelines.
 - [Returns & Refunds](https://www.sharoncraft.co.ke/returns.html) - The customer-facing return, refund, and damaged-item policy.
 - [Privacy](https://www.sharoncraft.co.ke/privacy.html) - Website privacy and order-data handling details.

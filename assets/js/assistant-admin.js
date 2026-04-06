@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const priceInput = document.getElementById("assistant-price");
   const autoPriceInput = document.getElementById("assistant-auto-price");
   const priceFormulaNote = document.getElementById("assistant-price-formula");
+  const calculatedPriceInput = document.getElementById("assistant-calculated-price");
   const imageInput = document.getElementById("assistant-image");
   const imageStageInput = document.getElementById("assistant-image-stage");
   const imageStageStatus = document.getElementById("assistant-image-stage-status");
@@ -248,6 +249,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     const basePrice = Math.max(0, Number(priceInput && priceInput.value) || 0);
     const websitePrice = getPublishedPrice(basePrice, pricingMode);
     const settings = getPricingSettings();
+
+    if (calculatedPriceInput) {
+      calculatedPriceInput.value = formatCurrency(websitePrice);
+    }
 
     if (pricingMode === "formula" && settings.enabled) {
       priceFormulaNote.textContent = `Website price = (${formatCurrency(basePrice)} + ${formatCurrency(settings.deliveryFee)} delivery + ${formatCurrency(settings.packagingFee)} packaging) x ${settings.multiplier} = ${formatCurrency(websitePrice)}.`;
