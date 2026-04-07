@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const { loadCatalogSource } = require("./catalog-source");
 
 const rootDir = path.resolve(__dirname, "..");
-const dataModulePath = path.join(rootDir, "assets", "js", "data.js");
 const productTemplatePath = path.join(rootDir, "product.html");
 const articlesDir = path.join(rootDir, "articles");
 const outputPath = path.join(rootDir, "sitemap.xml");
@@ -89,27 +89,6 @@ function getDefaultPageMeta(fileName) {
   return { changefreq: "monthly", priority: "0.5", order: 100 };
 }
 
-function loadCatalogData() {
-  delete require.cache[require.resolve(dataModulePath)];
-
-  global.window = {
-    localStorage: {
-      getItem: function () {
-        return null;
-      },
-      setItem: function () {
-        return null;
-      }
-    },
-    location: {
-      origin: siteUrl
-    }
-  };
-
-  require(dataModulePath);
-  return global.window.SharonCraftData;
-}
-
 function listArticleFiles(directory) {
   if (!fs.existsSync(directory)) {
     return [];
@@ -161,7 +140,7 @@ function buildProductEntries(products) {
     return [];
   }
 
-  const dataUpdatedAt = fs.statSync(dataModulePath).mtimeMs;
+  const dataUpdatedAt = Date.now();
   const productTemplateUpdatedAt = fs.existsSync(productTemplatePath) ? fs.statSync(productTemplatePath).mtimeMs : 0;
   const lastmod = toLastmod(Math.max(dataUpdatedAt, productTemplateUpdatedAt));
 
@@ -215,8 +194,8 @@ function buildXml(entries) {
   return ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', body, "</urlset>", ""].join("\n");
 }
 
-function generateSitemap() {
-  const data = loadCatalogData();
+async function generateSitemap() {
+  const data = await loadCatalogSource();
 
   if (!data || !Array.isArray(data.products)) {
     throw new Error("Unable to load SharonCraft catalog data for sitemap generation.");
@@ -246,8 +225,14 @@ module.exports = {
 };
 
 if (require.main === module) {
-  const result = generateSitemap();
-  console.log(`Sitemap generated successfully at: ${result.outputPath}`);
-  console.log(`Included ${result.count} URLs.`);
+  generateSitemap()
+    .then((result) => {
+      console.log(`Sitemap generated successfully at: ${result.outputPath}`);
+      console.log(`Included ${result.count} URLs.`);
+    })
+    .catch((error) => {
+      console.error(error && error.message ? error.message : error);
+      process.exit(1);
+    });
 }
 
