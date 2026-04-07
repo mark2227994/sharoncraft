@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SharonCraft Marketing Desk</title>
+  <meta name="description" content="Private SharonCraft marketing desk for daily sales copy, follow-up replies, and live product signals." />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260407-grounded-structure" />
+  <link rel="stylesheet" href="assets/css/marketing-desk.css?v=20260407-marketing-desk" />
+</head>
+<body class="marketing-desk-page">
+  <main class="marketing-shell">
+    <section class="marketing-auth" id="marketing-auth">
+      <article class="marketing-auth-card">
+        <div class="marketing-brand">
+          <img src="assets/images/sharoncraft-logo-transparent.webp" alt="SharonCraft logo" />
+          <div>
+            <span class="section-kicker">Marketing Workspace</span>
+            <h1>Daily sales desk for SharonCraft</h1>
+            <p>Use this page for product captions, WhatsApp replies, follow-ups, and quick decisions on what to promote next.</p>
+          </div>
+        </div>
+
+        <form id="marketing-login-form" class="marketing-auth-form">
+          <label>
+            <span>Email</span>
+            <input id="marketing-email" type="email" autocomplete="username" placeholder="you@example.com" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="marketing-password" type="password" autocomplete="current-password" placeholder="Admin password" required />
+          </label>
+          <button class="button button-primary" type="submit">Open Marketing Desk</button>
+        </form>
+
+        <p id="marketing-auth-status" class="marketing-status">Checking live access...</p>
+      </article>
+    </section>
+
+    <section class="marketing-app" id="marketing-app" hidden>
+      <header class="marketing-topbar">
+        <div class="marketing-topbar-copy">
+          <span class="section-kicker">SharonCraft Marketing Desk</span>
+          <h1>Push, reply, and follow up from one page</h1>
+          <p id="marketing-user-copy">Signed in</p>
+        </div>
+        <div class="marketing-topbar-actions">
+          <span class="marketing-live-chip" id="marketing-live-chip">Live Supabase</span>
+          <a class="button button-secondary" href="assistant-admin.html">Assistant Admin</a>
+          <button class="button button-secondary" id="marketing-sign-out" type="button">Sign Out</button>
+        </div>
+      </header>
+
+      <p id="marketing-app-status" class="marketing-status">Loading products, orders, and live activity...</p>
+
+      <section class="marketing-summary-grid" id="marketing-summary"></section>
+
+      <section class="marketing-main-grid">
+        <article class="marketing-card marketing-generator-card">
+          <div class="marketing-card-head">
+            <div>
+              <span class="section-kicker">Sell This Product</span>
+              <h2>Generate copy from a real product</h2>
+            </div>
+            <button class="button button-secondary" id="marketing-refresh-products" type="button">Refresh Products</button>
+          </div>
+
+          <label class="marketing-field">
+            <span>Search products</span>
+            <input id="marketing-product-search" type="search" placeholder="Search by name or category" />
+          </label>
+
+          <div class="marketing-product-picks" id="marketing-product-picks"></div>
+
+          <div class="marketing-selected-product" id="marketing-selected-product">
+            <div class="marketing-selected-media">
+              <img id="marketing-product-image" src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="Selected SharonCraft product" />
+            </div>
+            <div class="marketing-selected-copy">
+              <span class="section-kicker" id="marketing-product-kicker">Ready to market</span>
+              <h3 id="marketing-product-name">Choose a product</h3>
+              <p id="marketing-product-story">Pick one product to generate post copy, WhatsApp pitch text, and the direct share link.</p>
+            </div>
+          </div>
+
+          <div class="marketing-copy-grid">
+            <article class="marketing-copy-card">
+              <div class="marketing-copy-head">
+                <strong>Instagram caption</strong>
+                <button class="button button-secondary" type="button" data-marketing-copy="instagram">Copy</button>
+              </div>
+              <textarea id="marketing-copy-instagram" rows="5" readonly></textarea>
+            </article>
+            <article class="marketing-copy-card">
+              <div class="marketing-copy-head">
+                <strong>WhatsApp sales pitch</strong>
+                <button class="button button-secondary" type="button" data-marketing-copy="whatsapp">Copy</button>
+              </div>
+              <textarea id="marketing-copy-whatsapp" rows="4" readonly></textarea>
+            </article>
+            <article class="marketing-copy-card">
+              <div class="marketing-copy-head">
+                <strong>Status text</strong>
+                <button class="button button-secondary" type="button" data-marketing-copy="status">Copy</button>
+              </div>
+              <textarea id="marketing-copy-status" rows="4" readonly></textarea>
+            </article>
+            <article class="marketing-copy-card">
+              <div class="marketing-copy-head">
+                <strong>Share link</strong>
+                <button class="button button-secondary" type="button" data-marketing-copy="link">Copy</button>
+              </div>
+              <input id="marketing-copy-link" type="text" readonly />
+            </article>
+          </div>
+        </article>
+
+        <aside class="marketing-side-stack">
+          <article class="marketing-card">
+            <div class="marketing-card-head">
+              <div>
+                <span class="section-kicker">Quick Actions</span>
+                <h2>Fast daily moves</h2>
+              </div>
+            </div>
+            <div class="marketing-quick-actions">
+              <button class="marketing-quick-action" type="button" data-quick-copy="offer">Copy Today's Offer</button>
+              <button class="marketing-quick-action" type="button" data-quick-copy="followup">Copy Warm Follow-up</button>
+              <button class="marketing-quick-action" type="button" data-quick-link="shop">Open Shop</button>
+              <button class="marketing-quick-action" type="button" data-quick-link="gifts">Open Gift Page</button>
+            </div>
+          </article>
+
+          <article class="marketing-card">
+            <div class="marketing-card-head">
+              <div>
+                <span class="section-kicker">Push Today</span>
+                <h2>Best thing to promote now</h2>
+              </div>
+            </div>
+            <div id="marketing-push-today" class="marketing-opportunity-stack"></div>
+          </article>
+
+          <article class="marketing-card">
+            <div class="marketing-card-head">
+              <div>
+                <span class="section-kicker">Sales Opportunities</span>
+                <h2>What needs action</h2>
+              </div>
+            </div>
+            <div id="marketing-opportunities" class="marketing-opportunity-stack"></div>
+          </article>
+        </aside>
+      </section>
+
+      <section class="marketing-lower-grid">
+        <article class="marketing-card">
+          <div class="marketing-card-head">
+            <div>
+              <span class="section-kicker">Follow-up Desk</span>
+              <h2>Reply to buyers faster</h2>
+            </div>
+            <button class="button button-secondary" id="marketing-refresh-orders" type="button">Refresh Orders</button>
+          </div>
+          <div id="marketing-orders" class="marketing-order-list"></div>
+        </article>
+
+        <article class="marketing-card">
+          <div class="marketing-card-head">
+            <div>
+              <span class="section-kicker">Live Signals</span>
+              <h2>What people are showing interest in</h2>
+            </div>
+            <button class="button button-secondary" id="marketing-refresh-analytics" type="button">Refresh Analytics</button>
+          </div>
+          <div class="marketing-range-row" role="group" aria-label="Marketing range">
+            <button class="marketing-range is-active" type="button" data-marketing-range="7d">7d</button>
+            <button class="marketing-range" type="button" data-marketing-range="30d">30d</button>
+            <button class="marketing-range" type="button" data-marketing-range="90d">90d</button>
+          </div>
+          <div class="marketing-signal-grid">
+            <section class="marketing-subcard">
+              <div class="marketing-subhead">
+                <span class="section-kicker">Top Products</span>
+                <h3>Most attention</h3>
+              </div>
+              <div id="marketing-top-products" class="marketing-rank-list"></div>
+            </section>
+            <section class="marketing-subcard">
+              <div class="marketing-subhead">
+                <span class="section-kicker">Top Pages</span>
+                <h3>Most visits</h3>
+              </div>
+              <div id="marketing-top-pages" class="marketing-rank-list"></div>
+            </section>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="assets/js/data.js?v=20260331-mpesa" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase/supabase-config.js?v=20260330-folder-reorg" defer></script>
+  <script src="supabase/supabase-catalog.js?v=20260401-reviews-sync" defer></script>
+  <script src="assets/js/auth/auth-state.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/user-controller.js?v=20260330-auth" defer></script>
+  <script src="assets/js/auth/session-middleware.js?v=20260330-auth" defer></script>
+  <script src="assets/js/marketing-desk.js?v=20260407-marketing-desk" defer></script>
+</body>
+</html>
