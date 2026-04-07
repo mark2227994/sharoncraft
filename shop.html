@@ -46,7 +46,7 @@
           <div class="shop-refine-copy">
             <span id="shop-refine-kicker" class="section-kicker">Browse & Refine</span>
             <h2 id="shop-refine-title">Search first. Filter only when you need to.</h2>
-            <p class="shop-refine-note">Start with the product name or category, then make the list smaller only if it helps.</p>
+            <p class="shop-refine-note">Search by name first, then filter only if it helps you narrow the list faster.</p>
           </div>
           <div class="shop-filter-search-section">
             <div class="shop-search-box">
@@ -54,6 +54,18 @@
               <span class="shop-search-icon">Search</span>
             </div>
           </div>
+          <div class="shop-refine-tools">
+            <span id="shop-count" class="shop-product-count">0 pieces</span>
+            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
+              <span class="shop-filter-toggle-text">Filters</span>
+            </button>
+            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="shop-filter-chips" id="shop-chips"></div>
+
+        <div class="shop-filter-panels" id="shop-filter-grid">
           <div class="shop-filter-cards shop-filter-cards-essential">
             <div class="shop-filter-card">
               <div class="filter-card-header">
@@ -81,20 +93,7 @@
               <span class="shop-filter-check-copy">Show only fresh arrivals</span>
               <input id="shop-new-only" type="checkbox" />
             </label>
-          </div>
-          <div class="shop-refine-tools">
-            <span id="shop-count" class="shop-product-count">0 pieces</span>
-            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
-              <span class="shop-filter-toggle-text">Filters</span>
-            </button>
-            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
-          </div>
-        </div>
 
-        <div class="shop-filter-chips" id="shop-chips"></div>
-
-        <div class="shop-filter-panels" id="shop-filter-grid">
-          <div class="shop-filter-cards">
             <div class="shop-filter-card">
               <div class="filter-card-header">
                 <h3 class="filter-card-title">Sort</h3>
