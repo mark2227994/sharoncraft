@@ -2104,12 +2104,27 @@
     return `https://wa.me/${data.site.whatsapp}?text=${encodeURIComponent(message)}`;
   }
 
+  function slugifyProductId(value) {
+    return normalizeText(value)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "product";
+  }
+
+  function buildProductSharePath(product) {
+    const productId = normalizeText(product && product.id);
+    if (!productId) {
+      return window.location.pathname;
+    }
+    return `/products/${slugifyProductId(productId)}.html`;
+  }
+
   function buildProductWhatsAppMessage(product, options) {
     const settings = options || {};
     const productName = product && product.name ? product.name : "this SharonCraft piece";
     const productPrice = product && Number.isFinite(Number(product.price)) ? formatCurrency(product.price) : "the listed price";
     const intent = normalizeText(settings.intent) || "order";
-    const productPath = product && product.id ? `/product.html?id=${encodeURIComponent(product.id)}` : window.location.pathname;
+    const productPath = product && product.id ? buildProductSharePath(product) : window.location.pathname;
     const productLink = absoluteUrl(productPath);
 
     if (intent === "custom") {
@@ -3881,6 +3896,7 @@
     get data() { return data; }, // Dynamic getter for current data
     formatCurrency,
     buildWhatsAppUrl,
+    buildProductSharePath,
     buildProductWhatsAppMessage,
     getProductById,
     getProductImages,
