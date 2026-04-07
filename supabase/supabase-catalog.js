@@ -399,7 +399,7 @@
     return data ? mapRowToOrder(data) : null;
   };
 
-  const fetchSetting = async (key) => {
+  const fetchSettingRecord = async (key) => {
     const supabase = getClient();
     if (!supabase) {
       return null;
@@ -413,7 +413,7 @@
 
     const { data, error } = await supabase
       .from(config.settingsTable)
-      .select("value")
+      .select("key, value, updated_at")
       .eq("key", settingKey)
       .maybeSingle();
 
@@ -421,7 +421,12 @@
       throw error;
     }
 
-    return data && typeof data.value !== "undefined" ? data.value : null;
+    return data && typeof data === "object" ? data : null;
+  };
+
+  const fetchSetting = async (key) => {
+    const record = await fetchSettingRecord(key);
+    return record && typeof record.value !== "undefined" ? record.value : null;
   };
 
   const saveSetting = async (key, value) => {
@@ -1033,6 +1038,7 @@
     fetchPublicOrder,
     deleteOrder,
     clearOrders,
+    fetchSettingRecord,
     fetchSetting,
     saveSetting,
     fetchCustomerProfile,
