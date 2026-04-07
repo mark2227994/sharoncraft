@@ -312,16 +312,47 @@ body.marketing-desk-page {
   background: rgba(255, 248, 241, 0.96);
 }
 
+.marketing-list-note {
+  margin: 12px 0 14px;
+  color: var(--marketing-muted);
+}
+
 .marketing-product-picks {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   margin-bottom: 18px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .marketing-product-pill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 15px 16px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.marketing-product-pill-copy {
   display: grid;
   gap: 4px;
-  padding: 14px 15px;
-  cursor: pointer;
+  min-width: 0;
+}
+
+.marketing-product-pill-meta {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(138, 86, 63, 0.1);
+  color: var(--marketing-accent);
+  font-weight: 800;
 }
 
 .marketing-product-pill.is-active {
@@ -442,7 +473,6 @@ body.marketing-desk-page {
   .marketing-quick-actions,
   .marketing-copy-grid,
   .marketing-video-grid,
-  .marketing-product-picks,
   .marketing-signal-grid {
     grid-template-columns: 1fr;
   }
@@ -480,6 +510,15 @@ body.marketing-desk-page {
     grid-template-columns: 1fr;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .marketing-product-pill {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .marketing-product-pill-meta {
+    min-width: 0;
   }
 
   .marketing-selected-media img {
