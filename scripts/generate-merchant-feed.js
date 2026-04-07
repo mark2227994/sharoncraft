@@ -2,10 +2,51 @@ const fs = require('fs');
 const path = require('path');
 const { loadCatalogSource } = require('./catalog-source');
 const siteUrl = "https://www.sharoncraft.co.ke";
+const fallbackImagePath = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
+const maxImageReferenceLength = 2048;
+
+function isHttpUrl(value) {
+  return /^https?:\/\//i.test(String(value || "").trim());
+}
+
+function normalizeImageExtension(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const hashIndex = trimmed.indexOf("#");
+  const queryIndex = trimmed.indexOf("?");
+  const splitIndex =
+    hashIndex === -1 ? queryIndex :
+    queryIndex === -1 ? hashIndex :
+    Math.min(hashIndex, queryIndex);
+  const base = splitIndex === -1 ? trimmed : trimmed.slice(0, splitIndex);
+  const suffix = splitIndex === -1 ? "" : trimmed.slice(splitIndex);
+
+  return `${base.replace(/\.(jpg|jpeg|png)$/i, '.webp')}${suffix}`;
+}
+
+function normalizeImageReference(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed || trimmed.length > maxImageReferenceLength || /^data:/i.test(trimmed)) {
+    return "";
+  }
+
+  if (isHttpUrl(trimmed)) {
+    return normalizeImageExtension(trimmed);
+  }
+
+  if (/^[a-z]+:/i.test(trimmed) || trimmed.startsWith("//")) {
+    return "";
+  }
+
+  return normalizeImageExtension(trimmed.replace(/^\/+/, ''));
+}
 
 function absoluteAssetUrl(assetPath) {
-  const cleaned = String(assetPath || "").trim().replace(/^\/+/, '');
-  return `${siteUrl}/${cleaned || "assets/images/custom-occasion-beadwork-46mokm-opt.webp"}`;
+  const normalized = normalizeImageReference(assetPath) || fallbackImagePath;
+  return isHttpUrl(normalized) ? normalized : `${siteUrl}/${normalized}`;
 }
 
 // Helper to reliably escape XML payload formats
@@ -27,11 +68,11 @@ function normalizeImageList(product) {
     .concat(Array.isArray(product && product.images) ? product.images : [])
     .concat(product && product.image ? [product.image] : [])
     .concat(Array.isArray(product && product.gallery) ? product.gallery : [])
-    .map((item) => String(item || "").trim())
+    .map((item) => normalizeImageReference(item))
     .filter(Boolean);
 
   const unique = imageList.filter((image, index) => imageList.indexOf(image) === index);
-  return unique.length ? unique : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
+  return unique.length ? unique : [fallbackImagePath];
 }
 
 function normalizeDescription(product) {
@@ -56,10 +97,10 @@ function generateItem(product) {
   const url = `${siteUrl}/product.html?id=${encodeURIComponent(product.id)}`;
   const category = categoryMap.get(String(product.category || "").trim()) || {};
   const productImages = normalizeImageList(product);
-  const mainImage = absoluteAssetUrl(productImages[0].replace(/\.(jpg|jpeg|png)$/i, '.webp'));
+  const mainImage = absoluteAssetUrl(productImages[0]);
   const additionalImagesXml = productImages
     .slice(1, 10)
-    .map((image) => `      <g:additional_image_link>${escapeXml(absoluteAssetUrl(image.replace(/\.(jpg|jpeg|png)$/i, '.webp')))}</g:additional_image_link>`)
+    .map((image) => `      <g:additional_image_link>${escapeXml(absoluteAssetUrl(image))}</g:additional_image_link>`)
     .join('\n');
   const productType = buildProductType(product);
   const customLabel0 = product.featured ? "featured" : product.newArrival ? "new-arrival" : "catalog";
