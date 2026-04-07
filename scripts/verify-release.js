@@ -12,6 +12,11 @@ const requiredPages = [
   "404.html",
   "privacy.html"
 ];
+const requiredSupportFiles = [
+  "robots.txt",
+  "llms.txt",
+  "6e8a6d86-fb64-4afc-a912-0a4c9ee7cb50.txt"
+];
 const generatedFiles = [
   {
     path: "sitemap.xml",
@@ -113,6 +118,10 @@ function verifyRequiredPages() {
   requiredPages.forEach(ensureFileExists);
 }
 
+function verifySupportFiles() {
+  requiredSupportFiles.forEach(ensureFileExists);
+}
+
 function verifyGeneratedFiles() {
   return generatedFiles.map(function (file) {
     const absolutePath = ensureFileExists(file.path);
@@ -171,6 +180,7 @@ function verifyHtmlReferences() {
 
 function runReleaseVerification() {
   verifyRequiredPages();
+  verifySupportFiles();
   const generatedSummary = verifyGeneratedFiles();
   const htmlSummary = verifyHtmlReferences();
 
