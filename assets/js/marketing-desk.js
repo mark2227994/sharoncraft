@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const appStatus = $("marketing-app-status");
   const productSearch = $("marketing-product-search");
   const productPicks = $("marketing-product-picks");
+  const productListNote = $("marketing-product-list-note");
   const summaryWrap = $("marketing-summary");
   const planWrap = $("marketing-plan");
   const productImage = $("marketing-product-image");
@@ -47,6 +48,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   let currentAngle = "gift";
   let currentRange = "7d";
   let currentUser = null;
+  let lastProductSignature = "";
+  let productRefreshTimer = 0;
 
   function t(v) { return String(v || "").trim(); }
   function h(v) { return String(v || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
@@ -188,6 +191,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   function todayOffer() { const product = topProduct(); const promo = t(window.SharonCraftData && window.SharonCraftData.site && window.SharonCraftData.site.promo); return product ? `${t(product.name)} is one of the best products to push today at SharonCraft. ${promo || "Handmade in Kenya and easy to order on WhatsApp."} View it here: ${shareUrl(product)}` : (promo || "Handmade SharonCraft pieces are available now. Message on WhatsApp for help choosing the right piece."); }
   function warmFollowUp() { const pending = orders.find(function (o) { return ["new", "confirmed"].includes(t(o.status)); }); return pending ? orderMsg(pending, "followup") : "Hello, just checking in from SharonCraft. If you still want help choosing a gift, decor piece, or handmade accessory, I can guide you quickly on WhatsApp."; }
   function selectedProduct() { return products.find(function (p) { return t(p.id) === selectedId; }) || topProduct(); }
+  function productSignature(list) { return (list || []).map(function (p) { return [t(p.id), t(p.updatedAt), t(p.name)].join(":"); }).join("|"); }
 
   function renderSummary() {
     const replies = orders.filter(function (o) { return ["new", "confirmed"].includes(t(o.status)); }).length;
@@ -214,10 +218,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   function renderPicks() {
     const q = t(productSearch && productSearch.value).toLowerCase();
-    const list = products.filter(function (p) { return !q || t(p.name).toLowerCase().includes(q) || categoryName(p).toLowerCase().includes(q); }).slice(0, 8);
+    const list = products.filter(function (p) { return !q || t(p.name).toLowerCase().includes(q) || categoryName(p).toLowerCase().includes(q); });
+    if (productListNote) productListNote.textContent = list.length ? `${list.length} live product${list.length === 1 ? "" : "s"} ready to choose from. The list refreshes automatically when you come back here.` : "No live products match your search right now.";
     productPicks.innerHTML = list.length ? list.map(function (p) {
       const active = t(p.id) === t(selectedId) ? " is-active" : "";
-      return `<button class="marketing-product-pill${active}" type="button" data-product-pick="${h(t(p.id))}"><strong>${h(t(p.name))}</strong><span>${h(categoryName(p))} - ${h(money(p.price))}</span></button>`;
+      return `<button class="marketing-product-pill${active}" type="button" data-product-pick="${h(t(p.id))}"><span class="marketing-product-pill-copy"><strong>${h(t(p.name))}</strong><span>${h(categoryName(p))}</span></span><span class="marketing-product-pill-meta">${h(money(p.price))}</span></button>`;
     }).join("") : '<div class="marketing-empty">No products match that search yet.</div>';
   }
 
@@ -292,9 +297,39 @@ document.addEventListener("DOMContentLoaded", async function () {
     renderSignals();
   }
 
-  async function loadProducts(showStatus) { products = await catalogApi.fetchProducts(); if (!selectedId) { const p = topProduct(); selectedId = t(p && p.id); } renderAll(); if (showStatus !== false) status(appStatus, "Live products refreshed.", "success"); }
+  async function loadProducts(showStatus, options) {
+    const nextProducts = await catalogApi.fetchProducts();
+    const nextSignature = productSignature(nextProducts);
+    const changed = nextSignature !== lastProductSignature;
+    products = nextProducts;
+    lastProductSignature = nextSignature;
+    if (!selectedId || !products.some(function (p) { return t(p.id) === selectedId; })) {
+      const p = topProduct();
+      selectedId = t(p && p.id);
+    }
+    renderAll();
+    if (showStatus === false) return;
+    if (changed && options && options.passive) {
+      status(appStatus, "Live products updated in the marketing list.", "success");
+      return;
+    }
+    if (showStatus !== false) status(appStatus, "Live products refreshed.", "success");
+  }
   async function loadOrders(showStatus) { orders = await catalogApi.fetchOrders(); renderAll(); if (showStatus !== false) status(appStatus, "Live orders refreshed.", "success"); }
   async function loadAnalytics(showStatus) { events = await catalogApi.fetchAnalyticsEvents(200); renderAll(); if (showStatus !== false) status(appStatus, "Live analytics refreshed.", "success"); }
+  async function autoRefreshProducts() {
+    if (authView.hidden === false || appView.hidden) return;
+    try {
+      await loadProducts(true, { passive: true });
+    } catch (error) {}
+  }
+  function startProductRefreshLoop() {
+    if (productRefreshTimer) window.clearInterval(productRefreshTimer);
+    productRefreshTimer = window.setInterval(function () {
+      if (document.hidden) return;
+      autoRefreshProducts();
+    }, 45000);
+  }
 
   async function enterApp(user) {
     currentUser = user;
@@ -305,6 +340,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     await loadProducts(false);
     await loadOrders(false);
     await loadAnalytics(false);
+    startProductRefreshLoop();
     status(appStatus, "Marketing desk ready. Products, orders, and live activity are synced.", "success");
   }
 
@@ -332,6 +368,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (signOutButton) signOutButton.addEventListener("click", async function () {
     try { await userController.signOut(); } catch (error) {}
     currentUser = null;
+    if (productRefreshTimer) { window.clearInterval(productRefreshTimer); productRefreshTimer = 0; }
     appView.hidden = true;
     authView.hidden = false;
     status(authStatus, "Signed out. Sign in again to reopen the marketing desk.", "info");
@@ -341,9 +378,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (productPicks) productPicks.addEventListener("click", function (event) { const button = event.target.closest("[data-product-pick]"); if (!button) return; selectedId = t(button.dataset.productPick); renderSelected(); renderPush(); });
   if (anglePicker) anglePicker.addEventListener("click", function (event) { const button = event.target.closest("[data-marketing-angle]"); if (!button) return; currentAngle = t(button.dataset.marketingAngle) || "gift"; renderSelected(); renderPush(); });
   rangeButtons.forEach(function (button) { button.addEventListener("click", function () { currentRange = button.dataset.marketingRange; rangeButtons.forEach(function (item) { item.classList.toggle("is-active", item === button); }); renderSummary(); renderPush(); renderNeeds(); renderSignals(); }); });
-  if (refreshProductsButton) refreshProductsButton.addEventListener("click", async function () { try { await loadProducts(); } catch (error) { status(appStatus, "Could not refresh products right now.", "error"); } });
+  if (refreshProductsButton) refreshProductsButton.addEventListener("click", async function () { try { await loadProducts(true); } catch (error) { status(appStatus, "Could not refresh products right now.", "error"); } });
   if (refreshOrdersButton) refreshOrdersButton.addEventListener("click", async function () { try { await loadOrders(); } catch (error) { status(appStatus, "Could not refresh orders right now.", "error"); } });
   if (refreshAnalyticsButton) refreshAnalyticsButton.addEventListener("click", async function () { try { await loadAnalytics(); } catch (error) { status(appStatus, "Could not refresh analytics right now.", "error"); } });
+  window.addEventListener("focus", autoRefreshProducts);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) autoRefreshProducts(); });
 
   if (appView) appView.addEventListener("click", function (event) {
     const product = selectedProduct();
@@ -390,6 +429,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     catalogApi.onAuthStateChange(function (user) {
       if (!user && currentUser) {
         currentUser = null;
+        if (productRefreshTimer) { window.clearInterval(productRefreshTimer); productRefreshTimer = 0; }
         appView.hidden = true;
         authView.hidden = false;
         status(authStatus, "Signed out. Sign in again to reopen the marketing desk.", "info");
