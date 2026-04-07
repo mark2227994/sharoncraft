@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const utils = window.SharonCraftUtils;
+  const docElement = document.documentElement;
+  const pageBody = document.body;
+  const openingLoader = document.querySelector("[data-home-loader-overlay]");
   const heroKicker = document.getElementById("home-hero-kicker");
   const heroTitle = document.getElementById("home-hero-title");
   const heroDescription = document.getElementById("home-hero-description");
@@ -16,6 +19,71 @@ document.addEventListener("DOMContentLoaded", async function () {
   const categoryGrid = document.getElementById("home-categories");
   const arrivalsGrid = document.getElementById("new-arrivals");
   const testimonialStack = document.getElementById("home-testimonials");
+  let loaderFinished = false;
+
+  function finishHomeOpeningLoader() {
+    if (!openingLoader || loaderFinished) {
+      return;
+    }
+
+    loaderFinished = true;
+    docElement.setAttribute("data-home-loader-state", "leaving");
+    pageBody.classList.add("home-loader-leaving");
+
+    window.setTimeout(function () {
+      openingLoader.hidden = true;
+      pageBody.classList.remove("home-loader-active", "home-loader-leaving");
+      docElement.setAttribute("data-home-loader-state", "done");
+    }, 720);
+  }
+
+  function initHomeOpeningLoader() {
+    if (!openingLoader) {
+      docElement.setAttribute("data-home-loader-state", "done");
+      return;
+    }
+
+    if (docElement.getAttribute("data-home-loader") === "skip") {
+      openingLoader.hidden = true;
+      docElement.setAttribute("data-home-loader-state", "done");
+      return;
+    }
+
+    pageBody.classList.add("home-loader-active");
+    docElement.setAttribute("data-home-loader-state", "active");
+
+    try {
+      window.sessionStorage.setItem("sharoncraft-home-loader-seen", "1");
+    } catch (error) {
+      console.warn("Unable to persist homepage loader session state.", error);
+    }
+
+    const loaderStartedAt = Date.now();
+    const minimumDuration = 1180;
+    const fallbackDuration = 2400;
+    let closeRequested = false;
+
+    function requestClose() {
+      if (closeRequested) {
+        return;
+      }
+
+      closeRequested = true;
+      const remaining = Math.max(0, minimumDuration - (Date.now() - loaderStartedAt));
+      window.setTimeout(finishHomeOpeningLoader, remaining);
+    }
+
+    window.setTimeout(requestClose, fallbackDuration);
+
+    if (document.readyState === "complete") {
+      requestClose();
+      return;
+    }
+
+    window.addEventListener("load", requestClose, { once: true });
+  }
+
+  initHomeOpeningLoader();
 
   await utils.waitForData();
   const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
