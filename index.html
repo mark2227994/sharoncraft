@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=20260407-grounded-structure" />
+  <link rel="stylesheet" href="assets/css/style.css?v=20260407-intent-stage" />
   <link rel="stylesheet" href="assets/css/home-hero-refine.css?v=20260404-home-hero-refine" />
   <link rel="stylesheet" href="assets/css/payment-status-badge.css?v=20260404-mpesa-badge" />
   <link rel="stylesheet" href="assets/css/mobile-product-grid-comfort.css?v=20260404-mobile-grid-comfort" />
@@ -181,6 +181,11 @@
           <h2>Start With What You Need Today.</h2>
           <p>Choose the path that matches your reason for shopping, and go straight to the right pieces.</p>
         </div>
+        <div class="intent-stage-row reveal" aria-label="Shopping paths overview">
+          <span class="intent-stage-chip">Dress yourself</span>
+          <span class="intent-stage-chip">Pick a gift</span>
+          <span class="intent-stage-chip">Warm up a room</span>
+        </div>
         <div class="intent-paths">
           <div class="intent-path-line" aria-hidden="true"></div>
           <article class="intent-path-card accent-coral reveal">
@@ -188,9 +193,16 @@
               <img src="assets/images/intent-wear-it-necklace.webp" alt="Bright handmade statement necklace from SharonCraft" loading="lazy" decoding="async" />
             </a>
             <div class="intent-path-copy">
+              <div class="intent-path-meta">
+                <span class="intent-path-badge">Style-first choice</span>
+              </div>
               <span class="intent-path-kicker">Everyday styling</span>
               <h3>Wear It</h3>
               <p>Necklaces, bracelets, and statement beadwork for daily looks, events, and standout moments.</p>
+              <div class="intent-path-tag-row" aria-label="Wear It best for">
+                <span class="intent-path-tag">Everyday looks</span>
+                <span class="intent-path-tag">Events</span>
+              </div>
               <a class="button button-secondary" href="shop.html?category=Jewelry">Shop Jewelry</a>
             </div>
           </article>
@@ -199,9 +211,17 @@
               <img src="assets/images/intent-gift-it-set.jpg" alt="Gift-ready handmade jewelry set from SharonCraft" loading="lazy" decoding="async" />
             </a>
             <div class="intent-path-copy">
+              <div class="intent-path-meta">
+                <span class="intent-path-badge">Most-loved path</span>
+              </div>
               <span class="intent-path-kicker">Thoughtful gifting</span>
               <h3>Gift It</h3>
               <p>Handmade pieces for birthdays, weddings, thank-yous, and celebrations that should feel personal.</p>
+              <div class="intent-path-tag-row" aria-label="Gift It best for">
+                <span class="intent-path-tag">Birthdays</span>
+                <span class="intent-path-tag">Thank-yous</span>
+                <span class="intent-path-tag">Wedding moments</span>
+              </div>
               <a class="button button-primary" href="gift-sets-kenya.html">Find A Gift</a>
             </div>
           </article>
@@ -210,12 +230,29 @@
               <img src="assets/images/intent-style-home-clock.jpg" alt="Colorful beaded wall clock from SharonCraft" loading="lazy" decoding="async" />
             </a>
             <div class="intent-path-copy">
+              <div class="intent-path-meta">
+                <span class="intent-path-badge">Room-refresh pick</span>
+              </div>
               <span class="intent-path-kicker">Warm interiors</span>
               <h3>Style Home</h3>
               <p>Beaded decor accents that bring color, character, and a softer handmade finish into your space.</p>
+              <div class="intent-path-tag-row" aria-label="Style Home best for">
+                <span class="intent-path-tag">Living rooms</span>
+                <span class="intent-path-tag">Housewarmings</span>
+              </div>
               <a class="button button-secondary" href="african-home-decor-nairobi.html">Style A Space</a>
             </div>
           </article>
+        </div>
+        <div class="intent-guidance-bar reveal">
+          <div class="intent-guidance-copy">
+            <strong>Still choosing between lanes?</strong>
+            <p>Start with the full collection or send a quick WhatsApp note and SharonCraft can point you to the best fit.</p>
+          </div>
+          <div class="intent-guidance-actions">
+            <a class="button button-secondary" href="shop.html">Browse Everything</a>
+            <a id="home-intent-whatsapp" class="button button-primary" href="#" target="_blank" rel="noreferrer" data-analytics-label="Homepage Intent WhatsApp">Ask On WhatsApp</a>
+          </div>
         </div>
       </div>
     </section>
@@ -288,7 +325,7 @@
   <script src="assets/js/supabase-data-sync.js?v=20260401-site-content" defer></script>
   <script src="assets/js/app.js?v=20260407-grounded-structure" defer></script>
   <script src="assets/js/mobile-ux.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/home.js?v=20260401-ratings-pass" defer></script>
+  <script src="assets/js/home.js?v=20260407-intent-stage" defer></script>
 </body>
 </html>
 

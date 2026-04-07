@@ -2044,6 +2044,29 @@ main > .section:not(:first-of-type),
   margin-inline: auto;
 }
 
+.intent-stage-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: -0.2rem;
+}
+
+.intent-stage-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(92, 64, 51, 0.1);
+  color: rgba(92, 64, 51, 0.84);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 10px 24px rgba(92, 64, 51, 0.05);
+}
+
 .intent-paths {
   position: relative;
   display: grid;
@@ -2097,6 +2120,8 @@ main > .section:not(:first-of-type),
 .intent-path-card {
   --intent-solid: var(--terracotta);
   --intent-glow: rgba(217, 108, 72, 0.16);
+  --intent-rest-transform: translateY(0) rotate(0deg);
+  --intent-hover-transform: translateY(-5px) rotate(0deg);
   position: relative;
   z-index: 1;
   display: grid;
@@ -2107,6 +2132,7 @@ main > .section:not(:first-of-type),
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 34px rgba(92, 64, 51, 0.08);
   isolation: isolate;
+  transform: var(--intent-rest-transform);
   transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
 }
 
@@ -2123,18 +2149,29 @@ main > .section:not(:first-of-type),
 
 .intent-path-card:hover,
 .intent-path-card:focus-within {
-  transform: translateY(-5px);
+  transform: var(--intent-hover-transform);
   border-color: rgba(92, 64, 51, 0.2);
   box-shadow: 0 24px 42px rgba(92, 64, 51, 0.12);
 }
 
+.intent-path-card:nth-of-type(1) {
+  --intent-rest-transform: translateY(12px) rotate(-1.15deg);
+  --intent-hover-transform: translateY(-4px) rotate(-0.35deg);
+}
+
+.intent-path-card:nth-of-type(3) {
+  --intent-rest-transform: translateY(10px) rotate(1.15deg);
+  --intent-hover-transform: translateY(-4px) rotate(0.35deg);
+}
+
 .intent-path-card-featured {
-  transform: translateY(-18px);
+  --intent-rest-transform: translateY(-18px) scale(1.01);
+  --intent-hover-transform: translateY(-24px) scale(1.01);
 }
 
 .intent-path-card-featured:hover,
 .intent-path-card-featured:focus-within {
-  transform: translateY(-24px);
+  transform: var(--intent-hover-transform);
 }
 
 .intent-path-media {
@@ -2173,8 +2210,30 @@ main > .section:not(:first-of-type),
 .intent-path-copy {
   display: grid;
   gap: 0.72rem;
+  align-content: start;
   padding: 1.1rem 1.1rem 1.15rem;
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.94), rgba(255, 247, 238, 0.98));
+}
+
+.intent-path-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.intent-path-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(92, 64, 51, 0.07);
+  color: rgba(92, 64, 51, 0.82);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .intent-path-kicker {
@@ -2212,6 +2271,25 @@ main > .section:not(:first-of-type),
   max-width: 28ch;
 }
 
+.intent-path-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.intent-path-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.28rem 0.62rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(92, 64, 51, 0.08);
+  color: rgba(92, 64, 51, 0.82);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .intent-path-card .button {
   width: fit-content;
   margin-top: 0.15rem;
@@ -2244,20 +2322,67 @@ main > .section:not(:first-of-type),
   background: linear-gradient(180deg, rgba(247, 255, 252, 0.96), rgba(232, 248, 244, 0.98));
 }
 
+.intent-guidance-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.2rem;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 250, 244, 0.96), rgba(249, 243, 232, 0.96)),
+    rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(92, 64, 51, 0.1);
+  box-shadow: 0 16px 28px rgba(92, 64, 51, 0.06);
+}
+
+.intent-guidance-copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.intent-guidance-copy strong {
+  color: var(--deep-brown);
+  font-family: "Poppins", sans-serif;
+  font-size: 1.02rem;
+}
+
+.intent-guidance-copy p {
+  margin: 0;
+  max-width: 56ch;
+  color: rgba(92, 64, 51, 0.84);
+}
+
+.intent-guidance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: flex-end;
+}
+
 @media (max-width: 980px) {
   .intent-paths {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
   }
 
+  .intent-path-card,
+  .intent-path-card:nth-of-type(1),
+  .intent-path-card:nth-of-type(3) {
+    --intent-rest-transform: none;
+    --intent-hover-transform: translateY(-5px);
+  }
+
   .intent-path-card-featured {
     grid-column: 1 / -1;
-    transform: none;
+    --intent-rest-transform: none;
+    --intent-hover-transform: translateY(-5px);
   }
 
   .intent-path-card-featured:hover,
   .intent-path-card-featured:focus-within {
-    transform: translateY(-5px);
+    transform: var(--intent-hover-transform);
   }
 
   .intent-path-card-featured .intent-path-media {
@@ -2267,9 +2392,22 @@ main > .section:not(:first-of-type),
   .intent-path-line {
     top: 29%;
   }
+
+  .intent-guidance-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .intent-guidance-actions {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 640px) {
+  .intent-stage-row {
+    justify-content: flex-start;
+  }
+
   .intent-paths {
     grid-template-columns: 1fr;
     gap: 0.9rem;
@@ -2305,7 +2443,23 @@ main > .section:not(:first-of-type),
     font-size: 1.34rem;
   }
 
+  .intent-path-meta {
+    gap: 0.4rem;
+  }
+
   .intent-path-card .button {
+    width: 100%;
+  }
+
+  .intent-guidance-bar {
+    padding: 0.95rem;
+  }
+
+  .intent-guidance-actions {
+    width: 100%;
+  }
+
+  .intent-guidance-actions .button {
     width: 100%;
   }
 }
