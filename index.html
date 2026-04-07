@@ -22,11 +22,46 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css?v=20260407-intent-stage" />
-  <link rel="stylesheet" href="assets/css/home-hero-refine.css?v=20260404-home-hero-refine" />
+  <link rel="stylesheet" href="assets/css/home-hero-refine.css?v=20260407-home-opening" />
   <link rel="stylesheet" href="assets/css/payment-status-badge.css?v=20260404-mpesa-badge" />
   <link rel="stylesheet" href="assets/css/mobile-product-grid-comfort.css?v=20260404-mobile-grid-comfort" />
+  <script>
+    (function () {
+      try {
+        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var loaderSeen = window.sessionStorage.getItem("sharoncraft-home-loader-seen") === "1";
+        document.documentElement.setAttribute("data-home-loader", reduceMotion || loaderSeen ? "skip" : "show");
+      } catch (error) {
+        document.documentElement.setAttribute("data-home-loader", "show");
+      }
+    }());
+  </script>
 </head>
 <body data-page="home">
+  <div class="home-opening-loader" data-home-loader-overlay aria-hidden="true">
+    <div class="home-opening-loader-scene">
+      <div class="home-opening-loader-aura"></div>
+      <div class="home-opening-loader-pattern"></div>
+      <div class="home-opening-loader-orbit">
+        <span class="home-opening-loader-bead bead-coral" style="--from-x: -22px; --from-y: 106px; --to-x: 0px; --to-y: -94px; --delay: 0.02s;"></span>
+        <span class="home-opening-loader-bead bead-ochre" style="--from-x: -126px; --from-y: 60px; --to-x: 66px; --to-y: -66px; --delay: 0.12s;"></span>
+        <span class="home-opening-loader-bead bead-teal" style="--from-x: -146px; --from-y: 2px; --to-x: 94px; --to-y: 0px; --delay: 0.2s;"></span>
+        <span class="home-opening-loader-bead bead-brown" style="--from-x: -112px; --from-y: -82px; --to-x: 66px; --to-y: 66px; --delay: 0.28s;"></span>
+        <span class="home-opening-loader-bead bead-coral" style="--from-x: -6px; --from-y: -118px; --to-x: 0px; --to-y: 94px; --delay: 0.36s;"></span>
+        <span class="home-opening-loader-bead bead-ochre" style="--from-x: 92px; --from-y: -92px; --to-x: -66px; --to-y: 66px; --delay: 0.44s;"></span>
+        <span class="home-opening-loader-bead bead-teal" style="--from-x: 136px; --from-y: -18px; --to-x: -94px; --to-y: 0px; --delay: 0.52s;"></span>
+        <span class="home-opening-loader-bead bead-brown" style="--from-x: 108px; --from-y: 86px; --to-x: -66px; --to-y: -66px; --delay: 0.6s;"></span>
+      </div>
+      <div class="home-opening-loader-center">
+        <span class="home-opening-loader-center-mark"></span>
+      </div>
+      <div class="home-opening-loader-copy">
+        <span class="home-opening-loader-kicker">Handmade in Kenya</span>
+        <strong>SharonCraft</strong>
+        <p>Jewelry, gifts, and warm home accents with a crafted feel.</p>
+      </div>
+    </div>
+  </div>
   <div data-site-header></div>
 
   <main>
@@ -325,7 +360,7 @@
   <script src="assets/js/supabase-data-sync.js?v=20260401-site-content" defer></script>
   <script src="assets/js/app.js?v=20260407-grounded-structure" defer></script>
   <script src="assets/js/mobile-ux.js?v=20260327-live-fix" defer></script>
-  <script src="assets/js/home.js?v=20260407-intent-stage" defer></script>
+  <script src="assets/js/home.js?v=20260407-home-opening" defer></script>
 </body>
 </html>
 
