@@ -2292,6 +2292,10 @@
     const image = getProductImages(product)[0];
     const wishlisted = isWishlisted(product.id);
     const category = getCategoryBySlug(product.category);
+    const categoryAccent = normalizeText(category && category.accent) || "coral";
+    const craftSignature = normalizeText(product.material)
+      ? `${product.material} detail`
+      : "Handmade detail";
     const badgeMarkup = product.badge
       ? `<span class="${buildBadgeClass(product.badge)}">${product.badge}</span>`
       : "";
@@ -2300,9 +2304,11 @@
       : ` data-product-id="${product.id}" data-product-name="${productName}"`;
 
     return `
-      <article class="product-card reveal">
+      <article class="product-card reveal accent-${categoryAccent}">
         <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes}>
           <img src="${image}" alt="${productName}" loading="lazy" decoding="async" />
+          <span class="product-card-orbit" aria-hidden="true"></span>
+          <span class="product-card-wash" aria-hidden="true"></span>
           ${badgeMarkup}
           <div class="product-card-media-actions">
             <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
@@ -2313,6 +2319,10 @@
         <div class="product-card-body">
           <div class="product-card-copy">
             <p class="product-card-category">${category ? category.name : "Collection"}</p>
+            <div class="product-card-signature" aria-hidden="true">
+              <span class="product-card-beads"><i></i><i></i><i></i></span>
+              <span>${craftSignature}</span>
+            </div>
             <h3 class="product-name"><a href="product.html?id=${product.id}"${analyticsAttributes}>${productName}</a></h3>
           </div>
           <div class="product-card-price-row">
