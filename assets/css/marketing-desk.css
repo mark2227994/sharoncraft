@@ -147,6 +147,7 @@ body.marketing-desk-page {
 }
 
 .marketing-summary-grid,
+.marketing-plan-grid,
 .marketing-signal-grid {
   display: grid;
   gap: 16px;
@@ -154,10 +155,16 @@ body.marketing-desk-page {
 
 .marketing-summary-grid {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: 14px;
+}
+
+.marketing-plan-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-bottom: 20px;
 }
 
 .marketing-summary-grid article,
+.marketing-plan-grid article,
 .marketing-rank-item,
 .marketing-order-item,
 .marketing-opportunity-card,
@@ -172,11 +179,26 @@ body.marketing-desk-page {
   padding: 16px;
 }
 
+.marketing-plan-grid article {
+  padding: 18px;
+}
+
 .marketing-summary-grid strong {
   display: block;
   font-family: "Poppins", sans-serif;
   font-size: 1.3rem;
   margin-top: 8px;
+}
+
+.marketing-plan-grid strong {
+  display: block;
+  font-family: "Poppins", sans-serif;
+  margin-bottom: 8px;
+}
+
+.marketing-plan-grid p {
+  margin: 0;
+  color: var(--marketing-muted);
 }
 
 .marketing-main-grid,
@@ -204,9 +226,56 @@ body.marketing-desk-page {
   gap: 14px;
 }
 
+.marketing-angle-block {
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 247, 238, 0.86);
+  border: 1px solid rgba(101, 63, 50, 0.08);
+}
+
+.marketing-angle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.marketing-angle {
+  border: 1px solid rgba(101, 63, 50, 0.12);
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--marketing-text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.marketing-angle:hover {
+  border-color: rgba(138, 86, 63, 0.22);
+  background: rgba(255, 252, 248, 0.96);
+}
+
+.marketing-angle.is-active {
+  background: var(--marketing-accent);
+  border-color: var(--marketing-accent);
+  color: #fff7ef;
+}
+
+.marketing-angle-note {
+  margin: 12px 0 0;
+  color: var(--marketing-muted);
+}
+
 .marketing-card,
 .marketing-subcard {
   padding: 24px;
+}
+
+.marketing-generator-card {
+  background:
+    radial-gradient(circle at top right, rgba(255, 235, 214, 0.58), transparent 36%),
+    rgba(255, 250, 245, 0.94);
 }
 
 .marketing-card-head,
@@ -235,6 +304,12 @@ body.marketing-desk-page {
   font-weight: 800;
   cursor: pointer;
   text-align: left;
+}
+
+.marketing-quick-action:hover,
+.marketing-product-pill:hover {
+  border-color: rgba(138, 86, 63, 0.2);
+  background: rgba(255, 248, 241, 0.96);
 }
 
 .marketing-product-picks {
@@ -279,6 +354,18 @@ body.marketing-desk-page {
 
 .marketing-copy-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.marketing-video-block {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(101, 63, 50, 0.08);
+}
+
+.marketing-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .marketing-copy-card,
@@ -349,10 +436,12 @@ body.marketing-desk-page {
 }
 
 @media (max-width: 980px) {
+  .marketing-plan-grid,
   .marketing-main-grid,
   .marketing-lower-grid,
   .marketing-quick-actions,
   .marketing-copy-grid,
+  .marketing-video-grid,
   .marketing-product-picks,
   .marketing-signal-grid {
     grid-template-columns: 1fr;
