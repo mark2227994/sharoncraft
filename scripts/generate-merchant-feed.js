@@ -9,24 +9,6 @@ function isHttpUrl(value) {
   return /^https?:\/\//i.test(String(value || "").trim());
 }
 
-function normalizeImageExtension(value) {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) {
-    return "";
-  }
-
-  const hashIndex = trimmed.indexOf("#");
-  const queryIndex = trimmed.indexOf("?");
-  const splitIndex =
-    hashIndex === -1 ? queryIndex :
-    queryIndex === -1 ? hashIndex :
-    Math.min(hashIndex, queryIndex);
-  const base = splitIndex === -1 ? trimmed : trimmed.slice(0, splitIndex);
-  const suffix = splitIndex === -1 ? "" : trimmed.slice(splitIndex);
-
-  return `${base.replace(/\.(jpg|jpeg|png)$/i, '.webp')}${suffix}`;
-}
-
 function normalizeImageReference(value) {
   const trimmed = String(value || "").trim();
   if (!trimmed || trimmed.length > maxImageReferenceLength || /^data:/i.test(trimmed)) {
@@ -34,14 +16,14 @@ function normalizeImageReference(value) {
   }
 
   if (isHttpUrl(trimmed)) {
-    return normalizeImageExtension(trimmed);
+    return trimmed;
   }
 
   if (/^[a-z]+:/i.test(trimmed) || trimmed.startsWith("//")) {
     return "";
   }
 
-  return normalizeImageExtension(trimmed.replace(/^\/+/, ''));
+  return trimmed.replace(/^\/+/, '');
 }
 
 function absoluteAssetUrl(assetPath) {

@@ -165,7 +165,7 @@
     const fallbackImages = defaultProductImageMap.get(id) || [];
     const useFallbackImages =
       fallbackImages.length &&
-      (!images.length || repeatedMainImages.has(mainImage) || images.length === 1);
+      (!images.length || repeatedMainImages.has(mainImage));
     const finalImages = useFallbackImages ? fallbackImages : (images.length ? images : [fallbackImage]);
     const spotlightUntil = Date.parse(product && product.spotlightUntil);
     const newUntil = Date.parse(product && product.newUntil);

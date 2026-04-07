@@ -96,7 +96,7 @@ function mapSupabaseRowToProduct(row, index, staticData, repeatedMainImages) {
   const fallbackImages = defaultProductImageMap.get(id) || [];
   const useFallbackImages =
     fallbackImages.length &&
-    (!images.length || repeatedMainImages.has(mainImage) || images.length === 1);
+    (!images.length || repeatedMainImages.has(mainImage));
   const finalImages = useFallbackImages ? fallbackImages : (images.length ? images : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"]);
   const spotlightUntil = Date.parse(row && row.spotlight_until);
   const newUntil = Date.parse(row && row.new_until);
