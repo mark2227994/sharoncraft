@@ -59,6 +59,40 @@
     return String(value || "").trim();
   }
 
+  function shouldUseMobilePerformanceMode() {
+    const compactViewport = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+    const limitedCpu = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4;
+    const limitedMemory = typeof navigator.deviceMemory === "number" && navigator.deviceMemory > 0 && navigator.deviceMemory <= 4;
+    const saveDataEnabled = Boolean(navigator.connection && navigator.connection.saveData);
+    return compactViewport || limitedCpu || limitedMemory || saveDataEnabled;
+  }
+
+  function ensureMobilePerformanceStyles() {
+    if (!document || !document.head || !shouldUseMobilePerformanceMode()) {
+      return;
+    }
+
+    if (document.head.querySelector('link[data-mobile-performance-style="true"]')) {
+      return;
+    }
+
+    const baseStyle = document.querySelector('link[href*="assets/css/style.css"]');
+    const mobilePerformanceHref = baseStyle
+      ? String(baseStyle.getAttribute("href") || "").replace(/style\.css[^?#]*/i, "mobile-performance.css")
+      : "assets/css/mobile-performance.css?v=20260407-mobile-perf";
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = mobilePerformanceHref.includes("?")
+      ? `${mobilePerformanceHref}&mobile_perf=20260407`
+      : `${mobilePerformanceHref}?mobile_perf=20260407`;
+    style.setAttribute("data-mobile-performance-style", "true");
+    document.head.appendChild(style);
+
+    if (document.documentElement) {
+      document.documentElement.classList.add("mobile-performance-mode");
+    }
+  }
+
   function getDefaultCookieConsent() {
     return {
       version: cookieConsentVersion,
@@ -1361,7 +1395,7 @@
   }
 
   function readStoredSiteContent() {
-    return parseStoredSiteContent(siteContentSettingsKey) || parseStoredSiteContent(liveSiteContentCacheKey);
+    return parseStoredSiteContent(siteContentSettingsKey);
   }
 
   function getPathValue(source, path) {
@@ -3490,9 +3524,25 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
 
-      window.addEventListener("scroll", function () {
+      let scrollQueued = false;
+      const updateScrollButton = function () {
+        scrollQueued = false;
         scrollButton.classList.toggle("is-visible", window.scrollY > 420);
-      });
+      };
+
+      window.addEventListener("scroll", function () {
+        if (scrollQueued) {
+          return;
+        }
+
+        scrollQueued = true;
+        if (typeof window.requestAnimationFrame === "function") {
+          window.requestAnimationFrame(updateScrollButton);
+          return;
+        }
+
+        window.setTimeout(updateScrollButton, 16);
+      }, { passive: true });
     }
 
     if (closeButton) {
@@ -3533,7 +3583,7 @@
   function initReveal() {
     const items = document.querySelectorAll(".reveal");
 
-    if (!("IntersectionObserver" in window) || !items.length) {
+    if (shouldUseMobilePerformanceMode() || !("IntersectionObserver" in window) || !items.length) {
       items.forEach((item) => item.classList.add("is-visible"));
       return;
     }
@@ -3735,6 +3785,7 @@
       console.warn("Unable to load review summaries in the background.", error);
     });
   }, 900);
+  ensureMobilePerformanceStyles();
   document.addEventListener("DOMContentLoaded", hydrateSharedShell);
 
   window.SharonCraftUtils = {
