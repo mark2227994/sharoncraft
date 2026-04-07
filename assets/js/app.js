@@ -3165,6 +3165,7 @@
     const currentPage = document.body.dataset.page || "";
     const isShopFamilyPage = currentPage === "shop" || currentPage === "product";
     const useMinimalCategoriesHeader = currentPage === "categories";
+    const collapseMobileSearch = currentPage === "home";
     const showMobileSearch = [
       "home",
       "shop",
@@ -3261,6 +3262,17 @@
           `
           }
           <div class="header-actions">
+            ${
+              showMobileSearch && collapseMobileSearch
+                ? `
+            <button class="mobile-search-toggle" type="button" id="mobile-search-toggle" aria-expanded="false" aria-controls="mobile-header-search-panel" aria-label="Open search">
+              <span class="header-search-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              </span>
+            </button>
+            `
+                : ""
+            }
             <form action="shop.html" method="get" class="global-desktop-search" aria-label="Sitewide search">
               <span class="header-search-icon" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
@@ -3285,7 +3297,7 @@
         ${
           showMobileSearch
             ? `
-          <div class="container mobile-header-search-wrap">
+          <div class="container mobile-header-search-wrap${collapseMobileSearch ? " is-collapsible" : ""}" id="mobile-header-search-panel">
             <form class="mobile-header-search" action="shop.html" method="get">
               <span class="header-search-icon" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
@@ -3304,6 +3316,40 @@
     const nav = target.querySelector(".site-nav");
     const navBackdrop = target.querySelector(".site-nav-backdrop");
     const cartOpenButton = target.querySelector("#cart-open-button");
+    const mobileSearchToggleButton = target.querySelector("#mobile-search-toggle");
+    const mobileSearchPanel = target.querySelector("#mobile-header-search-panel");
+    const mobileSearchInput = mobileSearchPanel ? mobileSearchPanel.querySelector('input[type="search"]') : null;
+    let closeMobileSearch = function () {};
+
+    if (mobileSearchToggleButton && mobileSearchPanel) {
+      const syncMobileSearchState = function (isOpen) {
+        mobileSearchPanel.classList.toggle("is-open", isOpen);
+        mobileSearchToggleButton.setAttribute("aria-expanded", String(isOpen));
+        mobileSearchToggleButton.setAttribute("aria-label", isOpen ? "Close search" : "Open search");
+      };
+
+      closeMobileSearch = function () {
+        syncMobileSearchState(false);
+      };
+
+      syncMobileSearchState(false);
+
+      mobileSearchToggleButton.addEventListener("click", function () {
+        const shouldOpen = !mobileSearchPanel.classList.contains("is-open");
+        syncMobileSearchState(shouldOpen);
+        if (shouldOpen && mobileSearchInput) {
+          window.setTimeout(function () {
+            mobileSearchInput.focus();
+          }, 60);
+        }
+      });
+
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 760) {
+          closeMobileSearch();
+        }
+      });
+    }
 
     if (toggleButton && nav) {
       const syncNavState = function (isOpen) {
@@ -3325,6 +3371,7 @@
       };
 
       const toggleNav = function () {
+        closeMobileSearch();
         syncNavState(!nav.classList.contains("is-open"));
       };
 
@@ -3358,7 +3405,10 @@
     }
 
     if (cartOpenButton) {
-      cartOpenButton.addEventListener("click", openCart);
+      cartOpenButton.addEventListener("click", function () {
+        closeMobileSearch();
+        openCart();
+      });
     }
   }
 
