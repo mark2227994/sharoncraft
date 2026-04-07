@@ -26,6 +26,14 @@ const products = data.products;
 const site = data.site || {};
 const siteName = site.name || "SharonCraft";
 const siteUrl = "https://www.sharoncraft.co.ke";
+const categoryMap = new Map(
+  (Array.isArray(data.categories) ? data.categories : []).map((category) => [String(category.slug || "").trim(), category || {}])
+);
+
+function absoluteAssetUrl(assetPath) {
+  const cleaned = String(assetPath || "").trim().replace(/^\/+/, '');
+  return `${siteUrl}/${cleaned || "assets/images/custom-occasion-beadwork-46mokm-opt.webp"}`;
+}
 
 // Helper to reliably escape XML payload formats
 function escapeXml(unsafe) {
@@ -41,28 +49,65 @@ function escapeXml(unsafe) {
     });
 }
 
+function normalizeImageList(product) {
+  const imageList = []
+    .concat(Array.isArray(product && product.images) ? product.images : [])
+    .concat(product && product.image ? [product.image] : [])
+    .concat(Array.isArray(product && product.gallery) ? product.gallery : [])
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+
+  const unique = imageList.filter((image, index) => imageList.indexOf(image) === index);
+  return unique.length ? unique : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
+}
+
+function normalizeDescription(product) {
+  const category = categoryMap.get(String(product && product.category || "").trim()) || {};
+  const parts = [
+    String(product && (product.shortDescription || product.description || product.name) || "").trim(),
+    category && category.name ? `Category: ${String(category.name).trim()}.` : "",
+    Array.isArray(product && product.details) && product.details.length ? product.details.slice(0, 2).join(". ") : ""
+  ].filter(Boolean);
+
+  return parts.join(" ").replace(/\s+/g, " ").trim().slice(0, 4990);
+}
+
+function buildProductType(product) {
+  const category = categoryMap.get(String(product && product.category || "").trim()) || {};
+  const categoryName = String(category.name || "Handmade Beadwork").trim();
+  return `${siteName} > ${categoryName}`;
+}
+
 function generateItem(product) {
   if (!product || !product.id) return '';
   const url = `${siteUrl}/product.html?id=${encodeURIComponent(product.id)}`;
-  const firstImage = Array.isArray(product.images) && product.images[0] ? product.images[0] : "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
-  // The replace-image-paths.js will convert existing .jpg paths inside codebase, but just to be safe in the XML generation:
-  const webpImage = firstImage.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-  const imgUrl = `${siteUrl}/${webpImage}`;
-        
-  // Note: g:price must be strictly numeric with currency standard formatted.
+  const category = categoryMap.get(String(product.category || "").trim()) || {};
+  const productImages = normalizeImageList(product);
+  const mainImage = absoluteAssetUrl(productImages[0].replace(/\.(jpg|jpeg|png)$/i, '.webp'));
+  const additionalImagesXml = productImages
+    .slice(1, 10)
+    .map((image) => `      <g:additional_image_link>${escapeXml(absoluteAssetUrl(image.replace(/\.(jpg|jpeg|png)$/i, '.webp')))}</g:additional_image_link>`)
+    .join('\n');
+  const productType = buildProductType(product);
+  const customLabel0 = product.featured ? "featured" : product.newArrival ? "new-arrival" : "catalog";
+  const customLabel1 = String(category.name || product.category || "handmade beadwork").trim();
+
   return `
     <item>
       <g:id>${escapeXml(product.id)}</g:id>
       <g:title>${escapeXml(product.name)}</g:title>
-      <g:description>${escapeXml(product.description || product.shortDescription || product.name)}</g:description>
+      <g:description>${escapeXml(normalizeDescription(product))}</g:description>
       <g:link>${escapeXml(url)}</g:link>
-      <g:image_link>${escapeXml(imgUrl)}</g:image_link>
+      <g:image_link>${escapeXml(mainImage)}</g:image_link>
+${additionalImagesXml ? `${additionalImagesXml}\n` : ""}      <g:product_type>${escapeXml(productType)}</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>${product.soldOut ? 'out of stock' : 'in stock'}</g:availability>
       <g:price>${Math.max(product.price || 0, 0)} KES</g:price>
       <g:brand>${escapeXml(siteName)}</g:brand>
-      <!-- Standardized jewelry category mapped by standard feed specifications -->
-      <g:google_product_category>188</g:google_product_category>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>${escapeXml(customLabel0)}</g:custom_label_0>
+      <g:custom_label_1>${escapeXml(customLabel1)}</g:custom_label_1>
     </item>`;
 }
 

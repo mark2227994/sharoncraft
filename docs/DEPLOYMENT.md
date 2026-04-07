@@ -44,7 +44,8 @@ Current working flow:
 2. Commit with a clear message.
 3. Push to `main`.
 4. Wait for the hosting platform to redeploy from GitHub.
-5. Run `npm run notify:indexnow` after the live deploy if you want to notify IndexNow/Bing about the updated URLs.
+5. Run `npm run notify:indexnow:changed` after the live deploy for a focused changed-URL IndexNow submission.
+6. Use `npm run notify:indexnow` instead if you want to resubmit the whole sitemap.
 
 Example:
 
@@ -52,6 +53,7 @@ Example:
 git add -A
 git commit -m "Describe the update clearly"
 git push origin main
+npm run notify:indexnow:changed
 ```
 
 ## 5. After deploy

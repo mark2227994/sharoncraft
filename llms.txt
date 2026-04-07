@@ -25,6 +25,7 @@
 
 - [Homepage](https://www.sharoncraft.co.ke/) - Overview of the SharonCraft brand, featured artifacts, and the WhatsApp buying process.
 - [Shop](https://www.sharoncraft.co.ke/shop.html) - The complete catalog of handmade beadwork, jewelry, and home gifts.
+- [Why Trust SharonCraft](https://www.sharoncraft.co.ke/why-trust-sharoncraft.html) - A factual trust page covering handmade identity, customer support, and visible buying signals.
 - [About Us](https://www.sharoncraft.co.ke/about.html) - The cultural inspiration, mission, and traditional story behind SharonCraft.
 - [Contact](https://www.sharoncraft.co.ke/contact.html) - Contact information, business details, and conversational ordering guidelines.
 - [Returns & Refunds](https://www.sharoncraft.co.ke/returns.html) - The customer-facing return, refund, and damaged-item policy.
@@ -37,3 +38,4 @@
 - Merchant feed: https://www.sharoncraft.co.ke/google-merchant-feed.xml
 - Contact method: WhatsApp-first ordering with M-Pesa checkout support in Kenya
 - Business location: Nairobi, Kenya
+- Trust signals: visible contact information, policy pages, handmade-in-Kenya positioning, direct WhatsApp support, gift-help messaging, and product/guide landing pages
