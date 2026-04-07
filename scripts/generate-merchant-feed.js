@@ -1,34 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-
-// Mock window for data.js execution
-global.window = {
-  localStorage: {
-    getItem: () => null,
-    setItem: () => null
-  },
-  location: {
-    origin: 'https://www.sharoncraft.co.ke'
-  }
-};
-
-// Require triggers the IIFE in data.js to populate global.window
-require('../assets/js/data.js');
-
-const data = global.window.SharonCraftData;
-
-if (!data || !data.products) {
-  console.error("Failed to load catalog data mapping.");
-  process.exit(1);
-}
-
-const products = data.products;
-const site = data.site || {};
-const siteName = site.name || "SharonCraft";
+const { loadCatalogSource } = require('./catalog-source');
 const siteUrl = "https://www.sharoncraft.co.ke";
-const categoryMap = new Map(
-  (Array.isArray(data.categories) ? data.categories : []).map((category) => [String(category.slug || "").trim(), category || {}])
-);
 
 function absoluteAssetUrl(assetPath) {
   const cleaned = String(assetPath || "").trim().replace(/^\/+/, '');
@@ -111,9 +84,23 @@ ${additionalImagesXml ? `${additionalImagesXml}\n` : ""}      <g:product_type>${
     </item>`;
 }
 
-const itemsXml = products.map(generateItem).join("");
+let products = [];
+let site = {};
+let siteName = "SharonCraft";
+let categoryMap = new Map();
 
-const feedXml = `<?xml version="1.0"?>
+async function main() {
+  const catalogSource = await loadCatalogSource();
+  products = Array.isArray(catalogSource.products) ? catalogSource.products : [];
+  site = catalogSource.site || {};
+  siteName = site.name || "SharonCraft";
+  categoryMap = new Map(
+    (Array.isArray(catalogSource.categories) ? catalogSource.categories : []).map((category) => [String(category.slug || "").trim(), category || {}])
+  );
+
+  const itemsXml = products.map(generateItem).join("");
+
+  const feedXml = `<?xml version="1.0"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
   <channel>
     <title>${escapeXml(siteName)} Catalog</title>
@@ -123,6 +110,13 @@ const feedXml = `<?xml version="1.0"?>
   </channel>
 </rss>`;
 
-const outputPath = path.join(__dirname, '../google-merchant-feed.xml');
-fs.writeFileSync(outputPath, feedXml, 'utf8');
-console.log('Google Merchant feed generated successfully at: ' + outputPath);
+  const outputPath = path.join(__dirname, '../google-merchant-feed.xml');
+  fs.writeFileSync(outputPath, feedXml, 'utf8');
+  console.log('Google Merchant feed generated successfully at: ' + outputPath);
+  console.log(`Catalog source: ${catalogSource.source}`);
+}
+
+main().catch((error) => {
+  console.error(error && error.message ? error.message : error);
+  process.exit(1);
+});
