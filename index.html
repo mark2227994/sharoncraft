@@ -29,8 +29,15 @@
     (function () {
       try {
         var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var narrowScreen = window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
         var loaderSeen = window.sessionStorage.getItem("sharoncraft-home-loader-seen") === "1";
-        document.documentElement.setAttribute("data-home-loader", reduceMotion || loaderSeen ? "skip" : "show");
+        var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        var saveData = !!(connection && connection.saveData);
+        var slowConnection = !!(connection && /2g|3g/i.test(String(connection.effectiveType || "")));
+        document.documentElement.setAttribute(
+          "data-home-loader",
+          reduceMotion || loaderSeen || narrowScreen || saveData || slowConnection ? "skip" : "show"
+        );
       } catch (error) {
         document.documentElement.setAttribute("data-home-loader", "show");
       }

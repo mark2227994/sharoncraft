@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const arrivalsGrid = document.getElementById("new-arrivals");
   const testimonialStack = document.getElementById("home-testimonials");
   let loaderFinished = false;
+  let requestHomeOpeningLoaderClose = function () {};
 
   function finishHomeOpeningLoader() {
     if (!openingLoader || loaderFinished) {
@@ -59,8 +60,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     const loaderStartedAt = Date.now();
-    const minimumDuration = 1180;
-    const fallbackDuration = 2400;
+    const minimumDuration = 420;
+    const fallbackDuration = 1100;
     let closeRequested = false;
 
     function requestClose() {
@@ -73,14 +74,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       window.setTimeout(finishHomeOpeningLoader, remaining);
     }
 
+    requestHomeOpeningLoaderClose = requestClose;
     window.setTimeout(requestClose, fallbackDuration);
-
-    if (document.readyState === "complete") {
-      requestClose();
-      return;
-    }
-
-    window.addEventListener("load", requestClose, { once: true });
   }
 
   initHomeOpeningLoader();
@@ -289,6 +284,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   renderHome();
+  requestHomeOpeningLoaderClose();
 
   reviewSummaryPromise.then(function () {
     renderHome();
