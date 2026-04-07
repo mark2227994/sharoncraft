@@ -653,7 +653,7 @@
     const fallback = normalizePricingSettings(defaultPricing);
 
     try {
-      const raw = window.localStorage.getItem(siteContentSettingsKey) || window.localStorage.getItem(liveSiteContentCacheKey);
+      const raw = window.localStorage.getItem(siteContentSettingsKey);
       if (!raw) {
         return fallback;
       }

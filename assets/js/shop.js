@@ -21,14 +21,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     ? utils.loadReviewSummaries().catch(function () { return null; })
     : Promise.resolve(null);
 
-  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
-    try {
-      await window.SharonCraftLiveSync.ready;
-    } catch (error) {
-      console.warn("Unable to complete live shop sync before first render.", error);
-    }
-  }
-
   if (helpWhatsapp) {
     helpWhatsapp.href = utils.buildWhatsAppUrl(
       "Hello SharonCraft, please help me choose the right beadwork based on my budget, occasion, or preferred style."
@@ -418,4 +410,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   reviewSummaryPromise.then(function () {
     renderProducts();
   });
+
+  if (window.SharonCraftLiveSync && window.SharonCraftLiveSync.ready) {
+    window.SharonCraftLiveSync.ready
+      .then(function () {
+        utils.renderCategorySelect(categorySelect);
+
+        if (initialCategory) {
+          categorySelect.value = initialCategory;
+        }
+
+        renderProducts();
+      })
+      .catch(function (error) {
+        console.warn("Unable to refresh shop after live sync.", error);
+      });
+  }
 });

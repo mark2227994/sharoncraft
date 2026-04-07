@@ -1,0 +1,40 @@
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal,
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  main > .section,
+  .page-hero + .section,
+  .page-hero + .site-accent-divider + .section,
+  .marketing-proof-grid,
+  .landing-link-grid,
+  .product-grid,
+  .category-grid,
+  .testimonial-stack,
+  .shop-filter-panels {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 760px;
+  }
+
+  .story-card,
+  .landing-link-card,
+  .testimonial-card,
+  .product-card,
+  .category-feature-card {
+    contain-intrinsic-size: 1px 320px;
+  }
+
+  .scroll-top,
+  .floating-whatsapp,
+  .cart-drawer,
+  .cart-backdrop {
+    transition: none;
+  }
+}
