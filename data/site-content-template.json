@@ -1,0 +1,18 @@
+{
+  "site": {
+    "name": "SharonCraft",
+    "tagline": "Bright handmade beadwork for gifts, home styling, and joyful African-inspired looks.",
+    "promo": "Free Nairobi delivery for orders above KES 3,500 this week."
+  },
+  "home": {
+    "hero": {
+      "kicker": "Welcome to SharonCraft",
+      "title": "Step into handmade color.",
+      "description": "Jewelry, gifts, and home pieces made in Kenya."
+    }
+  },
+  "notes": [
+    "Use this as a drafting template for future JSON-managed content.",
+    "Keep production content in Supabase if that remains your main source of truth."
+  ]
+}
