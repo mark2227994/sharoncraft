@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { loadCatalogSource } = require("./catalog-source");
+const { buildSharePath } = require("./generate-product-share-pages");
 
 const rootDir = path.resolve(__dirname, "..");
 const productTemplatePath = path.join(rootDir, "product.html");
@@ -150,7 +151,7 @@ function buildProductEntries(products) {
     })
     .map(function (product) {
       return {
-        loc: `${siteUrl}/product.html?id=${encodeURIComponent(product.id)}`,
+        loc: `${siteUrl}/${buildSharePath(product)}`,
         lastmod,
         changefreq: product.newArrival || product.featured ? "weekly" : "monthly",
         priority: product.soldOut ? "0.6" : product.featured ? "0.8" : "0.7"
