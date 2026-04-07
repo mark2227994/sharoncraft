@@ -220,9 +220,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const productCategory = utils.getCategoryBySlug(product.category);
   const productName = product.name || "Artisan Creation";
   const productDescription = product.description || product.shortDescription || "Handmade by SharonCraft artisans.";
-  const productImages = Array.isArray(product.images) && product.images.length
-    ? product.images
-    : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
+  const productImages = typeof utils.getProductImages === "function"
+    ? utils.getProductImages(product)
+    : (Array.isArray(product.images) && product.images.length
+      ? product.images
+      : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"]);
   const productDetails = Array.isArray(product.details) && product.details.length
     ? product.details
     : ["Handmade in Kenya", "Shared with care by SharonCraft"];

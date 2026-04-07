@@ -59,6 +59,31 @@
     return String(value || "").trim();
   }
 
+  function buildAssetVersion(value) {
+    const normalized = normalizeText(value);
+    if (!normalized) {
+      return "";
+    }
+
+    const parsedTime = Date.parse(normalized);
+    if (Number.isFinite(parsedTime) && parsedTime > 0) {
+      return parsedTime.toString(36);
+    }
+
+    return normalized.replace(/[^a-z0-9]+/gi, "").toLowerCase();
+  }
+
+  function addAssetVersion(url, versionValue) {
+    const source = normalizeText(url);
+    const version = buildAssetVersion(versionValue);
+
+    if (!source || !version || source.startsWith("data:") || source.startsWith("blob:")) {
+      return source;
+    }
+
+    return `${source}${source.includes("?") ? "&" : "?"}v=${encodeURIComponent(version)}`;
+  }
+
   function shouldUseMobilePerformanceMode() {
     const compactViewport = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
     const limitedCpu = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4;
@@ -2026,7 +2051,11 @@
       .filter(Boolean);
 
     const uniqueImages = imageList.filter((image, index) => imageList.indexOf(image) === index);
-    return uniqueImages.length ? uniqueImages : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
+    const versionValue = normalizeText(product && product.updatedAt);
+    const finalImages = uniqueImages.length ? uniqueImages : ["assets/images/custom-occasion-beadwork-46mokm-opt.webp"];
+    return finalImages.map(function (image) {
+      return addAssetVersion(image, versionValue);
+    });
   }
 
   function formatCurrency(value) {
@@ -3804,6 +3833,7 @@
     buildWhatsAppUrl,
     buildProductWhatsAppMessage,
     getProductById,
+    getProductImages,
     getCategoryBySlug,
     getProductsByCategory,
     getRelatedProducts,

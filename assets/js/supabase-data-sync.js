@@ -275,7 +275,14 @@
       return null;
     }
 
-    const setting = await liveCatalog.fetchSetting("home_visuals");
+    const settingRecord =
+      typeof liveCatalog.fetchSettingRecord === "function"
+        ? await liveCatalog.fetchSettingRecord("home_visuals")
+        : null;
+    const setting = settingRecord && typeof settingRecord.value === "object"
+      ? settingRecord.value
+      : await liveCatalog.fetchSetting("home_visuals");
+
     if (!setting || typeof setting !== "object") {
       return null;
     }
@@ -287,7 +294,7 @@
 
     data.homeVisuals = {
       ...normalizeHomeVisuals(setting, fallback),
-      version: computeCacheVersion(setting),
+      version: normalizeText(settingRecord && settingRecord.updated_at) || computeCacheVersion(setting),
     };
 
     if (!isLocalPreview) {

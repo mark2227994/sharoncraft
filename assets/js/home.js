@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const favorite = visuals.favorite || {};
     const favoriteProduct = allProducts.find((product) => product.id === favorite.productId);
     const favoriteFallbackImage =
-      favoriteProduct && Array.isArray(favoriteProduct.images) && favoriteProduct.images[0]
-        ? favoriteProduct.images[0]
+      favoriteProduct && typeof utils.getProductImages === "function" && utils.getProductImages(favoriteProduct)[0]
+        ? utils.getProductImages(favoriteProduct)[0]
         : "assets/images/kenyan-bead-decor-yhip8u-opt.webp";
 
     if (heroKicker) {
