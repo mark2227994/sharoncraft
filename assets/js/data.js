@@ -463,6 +463,18 @@
     return pricingMode === "formula";
   }
 
+  function applyOfferFinish(value) {
+    const rounded = Math.max(0, Math.round(Number(value) || 0));
+    if (rounded < 100) {
+      return rounded;
+    }
+    const loweredToFifty = Math.floor(rounded / 50) * 50;
+    if (rounded === loweredToFifty) {
+      return Math.max(50, loweredToFifty - 50);
+    }
+    return Math.max(50, loweredToFifty);
+  }
+
   function calculateWebsitePrice(basePrice, siteData) {
     const settings = getPricingSettings(siteData);
     const normalizedBasePrice = Math.max(0, Number(basePrice) || 0);
@@ -471,7 +483,7 @@
       return Math.round(normalizedBasePrice);
     }
 
-    return Math.round((normalizedBasePrice + settings.deliveryFee + settings.packagingFee) * settings.multiplier);
+    return applyOfferFinish((normalizedBasePrice + settings.deliveryFee + settings.packagingFee) * settings.multiplier);
   }
 
   function applyPricingToProduct(product, siteData) {
