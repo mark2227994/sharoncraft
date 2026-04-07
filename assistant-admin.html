@@ -131,10 +131,23 @@
                 <span>Product name</span>
                 <input id="assistant-name" type="text" maxlength="90" placeholder="Beaded Necklace" required />
               </label>
+              <p class="assistant-muted assistant-field-note" id="assistant-name-helper">If the name is empty, the assistant can suggest one from the uploaded image file name.</p>
               <label>
                 <span>Short description</span>
                 <textarea id="assistant-description" rows="5" maxlength="500" placeholder="Simple client-friendly description" required></textarea>
               </label>
+              <section class="assistant-quick-fill-panel">
+                <div class="assistant-template-head">
+                  <strong>Quick fill</strong>
+                  <span>Use these when you want to finish a product faster.</span>
+                </div>
+                <div class="assistant-template-buttons">
+                  <button class="assistant-template-button is-recommended" id="assistant-fill-recommended" type="button">Use Recommended Description</button>
+                  <button class="assistant-template-button" id="assistant-fill-details" type="button">Add Short Details</button>
+                  <button class="assistant-template-button" id="assistant-fill-featured" type="button">Make Featured</button>
+                  <button class="assistant-template-button" id="assistant-fill-new" type="button">Mark New</button>
+                </div>
+              </section>
               <div class="assistant-template-panel">
                 <div class="assistant-template-head">
                   <strong>Description starters</strong>
@@ -183,6 +196,13 @@
               <div class="assistant-form-actions">
                 <button class="button button-primary" id="assistant-save-product" type="submit">Save To Live Catalog</button>
               </div>
+              <section class="assistant-publish-panel" aria-live="polite">
+                <div class="assistant-template-head">
+                  <strong>Ready to publish?</strong>
+                  <span id="assistant-publish-status">Add the main fields and this will update.</span>
+                </div>
+                <div class="assistant-publish-checks" id="assistant-publish-checks"></div>
+              </section>
             </form>
           </article>
 

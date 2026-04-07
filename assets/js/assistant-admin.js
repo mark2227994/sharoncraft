@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const saveProductButton = document.getElementById("assistant-save-product");
   const productIdInput = document.getElementById("assistant-product-id");
   const nameInput = document.getElementById("assistant-name");
+  const nameHelper = document.getElementById("assistant-name-helper");
   const categoryInput = document.getElementById("assistant-category");
   const priceInput = document.getElementById("assistant-price");
   const autoPriceInput = document.getElementById("assistant-auto-price");
@@ -32,6 +33,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const descriptionInput = document.getElementById("assistant-description");
   const templateHint = document.getElementById("assistant-template-hint");
   const templateButtons = Array.from(document.querySelectorAll("[data-assistant-description-template]"));
+  const fillRecommendedButton = document.getElementById("assistant-fill-recommended");
+  const fillDetailsButton = document.getElementById("assistant-fill-details");
+  const fillFeaturedButton = document.getElementById("assistant-fill-featured");
+  const fillNewButton = document.getElementById("assistant-fill-new");
   const detailsInput = document.getElementById("assistant-details");
   const badgeInput = document.getElementById("assistant-badge");
   const featuredInput = document.getElementById("assistant-featured");
@@ -39,6 +44,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const soldOutInput = document.getElementById("assistant-soldout");
   const imagePreviewWrap = document.getElementById("assistant-image-preview-wrap");
   const imagePreview = document.getElementById("assistant-image-preview");
+  const publishStatus = document.getElementById("assistant-publish-status");
+  const publishChecks = document.getElementById("assistant-publish-checks");
   const miniMetrics = document.getElementById("assistant-mini-metrics");
   const refreshOrdersButton = document.getElementById("assistant-refresh-orders");
   const orderSearchInput = document.getElementById("assistant-order-search");
@@ -342,6 +349,70 @@ document.addEventListener("DOMContentLoaded", async function () {
     return `${subject} is handmade by SharonCraft with a comfortable feel and a clean finish. It is easy to wear, gift, or keep for days when you want something personal and full of color.`;
   }
 
+  function buildDetailsTemplate() {
+    const categorySlug = normalizeText(categoryInput && categoryInput.value).toLowerCase();
+    if (categorySlug === "home-decor") {
+      return "Handmade in Kenya, Easy to style, Warm statement piece";
+    }
+    if (categorySlug === "gift-sets" || categorySlug === "bridal-occasion") {
+      return "Handmade in Kenya, Gift-ready, Special occasion friendly";
+    }
+    if (categorySlug === "bags-accessories") {
+      return "Handmade in Kenya, Easy to carry, Everyday style";
+    }
+    return "Handmade in Kenya, Lightweight feel, Easy to wear";
+  }
+
+  function titleCaseWords(value) {
+    return normalizeText(value)
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(function (word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(" ");
+  }
+
+  function inferNameFromImageSource(source) {
+    const normalized = normalizeText(source);
+    if (!normalized) {
+      return "";
+    }
+    const fileName = normalized.split("/").pop().split("?")[0].split("#")[0];
+    const rawBase = normalizeText(fileName.replace(/\.[a-z0-9]+$/i, ""));
+    const cleaned = rawBase
+      .replace(/\b(ready|live|archive|copy|final|edited|upload|photo|image)\b/gi, " ")
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return titleCaseWords(cleaned);
+  }
+
+  function suggestNameFromImage(force) {
+    if (!nameInput) {
+      return;
+    }
+    if (!force && normalizeText(nameInput.value)) {
+      if (nameHelper) {
+        nameHelper.textContent = "Product name is set. You can still change it any time.";
+      }
+      return;
+    }
+    const suggestion = inferNameFromImageSource(imageInput && imageInput.value);
+    if (!suggestion) {
+      if (nameHelper) {
+        nameHelper.textContent = "If the name is empty, the assistant can suggest one from the uploaded image file name.";
+      }
+      return;
+    }
+    if (force || !normalizeText(nameInput.value)) {
+      nameInput.value = suggestion;
+    }
+    if (nameHelper) {
+      nameHelper.textContent = `Suggested from image: ${suggestion}`;
+    }
+  }
+
   function updateTemplateRecommendation() {
     const recommendedKey = getRecommendedTemplateKey(categoryInput && categoryInput.value);
     templateButtons.forEach(function (button) {
@@ -393,6 +464,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         imageStageStatus.textContent = `This image is outside the local stage folders. The product will still work, but the clearest local workflow is ${imageWorkflowFolders.ready} first, then ${imageWorkflowFolders.live}.`;
       }
     }
+    suggestNameFromImage(false);
+    updatePublishReadiness();
   }
 
   function resetForm() {
@@ -416,6 +489,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     updateTemplateRecommendation();
     updatePreview();
     updatePricingFormulaNote();
+    updatePublishReadiness();
   }
 
   function fillForm(product) {
@@ -446,6 +520,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     updateTemplateRecommendation();
     updatePreview();
     updatePricingFormulaNote();
+    updatePublishReadiness();
     activateTab("add");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -479,6 +554,27 @@ document.addEventListener("DOMContentLoaded", async function () {
       newUntil: newInput.checked ? new Date(now + 14 * 24 * 60 * 60 * 1000).toISOString() : "",
       sortOrder: existingProduct && Number.isFinite(Number(existingProduct.sortOrder)) ? Number(existingProduct.sortOrder) : 0
     };
+  }
+
+  function updatePublishReadiness() {
+    if (!publishChecks || !publishStatus) {
+      return;
+    }
+    const checks = [
+      { label: "Main image added", done: Boolean(normalizeText(imageInput && imageInput.value)) },
+      { label: "Product name added", done: Boolean(normalizeText(nameInput && nameInput.value)) },
+      { label: "Short description added", done: Boolean(normalizeText(descriptionInput && descriptionInput.value)) },
+      { label: "Category selected", done: Boolean(normalizeText(categoryInput && categoryInput.value)) },
+      { label: "Price added", done: Math.max(0, Number(priceInput && priceInput.value) || 0) > 0 },
+      { label: "Short details added", done: parseList(detailsInput && detailsInput.value).length > 0 }
+    ];
+    const doneCount = checks.filter(function (item) { return item.done; }).length;
+    publishStatus.textContent = doneCount === checks.length
+      ? "Ready to publish. The main product details are in place."
+      : `Almost there. ${checks.length - doneCount} more ${checks.length - doneCount === 1 ? "thing" : "things"} would make this product easier to publish cleanly.`;
+    publishChecks.innerHTML = checks.map(function (item) {
+      return `<article class="assistant-publish-check${item.done ? " is-done" : ""}">${escapeHtml(item.label)}</article>`;
+    }).join("");
   }
 
   function renderMiniMetrics() {
@@ -812,6 +908,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     imageInput.value = publicUrl;
     updatePreview();
+    suggestNameFromImage(false);
     setStatus(
       appStatus,
       `${file.name} uploaded and ready to save with the product. If you also keep local project files, match its stage in ${getImageStageFolder(getSelectedImageStage())}.`,
@@ -927,9 +1024,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     imageInput.addEventListener("change", updatePreview);
   }
 
+  if (nameInput) {
+    nameInput.addEventListener("input", function () {
+      if (nameHelper) {
+        nameHelper.textContent = normalizeText(nameInput.value)
+          ? "Product name is set. You can still change it any time."
+          : "If the name is empty, the assistant can suggest one from the uploaded image file name.";
+      }
+      updatePublishReadiness();
+    });
+  }
+
   if (categoryInput) {
     categoryInput.addEventListener("change", updateTemplateRecommendation);
     categoryInput.addEventListener("input", updateTemplateRecommendation);
+    categoryInput.addEventListener("change", updatePublishReadiness);
+    categoryInput.addEventListener("input", updatePublishReadiness);
   }
 
   [priceInput, autoPriceInput].forEach(function (input) {
@@ -939,6 +1049,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     input.addEventListener("input", updatePricingFormulaNote);
     input.addEventListener("change", updatePricingFormulaNote);
+    input.addEventListener("input", updatePublishReadiness);
+    input.addEventListener("change", updatePublishReadiness);
   });
 
   templateButtons.forEach(function (button) {
@@ -949,8 +1061,56 @@ document.addEventListener("DOMContentLoaded", async function () {
       descriptionInput.value = buildDescriptionTemplate(button.dataset.assistantDescriptionTemplate);
       descriptionInput.focus();
       descriptionInput.setSelectionRange(descriptionInput.value.length, descriptionInput.value.length);
+      updatePublishReadiness();
       setStatus(appStatus, "Description starter added. Edit it to match the photo.", "info");
     });
+  });
+
+  if (fillRecommendedButton) {
+    fillRecommendedButton.addEventListener("click", function () {
+      const key = getRecommendedTemplateKey(categoryInput && categoryInput.value);
+      descriptionInput.value = buildDescriptionTemplate(key);
+      updatePublishReadiness();
+      setStatus(appStatus, "Recommended description starter added.", "info");
+    });
+  }
+
+  if (fillDetailsButton) {
+    fillDetailsButton.addEventListener("click", function () {
+      detailsInput.value = buildDetailsTemplate();
+      updatePublishReadiness();
+      setStatus(appStatus, "Short details added for this category.", "info");
+    });
+  }
+
+  if (fillFeaturedButton) {
+    fillFeaturedButton.addEventListener("click", function () {
+      featuredInput.checked = true;
+      if (!normalizeText(badgeInput.value)) {
+        badgeInput.value = "Featured";
+      }
+      updatePublishReadiness();
+      setStatus(appStatus, "This product is marked as featured.", "info");
+    });
+  }
+
+  if (fillNewButton) {
+    fillNewButton.addEventListener("click", function () {
+      newInput.checked = true;
+      if (!normalizeText(badgeInput.value)) {
+        badgeInput.value = "New";
+      }
+      updatePublishReadiness();
+      setStatus(appStatus, "This product is marked as new.", "info");
+    });
+  }
+
+  [descriptionInput, detailsInput, imageStageInput, galleryInput, badgeInput, featuredInput, newInput, soldOutInput].forEach(function (input) {
+    if (!input) {
+      return;
+    }
+    input.addEventListener("input", updatePublishReadiness);
+    input.addEventListener("change", updatePublishReadiness);
   });
 
   if (imageStageInput) {
