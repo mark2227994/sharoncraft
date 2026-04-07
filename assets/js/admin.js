@@ -2593,7 +2593,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     if (autoPriceInput && autoPriceInput.checked && settings.enabled) {
-      priceFormulaNote.textContent = `Website price = (${formatPrice(basePrice)} + ${formatPrice(settings.deliveryFee)} delivery + ${formatPrice(settings.packagingFee)} packaging) x ${settings.multiplier} = ${formatPrice(sellingPrice)}.`;
+      priceFormulaNote.textContent = `Website price = (${formatPrice(basePrice)} + ${formatPrice(settings.deliveryFee)} delivery + ${formatPrice(settings.packagingFee)} packaging) x ${settings.multiplier}, then softened to an offer-style ending = ${formatPrice(sellingPrice)}.`;
       return;
     }
 

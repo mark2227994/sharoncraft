@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     if (pricingMode === "formula" && settings.enabled) {
-      priceFormulaNote.textContent = `Website price = (${formatCurrency(basePrice)} + ${formatCurrency(settings.deliveryFee)} delivery + ${formatCurrency(settings.packagingFee)} packaging) x ${settings.multiplier} = ${formatCurrency(websitePrice)}.`;
+      priceFormulaNote.textContent = `Website price = (${formatCurrency(basePrice)} + ${formatCurrency(settings.deliveryFee)} delivery + ${formatCurrency(settings.packagingFee)} packaging) x ${settings.multiplier}, then softened to an offer-style ending = ${formatCurrency(websitePrice)}.`;
       return;
     }
 
