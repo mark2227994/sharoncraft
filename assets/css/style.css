@@ -789,6 +789,32 @@ main > .section:not(:first-of-type),
   color: rgba(92, 64, 51, 0.84);
 }
 
+.founder-verified-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  vertical-align: baseline;
+}
+
+.founder-verified-name strong {
+  margin: 0;
+}
+
+.founder-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(18, 122, 99, 1), rgba(12, 94, 76, 1));
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(18, 122, 99, 0.22);
+}
+
 .section-heading p {
   margin: 0;
   max-width: 58ch;
