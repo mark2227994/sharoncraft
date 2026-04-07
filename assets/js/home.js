@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const favoriteDescription = document.getElementById("home-favorite-description");
   const favoriteImage = document.getElementById("home-favorite-image");
   const featuredGrid = document.getElementById("featured-products");
-  const categoryGrid = document.getElementById("home-categories");
   const arrivalsGrid = document.getElementById("new-arrivals");
   const testimonialStack = document.getElementById("home-testimonials");
   let loaderFinished = false;
@@ -103,32 +102,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     const hero = visuals.hero || {};
     const favorite = visuals.favorite || {};
     const homeOrigin = window.location.origin;
-    const discoveryPages = [
+    const explorePages = [
       {
         name: "Handmade Kenyan Gifts",
         url: new URL("/handmade-kenyan-gifts.html", homeOrigin).href
       },
       {
-        name: "Maasai Jewelry Kenya",
-        url: new URL("/maasai-jewelry-kenya.html", homeOrigin).href
-      },
-      {
-        name: "African Home Decor Nairobi",
-        url: new URL("/african-home-decor-nairobi.html", homeOrigin).href
-      }
-    ];
-    const guidePages = [
-      {
         name: "Where To Buy Kenyan Artifacts",
         url: new URL("/articles/where-to-buy-kenyan-artifacts.html", homeOrigin).href
       },
       {
-        name: "How To Style Beaded Home Decor",
-        url: new URL("/articles/how-to-style-beaded-home-decor.html", homeOrigin).href
-      },
-      {
-        name: "How To Choose Maasai Jewelry",
-        url: new URL("/articles/how-to-choose-maasai-jewelry.html", homeOrigin).href
+        name: "Why Trust SharonCraft",
+        url: new URL("/why-trust-sharoncraft.html", homeOrigin).href
       }
     ];
     const favoriteProduct = allProducts.find((product) => product.id === favorite.productId);
@@ -215,10 +200,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         listName: "Homepage Featured",
         products: visibleProducts
       });
-    }
-
-    if (categoryGrid) {
-      categoryGrid.innerHTML = utils.data.categories.map(utils.createCategoryCard).join("");
     }
 
     if (arrivalsGrid) {
@@ -308,23 +289,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         }))
       });
 
-      utils.setStructuredData("home-discovery-pages", {
+      utils.setStructuredData("home-explore-pages", {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        name: "Popular SharonCraft landing pages",
-        itemListElement: discoveryPages.map((item, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          url: item.url,
-          name: item.name
-        }))
-      });
-
-      utils.setStructuredData("home-buying-guides", {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: "SharonCraft buying guides",
-        itemListElement: guidePages.map((item, index) => ({
+        name: "Helpful SharonCraft pages",
+        itemListElement: explorePages.map((item, index) => ({
           "@type": "ListItem",
           position: index + 1,
           url: item.url,
