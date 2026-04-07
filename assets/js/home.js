@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const heroDescription = document.getElementById("home-hero-description");
   const heroPrimary = document.getElementById("home-hero-primary");
   const heroWhatsapp = document.getElementById("home-hero-whatsapp");
+  const intentWhatsapp = document.getElementById("home-intent-whatsapp");
   const heroSecondary = document.getElementById("home-hero-secondary");
   const heroImage = document.getElementById("home-hero-image");
   const favoriteKicker = document.getElementById("home-favorite-kicker");
@@ -61,6 +62,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     if (heroWhatsapp) {
       heroWhatsapp.href = utils.buildWhatsAppUrl("Hello SharonCraft, I would like help choosing the right handmade beadwork for me.");
+    }
+    if (intentWhatsapp) {
+      intentWhatsapp.href = utils.buildWhatsAppUrl("Hello SharonCraft, I am choosing between jewelry, gifts, and home decor. Which path do you recommend?");
     }
     if (heroSecondary) {
       heroSecondary.textContent = hero.secondaryLabel || "Our Story";
