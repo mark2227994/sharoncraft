@@ -1926,10 +1926,10 @@
     const storeImage = absoluteUrl("assets/images/custom-occasion-beadwork-46mokm-opt.webp");
     const socialUrls = getPublicSocialUrls();
     const founderName = normalizeText(data.site.founderName) || "Kelvin Mark";
-    const founderTitle = normalizeText(data.site.founderTitle) || "Founder & CEO";
+    const founderTitle = normalizeText(data.site.founderTitle) || "Founder and CEO";
     const founderDescription =
       normalizeText(data.site.founderDescription) ||
-      "Founder and CEO of SharonCraft, leading brand direction, operations, growth, and customer experience.";
+      "Kelvin Mark is the founder and CEO of SharonCraft. He launched the brand at 21 and leads brand direction, operations, growth, and customer experience.";
     const leadDesignerName = normalizeText(data.site.leadDesignerName) || "Sharon Ruth";
     const leadDesignerTitle = normalizeText(data.site.leadDesignerTitle) || "Lead Designer";
     const leadDesignerDescription =
