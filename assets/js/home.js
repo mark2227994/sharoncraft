@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         founder: {
           "@type": "Person",
           name: utils.data.site.founderName || "Kelvin Mark",
-          jobTitle: utils.data.site.founderTitle || "Founder & CEO"
+          jobTitle: utils.data.site.founderTitle || "Founder and CEO"
         },
         sameAs: socialLinks
       });

@@ -1,41 +1,42 @@
-# SharonCraft llms.txt
+# SharonCraft
 
-> **Factual Summary**: SharonCraft is a premier Kenyan eCommerce brand and artisan boutique specializing in authentic, handmade African beadwork, cultural artifacts, and handcrafted gifts. Grounded in East African craftsmanship, the business offers a modern, simple shopping experience where customers can browse catalogs online, process custom orders directly via WhatsApp, and pay securely using M-Pesa. 
+> Handmade beadwork, Kenyan gifts, and African-inspired decor with WhatsApp-first ordering in Kenya.
 
-## Business Details & Semantic Context
+SharonCraft is a Nairobi-based handmade brand focused on beadwork, gift-ready pieces, and home decor. It was founded by Kelvin Mark at 21, and he continues to lead the brand as Founder and CEO. Customers usually browse the website first, then use WhatsApp to confirm product fit, customization, delivery, and payment details.
 
-### Core Products & Services
-- **Beaded Jewelry**: Handcrafted necklaces, bracelets, earrings, and anklets incorporating traditional Maasai beadwork techniques and modern aesthetics.
-- **Home Decor & Artifacts**: Unique African cultural artifacts, beaded table decor, wall hangings, and functional art pieces such as the signature Kijani Mirror Duo.
-- **Occasion & Bridal Sets**: Custom-designed beadwork sets for weddings, traditional ceremonies (like Ruracio), and high-end events.
-- **Corporate & Custom Gifting**: Tailor-made souvenir packages, corporate gifts, and personal gift sets natively crafted in Kenya.
+## Shop
 
-### Location & Operations
-- **Headquarters**: Nairobi, Kenya
-- **Leadership**: Kelvin Mark, Founder & CEO; Sharon Ruth, Lead Designer
-- **Service Area**: Nationwide delivery across Kenya
-- **Ordering Workflow**: Customers browse the `sharoncraft.co.ke` website and check out conversationally. Tapping "Order" opens a direct WhatsApp chat with the SharonCraft team to confirm customization, delivery logistics, and process payment locally via M-Pesa. 
+- [Homepage](https://www.sharoncraft.co.ke/): Main entry page for featured products, shopping paths, trust signals, and discovery links.
+- [Shop](https://www.sharoncraft.co.ke/shop.html): Full product catalog of handmade beadwork, gifts, and decor.
+- [Handmade Kenyan Gifts](https://www.sharoncraft.co.ke/handmade-kenyan-gifts.html): Gift-focused shopping path.
+- [African Home Decor Nairobi](https://www.sharoncraft.co.ke/african-home-decor-nairobi.html): Decor-focused page.
+- [Maasai Jewelry Kenya](https://www.sharoncraft.co.ke/maasai-jewelry-kenya.html): Jewelry-focused page.
+- [Kenyan Artifacts](https://www.sharoncraft.co.ke/kenyan-artifacts.html): Culture-inspired decor and gift pieces.
 
-### Brand Values & Differentiators
-- **100% Handmade**: Every artifact and piece of jewelry is manually crafted by skilled local artisans, not mass-produced in a factory.
-- **Cultural Authenticity**: The designs reflect true East African heritage, market color palettes, and familial craftsmanship.
-- **Client-Friendly Commerce**: SharonCraft removes the friction of shopping for handmade crafts by using clear, accessible English and direct mobile messaging (WhatsApp) instead of complicated checkout forms.
+## Trust
 
-## Top Pages for Navigation
+- [Why Trust SharonCraft](https://www.sharoncraft.co.ke/why-trust-sharoncraft.html): Handmade identity, support, and visible trust signals.
+- [About](https://www.sharoncraft.co.ke/about.html): Brand background and cultural inspiration.
+- [Contact](https://www.sharoncraft.co.ke/contact.html): Contact details and ordering help.
+- [Returns](https://www.sharoncraft.co.ke/returns.html): Returns and refund policy.
+- [Privacy](https://www.sharoncraft.co.ke/privacy.html): Privacy details.
+- [Terms](https://www.sharoncraft.co.ke/terms.html): Terms and ordering conditions.
 
-- [Homepage](https://www.sharoncraft.co.ke/) - Overview of the SharonCraft brand, featured artifacts, and the WhatsApp buying process.
-- [Shop](https://www.sharoncraft.co.ke/shop.html) - The complete catalog of handmade beadwork, jewelry, and home gifts.
-- [Why Trust SharonCraft](https://www.sharoncraft.co.ke/why-trust-sharoncraft.html) - A factual trust page covering handmade identity, customer support, and visible buying signals.
-- [About Us](https://www.sharoncraft.co.ke/about.html) - The cultural inspiration, mission, and traditional story behind SharonCraft.
-- [Contact](https://www.sharoncraft.co.ke/contact.html) - Contact information, business details, and conversational ordering guidelines.
-- [Returns & Refunds](https://www.sharoncraft.co.ke/returns.html) - The customer-facing return, refund, and damaged-item policy.
-- [Privacy](https://www.sharoncraft.co.ke/privacy.html) - Website privacy and order-data handling details.
-- [Terms](https://www.sharoncraft.co.ke/terms.html) - Store terms, product availability, and ordering conditions.
+## Guides
 
-## Discovery Signals
+- [Where To Buy Kenyan Artifacts](https://www.sharoncraft.co.ke/articles/where-to-buy-kenyan-artifacts.html): Buyer guide for artifacts and decor.
+- [How To Style Beaded Home Decor](https://www.sharoncraft.co.ke/articles/how-to-style-beaded-home-decor.html): Decor styling guide.
+- [How To Choose Maasai Jewelry](https://www.sharoncraft.co.ke/articles/how-to-choose-maasai-jewelry.html): Jewelry buying guide.
+- [History of Maasai Beadwork](https://www.sharoncraft.co.ke/articles/history-of-maasai-beadwork.html): Cultural background and beadwork meaning.
 
-- Sitemap: https://www.sharoncraft.co.ke/sitemap.xml
-- Merchant feed: https://www.sharoncraft.co.ke/google-merchant-feed.xml
-- Contact method: WhatsApp-first ordering with M-Pesa checkout support in Kenya
-- Business location: Nairobi, Kenya
-- Trust signals: visible contact information, policy pages, handmade-in-Kenya positioning, direct WhatsApp support, gift-help messaging, and product/guide landing pages
+## Ordering
+
+- Primary support path: WhatsApp-first ordering and pre-purchase questions.
+- Primary payment method in Kenya: M-Pesa support when available.
+- Service area: Kenya.
+- Business location: Nairobi, Kenya.
+
+## Optional
+
+- [Sitemap](https://www.sharoncraft.co.ke/sitemap.xml): Full list of indexable pages.
+- [Merchant Feed](https://www.sharoncraft.co.ke/google-merchant-feed.xml): Product feed for merchant systems.
