@@ -1,0 +1,401 @@
+:root {
+  --marketing-bg: #f7efe6;
+  --marketing-surface: rgba(255, 250, 245, 0.92);
+  --marketing-border: rgba(101, 63, 50, 0.12);
+  --marketing-text: #2f211c;
+  --marketing-muted: #6f5c53;
+  --marketing-accent: #8a563f;
+  --marketing-accent-soft: rgba(138, 86, 63, 0.12);
+  --marketing-shadow: 0 24px 50px rgba(90, 54, 40, 0.1);
+}
+
+body.marketing-desk-page {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 228, 203, 0.9), transparent 30%),
+    radial-gradient(circle at top right, rgba(220, 191, 170, 0.4), transparent 28%),
+    linear-gradient(180deg, #fbf6f1 0%, #f3eadf 52%, #ede1d2 100%);
+  color: var(--marketing-text);
+}
+
+.marketing-shell {
+  width: min(1240px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.marketing-auth-card,
+.marketing-card,
+.marketing-subcard {
+  border: 1px solid var(--marketing-border);
+  border-radius: 28px;
+  background: var(--marketing-surface);
+  box-shadow: var(--marketing-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.marketing-auth-card {
+  max-width: 760px;
+  margin: 28px auto 0;
+  padding: 28px;
+}
+
+.marketing-brand {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.marketing-brand img {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+}
+
+.marketing-brand h1,
+.marketing-topbar-copy h1,
+.marketing-card-head h2,
+.marketing-subhead h3,
+.marketing-copy-head strong {
+  margin: 6px 0 8px;
+  font-family: "Poppins", sans-serif;
+}
+
+.marketing-brand p,
+.marketing-topbar-copy p,
+.marketing-status,
+.marketing-selected-copy p,
+.marketing-opportunity-card p,
+.marketing-opportunity-card span,
+.marketing-order-meta,
+.marketing-rank-item span {
+  color: var(--marketing-muted);
+}
+
+.marketing-auth-form,
+.marketing-auth-form label,
+.marketing-field {
+  display: grid;
+  gap: 8px;
+}
+
+.marketing-auth-form {
+  gap: 18px;
+}
+
+.marketing-auth-form input,
+.marketing-field input,
+.marketing-copy-card textarea,
+.marketing-copy-card input {
+  width: 100%;
+  border: 1px solid rgba(101, 63, 50, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--marketing-text);
+  padding: 14px 16px;
+  font: inherit;
+}
+
+.marketing-status {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.marketing-status[data-tone="success"] {
+  background: rgba(72, 156, 103, 0.14);
+  color: #245d3d;
+}
+
+.marketing-status[data-tone="error"] {
+  background: rgba(173, 68, 57, 0.13);
+  color: #7b2f27;
+}
+
+.marketing-status[data-tone="warning"] {
+  background: rgba(181, 122, 46, 0.14);
+  color: #7a511d;
+}
+
+.marketing-topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.marketing-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.marketing-live-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--marketing-accent-soft);
+  color: var(--marketing-accent);
+  font-weight: 700;
+}
+
+.marketing-summary-grid,
+.marketing-signal-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.marketing-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: 20px;
+}
+
+.marketing-summary-grid article,
+.marketing-rank-item,
+.marketing-order-item,
+.marketing-opportunity-card,
+.marketing-product-pill,
+.marketing-copy-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(101, 63, 50, 0.08);
+}
+
+.marketing-summary-grid article {
+  padding: 16px;
+}
+
+.marketing-summary-grid strong {
+  display: block;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem;
+  margin-top: 8px;
+}
+
+.marketing-main-grid,
+.marketing-lower-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.marketing-main-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  margin-bottom: 20px;
+}
+
+.marketing-lower-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.marketing-side-stack,
+.marketing-opportunity-stack,
+.marketing-order-list,
+.marketing-rank-list,
+.marketing-product-picks,
+.marketing-copy-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.marketing-card,
+.marketing-subcard {
+  padding: 24px;
+}
+
+.marketing-card-head,
+.marketing-subhead,
+.marketing-copy-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.marketing-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.marketing-quick-action {
+  border: 1px solid rgba(101, 63, 50, 0.12);
+  border-radius: 18px;
+  padding: 16px 14px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--marketing-text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+}
+
+.marketing-product-picks {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.marketing-product-pill {
+  display: grid;
+  gap: 4px;
+  padding: 14px 15px;
+  cursor: pointer;
+}
+
+.marketing-product-pill.is-active {
+  border-color: rgba(138, 86, 63, 0.2);
+  background: rgba(138, 86, 63, 0.1);
+}
+
+.marketing-product-pill strong {
+  font-family: "Poppins", sans-serif;
+}
+
+.marketing-selected-product {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(101, 63, 50, 0.08);
+  margin-bottom: 18px;
+}
+
+.marketing-selected-media img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.marketing-copy-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.marketing-copy-card,
+.marketing-opportunity-card,
+.marketing-order-item {
+  padding: 16px;
+}
+
+.marketing-copy-card textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.marketing-opportunity-card,
+.marketing-order-item,
+.marketing-rank-item {
+  display: grid;
+  gap: 10px;
+}
+
+.marketing-order-actions,
+.marketing-range-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.marketing-order-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.marketing-order-status,
+.marketing-range {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.marketing-order-status {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--marketing-accent);
+}
+
+.marketing-range {
+  border: 0;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--marketing-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.marketing-range.is-active {
+  background: var(--marketing-accent);
+  color: #fff7ef;
+}
+
+.marketing-empty {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--marketing-muted);
+}
+
+@media (max-width: 980px) {
+  .marketing-main-grid,
+  .marketing-lower-grid,
+  .marketing-quick-actions,
+  .marketing-copy-grid,
+  .marketing-product-picks,
+  .marketing-signal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .marketing-shell {
+    width: min(100% - 20px, 1240px);
+    padding: 20px 0 40px;
+  }
+
+  .marketing-auth-card,
+  .marketing-card,
+  .marketing-subcard {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .marketing-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .marketing-brand {
+    grid-template-columns: 1fr;
+  }
+
+  .marketing-brand img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .marketing-selected-product,
+  .marketing-order-row-top {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .marketing-selected-media img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+}
