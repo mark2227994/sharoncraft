@@ -9,7 +9,8 @@ const merchantImageAliasMap = new Map([
   ["assets/images/Africa Beads Necklace_tribal Beads Maasai….webp", "assets/images/circle-mother-necklace-main.webp"],
   ["assets/images/African Kenyan Handmade Pendant Necklace_ Unique….webp", "assets/images/circle-mother-necklace-alt.webp"],
   ["assets/images/Africa Beads Necklace_tribal Beads Maasai….jpg", "assets/images/circle-mother-necklace-main.webp"],
-  ["assets/images/African Kenyan Handmade Pendant Necklace_ Unique….jpg", "assets/images/circle-mother-necklace-alt.webp"]
+  ["assets/images/African Kenyan Handmade Pendant Necklace_ Unique….jpg", "assets/images/circle-mother-necklace-alt.webp"],
+  ["https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775536669198-elevate-your-style-with-our-stunning-maasai-regal.jpg", "assets/images/bead-jewlery-gift-set-main.jpg"]
 ]);
 
 function isHttpUrl(value) {
@@ -23,7 +24,7 @@ function normalizeImageReference(value) {
   }
 
   if (isHttpUrl(trimmed)) {
-    return trimmed;
+    return getMerchantImageAliasPath(trimmed);
   }
 
   if (/^[a-z]+:/i.test(trimmed) || trimmed.startsWith("//")) {
