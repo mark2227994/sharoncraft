@@ -27,7 +27,8 @@
       email: "hello@sharoncraft.co.ke",
       location: "Nairobi, Kenya",
       analytics: {
-        ga4MeasurementId: "G-B3JW5DJ52P"
+        ga4MeasurementId: "G-B3JW5DJ52P",
+        ahrefsAnalyticsKey: "BgGowFbUBT7PdXeMHYheSQ"
       },
       pricing: {
         enabled: true,
