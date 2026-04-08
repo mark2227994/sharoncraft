@@ -20,6 +20,7 @@
   let cartTimerInterval = null;
   let analyticsEventsBound = false;
   let gaLoadPromise = null;
+  let ahrefsLoadPromise = null;
   let analyticsFlushPromise = null;
   let analyticsFlushTimer = null;
   let mpesaProfilePromise = null;
@@ -327,6 +328,8 @@
     }
 
     scheduleAnalyticsFlush(200);
+    loadGa4IfNeeded();
+    loadAhrefsIfNeeded();
 
     if (previousConsent !== true) {
       trackEvent("page_view", {
@@ -382,7 +385,7 @@
           <label class="cookie-consent-option">
             <div class="cookie-consent-option-copy">
               <strong>Analytics</strong>
-              <p>Lets SharonCraft measure page views, product interest, and site performance using first-party analytics and Google Analytics.</p>
+              <p>Lets SharonCraft measure page views, product interest, and site performance using first-party analytics, Google Analytics, and Ahrefs Analytics.</p>
             </div>
             <span class="cookie-consent-switch">
               <input type="checkbox" data-cookie-consent-analytics />
@@ -666,6 +669,10 @@
       ga4MeasurementId:
         normalizeText(siteAnalytics.ga4MeasurementId) ||
         normalizeText(window.SHARONCRAFT_GA4_ID) ||
+        "",
+      ahrefsAnalyticsKey:
+        normalizeText(siteAnalytics.ahrefsAnalyticsKey) ||
+        normalizeText(window.SHARONCRAFT_AHREFS_KEY) ||
         ""
     };
   }
@@ -1100,6 +1107,42 @@
     });
 
     return gaLoadPromise;
+  }
+
+  function loadAhrefsIfNeeded() {
+    if (!isAnalyticsConsentGranted()) {
+      return Promise.resolve(false);
+    }
+
+    const config = getAnalyticsConfig();
+    if (!config.ahrefsAnalyticsKey) {
+      return Promise.resolve(false);
+    }
+
+    if (document.querySelector('script[data-ahrefs-loader="true"]')) {
+      return Promise.resolve(true);
+    }
+
+    if (ahrefsLoadPromise) {
+      return ahrefsLoadPromise;
+    }
+
+    ahrefsLoadPromise = new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = "https://analytics.ahrefs.com/analytics.js";
+      script.setAttribute("data-key", config.ahrefsAnalyticsKey);
+      script.setAttribute("data-ahrefs-loader", "true");
+      script.addEventListener("load", function () {
+        resolve(true);
+      });
+      script.addEventListener("error", function () {
+        resolve(false);
+      });
+      document.head.appendChild(script);
+    });
+
+    return ahrefsLoadPromise;
   }
 
   function trackEvent(name, payload) {
@@ -3846,6 +3889,7 @@
       flushAnalyticsQueue();
     });
     scheduleAnalyticsFlush(200);
+    loadAhrefsIfNeeded();
     setSiteStructuredData();
     trackEvent("page_view", {
       page_title: document.title,
