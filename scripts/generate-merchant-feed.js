@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadCatalogSource } = require('./catalog-source');
 const siteUrl = "https://www.sharoncraft.co.ke";
+const rootDir = path.resolve(__dirname, "..");
 const fallbackImagePath = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
 const maxImageReferenceLength = 2048;
 
@@ -23,12 +24,42 @@ function normalizeImageReference(value) {
     return "";
   }
 
-  return trimmed.replace(/^\/+/, '');
+  const normalizedLocalPath = trimmed.replace(/^\/+/, '');
+  return resolveLocalAssetPath(normalizedLocalPath);
 }
 
 function absoluteAssetUrl(assetPath) {
   const normalized = normalizeImageReference(assetPath) || fallbackImagePath;
-  return isHttpUrl(normalized) ? normalized : `${siteUrl}/${normalized}`;
+  if (isHttpUrl(normalized)) {
+    return normalized;
+  }
+
+  return `${siteUrl}/${normalized.split('/').map((segment) => encodeURIComponent(segment)).join('/')}`;
+}
+
+function resolveLocalAssetPath(assetPath) {
+  const normalized = String(assetPath || "").trim().replace(/\\/g, "/");
+  if (!normalized) {
+    return "";
+  }
+
+  const resolvedPath = path.join(rootDir, normalized);
+  if (fs.existsSync(resolvedPath)) {
+    return normalized;
+  }
+
+  const ext = path.extname(normalized);
+  const base = ext ? normalized.slice(0, -ext.length) : normalized;
+  const extensionsToTry = [".webp", ".jpg", ".jpeg", ".png", ".gif"];
+
+  for (const candidateExt of extensionsToTry) {
+    const candidate = `${base}${candidateExt}`;
+    if (fs.existsSync(path.join(rootDir, candidate))) {
+      return candidate.replace(/\\/g, "/");
+    }
+  }
+
+  return "";
 }
 
 // Helper to reliably escape XML payload formats
