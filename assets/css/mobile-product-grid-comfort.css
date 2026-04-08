@@ -9,14 +9,14 @@
   body[data-page="home"] .product-card,
   body[data-page="shop"] .product-card,
   body[data-page="product"] .product-card {
-    border-radius: 14px;
+    border-radius: 4px;
   }
 
   body[data-page="home"] .product-card-media,
   body[data-page="shop"] .product-card-media,
   body[data-page="product"] .product-card-media {
     margin: 0.62rem 0.62rem 0;
-    border-radius: 10px;
+    border-radius: 0;
     box-shadow: none;
   }
 

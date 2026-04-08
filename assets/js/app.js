@@ -2351,8 +2351,6 @@
       <article class="product-card reveal accent-${categoryAccent}">
         <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes}>
           <img src="${image}" alt="${productName}" loading="lazy" decoding="async" />
-          <span class="product-card-orbit" aria-hidden="true"></span>
-          <span class="product-card-wash" aria-hidden="true"></span>
           ${badgeMarkup}
           <div class="product-card-media-actions">
             <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
