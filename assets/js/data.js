@@ -15,7 +15,7 @@
   const defaultData = {
     site: {
       name: "SharonCraft",
-      tagline: "Bright handmade beadwork for gifts, home styling, and joyful African-inspired looks.",
+      tagline: "Handmade jewelry, gifts, and home decor from Nairobi with direct WhatsApp support.",
       founderName: "Kelvin Mark",
       founderTitle: "Founder and CEO",
       founderDescription: "Kelvin Mark is the founder and CEO of SharonCraft. He launched the brand at 21 and leads brand direction, operations, growth, and customer experience.",
