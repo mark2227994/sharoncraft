@@ -5,6 +5,12 @@ const siteUrl = "https://www.sharoncraft.co.ke";
 const rootDir = path.resolve(__dirname, "..");
 const fallbackImagePath = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
 const maxImageReferenceLength = 2048;
+const merchantImageAliasMap = new Map([
+  ["assets/images/Africa Beads Necklace_tribal Beads Maasai….webp", "assets/images/circle-mother-necklace-main.webp"],
+  ["assets/images/African Kenyan Handmade Pendant Necklace_ Unique….webp", "assets/images/circle-mother-necklace-alt.webp"],
+  ["assets/images/Africa Beads Necklace_tribal Beads Maasai….jpg", "assets/images/circle-mother-necklace-main.webp"],
+  ["assets/images/African Kenyan Handmade Pendant Necklace_ Unique….jpg", "assets/images/circle-mother-necklace-alt.webp"]
+]);
 
 function isHttpUrl(value) {
   return /^https?:\/\//i.test(String(value || "").trim());
@@ -25,7 +31,8 @@ function normalizeImageReference(value) {
   }
 
   const normalizedLocalPath = trimmed.replace(/^\/+/, '');
-  return resolveLocalAssetPath(normalizedLocalPath);
+  const resolvedLocalPath = resolveLocalAssetPath(normalizedLocalPath);
+  return getMerchantImageAliasPath(resolvedLocalPath);
 }
 
 function absoluteAssetUrl(assetPath) {
@@ -60,6 +67,24 @@ function resolveLocalAssetPath(assetPath) {
   }
 
   return "";
+}
+
+function getMerchantImageAliasPath(assetPath) {
+  const normalized = String(assetPath || "").trim().replace(/\\/g, "/");
+  if (!normalized) {
+    return "";
+  }
+
+  const aliasPath = merchantImageAliasMap.get(normalized);
+  if (!aliasPath) {
+    return normalized;
+  }
+
+  if (fs.existsSync(path.join(rootDir, aliasPath))) {
+    return aliasPath.replace(/\\/g, "/");
+  }
+
+  return normalized;
 }
 
 // Helper to reliably escape XML payload formats
