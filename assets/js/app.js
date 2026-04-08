@@ -3474,8 +3474,8 @@
         <div class="container footer-grid">
           <section class="footer-brand">
             <span class="section-kicker">${data.site.name || "SharonCraft"}</span>
-            <h2>${data.site.tagline || "Colorful handmade beadwork for homes, gifts, and joyful moments."}</h2>
-            <p>Browse the collection, ask what you need, and finish your order in a simple personal way.</p>
+            <h2>${data.site.tagline || "Handmade jewelry, gifts, and home decor from Nairobi with direct WhatsApp support."}</h2>
+            <p>Browse the collection, ask about availability or delivery, and place your order through the site or on WhatsApp.</p>
           </section>
           <div class="footer-columns">
             <section class="footer-panel footer-panel-contact footer-accordion-panel is-open">
