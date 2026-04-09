@@ -34,76 +34,76 @@
       <div class="container">
         <div class="page-hero-copy">
           <span id="shop-hero-kicker" class="section-kicker">Shop SharonCraft</span>
-          <h1 id="shop-hero-title">Find the piece that suits you without digging through clutter.</h1>
-          <p id="shop-hero-description">Start with the grid, open what catches your eye, and refine only when you need to narrow things down.</p>
+          <h1 id="shop-hero-title">Handmade beadwork worth browsing slowly.</h1>
+          <p id="shop-hero-description">Start with a collection, open what catches your eye, and refine only when you need to narrow the list.</p>
         </div>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <div class="shop-refine-bar">
-          <div class="shop-refine-copy">
-            <span id="shop-refine-kicker" class="section-kicker">Browse & Refine</span>
-            <h2 id="shop-refine-title">Search first. Filter only when you need to.</h2>
-            <p class="shop-refine-note">Search by name first, then filter only if it helps you narrow the list faster.</p>
+        <div class="shop-discovery-shell">
+          <div class="shop-collection-strip">
+            <div class="shop-collection-intro">
+              <span id="shop-refine-kicker" class="section-kicker">Shop by Collection</span>
+              <h2 id="shop-refine-title">Start with the mood that fits.</h2>
+            </div>
+            <div class="shop-filter-chips shop-collection-rail" id="shop-chips"></div>
           </div>
-          <div class="shop-filter-search-section">
-            <div class="shop-search-box">
-              <input id="shop-search" type="search" placeholder="Search pieces..." aria-label="Search products" />
-              <span class="shop-search-icon">Search</span>
+
+          <div class="shop-refine-bar">
+            <div class="shop-filter-search-section">
+              <div class="shop-search-box">
+                <input id="shop-search" type="search" placeholder="Search pieces or collections..." aria-label="Search products" />
+                <span class="shop-search-icon">Search</span>
+              </div>
+            </div>
+            <div class="shop-refine-tools">
+              <label class="shop-sort-box" for="shop-sort">
+                <span class="shop-sort-label">Sort</span>
+                <select id="shop-sort" class="filter-card-select shop-sort-select" aria-label="Sort products">
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                </select>
+              </label>
+              <span id="shop-count" class="shop-product-count">0 pieces</span>
+              <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
+                <span class="shop-filter-toggle-text">Refine</span>
+              </button>
+              <button id="clear-shop-filters" class="shop-clear-button" type="button" hidden>Clear</button>
             </div>
           </div>
-          <div class="shop-refine-tools">
-            <span id="shop-count" class="shop-product-count">0 pieces</span>
-            <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
-              <span class="shop-filter-toggle-text">Filters</span>
-            </button>
-            <button id="clear-shop-filters" class="shop-clear-button" type="button">Clear</button>
-          </div>
-        </div>
 
-        <div class="shop-filter-chips" id="shop-chips"></div>
-
-        <div class="shop-filter-panels" id="shop-filter-grid">
-          <div class="shop-filter-cards shop-filter-cards-essential">
-            <div class="shop-filter-card">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">Category</h3>
+          <div class="shop-filter-panels" id="shop-filter-grid">
+            <div class="shop-filter-cards shop-filter-cards-essential">
+              <div class="shop-filter-card">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Category</h3>
+                </div>
+                <select id="shop-category" class="filter-card-select" aria-label="Filter by category"></select>
               </div>
-              <select id="shop-category" class="filter-card-select" aria-label="Filter by category"></select>
-            </div>
 
-            <div class="shop-filter-card">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">Price</h3>
+              <div class="shop-filter-card">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Price</h3>
+                </div>
+                <select id="shop-price" class="filter-card-select" aria-label="Filter by price">
+                  <option value="">All prices</option>
+                  <option value="under-2000">Under KES 2,000</option>
+                  <option value="2000-5000">KES 2,000 to 5,000</option>
+                  <option value="over-5000">Above KES 5,000</option>
+                </select>
               </div>
-              <select id="shop-price" class="filter-card-select" aria-label="Filter by price">
-                <option value="">All prices</option>
-                <option value="under-2000">Under KES 2,000</option>
-                <option value="2000-5000">KES 2,000 to 5,000</option>
-                <option value="over-5000">Above KES 5,000</option>
-              </select>
-            </div>
 
-            <label class="shop-filter-card shop-filter-card-check" for="shop-new-only">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">New only</h3>
-              </div>
-              <span class="shop-filter-check-copy">Show only fresh arrivals</span>
-              <input id="shop-new-only" type="checkbox" />
-            </label>
-
-            <div class="shop-filter-card">
-              <div class="filter-card-header">
-                <h3 class="filter-card-title">Sort</h3>
-              </div>
-              <select id="shop-sort" class="filter-card-select" aria-label="Sort products">
-                <option value="featured">Featured</option>
-                <option value="newest">Newest</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-              </select>
+              <label class="shop-filter-card shop-filter-card-check" for="shop-new-only">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Fresh arrivals</h3>
+                </div>
+                <span class="shop-filter-check-copy">Only the newest pieces</span>
+                <input id="shop-new-only" type="checkbox" />
+              </label>
             </div>
           </div>
         </div>
