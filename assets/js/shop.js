@@ -44,27 +44,38 @@ document.addEventListener("DOMContentLoaded", async function () {
   const chipContainer = document.getElementById("shop-chips");
   const filterGrid = document.getElementById("shop-filter-grid");
   const toggleFiltersButton = document.getElementById("shop-toggle-filters");
+  const categoryRailItems = Array.isArray(utils.data && utils.data.categories)
+    ? utils.data.categories
+    : [];
 
   function buildChips() {
     if (!chipContainer) return;
 
     const categories = [
-      { value: "", label: "All" },
-      { value: "__new__", label: "New" },
-      ...Array.from(categorySelect.options)
-        .filter((option) => option.value)
-        .map((option) => ({ value: option.value, label: option.textContent }))
-        .slice(0, 3)
+      { value: "", label: "All pieces", note: "Everything in one view" },
+      { value: "__new__", label: "New arrivals", note: "Fresh this season" },
+      ...categoryRailItems.map((category) => ({
+        value: category.slug,
+        label: category.name,
+        note: category.tip || "Explore"
+      }))
     ];
 
     chipContainer.innerHTML = categories
-      .map(
-        (cat) => `
-          <button type="button" class="filter-chip ${(cat.value === "__new__" ? Boolean(newOnlyInput && newOnlyInput.checked) : cat.value === categorySelect.value) ? "is-active" : ""}" data-chip="${cat.value}">
-            ${cat.label}
+      .map((cat) => {
+        const isActive = cat.value === "__new__"
+          ? Boolean(newOnlyInput && newOnlyInput.checked) && !categorySelect.value
+          : cat.value
+            ? cat.value === categorySelect.value
+            : !categorySelect.value && !(newOnlyInput && newOnlyInput.checked);
+
+        return `
+          <button type="button" class="shop-collection-card ${isActive ? "is-active" : ""}" data-chip="${cat.value}" aria-pressed="${isActive}">
+            <span class="shop-collection-card-title">${cat.label}</span>
+            <span class="shop-collection-card-note">${cat.note}</span>
           </button>
-        `
-      )
+        `;
+      })
       .join("");
   }
 
@@ -73,7 +84,33 @@ document.addEventListener("DOMContentLoaded", async function () {
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filters";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Refine";
+    }
+    syncFilterState();
+  }
+
+  function syncFilterState() {
+    const hasActiveFilters =
+      Boolean(searchInput.value.trim()) ||
+      Boolean(categorySelect.value) ||
+      Boolean(priceSelect.value) ||
+      Boolean(newOnlyInput && newOnlyInput.checked) ||
+      sortSelect.value !== "featured";
+
+    const hasRefineFilters =
+      Boolean(categorySelect.value) ||
+      Boolean(priceSelect.value) ||
+      Boolean(newOnlyInput && newOnlyInput.checked);
+
+    if (clearButton) {
+      clearButton.hidden = !hasActiveFilters;
+    }
+
+    if (toggleFiltersButton) {
+      toggleFiltersButton.classList.toggle(
+        "is-active",
+        hasRefineFilters || Boolean(filterGrid && filterGrid.classList.contains("is-open"))
+      );
     }
   }
 
@@ -90,13 +127,24 @@ document.addEventListener("DOMContentLoaded", async function () {
       const button = event.target.closest("[data-chip]");
       if (!button) return;
       const value = button.dataset.chip;
+
       if (value === "__new__") {
         if (newOnlyInput) {
-          newOnlyInput.checked = !newOnlyInput.checked;
+          newOnlyInput.checked = true;
+        }
+        categorySelect.value = "";
+      } else if (!value) {
+        categorySelect.value = "";
+        if (newOnlyInput) {
+          newOnlyInput.checked = false;
         }
       } else {
         categorySelect.value = value;
+        if (newOnlyInput) {
+          newOnlyInput.checked = false;
+        }
       }
+
       renderProducts();
     });
   }
@@ -167,6 +215,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .filter((url) => url && url !== "#");
 
     buildChips();
+    syncFilterState();
 
     const filtered = utils.data.products.filter((product) => {
       const categoryLabel = (utils.getCategoryBySlug(product.category) || {}).name || "";
