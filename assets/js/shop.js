@@ -47,19 +47,30 @@ document.addEventListener("DOMContentLoaded", async function () {
   const categoryRailItems = Array.isArray(utils.data && utils.data.categories)
     ? utils.data.categories
     : [];
+  const featuredChipLimit = 4;
 
   function buildChips() {
     if (!chipContainer) return;
 
+    const featuredCategories = categoryRailItems.slice(0, featuredChipLimit);
+    const activeCategory = categoryRailItems.find((category) => category.slug === categorySelect.value);
     const categories = [
-      { value: "", label: "All pieces", note: "Everything in one view" },
-      { value: "__new__", label: "New arrivals", note: "Fresh this season" },
-      ...categoryRailItems.map((category) => ({
+      { value: "", label: "All" },
+      { value: "__new__", label: "New" },
+      ...featuredCategories.map((category) => ({
         value: category.slug,
-        label: category.name,
-        note: category.tip || "Explore"
+        label: category.name
       }))
     ];
+
+    if (activeCategory && !featuredCategories.some((category) => category.slug === activeCategory.slug)) {
+      categories.push({
+        value: activeCategory.slug,
+        label: activeCategory.name
+      });
+    }
+
+    const shouldShowMore = categoryRailItems.length > featuredChipLimit;
 
     chipContainer.innerHTML = categories
       .map((cat) => {
@@ -72,11 +83,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         return `
           <button type="button" class="shop-collection-card ${isActive ? "is-active" : ""}" data-chip="${cat.value}" aria-pressed="${isActive}">
             <span class="shop-collection-card-title">${cat.label}</span>
-            <span class="shop-collection-card-note">${cat.note}</span>
           </button>
         `;
       })
-      .join("");
+      .join("") + (shouldShowMore
+        ? `
+          <button type="button" class="shop-collection-card shop-collection-card-more" data-chip="__more__" aria-expanded="${Boolean(filterGrid && filterGrid.classList.contains("is-open"))}">
+            <span class="shop-collection-card-title">More</span>
+          </button>
+        `
+        : "");
   }
 
   function setFilterOpen(open) {
@@ -84,8 +100,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     filterGrid.classList.toggle("is-open", open);
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Refine";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filter";
     }
+    buildChips();
     syncFilterState();
   }
 
@@ -127,6 +144,14 @@ document.addEventListener("DOMContentLoaded", async function () {
       const button = event.target.closest("[data-chip]");
       if (!button) return;
       const value = button.dataset.chip;
+
+      if (value === "__more__") {
+        setFilterOpen(true);
+        if (categorySelect) {
+          categorySelect.focus();
+        }
+        return;
+      }
 
       if (value === "__new__") {
         if (newOnlyInput) {

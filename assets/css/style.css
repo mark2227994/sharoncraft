@@ -1478,42 +1478,31 @@ main > .section:not(:first-of-type),
 @media (hover: hover) and (pointer: fine) and (min-width: 960px) {
   body[data-page="home"] .product-card,
   body[data-page="shop"] .product-card {
-    transform-origin: center bottom;
-    will-change: transform, box-shadow;
+    will-change: border-color, box-shadow;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
   }
 
   body[data-page="home"] .product-card:hover,
   body[data-page="home"] .product-card:focus-within,
   body[data-page="shop"] .product-card:hover,
   body[data-page="shop"] .product-card:focus-within {
-    transform: translateY(-10px);
-    border-color: rgba(92, 64, 51, 0.2);
-    box-shadow:
-      0 22px 44px rgba(92, 64, 51, 0.14),
-      0 10px 22px rgba(217, 108, 72, 0.08);
-  }
-
-  body[data-page="home"] .product-card:hover .product-card-media::after,
-  body[data-page="home"] .product-card:focus-within .product-card-media::after,
-  body[data-page="shop"] .product-card:hover .product-card-media::after,
-  body[data-page="shop"] .product-card:focus-within .product-card-media::after {
-    opacity: 1;
-    transform: translateX(120%) rotate(10deg);
+    transform: none;
+    border-color: rgba(217, 108, 72, 0.22);
+    box-shadow: 0 10px 22px rgba(92, 64, 51, 0.08);
   }
 
   body[data-page="home"] .product-card:hover .product-card-media img,
   body[data-page="home"] .product-card:focus-within .product-card-media img,
   body[data-page="shop"] .product-card:hover .product-card-media img,
   body[data-page="shop"] .product-card:focus-within .product-card-media img {
-    transform: scale(1.065);
-    filter: saturate(1.08) contrast(1.03);
+    transform: none;
+    filter: none;
   }
 
   body[data-page="home"] .product-card:hover .product-card-signature,
   body[data-page="home"] .product-card:focus-within .product-card-signature,
   body[data-page="shop"] .product-card:hover .product-card-signature,
   body[data-page="shop"] .product-card:focus-within .product-card-signature {
-    transform: translateY(-2px);
     color: rgba(92, 64, 51, 0.88);
   }
 
@@ -1521,46 +1510,46 @@ main > .section:not(:first-of-type),
   body[data-page="home"] .product-card:focus-within .product-card-beads i:nth-child(1),
   body[data-page="shop"] .product-card:hover .product-card-beads i:nth-child(1),
   body[data-page="shop"] .product-card:focus-within .product-card-beads i:nth-child(1) {
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 5px rgba(217, 108, 72, 0.08);
+    transform: none;
+    box-shadow: none;
   }
 
   body[data-page="home"] .product-card:hover .product-card-beads i:nth-child(2),
   body[data-page="home"] .product-card:focus-within .product-card-beads i:nth-child(2),
   body[data-page="shop"] .product-card:hover .product-card-beads i:nth-child(2),
   body[data-page="shop"] .product-card:focus-within .product-card-beads i:nth-child(2) {
-    transform: translateY(-3px);
-    box-shadow: 0 0 0 5px rgba(242, 201, 76, 0.09);
+    transform: none;
+    box-shadow: none;
   }
 
   body[data-page="home"] .product-card:hover .product-card-beads i:nth-child(3),
   body[data-page="home"] .product-card:focus-within .product-card-beads i:nth-child(3),
   body[data-page="shop"] .product-card:hover .product-card-beads i:nth-child(3),
   body[data-page="shop"] .product-card:focus-within .product-card-beads i:nth-child(3) {
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 5px rgba(26, 188, 156, 0.08);
+    transform: none;
+    box-shadow: none;
   }
 
   body[data-page="home"] .product-card:hover .product-card-actions,
   body[data-page="home"] .product-card:focus-within .product-card-actions,
   body[data-page="shop"] .product-card:hover .product-card-actions,
   body[data-page="shop"] .product-card:focus-within .product-card-actions {
-    transform: translateY(-2px);
+    transform: none;
   }
 
   body[data-page="home"] .product-card:hover .product-card-view,
   body[data-page="home"] .product-card:focus-within .product-card-view,
   body[data-page="shop"] .product-card:hover .product-card-view,
   body[data-page="shop"] .product-card:focus-within .product-card-view {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 20px rgba(92, 64, 51, 0.1);
+    transform: none;
+    box-shadow: none;
   }
 
   body[data-page="home"] .product-card:hover .product-card-action-icon,
   body[data-page="home"] .product-card:focus-within .product-card-action-icon,
   body[data-page="shop"] .product-card:hover .product-card-action-icon,
   body[data-page="shop"] .product-card:focus-within .product-card-action-icon {
-    transform: scale(1.04);
+    transform: none;
     background: rgba(92, 64, 51, 0.1);
   }
 }
