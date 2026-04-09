@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const story = truncate(product.story || "Handmade by SharonCraft artisans.", 120);
 
     return `
-      <article class="product-card live-product-card reveal">
+      <article class="product-card live-product-card">
         <div class="product-card-media">
           <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async" fetchpriority="low" />
           <div class="live-product-badge-row">

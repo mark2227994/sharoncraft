@@ -33,9 +33,9 @@
     <section class="page-hero">
       <div class="container">
         <div class="page-hero-copy">
-          <span id="shop-hero-kicker" class="section-kicker">Shop SharonCraft</span>
-          <h1 id="shop-hero-title">Handmade beadwork worth browsing slowly.</h1>
-          <p id="shop-hero-description">Start with a collection, open what catches your eye, and refine only when you need to narrow the list.</p>
+          <span id="shop-hero-kicker" class="section-kicker">Shop</span>
+          <h1 id="shop-hero-title">Browse handmade pieces.</h1>
+          <p id="shop-hero-description">Search, pick a collection, and let the products lead.</p>
         </div>
       </div>
     </section>
@@ -43,14 +43,6 @@
     <section class="section">
       <div class="container">
         <div class="shop-discovery-shell">
-          <div class="shop-collection-strip">
-            <div class="shop-collection-intro">
-              <span id="shop-refine-kicker" class="section-kicker">Shop by Collection</span>
-              <h2 id="shop-refine-title">Start with the mood that fits.</h2>
-            </div>
-            <div class="shop-filter-chips shop-collection-rail" id="shop-chips"></div>
-          </div>
-
           <div class="shop-refine-bar">
             <div class="shop-filter-search-section">
               <div class="shop-search-box">
@@ -68,12 +60,15 @@
                   <option value="price-desc">Price: High to Low</option>
                 </select>
               </label>
-              <span id="shop-count" class="shop-product-count">0 pieces</span>
               <button id="shop-toggle-filters" class="shop-filter-toggle" aria-expanded="false" type="button">
-                <span class="shop-filter-toggle-text">Refine</span>
+                <span class="shop-filter-toggle-text">Filter</span>
               </button>
               <button id="clear-shop-filters" class="shop-clear-button" type="button" hidden>Clear</button>
             </div>
+          </div>
+
+          <div class="shop-collection-strip" aria-label="Collection shortcuts">
+            <div class="shop-filter-chips shop-collection-rail" id="shop-chips"></div>
           </div>
 
           <div class="shop-filter-panels" id="shop-filter-grid">
@@ -108,6 +103,9 @@
           </div>
         </div>
 
+        <div class="shop-results-bar">
+          <span id="shop-count" class="shop-product-count">0 pieces</span>
+        </div>
         <div id="shop-grid" class="product-grid"></div>
       </div>
     </section>
