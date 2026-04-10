@@ -2101,6 +2101,184 @@
     });
   }
 
+  const responsiveImageProfiles = Object.freeze({
+    card: {
+      widths: [220, 320, 420, 640],
+      sizes: "(max-width: 639px) 46vw, (max-width: 1023px) 31vw, (max-width: 1439px) 24vw, 280px"
+    },
+    hero: {
+      widths: [480, 720, 960, 1280],
+      sizes: "(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 540px"
+    },
+    favorite: {
+      widths: [160, 240, 320, 480],
+      sizes: "(max-width: 767px) 32vw, 96px"
+    },
+    detail: {
+      widths: [480, 720, 960, 1280],
+      sizes: "(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 620px"
+    },
+    thumb: {
+      widths: [120, 180, 240],
+      sizes: "(max-width: 767px) 28vw, 180px"
+    },
+    portrait: {
+      widths: [320, 480, 640],
+      sizes: "(max-width: 767px) 86vw, 320px"
+    }
+  });
+
+  function splitAssetUrl(url) {
+    const source = normalizeText(url);
+    const match = source.match(/^([^?#]+)(\?[^#]*)?(#.*)?$/);
+    return {
+      pathname: match ? match[1] : source,
+      query: match && match[2] ? match[2] : "",
+      hash: match && match[3] ? match[3] : ""
+    };
+  }
+
+  function buildDerivedAssetUrl(url, suffix, nextExtension) {
+    const source = splitAssetUrl(url);
+    const pathname = source.pathname.replace(/(\.[a-z0-9]+)$/i, function (_, extension) {
+      return `${suffix}.${nextExtension || extension.replace(/^\./, "")}`;
+    });
+    return `${pathname}${source.query}${source.hash}`;
+  }
+
+  function buildResponsiveSrcset(url, profileName, format) {
+    const profile = responsiveImageProfiles[profileName] || responsiveImageProfiles.card;
+    return profile.widths
+      .map(function (width) {
+        return `${buildDerivedAssetUrl(url, `--${profileName}-${width}`, format)} ${width}w`;
+      })
+      .join(", ");
+  }
+
+  function getResponsiveImageConfig(url, profileName) {
+    const source = normalizeText(url);
+    const profile = responsiveImageProfiles[profileName] || responsiveImageProfiles.card;
+    const extensionMatch = splitAssetUrl(source).pathname.match(/\.([a-z0-9]+)$/i);
+    const extension = extensionMatch ? extensionMatch[1].toLowerCase() : "";
+    const supportsWebpFallback = extension === "webp";
+    return {
+      profile: profileName,
+      source,
+      sizes: profile.sizes,
+      avifSrcset: buildResponsiveSrcset(source, profileName, "avif"),
+      webpSrcset: buildResponsiveSrcset(source, profileName, "webp"),
+      fallbackSrcset: supportsWebpFallback ? buildResponsiveSrcset(source, profileName, extension) : "",
+      fallbackType: extension === "jpg" ? "jpeg" : extension
+    };
+  }
+
+  function renderResponsivePictureMarkup(settings) {
+    const config = settings || {};
+    const imageUrl = normalizeText(config.src);
+    const alt = escapeHtml(config.alt || "");
+    const profileName = normalizeText(config.profile) || "card";
+    const responsive = getResponsiveImageConfig(imageUrl, profileName);
+    const loading = normalizeText(config.loading) || "lazy";
+    const decoding = normalizeText(config.decoding) || "async";
+    const fetchPriority = normalizeText(config.fetchpriority);
+    const imageClass = normalizeText(config.imageClass);
+    const pictureClass = normalizeText(config.pictureClass) || "responsive-media";
+    const imageAttrs = [
+      `src="${escapeHtml(imageUrl)}"`,
+      `alt="${alt}"`,
+      `loading="${escapeHtml(loading)}"`,
+      `decoding="${escapeHtml(decoding)}"`,
+      `data-responsive-profile="${escapeHtml(profileName)}"`
+    ];
+
+    if (responsive.fallbackSrcset) {
+      imageAttrs.push(`srcset="${escapeHtml(responsive.fallbackSrcset)}"`);
+      imageAttrs.push(`sizes="${escapeHtml(responsive.sizes)}"`);
+    }
+
+    if (fetchPriority) {
+      imageAttrs.push(`fetchpriority="${escapeHtml(fetchPriority)}"`);
+    }
+
+    if (imageClass) {
+      imageAttrs.push(`class="${escapeHtml(imageClass)}"`);
+    }
+
+    return `
+      <picture class="${escapeHtml(pictureClass)}" data-responsive-picture="${escapeHtml(profileName)}">
+        <source type="image/avif" srcset="${escapeHtml(responsive.avifSrcset)}" sizes="${escapeHtml(responsive.sizes)}" />
+        <source type="image/webp" srcset="${escapeHtml(responsive.webpSrcset)}" sizes="${escapeHtml(responsive.sizes)}" />
+        <img ${imageAttrs.join(" ")} />
+      </picture>
+    `;
+  }
+
+  function syncResponsiveImageState(shell) {
+    if (!shell || shell.dataset.imageStateBound === "true") {
+      return;
+    }
+
+    const image = shell.querySelector("img");
+    if (!image) {
+      return;
+    }
+
+    const markLoaded = function () {
+      shell.dataset.imageState = image.naturalWidth > 0 ? "loaded" : "error";
+    };
+
+    shell.dataset.imageStateBound = "true";
+    shell.dataset.imageState = image.complete && image.naturalWidth > 0 ? "loaded" : "loading";
+    image.addEventListener("load", markLoaded, { once: true });
+    image.addEventListener("error", function () {
+      shell.dataset.imageState = "error";
+    }, { once: true });
+  }
+
+  function hydrateResponsiveImages(root) {
+    const scope = root && typeof root.querySelectorAll === "function" ? root : document;
+    const shells = [];
+
+    if (scope && typeof scope.matches === "function" && scope.matches("[data-image-shell]")) {
+      shells.push(scope);
+    }
+
+    scope.querySelectorAll("[data-image-shell]").forEach(function (shell) {
+      shells.push(shell);
+    });
+
+    shells.forEach(syncResponsiveImageState);
+  }
+
+  function preloadResponsiveImage(url, profileName, options) {
+    const imageUrl = normalizeText(url);
+    if (!imageUrl || !document || !document.head) {
+      return;
+    }
+
+    const profile = normalizeText(profileName) || "hero";
+    const key = `${profile}:${imageUrl}`;
+    const existingPreload = Array.from(document.head.querySelectorAll("link[data-responsive-preload]"))
+      .some(function (entry) {
+        return entry.getAttribute("data-responsive-preload") === key;
+      });
+
+    if (existingPreload) {
+      return;
+    }
+
+    const config = getResponsiveImageConfig(imageUrl, profile);
+    const preload = document.createElement("link");
+    preload.rel = "preload";
+    preload.as = "image";
+    preload.href = imageUrl;
+    preload.setAttribute("data-responsive-preload", key);
+    preload.setAttribute("imagesrcset", config.webpSrcset);
+    preload.setAttribute("imagesizes", config.sizes);
+    preload.fetchPriority = normalizeText(options && options.fetchpriority) || "high";
+    document.head.appendChild(preload);
+  }
+
   function formatCurrency(value) {
     const amount = Number(value);
     if (!Number.isFinite(amount)) {
@@ -2377,6 +2555,8 @@
     const config = options || {};
     const productName = product.name || "Artisan Creation";
     const image = getProductImages(product)[0];
+    const imageLoading = config.priorityImage ? "eager" : "lazy";
+    const imagePriority = config.priorityImage ? "high" : "low";
     const wishlisted = isWishlisted(product.id);
     const category = getCategoryBySlug(product.category);
     const categoryAccent = normalizeText(category && category.accent) || "coral";
@@ -2392,8 +2572,15 @@
 
     return `
       <article class="product-card accent-${categoryAccent}">
-        <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes}>
-          <img src="${image}" alt="${productName}" loading="lazy" decoding="async" />
+        <a class="product-card-media" href="product.html?id=${product.id}"${analyticsAttributes} data-image-shell="card" data-image-state="loading">
+          ${renderResponsivePictureMarkup({
+            src: image,
+            alt: productName,
+            profile: "card",
+            loading: imageLoading,
+            decoding: "async",
+            fetchpriority: imagePriority
+          })}
           ${badgeMarkup}
           <div class="product-card-media-actions">
             <button class="icon-action-button wishlist-icon-button ${wishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${product.id}" aria-label="${wishlisted ? "Remove from wishlist" : "Save to wishlist"}" aria-pressed="${wishlisted ? "true" : "false"}">
@@ -3899,6 +4086,7 @@
     renderFooter();
     applySiteContentOverrides(siteContentOverrides);
     initReveal();
+    hydrateResponsiveImages(document);
     renderCartUi();
     startCartTimer();
     bindCartEvents();
@@ -3919,6 +4107,7 @@
           renderCartUi();
           bindCartEvents();
           initReveal();
+          hydrateResponsiveImages(document);
         })
         .catch(function (error) {
           console.warn("Unable to refresh shared shell after live storefront sync.", error);
@@ -3962,6 +4151,10 @@
     applyPricingToProduct,
     renderCategorySelect,
     refreshReveal: initReveal,
+    hydrateResponsiveImages,
+    renderResponsivePictureMarkup,
+    getResponsiveImageConfig,
+    preloadResponsiveImage,
     addToCart,
     openCart,
     closeCart,

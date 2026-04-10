@@ -92,6 +92,18 @@
                 </select>
               </div>
 
+              <div class="shop-filter-card shop-filter-card-mobile-sort">
+                <div class="filter-card-header">
+                  <h3 class="filter-card-title">Sort</h3>
+                </div>
+                <select id="shop-sort-mobile" class="filter-card-select" aria-label="Sort products on mobile">
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                </select>
+              </div>
+
               <label class="shop-filter-card shop-filter-card-check" for="shop-new-only">
                 <div class="filter-card-header">
                   <h3 class="filter-card-title">Fresh arrivals</h3>
@@ -101,6 +113,7 @@
               </label>
             </div>
           </div>
+          <button id="shop-filter-backdrop" class="shop-filter-backdrop" type="button" hidden aria-label="Close filters"></button>
         </div>
 
         <div class="shop-results-bar">

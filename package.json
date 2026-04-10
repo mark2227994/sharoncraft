@@ -4,7 +4,8 @@
   "private": true,
   "description": "Local Node.js workflow for the SharonCraft static storefront.",
   "scripts": {
-    "build:release": "npm run build:seo && node scripts/verify-release.js",
+    "build:release": "npm run build:images && npm run build:seo && node scripts/verify-release.js",
+    "build:images": "node scripts/generate-responsive-images.js",
     "build:seo": "node scripts/generate-product-share-pages.js && node scripts/generate-sitemap.js && node scripts/generate-merchant-feed.js",
     "generate:merchant-feed": "node scripts/generate-merchant-feed.js",
     "generate:product-share-pages": "node scripts/generate-product-share-pages.js",

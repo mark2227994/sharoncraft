@@ -3,34 +3,56 @@
   <channel>
     <title>SharonCraft Catalog</title>
     <link>https://www.sharoncraft.co.ke</link>
-    <description>Bright handmade beadwork for gifts, home styling, and joyful African-inspired looks.</description>
+    <description>Handmade jewelry, gifts, and home decor from Nairobi with direct WhatsApp support.</description>
     
     <item>
-      <g:id>bead-jewlery-gift-set</g:id>
-      <g:title>bead jewlery gift set</g:title>
-      <g:description>bead jewlery gift set makes a thoughtful gift for birthdays, thank-you moments, weddings, and simple surprises. SharonCraft made it by hand so it feels warm, personal, and easy to remember. Category: Gift Sets.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=bead-jewlery-gift-set</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/bead-jewlery-gift-set-main.jpg</g:image_link>
+      <g:id>uhuru-home-set</g:id>
+      <g:title>Uhuru Home Set</g:title>
+      <g:description>A bold beaded wall and rungu-inspired decor set for joyful living spaces. Category: Gift Sets. Handmade in Kenya. Works well for gifting or home styling</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=uhuru-home-set</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/handmade-kenyan-beadwork-jrpr9r.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/handmade-african-souvenir-joswzj.webp</g:additional_image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/kenyan-bead-decor-hkewyc-opt.webp</g:additional_image_link>
       <g:product_type>SharonCraft &gt; Gift Sets</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>4600 KES</g:price>
+      <g:price>6800 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
+      <g:custom_label_0>featured</g:custom_label_0>
       <g:custom_label_1>Gift Sets</g:custom_label_1>
     </item>
     <item>
-      <g:id>beaded-african-necklace</g:id>
-      <g:title>beaded african necklace</g:title>
-      <g:description>This necklaces piece is handmade by SharonCraft with a comfortable feel and a clean finish. It is easy to wear, gift, or keep for days when you want something personal and full of color. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=beaded-african-necklace</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775512997340-african-beaded-necklace-handmade-maasai-tribal.jpg</g:image_link>
+      <g:id>sunburst-cascade-necklace</g:id>
+      <g:title>Sunburst Cascade Necklace</g:title>
+      <g:description>Long beaded strands with a rich drape and a polished cultural look. Category: Necklaces. Available in white, black, and mixed bead patterns. Lightweight for day-to-night wear</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=sunburst-cascade-necklace</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/sharoncraft-african-necklace-gilyu6.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/sharoncraft-african-necklace-p1sw79.webp</g:additional_image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/nairobi-artisan-jewelry-36egyo.webp</g:additional_image_link>
       <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>3000 KES</g:price>
+      <g:price>3200 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>featured</g:custom_label_0>
+      <g:custom_label_1>Necklaces</g:custom_label_1>
+    </item>
+    <item>
+      <g:id>malkia-collar</g:id>
+      <g:title>Malkia Collar</g:title>
+      <g:description>A bright sky-blue collar with diamond details for a clean standout finish. Category: Necklaces. Soft collar fit. Strong color contrast with hand-finished detail</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=malkia-collar</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/sharoncraft-african-necklace-p1sw79.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/sharoncraft-african-necklace-wmwmaf-opt.webp</g:additional_image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/sharoncraft-african-necklace-e8twpi-opt.webp</g:additional_image_link>
+      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>2900 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
@@ -38,31 +60,82 @@
       <g:custom_label_1>Necklaces</g:custom_label_1>
     </item>
     <item>
-      <g:id>kenyan-beaded-mats</g:id>
-      <g:title>Kenyan Beaded Mats</g:title>
-      <g:description>Kenyan Beaded Mats adds color and handmade character without making the space feel busy. It works well when you want a home piece that feels warm, memorable, and easy to place. Category: Home Decor.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=kenyan-beaded-mats</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775318423993-kenyan-beaded-mats.jpg</g:image_link>
-      <g:product_type>SharonCraft &gt; Home Decor</g:product_type>
+      <g:id>kenya-pride-bracelet</g:id>
+      <g:title>Kenya Pride Bracelet</g:title>
+      <g:description>A simple flag-inspired bracelet that is easy to wear and easy to gift. Category: Bracelets. Adjustable fit. Great for gifts, clubs, and events</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=kenya-pride-bracelet</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/kenya%20bracelete-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/authentic-maasai-bracelet-77ao7w.webp</g:additional_image_link>
+      <g:product_type>SharonCraft &gt; Bracelets</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>4600 KES</g:price>
+      <g:price>900 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>featured</g:custom_label_0>
+      <g:custom_label_1>Bracelets</g:custom_label_1>
+    </item>
+    <item>
+      <g:id>rainbow-loop-stack</g:id>
+      <g:title>Rainbow Loop Stack</g:title>
+      <g:description>A cheerful stack of colorful bead loops for playful daily styling. Category: Bracelets. Sold as a colorful stack. Pairs well with plain outfits</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=rainbow-loop-stack</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/authentic-maasai-bracelet-8ei1qd.webp</g:image_link>
+      <g:product_type>SharonCraft &gt; Bracelets</g:product_type>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>1800 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>new-arrival</g:custom_label_0>
+      <g:custom_label_1>Bracelets</g:custom_label_1>
+    </item>
+    <item>
+      <g:id>sunlit-drop-earrings</g:id>
+      <g:title>Sunlit Drop Earrings</g:title>
+      <g:description>Bright drop earrings with a light feel and a joyful handmade finish. Category: Earrings. Lightweight for comfortable wear. Easy to pair with dresses, shirts, and occasion looks</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=sunlit-drop-earrings</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-wap9kh-opt.webp</g:image_link>
+      <g:product_type>SharonCraft &gt; Earrings</g:product_type>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>1400 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>featured</g:custom_label_0>
+      <g:custom_label_1>Earrings</g:custom_label_1>
+    </item>
+    <item>
+      <g:id>twiga-statement-earrings</g:id>
+      <g:title>Twiga Statement Earrings</g:title>
+      <g:description>Bold beaded earrings with stronger shape, color, and event-ready character. Category: Earrings. Statement size with balanced wear. Works beautifully for events, shoots, and gifting</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=twiga-statement-earrings</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-96fk0x-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/nairobi-artisan-jewelry-9e1bft-opt.webp</g:additional_image_link>
+      <g:product_type>SharonCraft &gt; Earrings</g:product_type>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>1850 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
       <g:custom_label_0>catalog</g:custom_label_0>
-      <g:custom_label_1>Home Decor</g:custom_label_1>
+      <g:custom_label_1>Earrings</g:custom_label_1>
     </item>
     <item>
-      <g:id>african-artistry-cup</g:id>
-      <g:title>african artistry cup</g:title>
-      <g:description>This home decor piece adds color and handmade character without making the space feel busy. It works well when you want a home piece that feels warm, memorable, and easy to place. Category: Home Decor.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=african-artistry-cup</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775317914826-add-a-touch-of-authentic-african-artistry-to-your-2.jpg</g:image_link>
+      <g:id>kijani-mirror-duo</g:id>
+      <g:title>Kijani Mirror Duo</g:title>
+      <g:description>Round beaded mirrors that brighten bedrooms, hallways, and dressing spaces. Category: Home Decor. Two-size look with rich handmade trim. Works in modern or cultural interiors</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=kijani-mirror-duo</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/kenyan-bead-decor-yhip8u-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/kenyan-bead-decor-kwwvkk.webp</g:additional_image_link>
       <g:product_type>SharonCraft &gt; Home Decor</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>3600 KES</g:price>
+      <g:price>7400 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
@@ -70,15 +143,51 @@
       <g:custom_label_1>Home Decor</g:custom_label_1>
     </item>
     <item>
-      <g:id>kenya-culture-beaded-sandals</g:id>
-      <g:title>kenya culture beaded sandals</g:title>
-      <g:description>Buy African bags, shoes and accessories Category: Bags &amp; Accessories.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=kenya-culture-beaded-sandals</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775287816161-buy-african-bags-shoes-and-accessories-all.jpg</g:image_link>
+      <g:id>unity-table-placemats</g:id>
+      <g:title>Unity Table Placemats</g:title>
+      <g:description>Bright round placemats that make a dining table feel welcoming and alive. Category: Home Decor. Set includes coordinated circular placemats. Easy to style for casual or celebration tables</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=unity-table-placemats</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/kenyan-bead-decor-nxwcav.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/kenyan-bead-decor-hkewyc-opt.webp</g:additional_image_link>
+      <g:product_type>SharonCraft &gt; Home Decor</g:product_type>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>5200 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>new-arrival</g:custom_label_0>
+      <g:custom_label_1>Home Decor</g:custom_label_1>
+    </item>
+    <item>
+      <g:id>beaded-carry-net</g:id>
+      <g:title>Beaded Carry Net</g:title>
+      <g:description>Open-weave beaded carry bags in bright colors for market days and casual style. Category: Bags &amp; Accessories. Available in several colors. Ideal for light carry use and styling</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=beaded-carry-net</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/handmade-african-souvenir-ldj58p-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/handmade-african-souvenir-joswzj.webp</g:additional_image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/handmade-african-souvenir-7dgi8p.webp</g:additional_image_link>
       <g:product_type>SharonCraft &gt; Bags &amp; Accessories</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>3500 KES</g:price>
+      <g:price>3600 KES</g:price>
+      <g:brand>SharonCraft</g:brand>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:adult>no</g:adult>
+      <g:custom_label_0>new-arrival</g:custom_label_0>
+      <g:custom_label_1>Bags &amp; Accessories</g:custom_label_1>
+    </item>
+    <item>
+      <g:id>harvest-fringe-bag</g:id>
+      <g:title>Harvest Fringe Bag</g:title>
+      <g:description>A fringe-style beaded bag with movement, color, and a strong artisan finish. Category: Bags &amp; Accessories. Dramatic fringe movement. Multi-tone bead finish</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=harvest-fringe-bag</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/handmade-african-souvenir-brt5k2-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/handmade-african-souvenir-7dgi8p.webp</g:additional_image_link>
+      <g:product_type>SharonCraft &gt; Bags &amp; Accessories</g:product_type>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>4100 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
@@ -86,245 +195,38 @@
       <g:custom_label_1>Bags &amp; Accessories</g:custom_label_1>
     </item>
     <item>
-      <g:id>beaded-frame-wall-clock</g:id>
-      <g:title>beaded frame wall clock</g:title>
-      <g:description>Add a vibrant and artistic touch to your home with this beaded frame wall clock Category: Home Decor.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=beaded-frame-wall-clock</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775287606926-add-a-vibrant-and-artistic-touch-to-your-home-with.jpg</g:image_link>
-      <g:product_type>SharonCraft &gt; Home Decor</g:product_type>
+      <g:id>royal-occasion-set</g:id>
+      <g:title>Royal Occasion Set</g:title>
+      <g:description>A rich ceremonial bead set for brides, shoots, and unforgettable celebration looks. Category: Bridal &amp; Occasion. Suitable for bridal and occasion styling. Custom color discussions available on WhatsApp</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=royal-occasion-set</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/traditional-bridal-bead-set-knimvb-opt.webp</g:additional_image_link>
+      <g:product_type>SharonCraft &gt; Bridal &amp; Occasion</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>5000 KES</g:price>
+      <g:price>9500 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Home Decor</g:custom_label_1>
+      <g:custom_label_0>featured</g:custom_label_0>
+      <g:custom_label_1>Bridal &amp; Occasion</g:custom_label_1>
     </item>
     <item>
-      <g:id>bead-gift-set</g:id>
-      <g:title>bead gift set</g:title>
-      <g:description>A combo you definitely need to add to cart… Category: Gift Sets.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=bead-gift-set</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775265887105-a-combo-you-definitely-need-to-add-to-cart.jpg</g:image_link>
+      <g:id>color-loop-jewelry-set</g:id>
+      <g:title>Color Loop Jewelry Set</g:title>
+      <g:description>A matched necklace and earrings set with fresh bright loops and a clean finish. Category: Gift Sets. Includes matching earrings. Comfortable for all-day wear</g:description>
+      <g:link>https://www.sharoncraft.co.ke/product.html?id=color-loop-jewelry-set</g:link>
+      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-wap9kh-opt.webp</g:image_link>
+      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/sharoncraft-african-necklace-wmwmaf-opt.webp</g:additional_image_link>
       <g:product_type>SharonCraft &gt; Gift Sets</g:product_type>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>3200 KES</g:price>
+      <g:price>3400 KES</g:price>
       <g:brand>SharonCraft</g:brand>
       <g:identifier_exists>no</g:identifier_exists>
       <g:adult>no</g:adult>
       <g:custom_label_0>new-arrival</g:custom_label_0>
       <g:custom_label_1>Gift Sets</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>africa-artesy-creative-cup</g:id>
-      <g:title>africa artesy creative cup</g:title>
-      <g:description>Add a touch of authentic African artistry to your home Category: Home Decor.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=africa-artesy-creative-cup</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775265661987-add-a-touch-of-authentic-african-artistry-to-your-1.jpg</g:image_link>
-      <g:product_type>SharonCraft &gt; Home Decor</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>2000 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Home Decor</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>ceaded-earing</g:id>
-      <g:title>ceaded earing</g:title>
-      <g:description>a grate earing that matches the kenyan tradition Category: Earrings.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=ceaded-earing</g:link>
-      <g:image_link>https://vonzscriztdcdhobulhy.supabase.co/storage/v1/object/public/product-images/catalog/1775249954666-by-special-request-representing-ghana.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Earrings</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>1600 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Earrings</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>africa-tribal-necklace</g:id>
-      <g:title>africa tribal necklace</g:title>
-      <g:description>africa tribal necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=africa-tribal-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>2800 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>custom-kenya-bangle</g:id>
-      <g:title>custom kenya bangle</g:title>
-      <g:description>custom kenya bangle is a handmade bracelet. It works well for daily wear, gifting, and matching sets and makes a thoughtful gift or special statement piece. Category: Bracelets.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=custom-kenya-bangle</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Bracelets</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>2000 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Bracelets</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>rasta-colour-bead-chocker</g:id>
-      <g:title>rasta colour bead chocker</g:title>
-      <g:description>rasta colour bead chocker is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=rasta-colour-bead-chocker</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>3800 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>collier-necklace</g:id>
-      <g:title>collier necklace</g:title>
-      <g:description>collier necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=collier-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>3600 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>featured</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>custom-bangles</g:id>
-      <g:title>custom bangles</g:title>
-      <g:description>custom bangles is a handmade bracelet. It works well for daily wear, gifting, and matching sets and makes a thoughtful gift or special statement piece. Category: Bracelets.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=custom-bangles</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Bracelets</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>1600 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Bracelets</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>beaded-long-necklace</g:id>
-      <g:title>Beaded long Necklace</g:title>
-      <g:description>Beaded long Necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=beaded-long-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>3000 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>circle-mother-necklace</g:id>
-      <g:title>circle mother necklace</g:title>
-      <g:description>circle mother necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=circle-mother-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/circle-mother-necklace-main.webp</g:image_link>
-      <g:additional_image_link>https://www.sharoncraft.co.ke/assets/images/circle-mother-necklace-alt.webp</g:additional_image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>3200 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>long-women-necklace</g:id>
-      <g:title>long women necklace</g:title>
-      <g:description>long women necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=long-women-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>3000 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>featured</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>pendant-necklace</g:id>
-      <g:title>pendant necklace</g:title>
-      <g:description>pendant necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=pendant-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>3100 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>tribal-maasai-necklace</g:id>
-      <g:title>tribal maasai necklace</g:title>
-      <g:description>tribal maasai necklace is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=tribal-maasai-necklace</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>1500 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
-    </item>
-    <item>
-      <g:id>nigerian-african-beads</g:id>
-      <g:title>nigerian african beads</g:title>
-      <g:description>nigerian african beads is a handmade necklace. It works well for birthdays, events, and everyday styling and makes a thoughtful gift or special statement piece. Category: Necklaces.</g:description>
-      <g:link>https://www.sharoncraft.co.ke/product.html?id=nigerian-african-beads</g:link>
-      <g:image_link>https://www.sharoncraft.co.ke/assets/images/custom-occasion-beadwork-46mokm-opt.webp</g:image_link>
-      <g:product_type>SharonCraft &gt; Necklaces</g:product_type>
-      <g:condition>new</g:condition>
-      <g:availability>in stock</g:availability>
-      <g:price>4600 KES</g:price>
-      <g:brand>SharonCraft</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
-      <g:adult>no</g:adult>
-      <g:custom_label_0>new-arrival</g:custom_label_0>
-      <g:custom_label_1>Necklaces</g:custom_label_1>
     </item>
   </channel>
 </rss>
