@@ -3,26 +3,26 @@
   --terracotta-dark: #bf5835;
   --ochre: #f2c94c;
   --ochre-dark: #d8b03b;
-  --deep-brown: #49372f;
-  --deep-brown-strong: #30251f;
-  --text-dark: #413832;
+  --deep-brown: #5c4033;
+  --deep-brown-strong: #452f26;
+  --text-dark: #4a4a4a;
   --teal: #1abc9c;
   --coral: #ff6f61;
   --cream: #fff5e1;
   --white: #ffffff;
   --surface-card: #ffffff;
-  --surface-soft: #f4eee8;
-  --surface-neutral: #f1ece6;
-  --tan-line: #c7b097;
-  --border: rgba(73, 55, 47, 0.12);
-  --shadow-soft: 0 14px 28px rgba(52, 39, 33, 0.06);
-  --shadow-card: 0 4px 14px rgba(52, 39, 33, 0.05);
+  --surface-soft: #f8efe3;
+  --surface-neutral: #f6efe8;
+  --tan-line: #d2b48c;
+  --border: rgba(92, 64, 51, 0.12);
+  --shadow-soft: 0 12px 28px rgba(92, 64, 51, 0.08);
+  --shadow-card: 0 6px 18px rgba(92, 64, 51, 0.06);
   --radius-lg: 12px;
   --radius-md: 8px;
   --radius-sm: 4px;
   --max-width: 1180px;
   --focus-ring: rgba(217, 108, 72, 0.32);
-  --section-rule: rgba(73, 55, 47, 0.22);
+  --section-rule: rgba(92, 64, 51, 0.18);
 }
 
 *,
@@ -39,7 +39,9 @@ body {
   margin: 0;
   font-family: "Nunito", sans-serif;
   color: var(--text-dark);
-  background: linear-gradient(180deg, #fbf8f3 0%, #f7f1ea 100%);
+  background:
+    radial-gradient(circle at top left, rgba(242, 201, 76, 0.1), transparent 34%),
+    linear-gradient(180deg, #fffaf2 0%, #fef7ec 100%);
   line-height: 1.6;
 }
 
@@ -140,10 +142,10 @@ main > .section:not(:first-of-type),
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: rgba(73, 55, 47, 0.82);
-  font-size: 0.76rem;
+  color: var(--terracotta);
+  font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -202,14 +204,14 @@ main > .section:not(:first-of-type),
 }
 
 .button-secondary {
-  background: rgba(73, 55, 47, 0.05);
-  color: var(--deep-brown);
-  border-color: rgba(73, 55, 47, 0.14);
+  background: rgba(217, 108, 72, 0.08);
+  color: var(--terracotta-dark);
+  border-color: rgba(217, 108, 72, 0.18);
 }
 
 .button-secondary:hover {
-  background: rgba(73, 55, 47, 0.08);
-  border-color: rgba(73, 55, 47, 0.2);
+  background: rgba(217, 108, 72, 0.14);
+  border-color: rgba(217, 108, 72, 0.28);
 }
 
 .button-whatsapp {
@@ -863,8 +865,77 @@ main > .section:not(:first-of-type),
 
 .hero-media-main {
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 18px;
   box-shadow: var(--shadow-soft);
+}
+
+.responsive-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.responsive-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.28s ease, filter 0.32s ease, transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-image-shell] {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-image-shell]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(115deg, transparent 12%, rgba(255, 255, 255, 0.42) 32%, transparent 52%),
+    linear-gradient(180deg, rgba(255, 248, 240, 0.92), rgba(242, 230, 218, 0.74));
+  transform: translateX(-125%);
+  transition: opacity 0.24s ease;
+}
+
+[data-image-shell][data-image-state="loading"]::before {
+  opacity: 1;
+  animation: image-shell-shimmer 1.3s ease-in-out infinite;
+}
+
+[data-image-shell][data-image-state="loading"] img {
+  opacity: 0.34;
+  filter: blur(12px);
+  transform: scale(1.035);
+}
+
+[data-image-shell][data-image-state="loaded"]::before,
+[data-image-shell][data-image-state="error"]::before {
+  opacity: 0;
+  animation: none;
+}
+
+[data-image-shell][data-image-state="loaded"] img,
+[data-image-shell][data-image-state="error"] img {
+  opacity: 1;
+  filter: none;
+}
+
+@keyframes image-shell-shimmer {
+  0% {
+    transform: translateX(-125%);
+  }
+
+  55% {
+    transform: translateX(8%);
+  }
+
+  100% {
+    transform: translateX(132%);
+  }
 }
 
 .hero-media-main img {
@@ -883,7 +954,7 @@ main > .section:not(:first-of-type),
 .hero-floating-card img {
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .hero-note-card,
@@ -1177,6 +1248,7 @@ main > .section:not(:first-of-type),
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  z-index: 2;
 }
 
 .product-card-media img {
@@ -1197,7 +1269,7 @@ main > .section:not(:first-of-type),
   position: absolute;
   top: 0.7rem;
   left: 0.7rem;
-  z-index: 1;
+  z-index: 2;
   min-height: 1.9rem;
   padding: 0.38rem 0.72rem;
   border-radius: 999px;
@@ -2000,8 +2072,8 @@ main > .section:not(:first-of-type),
 .faq-card,
 .customer-proof-card {
   padding: 1.2rem;
-  border: 1px solid rgba(73, 55, 47, 0.1);
-  border-radius: 12px;
+  border: 1px solid rgba(92, 64, 51, 0.1);
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--shadow-card);
 }
@@ -2018,9 +2090,9 @@ main > .section:not(:first-of-type),
   align-items: center;
   min-height: 34px;
   padding: 0.45rem 0.8rem;
-  border-radius: 8px;
-  background: rgba(73, 55, 47, 0.06);
-  color: var(--deep-brown);
+  border-radius: 10px;
+  background: rgba(217, 108, 72, 0.1);
+  color: var(--coral);
   font-size: 0.82rem;
   font-weight: 800;
 }
@@ -2033,7 +2105,7 @@ main > .section:not(:first-of-type),
 .landing-hero-media img,
 .landing-link-card img {
   width: 100%;
-  border-radius: 4px;
+  border-radius: 12px;
   object-fit: cover;
   box-shadow: none;
 }
@@ -2058,9 +2130,9 @@ main > .section:not(:first-of-type),
   align-items: center;
   min-height: 36px;
   padding: 0.55rem 0.8rem;
-  border-radius: 8px;
-  background: rgba(73, 55, 47, 0.06);
-  color: rgba(73, 55, 47, 0.9);
+  border-radius: 10px;
+  background: rgba(18, 122, 99, 0.08);
+  color: rgba(18, 122, 99, 0.95);
   font-size: 0.84rem;
   font-weight: 800;
 }
@@ -2106,11 +2178,11 @@ main > .section:not(:first-of-type),
 .home-explore-shell {
   position: relative;
   padding: 1.4rem;
-  border-radius: 14px;
+  border-radius: 28px;
   background:
     linear-gradient(135deg, rgba(255, 252, 245, 0.96), rgba(255, 247, 238, 0.94));
   border: 1px solid rgba(92, 64, 51, 0.08);
-  box-shadow: 0 16px 34px rgba(52, 39, 33, 0.06);
+  box-shadow: 0 26px 60px rgba(92, 64, 51, 0.08);
 }
 
 .home-explore-heading {
@@ -2131,7 +2203,7 @@ main > .section:not(:first-of-type),
   position: relative;
   gap: 0.9rem;
   min-height: 100%;
-  border-radius: 12px;
+  border-radius: 22px;
   overflow: hidden;
 }
 

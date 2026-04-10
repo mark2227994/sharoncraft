@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "SharonCraft Mini",
+    "slug": "sharoncraft-mini",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#f5efe5"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.sharoncraft.mini",
+      "adaptiveIcon": {
+        "backgroundColor": "#f5efe5"
+      }
+    }
+  }
+}

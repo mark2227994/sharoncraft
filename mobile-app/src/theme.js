@@ -1,0 +1,16 @@
+export const palette = {
+  canvas: "#f7f0e6",
+  paper: "#fffaf4",
+  line: "#e7d6bf",
+  ink: "#2e2318",
+  muted: "#8e6f50",
+  accent: "#c96f3a",
+  accentDeep: "#8f4217",
+  accentSoft: "#f3cfb6",
+  olive: "#5f7347",
+  oliveSoft: "#dce5cb",
+  plum: "#6a4559",
+  plumSoft: "#ecdde5",
+  gold: "#f2b24d",
+  shadow: "rgba(46, 35, 24, 0.08)",
+};

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const categorySelect = document.getElementById("shop-category");
   const priceSelect = document.getElementById("shop-price");
   const sortSelect = document.getElementById("shop-sort");
+  const mobileSortSelect = document.getElementById("shop-sort-mobile");
   const newOnlyInput = document.getElementById("shop-new-only");
   const countLabel = document.getElementById("shop-count");
   const clearButton = document.getElementById("clear-shop-filters");
@@ -43,15 +44,49 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const chipContainer = document.getElementById("shop-chips");
   const filterGrid = document.getElementById("shop-filter-grid");
+  const filterBackdrop = document.getElementById("shop-filter-backdrop");
   const toggleFiltersButton = document.getElementById("shop-toggle-filters");
+  const collectionStrip = document.querySelector(".shop-collection-strip");
   const categoryRailItems = Array.isArray(utils.data && utils.data.categories)
     ? utils.data.categories
     : [];
-  const featuredChipLimit = 4;
+  const mobileMediaQuery = window.matchMedia ? window.matchMedia("(max-width: 760px)") : null;
+
+  function isMobileViewport() {
+    return Boolean(mobileMediaQuery && mobileMediaQuery.matches);
+  }
+
+  function getFeaturedChipLimit() {
+    return isMobileViewport() ? 1 : 4;
+  }
+
+  function syncSortControls(value) {
+    sortSelect.value = value;
+    if (mobileSortSelect) {
+      mobileSortSelect.value = value;
+    }
+  }
+
+  function getFilterButtonLabel(isOpen) {
+    if (isOpen) {
+      return "Close";
+    }
+
+    return isMobileViewport() ? "Filter & sort" : "Filter";
+  }
+
+  function syncDiscoveryVisibility() {
+    if (!collectionStrip) {
+      return;
+    }
+
+    collectionStrip.hidden = isMobileViewport() && Boolean(searchInput.value.trim());
+  }
 
   function buildChips() {
     if (!chipContainer) return;
 
+    const featuredChipLimit = getFeaturedChipLimit();
     const featuredCategories = categoryRailItems.slice(0, featuredChipLimit);
     const activeCategory = categoryRailItems.find((category) => category.slug === categorySelect.value);
     const categories = [
@@ -98,11 +133,17 @@ document.addEventListener("DOMContentLoaded", async function () {
   function setFilterOpen(open) {
     if (!filterGrid) return;
     filterGrid.classList.toggle("is-open", open);
+    document.body.classList.toggle("shop-filters-open", open && isMobileViewport());
+    if (filterBackdrop) {
+      filterBackdrop.hidden = !open || !isMobileViewport();
+      filterBackdrop.classList.toggle("is-open", open && isMobileViewport());
+    }
     if (toggleFiltersButton) {
       toggleFiltersButton.setAttribute("aria-expanded", open);
-      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = open ? "Close" : "Filter";
+      toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = getFilterButtonLabel(open);
     }
     buildChips();
+    syncDiscoveryVisibility();
     syncFilterState();
   }
 
@@ -136,6 +177,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       e.preventDefault();
       const isOpen = filterGrid.classList.contains("is-open");
       setFilterOpen(!isOpen);
+    });
+  }
+
+  if (filterBackdrop) {
+    filterBackdrop.addEventListener("click", function () {
+      setFilterOpen(false);
     });
   }
 
@@ -240,6 +287,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       .filter((url) => url && url !== "#");
 
     buildChips();
+    syncDiscoveryVisibility();
     syncFilterState();
 
     const filtered = utils.data.products.filter((product) => {
@@ -258,12 +306,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const sorted = applySort(filtered, sort);
     grid.innerHTML = sorted.length
-      ? sorted
+        ? sorted
           .map((product, index) =>
             utils.createProductCard(product, {
               listId: "shop_results",
               listName: "Shop Results",
-              index: index + 1
+              index: index + 1,
+              priorityImage: index === 0
             })
           )
           .join("")
@@ -276,6 +325,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           </div>
         </article>
       `;
+    if (typeof utils.hydrateResponsiveImages === "function") {
+      utils.hydrateResponsiveImages(grid);
+    }
     countLabel.textContent = `${sorted.length} piece${sorted.length === 1 ? "" : "s"}`;
     utils.trackProductListView({
       listId: "shop_results",
@@ -456,9 +508,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     utils.refreshReveal();
   }
 
-  [searchInput, categorySelect, priceSelect, sortSelect].forEach((element) => {
+  [searchInput, categorySelect, priceSelect].forEach((element) => {
     element.addEventListener("input", renderProducts);
     element.addEventListener("change", renderProducts);
+  });
+
+  [sortSelect, mobileSortSelect].filter(Boolean).forEach((element) => {
+    element.addEventListener("input", function () {
+      syncSortControls(element.value);
+      renderProducts();
+    });
+    element.addEventListener("change", function () {
+      syncSortControls(element.value);
+      renderProducts();
+    });
   });
 
   if (newOnlyInput) {
@@ -470,12 +533,32 @@ document.addEventListener("DOMContentLoaded", async function () {
       searchInput.value = "";
       categorySelect.value = "";
       priceSelect.value = "";
-      sortSelect.value = "featured";
+      syncSortControls("featured");
       if (newOnlyInput) {
         newOnlyInput.checked = false;
       }
       renderProducts();
       setFilterOpen(false);
+    });
+  }
+
+  syncSortControls(sortSelect.value);
+  setFilterOpen(false);
+
+  if (mobileMediaQuery && typeof mobileMediaQuery.addEventListener === "function") {
+    mobileMediaQuery.addEventListener("change", function () {
+      document.body.classList.remove("shop-filters-open");
+      if (filterBackdrop) {
+        filterBackdrop.hidden = true;
+        filterBackdrop.classList.remove("is-open");
+      }
+      syncDiscoveryVisibility();
+      buildChips();
+      if (toggleFiltersButton) {
+        toggleFiltersButton.querySelector(".shop-filter-toggle-text").textContent = getFilterButtonLabel(
+          Boolean(filterGrid && filterGrid.classList.contains("is-open"))
+        );
+      }
     });
   }
 

@@ -177,6 +177,80 @@ document.addEventListener("DOMContentLoaded", async function () {
       : "Reviews from SharonCraft clients will appear here as they come in.";
   };
 
+  function applyResponsiveImage(target, image, alt, profile, options) {
+    if (!target) {
+      return;
+    }
+
+    const source = String(image || "").trim();
+    if (!source) {
+      return;
+    }
+
+    const config = typeof utils.getResponsiveImageConfig === "function"
+      ? utils.getResponsiveImageConfig(source, profile)
+      : null;
+    const picture = target.closest("picture");
+
+    target.src = source;
+    target.alt = alt;
+
+    if (config && picture) {
+      const avifSource = picture.querySelector('source[type="image/avif"]');
+      const webpSource = picture.querySelector('source[type="image/webp"]');
+
+      if (avifSource) {
+        avifSource.srcset = config.avifSrcset;
+        avifSource.sizes = config.sizes;
+      }
+
+      if (webpSource) {
+        webpSource.srcset = config.webpSrcset;
+        webpSource.sizes = config.sizes;
+      }
+
+      if (config.fallbackSrcset) {
+        target.srcset = config.fallbackSrcset;
+        target.sizes = config.sizes;
+      } else {
+        target.removeAttribute("srcset");
+        target.removeAttribute("sizes");
+      }
+    }
+
+    if (typeof utils.hydrateResponsiveImages === "function") {
+      utils.hydrateResponsiveImages(target.closest("[data-image-shell]"));
+    }
+
+    if (options && options.preload && typeof utils.preloadResponsiveImage === "function") {
+      utils.preloadResponsiveImage(source, profile, { fetchpriority: options.fetchpriority || "high" });
+    }
+  }
+
+  function applyFallbackImage(target, image, alt) {
+    if (!target) {
+      return;
+    }
+
+    const source = String(image || "").trim();
+    const picture = target.closest("picture");
+
+    target.src = source;
+    target.alt = alt;
+    target.removeAttribute("srcset");
+    target.removeAttribute("sizes");
+
+    if (picture) {
+      picture.querySelectorAll("source").forEach(function (node) {
+        node.removeAttribute("srcset");
+      });
+    }
+
+    if (typeof utils.hydrateResponsiveImages === "function") {
+      utils.hydrateResponsiveImages(target.closest("[data-image-shell]"));
+    }
+  }
+
   if (!product) {
     if (stickyBar) {
       stickyBar.hidden = true;
@@ -194,8 +268,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     description.textContent = "The product link may be old. Please return to the shop and choose another item.";
     price.textContent = "";
     category.textContent = "";
-    mainImage.src = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
-    mainImage.alt = "SharonCraft featured piece";
+    applyResponsiveImage(mainImage, "assets/images/custom-occasion-beadwork-46mokm-opt.webp", "SharonCraft featured piece", "detail", {
+      preload: true,
+      fetchpriority: "high"
+    });
     breadcrumb.innerHTML = `<a href="index.html">Home</a><span>/</span><a href="shop.html">Shop</a><span>/</span><strong>Not found</strong>`;
     const fallbackProducts = utils.data.products.slice(0, 4);
     relatedGrid.innerHTML = fallbackProducts
@@ -207,6 +283,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         })
       )
       .join("");
+    if (typeof utils.hydrateResponsiveImages === "function") {
+      utils.hydrateResponsiveImages(relatedGrid);
+    }
     if (typeof utils.trackProductListView === "function") {
       utils.trackProductListView({
         listId: "related_products",
@@ -280,8 +359,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   price.textContent = utils.formatCurrency(product.price);
   description.textContent = productDescription;
   category.textContent = categoryName;
-  mainImage.src = productImages[0];
-  mainImage.alt = productName;
+  applyResponsiveImage(mainImage, productImages[0], productName, "detail", {
+    preload: true,
+    fetchpriority: "high"
+  });
   mpesaCopy.textContent = `If you want ${productName} now, order on WhatsApp and SharonCraft will guide you to the best available payment option.`;
   if (stickyBar) {
     stickyBar.hidden = false;
@@ -550,7 +631,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     thumbGrid.querySelectorAll(".thumb-button").forEach((item) => item.classList.remove("is-active"));
     button.classList.add("is-active");
-    mainImage.src = button.dataset.image;
+    applyFallbackImage(mainImage, button.dataset.image, productName);
   });
 
   const relatedProducts = await utils.getRelatedProducts(product);
@@ -563,6 +644,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       })
     )
     .join("");
+  if (typeof utils.hydrateResponsiveImages === "function") {
+    utils.hydrateResponsiveImages(relatedGrid);
+  }
   if (typeof utils.trackProductListView === "function") {
     utils.trackProductListView({
       listId: "related_products",

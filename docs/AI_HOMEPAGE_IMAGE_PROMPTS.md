@@ -198,3 +198,58 @@ Reject any image that feels:
 - Then generate the three intent cards as a matched set so they feel like one campaign.
 - Replace the decor floating card after the hero set is working.
 - Keep product-grid imagery real and current.
+
+## Explore More Prompt Set
+
+Use these three prompts if you want a cleaner dedicated AI image set for the `Explore More` section in [index.html](c:/Users/USER/Desktop/projects/bead%20VN2/index.html).
+
+Suggested filenames:
+
+- `assets/images/ai-explore-gift-path.png`
+- `assets/images/ai-explore-buyer-guide.png`
+- `assets/images/ai-explore-trust-page.png`
+
+Recommended crop:
+
+- `1400 x 1000`
+
+Keep the three images visually related:
+
+- same warm cinematic lighting family
+- same premium Gen Z editorial feel
+- same controlled dark contrast
+- same restrained earthy palette
+
+### Prompt A: Explore More - Gift Path
+
+Use case: photorealistic-natural
+Asset type: homepage explore card image for `Handmade Kenyan Gifts`
+Primary request: a highly realistic cinematic tabletop lifestyle image for SharonCraft showing a gift-ready handmade beadwork set in a modern premium scene
+Scene/backdrop: art-directed tabletop by soft window light, warm linen cloth, kraft wrapping, subtle matte black accent detail, refined minimal styling with breathing room
+Subject: one beautiful handmade beadwork gift set arranged elegantly for gifting, with a premium youthful feel
+Style/medium: cinematic still-life photography, highly realistic, Gen Z premium brand campaign mood
+Composition/framing: wide card-friendly tabletop crop, strong focal arrangement, clean negative space, social-first visual punch
+Lighting/mood: warm directional daylight, elegant shadow shapes, welcoming but premium, darker grounding without becoming gloomy
+Color palette: terracotta, sand, kraft brown, ivory, muted gold, soft black accents, restrained brighter bead colors
+Materials/textures: linen weave, kraft paper texture, crisp bead detail, matte ribbon or matte black object accent
+Constraints: no text, no watermark, no clutter, no fake luxury branding, no cheap props
+Avoid: plain ecommerce white background, generic flatlay feel, over-staged gift styling, fake CGI shine
+
+### Prompt B: Explore More - Buyer Guide
+
+Use case: photorealistic-natural
+Asset type: homepage explore card image for `Where To Buy Kenyan Artifacts`
+Primary request: a highly realistic cinematic editorial image for SharonCraft showing a culture-rich handmade artifact or beadwork object in a modern design-led setting
+Scene/backdrop: sculptural warm interior corner with textured plaster wall, wood surface, restrained woven detail, curated premium atmosphere
+Subject: one standout Kenyan handmade artifact-inspired object or statement beadwork piece as the focal subject
+Style/medium: cinematic editorial object photography, highly realistic, modern African design-magazine feel
+Composition/framing: wide card-friendly composition, object dominant and memorable, surrounding styling minimal but expressive
+Lighting/mood: directional natural sunlight with rich shadow depth, thoughtful and premium, visually intriguing
+Color palette: sand, clay, natural wood, charcoal, muted teal, terracotta, restrained brighter bead accents
+Materials/textures: crisp bead detail, wood grain, plaster texture, woven fibers, matte black sculptural accent
+Constraints: no text, no watermark, no people, no clutter, no tourist-market styling
+Avoid: busy room styling, generic souvenir-shop look, sterile showroom composition, over-saturation
+
+### Prompt C: Explore More - Trust Page
+
+ok   

@@ -10,11 +10,11 @@
   <meta property="og:description" content="Meet the SharonCraft leadership team, including Founder & CEO Kelvin Mark and Lead Designer Sharon Ruth." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.sharoncraft.co.ke/leadership.html" />
-  <meta property="og:image" content="https://www.sharoncraft.co.ke/assets/images/kelvin-mark-ceo-portrait.jpg" />
+  <meta property="og:image" content="https://www.sharoncraft.co.ke/assets/images/kelvin-mark-ceo-portrait.webp" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="SharonCraft Leadership | Founder, CEO And Lead Designer" />
   <meta name="twitter:description" content="Meet the SharonCraft leadership team, including Founder & CEO Kelvin Mark and Lead Designer Sharon Ruth." />
-  <meta name="twitter:image" content="https://www.sharoncraft.co.ke/assets/images/kelvin-mark-ceo-portrait.jpg" />
+  <meta name="twitter:image" content="https://www.sharoncraft.co.ke/assets/images/kelvin-mark-ceo-portrait.webp" />
   <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.webp" />
   <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.webp" />
   <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.webp" />
@@ -40,8 +40,12 @@
     <section class="section">
       <div class="container profile-grid">
         <article class="story-card reveal profile-card">
-          <div class="profile-photo-wrap">
-            <img class="profile-photo" src="assets/images/kelvin-mark-ceo-portrait.jpg" alt="Kelvin Mark, Founder and CEO of SharonCraft" loading="lazy" decoding="async" />
+          <div class="profile-photo-wrap" data-image-shell="portrait" data-image-state="loading">
+            <picture class="responsive-media" data-responsive-picture="portrait">
+              <source type="image/avif" srcset="assets/images/kelvin-mark-ceo-portrait--portrait-320.avif 320w, assets/images/kelvin-mark-ceo-portrait--portrait-480.avif 480w, assets/images/kelvin-mark-ceo-portrait--portrait-640.avif 640w" sizes="(max-width: 767px) 86vw, 320px" />
+              <source type="image/webp" srcset="assets/images/kelvin-mark-ceo-portrait--portrait-320.webp 320w, assets/images/kelvin-mark-ceo-portrait--portrait-480.webp 480w, assets/images/kelvin-mark-ceo-portrait--portrait-640.webp 640w" sizes="(max-width: 767px) 86vw, 320px" />
+              <img class="profile-photo" src="assets/images/kelvin-mark-ceo-portrait.webp" alt="Kelvin Mark, Founder and CEO of SharonCraft" loading="lazy" decoding="async" />
+            </picture>
           </div>
           <div class="profile-copy">
             <span class="leadership-role">Founder &amp; CEO</span>

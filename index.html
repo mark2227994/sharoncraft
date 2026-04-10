@@ -24,6 +24,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="assets/images/ai-home-hero-editorial.png" imagesrcset="assets/images/ai-home-hero-editorial--hero-480.webp 480w, assets/images/ai-home-hero-editorial--hero-720.webp 720w, assets/images/ai-home-hero-editorial--hero-960.webp 960w, assets/images/ai-home-hero-editorial--hero-1280.webp 1280w" imagesizes="(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 540px" fetchpriority="high" />
   <link rel="stylesheet" href="assets/css/style.css?v=20260407-intent-stage" />
   <link rel="stylesheet" href="assets/css/home-hero-refine.css?v=20260407-home-opening" />
   <link rel="stylesheet" href="assets/css/payment-status-badge.css?v=20260404-mpesa-badge" />
@@ -138,11 +139,19 @@
         </div>
 
         <div class="hero-media-stack">
-          <div class="hero-media-main reveal">
-            <img id="home-hero-image" src="assets/images/ai-home-hero-editorial.png" alt="Young Kenyan woman wearing SharonCraft beadwork in a warm editorial setting" loading="eager" fetchpriority="high" decoding="sync" />
+          <div class="hero-media-main reveal" data-image-shell="hero" data-image-state="loading">
+            <picture class="responsive-media" data-responsive-picture="hero">
+              <source type="image/avif" srcset="assets/images/ai-home-hero-editorial--hero-480.avif 480w, assets/images/ai-home-hero-editorial--hero-720.avif 720w, assets/images/ai-home-hero-editorial--hero-960.avif 960w, assets/images/ai-home-hero-editorial--hero-1280.avif 1280w" sizes="(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 540px" />
+              <source type="image/webp" srcset="assets/images/ai-home-hero-editorial--hero-480.webp 480w, assets/images/ai-home-hero-editorial--hero-720.webp 720w, assets/images/ai-home-hero-editorial--hero-960.webp 960w, assets/images/ai-home-hero-editorial--hero-1280.webp 1280w" sizes="(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 540px" />
+              <img id="home-hero-image" src="assets/images/ai-home-hero-editorial.png" alt="Young Kenyan woman wearing SharonCraft beadwork in a warm editorial setting" loading="eager" fetchpriority="high" decoding="sync" />
+            </picture>
           </div>
-          <article class="hero-floating-card reveal">
-            <img id="home-favorite-image" src="assets/images/ai-home-hero-decor-card.png" alt="Modern interior with a SharonCraft-inspired beaded mirror" loading="eager" fetchpriority="high" decoding="async" />
+          <article class="hero-floating-card reveal" data-image-shell="favorite" data-image-state="loading">
+            <picture class="responsive-media" data-responsive-picture="favorite">
+              <source type="image/avif" srcset="assets/images/ai-home-hero-decor-card--favorite-160.avif 160w, assets/images/ai-home-hero-decor-card--favorite-240.avif 240w, assets/images/ai-home-hero-decor-card--favorite-320.avif 320w, assets/images/ai-home-hero-decor-card--favorite-480.avif 480w" sizes="(max-width: 767px) 32vw, 96px" />
+              <source type="image/webp" srcset="assets/images/ai-home-hero-decor-card--favorite-160.webp 160w, assets/images/ai-home-hero-decor-card--favorite-240.webp 240w, assets/images/ai-home-hero-decor-card--favorite-320.webp 320w, assets/images/ai-home-hero-decor-card--favorite-480.webp 480w" sizes="(max-width: 767px) 32vw, 96px" />
+              <img id="home-favorite-image" src="assets/images/ai-home-hero-decor-card.png" alt="Modern interior with a SharonCraft-inspired beaded mirror" loading="eager" fetchpriority="high" decoding="async" />
+            </picture>
             <div>
               <span id="home-favorite-kicker" class="section-kicker">A quiet favorite</span>
               <h2 id="home-favorite-title">Kijani Mirror Duo</h2>

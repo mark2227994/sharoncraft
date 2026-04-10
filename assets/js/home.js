@@ -96,6 +96,56 @@ document.addEventListener("DOMContentLoaded", async function () {
     return `${source}${joiner}v=${encodeURIComponent(cacheVersion)}`;
   };
 
+  function applyResponsiveImage(target, image, alt, profile, options) {
+    if (!target) {
+      return;
+    }
+
+    const source = String(image || "").trim();
+    if (!source) {
+      return;
+    }
+
+    const config = typeof utils.getResponsiveImageConfig === "function"
+      ? utils.getResponsiveImageConfig(source, profile)
+      : null;
+    const picture = target.closest("picture");
+
+    target.src = source;
+    target.alt = alt;
+
+    if (config && picture) {
+      const avifSource = picture.querySelector('source[type="image/avif"]');
+      const webpSource = picture.querySelector('source[type="image/webp"]');
+
+      if (avifSource) {
+        avifSource.srcset = config.avifSrcset;
+        avifSource.sizes = config.sizes;
+      }
+
+      if (webpSource) {
+        webpSource.srcset = config.webpSrcset;
+        webpSource.sizes = config.sizes;
+      }
+
+      if (config.fallbackSrcset) {
+        target.srcset = config.fallbackSrcset;
+        target.sizes = config.sizes;
+      } else {
+        target.removeAttribute("srcset");
+        target.removeAttribute("sizes");
+      }
+    }
+
+    if (typeof utils.hydrateResponsiveImages === "function") {
+      utils.hydrateResponsiveImages(target.closest("[data-image-shell]"));
+    }
+
+    if (options && options.preload && typeof utils.preloadResponsiveImage === "function") {
+      utils.preloadResponsiveImage(source, profile, { fetchpriority: options.fetchpriority || "high" });
+    }
+  }
+
   function renderHome() {
     const allProducts = Array.isArray(utils.data.products) ? utils.data.products : [];
     const visuals = utils.data.homeVisuals || {};
@@ -148,8 +198,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       heroSecondary.href = hero.secondaryHref || "about.html";
     }
     if (heroImage) {
-      heroImage.src = addImageVersion(hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp", visuals.version);
-      heroImage.alt = hero.imageAlt || "Model wearing SharonCraft occasion beadwork";
+      applyResponsiveImage(
+        heroImage,
+        addImageVersion(hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp", visuals.version),
+        hero.imageAlt || "Model wearing SharonCraft occasion beadwork",
+        "hero",
+        { preload: true, fetchpriority: "high" }
+      );
     }
     if (favoriteKicker) {
       favoriteKicker.textContent = favorite.kicker || "A quiet favorite";
@@ -164,9 +219,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         "A well-loved SharonCraft piece chosen for everyday beauty and easy gifting.";
     }
     if (favoriteImage) {
-      favoriteImage.src = addImageVersion(favorite.image || favoriteFallbackImage, visuals.version);
-      favoriteImage.alt =
-        favorite.imageAlt || (favoriteProduct && favoriteProduct.name) || "SharonCraft favorite product photo";
+      applyResponsiveImage(
+        favoriteImage,
+        addImageVersion(favorite.image || favoriteFallbackImage, visuals.version),
+        favorite.imageAlt || (favoriteProduct && favoriteProduct.name) || "SharonCraft favorite product photo",
+        "favorite",
+        { preload: false }
+      );
     }
 
     if (testimonialStack) {
@@ -195,6 +254,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           })
         )
         .join("");
+      if (typeof utils.hydrateResponsiveImages === "function") {
+        utils.hydrateResponsiveImages(featuredGrid);
+      }
       utils.trackProductListView({
         listId: "home_featured",
         listName: "Homepage Featured",
@@ -214,6 +276,9 @@ document.addEventListener("DOMContentLoaded", async function () {
           })
         )
         .join("");
+      if (typeof utils.hydrateResponsiveImages === "function") {
+        utils.hydrateResponsiveImages(arrivalsGrid);
+      }
       utils.trackProductListView({
         listId: "home_new_arrivals",
         listName: "Homepage New Arrivals",

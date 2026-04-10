@@ -35,8 +35,12 @@
         <nav id="product-breadcrumb" class="breadcrumb" aria-label="Breadcrumb"></nav>
         <div class="product-layout">
           <section class="product-gallery">
-            <div class="product-main-image">
-              <img id="product-main-image" src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="SharonCraft product" loading="eager" fetchpriority="high" decoding="async" />
+            <div class="product-main-image" data-image-shell="detail" data-image-state="loading">
+              <picture class="responsive-media" data-responsive-picture="detail">
+                <source type="image/avif" srcset="assets/images/custom-occasion-beadwork-46mokm-opt--detail-480.avif 480w, assets/images/custom-occasion-beadwork-46mokm-opt--detail-720.avif 720w, assets/images/custom-occasion-beadwork-46mokm-opt--detail-960.avif 960w, assets/images/custom-occasion-beadwork-46mokm-opt--detail-1280.avif 1280w" sizes="(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 620px" />
+                <source type="image/webp" srcset="assets/images/custom-occasion-beadwork-46mokm-opt--detail-480.webp 480w, assets/images/custom-occasion-beadwork-46mokm-opt--detail-720.webp 720w, assets/images/custom-occasion-beadwork-46mokm-opt--detail-960.webp 960w, assets/images/custom-occasion-beadwork-46mokm-opt--detail-1280.webp 1280w" sizes="(max-width: 767px) 92vw, (max-width: 1199px) 48vw, 620px" />
+                <img id="product-main-image" src="assets/images/custom-occasion-beadwork-46mokm-opt.webp" alt="SharonCraft product" loading="eager" fetchpriority="high" decoding="async" />
+              </picture>
             </div>
             <div id="product-thumbs" class="thumb-grid"></div>
           </section>
