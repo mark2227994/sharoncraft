@@ -162,45 +162,6 @@
       </div>
     </section>
     <div class="site-accent-divider" aria-hidden="true"></div>
-    <script>
-      (function () {
-        try {
-          var raw = window.localStorage.getItem("sharoncraft-live-home-visuals-cache");
-          if (!raw) {
-            return;
-          }
-
-          var visuals = JSON.parse(raw);
-          var version = visuals && visuals.version ? String(visuals.version).trim() : "";
-          var addVersion = function (image) {
-            var source = String(image || "").trim();
-            if (!source || !version || source.indexOf("data:") === 0 || source.indexOf("blob:") === 0) {
-              return source;
-            }
-            return source + (source.indexOf("?") === -1 ? "?" : "&") + "v=" + encodeURIComponent(version);
-          };
-          var heroImage = document.getElementById("home-hero-image");
-          var favoriteImage = document.getElementById("home-favorite-image");
-
-          if (heroImage && visuals.hero && visuals.hero.image) {
-            heroImage.src = addVersion(visuals.hero.image);
-            if (visuals.hero.imageAlt) {
-              heroImage.alt = visuals.hero.imageAlt;
-            }
-          }
-
-          if (favoriteImage && visuals.favorite && visuals.favorite.image) {
-            favoriteImage.src = addVersion(visuals.favorite.image);
-            if (visuals.favorite.imageAlt) {
-              favoriteImage.alt = visuals.favorite.imageAlt;
-            }
-          }
-        } catch (error) {
-          console.warn("Unable to preload cached homepage visuals.", error);
-        }
-      }());
-    </script>
-
     <!-- Featured products -->
     <section class="section">
       <div class="container">

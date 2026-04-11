@@ -83,6 +83,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const reviewSummaryPromise = typeof utils.loadReviewSummaries === "function"
     ? utils.loadReviewSummaries().catch(function () { return null; })
     : Promise.resolve(null);
+  const defaultHeroImage = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
+  const defaultFavoriteImage = "assets/images/kenyan-bead-decor-yhip8u-opt.webp";
 
   const addImageVersion = (image, version) => {
     const source = String(image || "").trim();
@@ -106,35 +108,19 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const config = typeof utils.getResponsiveImageConfig === "function"
-      ? utils.getResponsiveImageConfig(source, profile)
-      : null;
-    const picture = target.closest("picture");
+    if (typeof utils.applyResponsiveImageElement === "function") {
+      utils.applyResponsiveImageElement(target, source, alt, profile);
+    } else {
+      target.src = source;
+      target.alt = alt;
+    }
 
-    target.src = source;
-    target.alt = alt;
-
-    if (config && picture) {
-      const avifSource = picture.querySelector('source[type="image/avif"]');
-      const webpSource = picture.querySelector('source[type="image/webp"]');
-
-      if (avifSource) {
-        avifSource.srcset = config.avifSrcset;
-        avifSource.sizes = config.sizes;
-      }
-
-      if (webpSource) {
-        webpSource.srcset = config.webpSrcset;
-        webpSource.sizes = config.sizes;
-      }
-
-      if (config.fallbackSrcset) {
-        target.srcset = config.fallbackSrcset;
-        target.sizes = config.sizes;
-      } else {
-        target.removeAttribute("srcset");
-        target.removeAttribute("sizes");
-      }
+    const fallbackSrc = String(options && options.fallbackSrc || "").trim();
+    if (fallbackSrc) {
+      target.dataset.fallbackSrc = fallbackSrc;
+      target.dataset.fallbackAlt = String(options && options.fallbackAlt || alt || "").trim();
+      target.dataset.fallbackProfile = String(options && options.fallbackProfile || profile || "").trim();
+      target.dataset.fallbackApplied = source === fallbackSrc ? "true" : "false";
     }
 
     if (typeof utils.hydrateResponsiveImages === "function") {
@@ -200,10 +186,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (heroImage) {
       applyResponsiveImage(
         heroImage,
-        addImageVersion(hero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp", visuals.version),
+        addImageVersion(hero.image || defaultHeroImage, visuals.version),
         hero.imageAlt || "Model wearing SharonCraft occasion beadwork",
         "hero",
-        { preload: true, fetchpriority: "high" }
+        {
+          preload: true,
+          fetchpriority: "high",
+          fallbackSrc: defaultHeroImage,
+          fallbackAlt: hero.imageAlt || "Model wearing SharonCraft occasion beadwork",
+          fallbackProfile: "hero"
+        }
       );
     }
     if (favoriteKicker) {
@@ -224,7 +216,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         addImageVersion(favorite.image || favoriteFallbackImage, visuals.version),
         favorite.imageAlt || (favoriteProduct && favoriteProduct.name) || "SharonCraft favorite product photo",
         "favorite",
-        { preload: false }
+        {
+          preload: false,
+          fallbackSrc: defaultFavoriteImage,
+          fallbackAlt: favorite.imageAlt || (favoriteProduct && favoriteProduct.name) || "SharonCraft favorite product photo",
+          fallbackProfile: "favorite"
+        }
       );
     }
 

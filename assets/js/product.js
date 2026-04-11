@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const reviewEmpty = document.getElementById("product-review-empty");
   const reviewStorageKey = "sharoncraft_product_reviews";
   const liveCatalogApi = window.SharonCraftCatalog || null;
+  const defaultProductImage = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
 
   const normalizeReviewText = (value) => String(value || "").trim();
   const normalizeSeoKeywords = (value) => {
@@ -187,35 +188,19 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const config = typeof utils.getResponsiveImageConfig === "function"
-      ? utils.getResponsiveImageConfig(source, profile)
-      : null;
-    const picture = target.closest("picture");
+    if (typeof utils.applyResponsiveImageElement === "function") {
+      utils.applyResponsiveImageElement(target, source, alt, profile);
+    } else {
+      target.src = source;
+      target.alt = alt;
+    }
 
-    target.src = source;
-    target.alt = alt;
-
-    if (config && picture) {
-      const avifSource = picture.querySelector('source[type="image/avif"]');
-      const webpSource = picture.querySelector('source[type="image/webp"]');
-
-      if (avifSource) {
-        avifSource.srcset = config.avifSrcset;
-        avifSource.sizes = config.sizes;
-      }
-
-      if (webpSource) {
-        webpSource.srcset = config.webpSrcset;
-        webpSource.sizes = config.sizes;
-      }
-
-      if (config.fallbackSrcset) {
-        target.srcset = config.fallbackSrcset;
-        target.sizes = config.sizes;
-      } else {
-        target.removeAttribute("srcset");
-        target.removeAttribute("sizes");
-      }
+    const fallbackSrc = String(options && options.fallbackSrc || "").trim();
+    if (fallbackSrc) {
+      target.dataset.fallbackSrc = fallbackSrc;
+      target.dataset.fallbackAlt = String(options && options.fallbackAlt || alt || "").trim();
+      target.dataset.fallbackProfile = String(options && options.fallbackProfile || profile || "").trim();
+      target.dataset.fallbackApplied = source === fallbackSrc ? "true" : "false";
     }
 
     if (typeof utils.hydrateResponsiveImages === "function") {
@@ -232,23 +217,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    const source = String(image || "").trim();
-    const picture = target.closest("picture");
-
-    target.src = source;
-    target.alt = alt;
-    target.removeAttribute("srcset");
-    target.removeAttribute("sizes");
-
-    if (picture) {
-      picture.querySelectorAll("source").forEach(function (node) {
-        node.removeAttribute("srcset");
-      });
-    }
-
-    if (typeof utils.hydrateResponsiveImages === "function") {
-      utils.hydrateResponsiveImages(target.closest("[data-image-shell]"));
-    }
+    applyResponsiveImage(target, image, alt, "detail", {
+      preload: true,
+      fetchpriority: "high",
+      fallbackSrc: defaultProductImage,
+      fallbackAlt: alt,
+      fallbackProfile: "detail"
+    });
   }
 
   if (!product) {
@@ -268,9 +243,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     description.textContent = "The product link may be old. Please return to the shop and choose another item.";
     price.textContent = "";
     category.textContent = "";
-    applyResponsiveImage(mainImage, "assets/images/custom-occasion-beadwork-46mokm-opt.webp", "SharonCraft featured piece", "detail", {
+    applyResponsiveImage(mainImage, defaultProductImage, "SharonCraft featured piece", "detail", {
       preload: true,
-      fetchpriority: "high"
+      fetchpriority: "high",
+      fallbackSrc: defaultProductImage,
+      fallbackAlt: "SharonCraft featured piece",
+      fallbackProfile: "detail"
     });
     breadcrumb.innerHTML = `<a href="index.html">Home</a><span>/</span><a href="shop.html">Shop</a><span>/</span><strong>Not found</strong>`;
     const fallbackProducts = utils.data.products.slice(0, 4);
@@ -361,7 +339,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   category.textContent = categoryName;
   applyResponsiveImage(mainImage, productImages[0], productName, "detail", {
     preload: true,
-    fetchpriority: "high"
+    fetchpriority: "high",
+    fallbackSrc: defaultProductImage,
+    fallbackAlt: productName,
+    fallbackProfile: "detail"
   });
   mpesaCopy.textContent = `If you want ${productName} now, order on WhatsApp and SharonCraft will guide you to the best available payment option.`;
   if (stickyBar) {
