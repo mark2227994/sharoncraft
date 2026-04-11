@@ -126,7 +126,7 @@
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
         secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
         image:
-          String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
+          String(fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
           "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt:
           String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
@@ -137,7 +137,7 @@
         title: String(favorite.title || fallbackFavorite.title || "").trim(),
         description: String(favorite.description || fallbackFavorite.description || "").trim(),
         image:
-          String(favorite.image || fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u-opt.webp").trim() ||
+          String(fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u-opt.webp").trim() ||
           "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
         imageAlt:
           String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
@@ -163,10 +163,7 @@
     const images = [mainImage].concat(gallery).filter(Boolean).filter((image, imageIndex, listRef) => listRef.indexOf(image) === imageIndex);
     const id = normalizeText(product && product.id) || `live-product-${Date.now().toString(36)}-${index}`;
     const fallbackImages = defaultProductImageMap.get(id) || [];
-    const useFallbackImages =
-      fallbackImages.length &&
-      (!images.length || repeatedMainImages.has(mainImage));
-    const finalImages = useFallbackImages ? fallbackImages : (images.length ? images : [fallbackImage]);
+    const finalImages = fallbackImages.length ? fallbackImages : (images.length ? images : [fallbackImage]);
     const spotlightUntil = Date.parse(product && product.spotlightUntil);
     const newUntil = Date.parse(product && product.newUntil);
 
