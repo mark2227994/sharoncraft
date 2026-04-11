@@ -11,8 +11,6 @@
   const liveHomeVisualsCacheKey = "sharoncraft-live-home-visuals-cache";
   const liveSocialSettingsCacheKey = "sharoncraft-live-social-settings-cache";
   const liveSiteContentCacheKey = "sharoncraft-live-site-content-cache";
-  const imageCacheResetKey = "sharoncraft-image-cache-reset";
-  const imageCacheResetVersion = "2026-04-11-latest-images";
 
   const defaultData = {
     site: {
@@ -575,7 +573,7 @@
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
         secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
         image:
-          String(fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
+          String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
           "assets/images/custom-occasion-beadwork-46mokm-opt.webp",
         imageAlt:
           String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming beadwork photo").trim() ||
@@ -586,7 +584,7 @@
         title: String(favorite.title || fallbackFavorite.title || "").trim(),
         description: String(favorite.description || fallbackFavorite.description || "").trim(),
         image:
-          String(fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u-opt.webp").trim() ||
+          String(favorite.image || fallbackFavorite.image || "assets/images/kenyan-bead-decor-yhip8u-opt.webp").trim() ||
           "assets/images/kenyan-bead-decor-yhip8u-opt.webp",
         imageAlt:
           String(favorite.imageAlt || fallbackFavorite.imageAlt || "SharonCraft favorite product photo").trim() ||
@@ -605,11 +603,21 @@
           return parsed.map(normalizeProduct);
         }
       }
-    } catch (error) {
-      // Ignore invalid local catalog overrides and continue with shipped data.
-    }
 
-    return null;
+      const cachedRaw = window.localStorage.getItem(liveCatalogCacheKey);
+      if (!cachedRaw) {
+        return null;
+      }
+
+      const cachedParsed = JSON.parse(cachedRaw);
+      if (!Array.isArray(cachedParsed)) {
+        return null;
+      }
+
+      return cachedParsed.map(normalizeProduct);
+    } catch (error) {
+      return null;
+    }
   }
 
   function normalizeSavedSocials(rawSocials, defaultSocials) {
@@ -712,29 +720,23 @@
           return normalizeHomeVisuals(parsed, defaultHomeVisuals);
         }
       }
-    } catch (error) {
-      // Ignore invalid local homepage visual overrides and continue with shipped data.
-    }
 
-    return defaultHomeVisuals;
-  }
-
-  function resetStaleImageCaches() {
-    try {
-      const appliedVersion = String(window.localStorage.getItem(imageCacheResetKey) || "").trim();
-      if (appliedVersion === imageCacheResetVersion) {
-        return;
+      const cachedRaw = window.localStorage.getItem(liveHomeVisualsCacheKey);
+      if (!cachedRaw) {
+        return defaultHomeVisuals;
       }
 
-      window.localStorage.removeItem(liveCatalogCacheKey);
-      window.localStorage.removeItem(liveHomeVisualsCacheKey);
-      window.localStorage.setItem(imageCacheResetKey, imageCacheResetVersion);
+      const cachedParsed = JSON.parse(cachedRaw);
+      if (!cachedParsed || typeof cachedParsed !== "object") {
+        return defaultHomeVisuals;
+      }
+
+      return normalizeHomeVisuals(cachedParsed, defaultHomeVisuals);
     } catch (error) {
-      // Ignore storage limits and continue with shipped data.
+      return defaultHomeVisuals;
     }
   }
 
-  resetStaleImageCaches();
   const savedProducts = loadSavedProducts();
   const data = clone(defaultData);
   const savedCategories = loadSavedCategories(defaultData.categories);
