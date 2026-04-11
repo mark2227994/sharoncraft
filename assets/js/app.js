@@ -2178,6 +2178,9 @@
     const alt = escapeHtml(config.alt || "");
     const profileName = normalizeText(config.profile) || "card";
     const responsive = getResponsiveImageConfig(imageUrl, profileName);
+    const fallbackSrc = normalizeText(config.fallbackSrc);
+    const fallbackAlt = escapeHtml(config.fallbackAlt || config.alt || "");
+    const fallbackProfile = normalizeText(config.fallbackProfile) || profileName;
     const loading = normalizeText(config.loading) || "lazy";
     const decoding = normalizeText(config.decoding) || "async";
     const fetchPriority = normalizeText(config.fetchpriority);
@@ -2190,6 +2193,12 @@
       `decoding="${escapeHtml(decoding)}"`,
       `data-responsive-profile="${escapeHtml(profileName)}"`
     ];
+
+    if (fallbackSrc) {
+      imageAttrs.push(`data-fallback-src="${escapeHtml(fallbackSrc)}"`);
+      imageAttrs.push(`data-fallback-alt="${fallbackAlt}"`);
+      imageAttrs.push(`data-fallback-profile="${escapeHtml(fallbackProfile)}"`);
+    }
 
     if (responsive.fallbackSrcset) {
       imageAttrs.push(`srcset="${escapeHtml(responsive.fallbackSrcset)}"`);
@@ -2213,8 +2222,71 @@
     `;
   }
 
+  function applyResponsiveImageElement(target, image, alt, profile) {
+    if (!target) {
+      return;
+    }
+
+    const source = normalizeText(image);
+    const imageAlt = normalizeText(alt) || target.alt || "";
+    const profileName = normalizeText(profile) || normalizeText(target.dataset && target.dataset.responsiveProfile) || "card";
+    const config = getResponsiveImageConfig(source, profileName);
+    const picture = target.closest("picture");
+
+    target.src = source;
+    target.alt = imageAlt;
+    target.dataset.responsiveProfile = profileName;
+
+    if (picture) {
+      const avifSource = picture.querySelector('source[type="image/avif"]');
+      const webpSource = picture.querySelector('source[type="image/webp"]');
+
+      if (avifSource) {
+        avifSource.srcset = config.avifSrcset;
+        avifSource.sizes = config.sizes;
+      }
+
+      if (webpSource) {
+        webpSource.srcset = config.webpSrcset;
+        webpSource.sizes = config.sizes;
+      }
+    }
+
+    if (config.fallbackSrcset) {
+      target.srcset = config.fallbackSrcset;
+      target.sizes = config.sizes;
+      return;
+    }
+
+    target.removeAttribute("srcset");
+    target.removeAttribute("sizes");
+  }
+
+  function tryResponsiveFallback(shell, image) {
+    const fallbackSrc = normalizeText(image && image.dataset && image.dataset.fallbackSrc);
+    if (!fallbackSrc || normalizeText(image && image.dataset && image.dataset.fallbackApplied) === "true") {
+      return false;
+    }
+
+    const currentPath = splitAssetUrl(image.currentSrc || image.src).pathname;
+    const fallbackPath = splitAssetUrl(fallbackSrc).pathname;
+    if (currentPath === fallbackPath) {
+      return false;
+    }
+
+    image.dataset.fallbackApplied = "true";
+    applyResponsiveImageElement(
+      image,
+      fallbackSrc,
+      normalizeText(image.dataset.fallbackAlt) || image.alt,
+      normalizeText(image.dataset.fallbackProfile) || normalizeText(image.dataset.responsiveProfile) || "card"
+    );
+    shell.dataset.imageState = "loading";
+    return true;
+  }
+
   function syncResponsiveImageState(shell) {
-    if (!shell || shell.dataset.imageStateBound === "true") {
+    if (!shell) {
       return;
     }
 
@@ -2227,12 +2299,29 @@
       shell.dataset.imageState = image.naturalWidth > 0 ? "loaded" : "error";
     };
 
-    shell.dataset.imageStateBound = "true";
-    shell.dataset.imageState = image.complete && image.naturalWidth > 0 ? "loaded" : "loading";
-    image.addEventListener("load", markLoaded, { once: true });
-    image.addEventListener("error", function () {
+    const markErrored = function () {
+      if (tryResponsiveFallback(shell, image)) {
+        return;
+      }
       shell.dataset.imageState = "error";
-    }, { once: true });
+    };
+
+    if (shell.dataset.imageStateBound !== "true") {
+      shell.dataset.imageStateBound = "true";
+      image.addEventListener("load", markLoaded);
+      image.addEventListener("error", markErrored);
+    }
+
+    if (image.complete) {
+      if (image.naturalWidth > 0) {
+        shell.dataset.imageState = "loaded";
+      } else {
+        markErrored();
+      }
+      return;
+    }
+
+    shell.dataset.imageState = "loading";
   }
 
   function hydrateResponsiveImages(root) {
@@ -2555,6 +2644,7 @@
     const config = options || {};
     const productName = product.name || "Artisan Creation";
     const image = getProductImages(product)[0];
+    const imageFallback = "assets/images/custom-occasion-beadwork-46mokm-opt.webp";
     const imageLoading = config.priorityImage ? "eager" : "lazy";
     const imagePriority = config.priorityImage ? "high" : "low";
     const wishlisted = isWishlisted(product.id);
@@ -2577,6 +2667,9 @@
             src: image,
             alt: productName,
             profile: "card",
+            fallbackSrc: imageFallback,
+            fallbackAlt: productName,
+            fallbackProfile: "card",
             loading: imageLoading,
             decoding: "async",
             fetchpriority: imagePriority
@@ -4152,6 +4245,7 @@
     renderCategorySelect,
     refreshReveal: initReveal,
     hydrateResponsiveImages,
+    applyResponsiveImageElement,
     renderResponsivePictureMarkup,
     getResponsiveImageConfig,
     preloadResponsiveImage,
