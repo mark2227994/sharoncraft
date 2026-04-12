@@ -14,3 +14,4 @@ package-lock.json.bak
 supabase/functions/.env
 supabase/functions/.env.local
 supabase/.temp/
+.codex-deploy-tmp/

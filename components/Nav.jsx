@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "../lib/cart-context";
-import Icon from "./icons";
 import { mobileNavLinks, primaryNavLinks } from "../data/site";
+import Icon from "./icons";
 
 export default function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,7 +20,7 @@ export default function Nav() {
     <>
       <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>
         <Link href="/" className="nav__logo" aria-label="SharonCraft home">
-          Sharon<span className="nav__logo-dot">•</span>Craft
+          Sharon<span className="nav__logo-dot">&bull;</span>Craft
         </Link>
 
         <nav aria-label="Primary">
@@ -36,12 +36,12 @@ export default function Nav() {
         </nav>
 
         <div className="nav__actions">
-          <Link href="/shop" className="nav__icon-btn" aria-label="Search the shop">
-            <Icon name="search" size={18} />
-          </Link>
           <Link href="/cart" className="nav__icon-btn" aria-label="View cart">
             <Icon name="cart" size={18} />
             {count > 0 ? <span className="cart-badge">{count}</span> : null}
+          </Link>
+          <Link href="/shop" className="nav__icon-btn nav__search" aria-label="Search the shop">
+            <Icon name="search" size={18} />
           </Link>
           <button
             type="button"

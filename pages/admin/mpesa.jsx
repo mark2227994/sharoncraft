@@ -1,210 +1,186 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Head from "next/head";
 import { useMemo, useState } from "react";
+import { format } from "date-fns";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { formatDateTime, formatKES, maskPhone } from "../../lib/formatters";
+import { readMpesaTransactions, readOrders } from "../../lib/store";
 
-export default function AdminMpesaPage() {
-  const queryClient = useQueryClient();
-  const [filter, setFilter] = useState("all");
-  const [drawerTxn, setDrawerTxn] = useState(null);
-  const [orderId, setOrderId] = useState("");
-  const [matching, setMatching] = useState(false);
+function exportCSV(transactions) {
+  const headers = ["Receipt", "Phone", "Amount (KES)", "Order Ref", "Status", "Date"];
+  const rows = transactions.map((t) => [
+    t.mpesa_receipt,
+    t.phone,
+    t.amount_kes,
+    t.order_ref,
+    t.status,
+    format(new Date(t.timestamp), "dd/MM/yyyy HH:mm"),
+  ]);
+  const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `mpesa-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-  const { data: transactions, isLoading: loadingTx } = useQuery({
-    queryKey: ["admin-mpesa"],
-    queryFn: async () => {
-      const response = await fetch("/api/admin/mpesa", { credentials: "same-origin" });
-      if (!response.ok) throw new Error("Failed");
-      return response.json();
-    },
-  });
+export default function MpesaPage({ transactions, orders }) {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [status, setStatus] = useState("All");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("date-desc");
+  const [drawerTransaction, setDrawerTransaction] = useState(null);
 
-  const { data: dashboard, isLoading: loadingDash } = useQuery({
-    queryKey: ["admin-dashboard"],
-    queryFn: async () => {
-      const response = await fetch("/api/admin/dashboard", { credentials: "same-origin" });
-      if (!response.ok) throw new Error("Failed");
-      return response.json();
-    },
-  });
+  const filtered = useMemo(() => {
+    const next = transactions.filter((transaction) => {
+      const date = new Date(transaction.timestamp);
+      const matchesFrom = fromDate ? date >= new Date(fromDate) : true;
+      const matchesTo = toDate ? date <= new Date(`${toDate}T23:59:59`) : true;
+      const matchesStatus = status === "All" ? true : transaction.status === status;
+      const searchTarget = `${transaction.mpesa_receipt} ${transaction.phone}`.toLowerCase();
+      const matchesSearch = search ? searchTarget.includes(search.toLowerCase()) : true;
+      return matchesFrom && matchesTo && matchesStatus && matchesSearch;
+    });
 
-  const orders = dashboard?.orders ?? [];
+    if (sortBy === "amount-asc") return next.slice().sort((a, b) => a.amount_kes - b.amount_kes);
+    if (sortBy === "amount-desc") return next.slice().sort((a, b) => b.amount_kes - a.amount_kes);
+    if (sortBy === "date-asc") return next.slice().sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return next.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  }, [fromDate, search, sortBy, status, toDate, transactions]);
 
-  const visible = useMemo(() => {
-    if (!transactions) return [];
-    if (filter === "open") {
-      return transactions.filter((t) => t.status === "Success" && !t.matched_order_id);
-    }
-    return transactions;
-  }, [transactions, filter]);
+  const summary = useMemo(() => {
+    const success = filtered.filter((transaction) => transaction.status === "Success");
+    const failed = filtered.filter((transaction) => transaction.status === "Failed" || !transaction.matched_order_id);
+    return {
+      total: success.reduce((sum, transaction) => sum + Number(transaction.amount_kes || 0), 0),
+      successCount: success.length,
+      failedCount: failed.length,
+    };
+  }, [filtered]);
 
-  async function submitMatch() {
-    if (!drawerTxn || !orderId) return;
-    setMatching(true);
-    const response = await fetch("/api/admin/mpesa/match", {
+  async function matchTransaction(orderId) {
+    await fetch("/api/admin/mpesa/match", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ transactionId: drawerTxn.id, orderId }),
+      body: JSON.stringify({ transactionId: drawerTransaction.id, orderId }),
     });
-    setMatching(false);
-    if (!response.ok) return;
-    setDrawerTxn(null);
-    setOrderId("");
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["admin-mpesa"] }),
-      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] }),
-    ]);
+    window.location.reload();
   }
-
-  function statusPill(t) {
-    if (t.status === "Success" && !t.matched_order_id) return "admin-pill admin-pill--unmatched";
-    if (t.status === "Success") return "admin-pill admin-pill--completed";
-    if (t.status === "Failed") return "admin-pill admin-pill--failed";
-    return "admin-pill admin-pill--pending";
-  }
-
-  const loading = loadingTx || loadingDash;
 
   return (
-    <>
-      <Head>
-        <title>M-Pesa — Gallery Admin</title>
-      </Head>
-      <AdminLayout title="M-Pesa">
-        {loading ? <p className="admin-note">Loading…</p> : null}
+    <AdminLayout
+      title="M-Pesa Transaction Tracker"
+      action={
+        <button type="button" className="admin-button" onClick={() => exportCSV(filtered)}>
+          Export CSV
+        </button>
+      }
+    >
+      <section className="mpesa-filter-bar">
+        <input className="admin-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
+        <input className="admin-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} />
+        <select className="admin-select" value={status} onChange={(event) => setStatus(event.target.value)}>
+          <option>All</option>
+          <option>Success</option>
+          <option>Failed</option>
+        </select>
+        <input
+          className="admin-input"
+          placeholder="Search receipt or phone"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        <select className="admin-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+          <option value="date-desc">Newest first</option>
+          <option value="date-asc">Oldest first</option>
+          <option value="amount-desc">Highest amount</option>
+          <option value="amount-asc">Lowest amount</option>
+        </select>
+      </section>
 
-        {!loading && transactions ? (
-          <>
-            <div className="mpesa-filter-bar">
-              <button
-                type="button"
-                className={`admin-button ${filter === "all" ? "" : "admin-button--secondary"}`}
-                onClick={() => setFilter("all")}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                className={`admin-button ${filter === "open" ? "" : "admin-button--secondary"}`}
-                onClick={() => setFilter("open")}
-              >
-                Unmatched
-              </button>
-            </div>
+      <section className="mpesa-summary-grid">
+        <article className="admin-stat-card">
+          <p className="admin-stat-card__label">Total Received This Month</p>
+          <p className="admin-stat-card__value">{formatKES(summary.total)}</p>
+        </article>
+        <article className="admin-stat-card">
+          <p className="admin-stat-card__label">Successful Transactions</p>
+          <p className="admin-stat-card__value">{summary.successCount}</p>
+        </article>
+        <article className="admin-stat-card">
+          <p className="admin-stat-card__label">Failed / Unmatched</p>
+          <p className="admin-stat-card__value admin-stat-card__value--terracotta">{summary.failedCount}</p>
+        </article>
+      </section>
 
-            <div className="admin-table-wrap admin-panel">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Receipt</th>
-                    <th>Phone</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>When</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {visible.map((t) => (
-                    <tr key={t.id}>
-                      <td>{t.mpesa_receipt}</td>
-                      <td>{maskPhone(t.phone)}</td>
-                      <td>{formatKES(t.amount_kes)}</td>
-                      <td>
-                        <span className={statusPill(t)}>
-                          {t.status === "Success" && !t.matched_order_id ? "Unmatched" : t.status}
-                        </span>
-                      </td>
-                      <td>{formatDateTime(t.timestamp)}</td>
-                      <td>
-                        {t.status === "Success" && !t.matched_order_id ? (
-                          <button type="button" className="admin-link" style={{ border: "none", background: "none" }} onClick={() => setDrawerTxn(t)}>
-                            Match
-                          </button>
-                        ) : (
-                          <span className="admin-note">{t.matched_order_id || "—"}</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="admin-mobile-cards">
-              {visible.map((t) => (
-                <div key={t.id} className="admin-form-card">
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
-                    <strong>{t.mpesa_receipt}</strong>
-                    <span className={statusPill(t)}>
-                      {t.status === "Success" && !t.matched_order_id ? "Unmatched" : t.status}
-                    </span>
-                  </div>
-                  <p className="admin-note" style={{ marginTop: "8px" }}>
-                    {maskPhone(t.phone)}
-                  </p>
-                  <p style={{ marginTop: "8px", fontWeight: 600 }}>{formatKES(t.amount_kes)}</p>
-                  <p className="admin-note" style={{ marginTop: "4px" }}>{formatDateTime(t.timestamp)}</p>
-                  {t.status === "Success" && !t.matched_order_id ? (
-                    <button
-                      type="button"
-                      className="admin-button"
-                      style={{ marginTop: "12px", width: "100%" }}
-                      onClick={() => setDrawerTxn(t)}
-                    >
-                      Match to order
-                    </button>
+      <section className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Receipt</th>
+              <th>Phone</th>
+              <th>Amount</th>
+              <th>Order Ref</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Matched Order</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((transaction) => (
+              <tr key={transaction.id}>
+                <td>{transaction.mpesa_receipt}</td>
+                <td>{maskPhone(transaction.phone)}</td>
+                <td>{formatKES(transaction.amount_kes)}</td>
+                <td>{transaction.order_ref}</td>
+                <td>
+                  <span className={`admin-pill ${transaction.status === "Success" ? "admin-pill--completed" : "admin-pill--failed"}`}>
+                    {transaction.status}
+                  </span>
+                </td>
+                <td>{formatDateTime(transaction.timestamp)}</td>
+                <td>
+                  {transaction.matched_order_id ? (
+                    transaction.matched_order_id
                   ) : (
-                    <p className="admin-note" style={{ marginTop: "8px" }}>
-                      Order: {t.matched_order_id || "—"}
-                    </p>
+                    <>
+                      <span className="admin-pill admin-pill--unmatched">Unmatched</span>{" "}
+                      <button type="button" style={{ color: "var(--color-terracotta)" }} onClick={() => setDrawerTransaction(transaction)}>
+                        Match Manually →
+                      </button>
+                    </>
                   )}
-                </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {drawerTransaction ? (
+        <div className="manual-match-drawer">
+          <button type="button" className="manual-match-drawer__overlay" onClick={() => setDrawerTransaction(null)} />
+          <div className="manual-match-drawer__panel">
+            <p className="overline">Manual match</p>
+            <h2 className="display-md" style={{ marginBottom: "16px" }}>
+              Link {drawerTransaction.mpesa_receipt}
+            </h2>
+            <div style={{ display: "grid", gap: "12px" }}>
+              {orders.map((order) => (
+                <button key={order.id} type="button" className="admin-button admin-button--secondary" onClick={() => matchTransaction(order.id)}>
+                  {order.id} · {order.product_name}
+                </button>
               ))}
             </div>
-          </>
-        ) : null}
-
-        {drawerTxn ? (
-          <div className="manual-match-drawer">
-            <button
-              type="button"
-              className="manual-match-drawer__overlay"
-              aria-label="Close"
-              onClick={() => setDrawerTxn(null)}
-            />
-            <div className="manual-match-drawer__panel">
-              <h2 className="heading-sm" style={{ marginBottom: "16px" }}>
-                Match payment
-              </h2>
-              <p className="admin-note" style={{ marginBottom: "16px" }}>
-                {formatKES(drawerTxn.amount_kes)} · {drawerTxn.mpesa_receipt}
-              </p>
-              <label className="admin-field">
-                <span className="admin-note">Order</span>
-                <select className="admin-select" value={orderId} onChange={(event) => setOrderId(event.target.value)}>
-                  <option value="">Select order…</option>
-                  {orders.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.id} — {o.buyer_name} ({formatKES(o.amount_kes)})
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="admin-quick-actions">
-                <button type="button" className="admin-button" disabled={matching || !orderId} onClick={submitMatch}>
-                  {matching ? "Saving…" : "Confirm match"}
-                </button>
-                <button type="button" className="admin-button admin-button--secondary" onClick={() => setDrawerTxn(null)}>
-                  Cancel
-                </button>
-              </div>
-            </div>
           </div>
-        ) : null}
-      </AdminLayout>
-    </>
+        </div>
+      ) : null}
+    </AdminLayout>
   );
+}
+
+export async function getServerSideProps() {
+  const [transactions, orders] = await Promise.all([readMpesaTransactions(), readOrders()]);
+  return { props: { transactions, orders } };
 }

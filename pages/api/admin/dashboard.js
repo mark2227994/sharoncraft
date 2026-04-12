@@ -1,6 +1,11 @@
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { getDashboardSnapshot } from "../../../lib/store";
 
 export default async function handler(req, res) {
+  if (!isAuthorizedRequest(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   const { products, orders, mpesa } = await getDashboardSnapshot();
 
   const now = new Date();

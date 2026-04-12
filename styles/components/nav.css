@@ -97,3 +97,6 @@
   .nav__links { display: flex; }
   .nav__hamburger { display: none; }
 }
+@media (max-width: 767px) {
+  .nav__search { display: none; }
+}

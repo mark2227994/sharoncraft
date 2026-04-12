@@ -1,6 +1,7 @@
 import formidable from "formidable";
 import fs from "fs/promises";
 import path from "path";
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export const config = {
   api: {
@@ -11,6 +12,10 @@ export const config = {
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
 
 export default async function handler(req, res) {
+  if (!isAuthorizedRequest(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
