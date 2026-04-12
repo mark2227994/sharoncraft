@@ -22,7 +22,15 @@
     "legacy:dev": "node scripts/dev-server.js",
     "legacy:dev:open": "node scripts/dev-server.js --open",
     "legacy:serve": "node scripts/dev-server.js",
-    "legacy:serve:5500": "node scripts/dev-server.js --port 5500"
+    "legacy:serve:5500": "node scripts/dev-server.js --port 5500",
+    "static:dev": "node scripts/dev-server.js",
+    "static:dev:open": "node scripts/dev-server.js --open",
+    "static:serve": "node scripts/dev-server.js",
+    "static:serve:5500": "node scripts/dev-server.js --port 5500",
+    "prestatic:dev": "npm run build:seo",
+    "prestatic:dev:open": "npm run build:seo",
+    "prestatic:serve": "npm run build:seo",
+    "prestatic:serve:5500": "npm run build:seo"
   },
   "devDependencies": {
     "postcss": "^8.5.8",
