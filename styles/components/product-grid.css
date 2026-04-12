@@ -1,0 +1,82 @@
+/* Mobile-first masonry: single column on very narrow phones, then 2–4 columns. */
+.masonry-grid-wrapper {
+  --masonry-gutter: 8px;
+  padding: var(--space-4) var(--gutter) var(--space-6);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+@media (min-width: 360px) {
+  .masonry-grid-wrapper {
+    --masonry-gutter: 8px;
+  }
+}
+
+@media (min-width: 640px) {
+  .masonry-grid-wrapper {
+    --masonry-gutter: 12px;
+    padding-top: var(--space-5);
+  }
+}
+
+.masonry-grid {
+  position: relative;
+}
+
+.masonry-sizer,
+.masonry-item {
+  width: 100%;
+}
+
+@media (min-width: 360px) {
+  .masonry-sizer,
+  .masonry-item {
+    width: calc(50% - var(--masonry-gutter) / 2);
+  }
+}
+
+@media (min-width: 640px) {
+  .masonry-sizer,
+  .masonry-item {
+    width: calc(33.333% - (var(--masonry-gutter) * 2 / 3));
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-sizer,
+  .masonry-item {
+    width: calc(25% - (var(--masonry-gutter) * 3 / 4));
+  }
+}
+
+.masonry-item {
+  margin-bottom: var(--masonry-gutter);
+  opacity: 0;
+  animation: fadeUpIn 420ms ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masonry-item {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+@keyframes fadeUpIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.masonry-empty {
+  width: 100%;
+  padding: var(--space-6) var(--space-3);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}

@@ -2,8 +2,12 @@
   "name": "sharoncraft-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Local Node.js workflow for the SharonCraft static storefront.",
+  "description": "Next.js redesign for the SharonCraft artisan storefront and admin workspace.",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "build:release": "npm run build:images && npm run build:seo && node scripts/verify-release.js",
     "build:images": "node scripts/generate-responsive-images.js",
     "build:seo": "node scripts/generate-product-share-pages.js && node scripts/generate-sitemap.js && node scripts/generate-merchant-feed.js",
@@ -15,14 +19,10 @@
     "notify:indexnow:changed:dry": "node scripts/notify-indexnow.js --changed --dry-run",
     "optimize:webp-assets": "node scripts/optimize-webp-assets.js",
     "generate:sitemap": "node scripts/generate-sitemap.js",
-    "dev": "node scripts/dev-server.js",
-    "dev:open": "node scripts/dev-server.js --open",
-    "serve": "node scripts/dev-server.js",
-    "serve:5500": "node scripts/dev-server.js --port 5500",
-    "predev": "npm run build:seo",
-    "predev:open": "npm run build:seo",
-    "preserve": "npm run build:seo",
-    "preserve:5500": "npm run build:seo"
+    "legacy:dev": "node scripts/dev-server.js",
+    "legacy:dev:open": "node scripts/dev-server.js --open",
+    "legacy:serve": "node scripts/dev-server.js",
+    "legacy:serve:5500": "node scripts/dev-server.js --port 5500"
   },
   "devDependencies": {
     "postcss": "^8.5.8",
@@ -30,6 +30,14 @@
     "prettier": "^3.8.1"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.99.0",
+    "date-fns": "^4.1.0",
+    "formidable": "^3.5.4",
+    "masonry-layout": "^4.2.2",
+    "next": "^16.2.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-hook-form": "^7.72.1",
     "sharp": "^0.34.5"
   }
 }

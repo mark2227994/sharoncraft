@@ -1,0 +1,17 @@
+Homepage marketing images (not catalog).
+
+placeholder.svg — default for all slots until you replace them (set paths in Admin → Look).
+
+When you use real photos, suggested filenames:
+  hero.webp
+  artisan.webp
+  collection-jewellery.webp
+  collection-home.webp
+  collection-accessories.webp
+
+SIZE GUIDE (quick reference)
+  Hero:        min ~1400px wide, tall portrait-friendly (e.g. 1400×1800).
+  Artisan:     ~1200×1200 or 1200×900, subject centered.
+  Collections: ~1200×800 each (3:2); keep important detail above bottom third (title overlay).
+
+Export WebP at ~80–85 quality; hero can be slightly larger file if needed.

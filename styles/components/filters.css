@@ -1,0 +1,88 @@
+/* In styles/components/filters.css */
+.category-strip {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--gutter);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--color-cream);
+  position: sticky;
+  top: var(--nav-height);
+  z-index: 100;
+}
+.category-strip::-webkit-scrollbar { display: none; }
+.category-pill {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-default);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--color-white);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.category-pill:hover {
+  border-color: var(--color-terracotta);
+  color: var(--color-terracotta);
+}
+.category-pill--active {
+  background: var(--color-terracotta);
+  border-color: var(--color-terracotta);
+  color: var(--color-white);
+}
+
+.filter-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  justify-content: flex-end;
+}
+.filter-drawer__overlay {
+  flex: 1;
+  background: rgba(28, 18, 9, 0.45);
+}
+.filter-drawer__panel {
+  width: min(360px, 100%);
+  background: var(--color-white);
+  padding: var(--space-6) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-shadow: -12px 0 40px rgba(28, 18, 9, 0.16);
+}
+.filter-drawer__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.filter-drawer__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+.filter-drawer__footer {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+.filter-drawer__action {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+}
+.filter-drawer__action--primary {
+  background: var(--color-terracotta);
+  border-color: var(--color-terracotta);
+  color: var(--color-white);
+}

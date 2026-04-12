@@ -1,0 +1,12 @@
+One folder for all product photos.
+
+Tip: name files after the product slug so they sort together, e.g.
+  ndovu-collar-main.webp
+  ndovu-collar-detail-1.webp
+
+In admin, set Image path to: /media/products/ndovu-collar-main.webp
+
+SIZE GUIDE
+  — Main image: ~1000×1300px (4:5) or 1200×1200 square; min width 900px.
+  — Gallery extras: similar height to main for a calm masonry grid.
+  — Prefer WebP; aim under ~300KB per file when practical (quality 80–85).

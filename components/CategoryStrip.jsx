@@ -1,0 +1,18 @@
+import { categoryOptions } from "../data/site";
+
+export default function CategoryStrip({ activeCategory = "All", onSelect, className = "" }) {
+  return (
+    <div className={`category-strip ${className}`.trim()}>
+      {categoryOptions.map((category) => (
+        <button
+          key={category}
+          type="button"
+          className={`category-pill ${activeCategory === category ? "category-pill--active" : ""}`}
+          onClick={() => onSelect?.(category)}
+        >
+          {category}
+        </button>
+      ))}
+    </div>
+  );
+}
