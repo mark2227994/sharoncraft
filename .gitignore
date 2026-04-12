@@ -1,5 +1,10 @@
 *.exe
 node_modules/
+
+# Next.js build output — never commit (regenerate with npm run build)
+.next/
+out/
+
 npm-debug.log*
 package-lock.json.bak
 .env
