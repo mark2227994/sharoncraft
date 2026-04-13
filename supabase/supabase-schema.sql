@@ -533,15 +533,8 @@ drop policy if exists "Admin upload product images" on storage.objects;
 create policy "Admin upload product images"
 on storage.objects
 for insert
-to authenticated
-with check (
-  bucket_id = 'product-images'
-  and exists (
-    select 1
-    from public.admin_users au
-    where au.user_id = auth.uid()
-  )
-);
+to anon, authenticated
+with check (bucket_id = 'product-images');
 
 drop policy if exists "Admin update product images" on storage.objects;
 create policy "Admin update product images"
