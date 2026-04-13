@@ -1,7 +1,6 @@
 import formidable from "formidable";
 import fs from "fs/promises";
 import path from "path";
-import { put } from "@vercel/blob";
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export const config = {
@@ -11,6 +10,12 @@ export const config = {
 };
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
+
+// Supabase project config (public values — safe to use server-side)
+const SUPABASE_URL = "https://vonzscriztdcdhobulhy.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_3CbiLXuCbqRGjKmBp7Ez3w_NV4HaLXa";
+const STORAGE_BUCKET = "product-images";
+const STORAGE_FOLDER = "catalog";
 
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
@@ -22,11 +27,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Use /tmp as the upload directory — the only writable folder on Vercel
-  const tmpDir = "/tmp";
-
+  // Parse the multipart form — write to /tmp (only writable dir on Vercel)
   const form = formidable({
-    uploadDir: tmpDir,
+    uploadDir: "/tmp",
     keepExtensions: true,
     maxFiles: 1,
     maxFileSize: 8 * 1024 * 1024,
@@ -51,18 +54,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid file type" });
   }
 
-  // Read the temp file and upload to Vercel Blob
+  // Read the temp file
   let fileBuffer;
   try {
     fileBuffer = await fs.readFile(file.filepath);
   } catch (error) {
     return res.status(500).json({ error: "Could not read uploaded file" });
   } finally {
-    // Clean up the temp file
     await fs.unlink(file.filepath).catch(() => {});
   }
 
-  // Create a clean filename from the original name
+  // Build a clean filename
   const originalName = file.originalFilename || "upload";
   const ext = path.extname(originalName) || ".webp";
   const baseName = path.basename(originalName, ext)
@@ -70,18 +72,32 @@ export default async function handler(req, res) {
     .replace(/[^a-z0-9-]/g, "-")
     .replace(/-+/g, "-")
     .slice(0, 60);
-  const blobName = `products/${baseName}-${Date.now()}${ext}`;
+  const fileName = `${baseName}-${Date.now()}${ext}`;
+  const storagePath = `${STORAGE_FOLDER}/${fileName}`;
 
+  // Upload to Supabase Storage
+  const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${storagePath}`;
+  let uploadRes;
   try {
-    const blob = await put(blobName, fileBuffer, {
-      access: "public",
-      contentType: file.mimetype,
+    uploadRes = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": file.mimetype,
+        "x-upsert": "true",
+      },
+      body: fileBuffer,
     });
-    return res.status(200).json({ path: blob.url });
   } catch (error) {
-    return res.status(500).json({
-      error: "Upload to storage failed",
-      detail: String(error.message || error),
-    });
+    return res.status(500).json({ error: "Upload to storage failed", detail: String(error.message || error) });
   }
+
+  if (!uploadRes.ok) {
+    const detail = await uploadRes.text().catch(() => "");
+    return res.status(500).json({ error: "Upload to storage failed", detail });
+  }
+
+  // Return the public URL for the uploaded file
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${storagePath}`;
+  return res.status(200).json({ path: publicUrl });
 }
