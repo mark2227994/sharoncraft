@@ -1,6 +1,25 @@
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { readSiteImages, writeSiteImages } from "../../../lib/site-images";
 
+const ALLOWED_KEYS = [
+  // Image paths
+  "heroImage",
+  "artisanPortrait",
+  "collectionJewellery",
+  "collectionHome",
+  "collectionAccessories",
+  "pageTexture",
+  // Text content
+  "heroTitle",
+  "heroSubtitle",
+  "artisanBio",
+  "aboutStory",
+  "contactWhatsApp",
+  "contactEmail",
+  "businessHours",
+  "deliveryNote",
+];
+
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -12,22 +31,18 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     const body = req.body || {};
-    const allowed = [
-      "heroImage",
-      "artisanPortrait",
-      "collectionJewellery",
-      "collectionHome",
-      "collectionAccessories",
-      "pageTexture",
-    ];
     const patch = {};
-    for (const key of allowed) {
+    for (const key of ALLOWED_KEYS) {
       if (typeof body[key] === "string") {
         patch[key] = body[key].trim();
       }
     }
-    const merged = await writeSiteImages(patch);
-    return res.status(200).json({ ok: true, siteImages: merged });
+    try {
+      const merged = await writeSiteImages(patch);
+      return res.status(200).json({ ok: true, siteImages: merged });
+    } catch (error) {
+      return res.status(500).json({ error: `Save failed: ${error.message}` });
+    }
   }
 
   res.setHeader("Allow", "GET, POST");

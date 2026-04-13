@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { products, orders, mpesa } = await getDashboardSnapshot();
+  const { products, orders, mpesa, waOrders } = await getDashboardSnapshot();
 
   const now = new Date();
   const month = now.getMonth();
@@ -30,5 +30,6 @@ export default async function handler(req, res) {
       { label: "Pending Orders", value: pendingOrders, delta: "Need follow-up" },
     ],
     orders,
+    waOrders,
   });
 }

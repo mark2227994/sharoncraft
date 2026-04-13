@@ -39,7 +39,7 @@ export default function CheckoutPage() {
   const delivery = 300;
   const total = subtotal + delivery;
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
     if (items.length === 0) return;
 
     const message = buildWhatsAppMessage({
@@ -50,6 +50,13 @@ export default function CheckoutPage() {
       subtotal,
       total,
     });
+
+    // Save order to admin tracking (fire-and-forget — don't block on failure)
+    fetch("/api/orders/create-wa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: data.name, phone: data.phone, area: data.area, items, subtotal, total }),
+    }).catch(() => {}); // silently ignore if it fails
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     clear();

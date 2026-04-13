@@ -5,9 +5,11 @@ import Icon from "../icons";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
+  { href: "/admin/orders", label: "💬 Orders", icon: "package" },
   { href: "/admin/products", label: "Products", icon: "package" },
   { href: "/admin/products/new", label: "Add Product", icon: "plus" },
   { href: "/admin/product-story", label: "Stories", icon: "edit" },
+  { href: "/admin/site-images", label: "Site Content", icon: "edit" },
   { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
 ];
 
