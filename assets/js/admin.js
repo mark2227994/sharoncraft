@@ -1251,6 +1251,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     reconNote: mpesaReconNote ? mpesaReconNote.textContent : ""
   };
   let currentLiveUser = null;
+  let currentLiveUserIsAdmin = false;
   let isSavingOrder = false;
   let editingOrderId = null;
   let orderSearchTerm = "";
@@ -3778,7 +3779,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     if (currentLiveUser && currentLiveUser.email) {
-      setLiveAuthState(`Live publish ready as ${currentLiveUser.email}`, "connected");
+      if (currentLiveUserIsAdmin) {
+        setLiveAuthState(`Live publish ready as ${currentLiveUser.email}`, "connected");
+      } else {
+        setLiveAuthState(
+          `Signed in as ${currentLiveUser.email}, but this account is not on the admin allow-list.`,
+          "error"
+        );
+      }
       return;
     }
 
@@ -3824,14 +3832,21 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function refreshLiveUser() {
     if (!liveCatalogApi || typeof liveCatalogApi.getCurrentUser !== "function" || !liveCatalogApi.isConfigured()) {
       currentLiveUser = null;
+      currentLiveUserIsAdmin = false;
       renderLiveAuthState();
       return null;
     }
 
     try {
       currentLiveUser = await liveCatalogApi.getCurrentUser();
+      if (currentLiveUser && typeof liveCatalogApi.isAdmin === "function") {
+        currentLiveUserIsAdmin = await liveCatalogApi.isAdmin();
+      } else {
+        currentLiveUserIsAdmin = false;
+      }
     } catch (error) {
       currentLiveUser = null;
+      currentLiveUserIsAdmin = false;
       console.error("Unable to read current Supabase user.", error);
     }
 
@@ -3892,6 +3907,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (localMessage) {
         setStatus(`${localMessage} Saved locally only. Sign in to Supabase to update the live website.`);
       }
+      return false;
+    }
+    if (!currentLiveUserIsAdmin) {
+      if (localMessage) {
+        setStatus(`${localMessage} Saved locally only. This account is not on the Supabase admin allow-list.`);
+      }
+      setLiveAuthState("Signed in, but this account cannot publish. Add it to public.admin_users.", "error");
       return false;
     }
 
@@ -9352,11 +9374,23 @@ document.addEventListener("DOMContentLoaded", async function () {
       try {
         await liveCatalogApi.signInWithPassword(liveEmailInput.value, livePasswordInput.value);
         await refreshLiveUser();
+        if (!currentLiveUserIsAdmin) {
+          await liveCatalogApi.signOut();
+          currentLiveUser = null;
+          currentLiveUserIsAdmin = false;
+          if (livePasswordInput) {
+            livePasswordInput.value = "";
+          }
+          setLiveAuthState("This account is not on the admin list.", "error");
+          setStatus("This account cannot publish products. Add it to public.admin_users, then sign in again.");
+          return;
+        }
         livePasswordInput.value = "";
         setStatus("Supabase sign-in successful. Product saves can now publish to the live website.");
       } catch (error) {
         console.error("Unable to sign in to Supabase.", error);
         currentLiveUser = null;
+        currentLiveUserIsAdmin = false;
         setLiveAuthState("Supabase sign-in failed. Check your email or password.", "error");
         setStatus("Supabase sign-in failed. Please check your email and password.");
       }
@@ -9367,6 +9401,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     liveSignOutButton.addEventListener("click", async function () {
       if (!liveCatalogApi || typeof liveCatalogApi.signOut !== "function" || !liveCatalogApi.isConfigured()) {
         currentLiveUser = null;
+        currentLiveUserIsAdmin = false;
         renderLiveAuthState();
         return;
       }
@@ -9378,6 +9413,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
 
       currentLiveUser = null;
+      currentLiveUserIsAdmin = false;
       if (livePasswordInput) {
         livePasswordInput.value = "";
       }
@@ -9635,6 +9671,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (liveCatalogApi && typeof liveCatalogApi.onAuthStateChange === "function" && liveCatalogApi.isConfigured()) {
     liveCatalogApi.onAuthStateChange(async function (user) {
       currentLiveUser = user || null;
+      if (currentLiveUser && typeof liveCatalogApi.isAdmin === "function") {
+        currentLiveUserIsAdmin = await liveCatalogApi.isAdmin();
+      } else {
+        currentLiveUserIsAdmin = false;
+      }
       renderLiveAuthState();
       if (user) {
         await refreshOrdersFromLive();

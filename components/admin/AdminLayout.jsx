@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import Icon from "../icons";
 
 const navItems = [
@@ -13,6 +14,36 @@ const navItems = [
 export default function AdminLayout({ title, action, children }) {
   const router = useRouter();
   const currentId = typeof router.query.id === "string" ? router.query.id : "";
+  const [sessionReady, setSessionReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkSession() {
+      try {
+        const response = await fetch("/api/admin/session", { credentials: "same-origin" });
+        if (!response.ok) {
+          throw new Error("Session check failed");
+        }
+        const payload = await response.json();
+        if (!payload || !payload.authorized) {
+          router.replace("/admin/login");
+          return;
+        }
+        if (isMounted) {
+          setSessionReady(true);
+        }
+      } catch (_error) {
+        router.replace("/admin/login");
+      }
+    }
+
+    checkSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -28,6 +59,16 @@ export default function AdminLayout({ title, action, children }) {
       return router.pathname === "/admin/products/new" || (router.pathname === "/admin/products/[id]" && currentId === "new");
     }
     return router.pathname === href || router.pathname.startsWith(`${href}/`);
+  }
+
+  if (!sessionReady) {
+    return (
+      <div className="admin-shell">
+        <main className="admin-main">
+          <p className="admin-note">Checking admin session...</p>
+        </main>
+      </div>
+    );
   }
 
   return (

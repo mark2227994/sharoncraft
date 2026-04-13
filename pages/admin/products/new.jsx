@@ -1,14 +1,18 @@
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 
 export default function AdminNewProductPage() {
   const router = useRouter();
   const { register, handleSubmit, setValue, watch } = useForm();
+  const [submitError, setSubmitError] = useState("");
   const imageValue = watch("image");
 
   async function onSubmit(values) {
+    setSubmitError("");
+
     const payload = {
       id: values.slug,
       slug: values.slug,
@@ -39,11 +43,33 @@ export default function AdminNewProductPage() {
       },
     };
 
-    await fetch("/api/admin/products", {
+    const response = await fetch("/api/admin/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(payload),
     });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        setSubmitError("Your admin session expired. Please log in again.");
+        router.push("/admin/login");
+        return;
+      }
+
+      let message = "Could not save this product. Please try again.";
+      try {
+        const body = await response.json();
+        if (body && body.error) {
+          message = String(body.error);
+        }
+      } catch (_error) {
+        // Keep fallback message when response body is not JSON.
+      }
+
+      setSubmitError(message);
+      return;
+    }
 
     router.push("/admin/products");
   }
@@ -110,6 +136,7 @@ export default function AdminNewProductPage() {
         <button type="submit" className="admin-button">
           Save Product
         </button>
+        {submitError ? <p className="admin-form-error">{submitError}</p> : null}
       </form>
     </AdminLayout>
   );

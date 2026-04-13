@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
@@ -65,6 +65,7 @@ function toFormValues(product) {
 export default function AdminProductEditorPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [saveError, setSaveError] = useState("");
   const rawId = router.query.id;
   const id = typeof rawId === "string" ? rawId : null;
   const isNew = id === "new";
@@ -108,6 +109,8 @@ export default function AdminProductEditorPage() {
   }
 
   async function onSubmit(values) {
+    setSaveError("");
+
     const materials = values.materialsStr
       .split(",")
       .map((part) => part.trim())
@@ -150,7 +153,28 @@ export default function AdminProductEditorPage() {
       credentials: "same-origin",
       body: JSON.stringify(payload),
     });
-    if (!response.ok) return;
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        setSaveError("Your admin session expired. Please log in again.");
+        router.push("/admin/login");
+        return;
+      }
+
+      let message = "Could not save this product. Please try again.";
+      try {
+        const body = await response.json();
+        if (body && body.error) {
+          message = String(body.error);
+        }
+      } catch (_error) {
+        // Keep fallback message when response body is not JSON.
+      }
+
+      setSaveError(message);
+      return;
+    }
+
     await queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     router.push("/admin/products");
   }
@@ -290,6 +314,7 @@ export default function AdminProductEditorPage() {
                 Save piece
               </button>
             </div>
+            {saveError ? <p className="admin-form-error">{saveError}</p> : null}
           </form>
         ) : null}
       </AdminLayout>

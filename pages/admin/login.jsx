@@ -14,7 +14,7 @@ export default function AdminLoginPage() {
     });
 
     if (!response.ok) {
-      setError("That password didn’t work.");
+      setError("That password did not work.");
       return;
     }
 
