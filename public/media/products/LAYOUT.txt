@@ -1,12 +1,93 @@
-One folder for all product photos.
+HOW TO ADD PRODUCT PHOTOS — SharonCraft
+=========================================
 
-Tip: name files after the product slug so they sort together, e.g.
-  ndovu-collar-main.webp
-  ndovu-collar-detail-1.webp
+DROP YOUR PHOTOS IN THIS FOLDER: public/media/products/
 
-In admin, set Image path to: /media/products/ndovu-collar-main.webp
+NAMING RULE: [product-id]-main.webp  (main photo)
+             [product-id]-2.webp     (second photo)
+             [product-id]-3.webp     (third photo, optional)
 
-SIZE GUIDE
-  — Main image: ~1000×1300px (4:5) or 1200×1200 square; min width 900px.
-  — Gallery extras: similar height to main for a calm masonry grid.
-  — Prefer WebP; aim under ~300KB per file when practical (quality 80–85).
+
+CURRENT PRODUCTS — FILES NEEDED
+================================
+
+uhuru-home-set
+  → uhuru-home-set-main.webp   ← main shop card photo
+  → uhuru-home-set-2.webp
+  → uhuru-home-set-3.webp
+
+sunburst-cascade-necklace
+  → sunburst-cascade-necklace-main.webp
+  → sunburst-cascade-necklace-2.webp
+  → sunburst-cascade-necklace-3.webp
+
+malkia-collar
+  → malkia-collar-main.webp
+  → malkia-collar-2.webp
+  → malkia-collar-3.webp
+
+kenya-pride-bracelet
+  → kenya-pride-bracelet-main.webp
+  → kenya-pride-bracelet-2.webp
+  → kenya-pride-bracelet-3.webp
+
+rainbow-loop-stack
+  → rainbow-loop-stack-main.webp
+  → rainbow-loop-stack-2.webp
+  → rainbow-loop-stack-3.webp
+
+sunlit-drop-earrings
+  → sunlit-drop-earrings-main.webp
+  → sunlit-drop-earrings-2.webp
+  → sunlit-drop-earrings-3.webp
+
+twiga-statement-earrings
+  → twiga-statement-earrings-main.webp
+  → twiga-statement-earrings-2.webp
+  → twiga-statement-earrings-3.webp
+
+kijani-mirror-duo
+  → kijani-mirror-duo-main.webp
+  → kijani-mirror-duo-2.webp
+  → kijani-mirror-duo-3.webp
+
+unity-table-placemats
+  → unity-table-placemats-main.webp
+  → unity-table-placemats-2.webp
+  → unity-table-placemats-3.webp
+
+beaded-carry-net
+  → beaded-carry-net-main.webp
+  → beaded-carry-net-2.webp
+  → beaded-carry-net-3.webp
+
+harvest-fringe-bag
+  → harvest-fringe-bag-main.webp
+  → harvest-fringe-bag-2.webp
+  → harvest-fringe-bag-3.webp
+
+royal-occasion-set
+  → royal-occasion-set-main.webp
+  → royal-occasion-set-2.webp
+  → royal-occasion-set-3.webp
+
+color-loop-jewelry-set
+  → color-loop-jewelry-set-main.webp
+  → color-loop-jewelry-set-2.webp
+  → color-loop-jewelry-set-3.webp
+
+
+PHOTO SIZE GUIDE
+================
+- Best size: 1000 × 1300 px (portrait 4:5 ratio) or 1200 × 1200 px square
+- Minimum width: 900 px
+- Keep each file under 300 KB if possible
+- Format: WebP (preferred) or JPG
+
+
+ADDING A BRAND NEW PRODUCT
+===========================
+1. Add photos here:  public/media/products/my-new-product-main.webp
+2. Open this file:   data/store/products.json
+3. Add a new entry with "id": "my-new-product" and images: ["/media/products/my-new-product-main.webp"]
+4. Commit and push to GitHub → Vercel auto-deploys
