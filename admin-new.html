@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SharonCraft Admin Panel - Product Manager</title>
+  <meta name="description" content="Manage SharonCraft products with the new admin panel." />
+  <link rel="icon" type="image/png" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="shortcut icon" href="assets/images/sharoncraft-favicon.webp" />
+  <link rel="apple-touch-icon" href="assets/images/sharoncraft-logo-transparent.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Savannah Earth Color Palette */
+    :root {
+      --primary: #C04D29;
+      --secondary: #B87333;
+      --accent: #8B5A2B;
+      --text: #2C1810;
+      --background: #F8F4F0;
+      --border: #E6D7CD;
+      --white: #FFFFFF;
+      --success: #28a745;
+      --danger: #dc3545;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .admin-header {
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .admin-header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .admin-header .subtitle {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--secondary);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent);
+    }
+
+    .btn-secondary {
+      background-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border);
+      opacity: 0.8;
+    }
+
+    .btn-success {
+      background-color: var(--success);
+      color: var(--white);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    /* Main Layout */
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 70px);
+    }
+
+    /* Sidebar */
+    .admin-sidebar {
+      width: 250px;
+      background-color: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 1rem;
+    }
+
+    .sidebar-nav button {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-nav button:hover {
+      background-color: var(--border);
+    }
+
+    .sidebar-nav button.active {
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    /* Main Content */
+    .admin-main {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .status-message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .status-message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      background-color: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .product-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-card h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.125rem;
+      color: var(--text);
+    }
+
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    .product-card .category {
+      color: var(--text);
+      opacity: 0.7;
+      font-size: 0.875rem;
+      margin: 0.5rem 0;
+    }
+
+    .product-card .price {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0.5rem 0;
+    }
+
+    .product-card .description {
+      color: var(--text);
+      font-size: 0.875rem;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+    }
+
+    .product-card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .product-card-actions .btn {
+      flex: 1;
+    }
+
+    /* Form Styles */
+    .admin-form {
+      background-color: var(--white);
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      max-width: 800px;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 1rem;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 0.5rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .form-actions .btn {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+
+    /* Section Heading */
+    .section-heading {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-heading h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text);
+      opacity: 0.7;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-layout {
+        flex-direction: column;
+      }
+
+      .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .sidebar-nav {
+        display: flex;
+        overflow-x: auto;
+      }
+
+      .sidebar-nav button {
+        white-space: nowrap;
+        margin-bottom: 0;
+      }
+
+      .admin-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="admin-header">
+    <div>
+      <h1>SharonCraft Admin</h1>
+      <span class="subtitle">Product Management Dashboard</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="window.location.href='index.html'">View Website</button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <nav class="sidebar-nav">
+        <button class="active" onclick="showTab('products')" id="nav-products">📦 Products</button>
+        <button onclick="showTab('add')" id="nav-add">➕ Add Product</button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Status Message -->
+      <div id="status-message" class="status-message"></div>
+
+      <!-- Products Tab -->
+      <div id="tab-products">
+        <div class="section-heading">
+          <h2>Product Catalog</h2>
+        </div>
+        <div id="product-list" class="product-grid">
+          <!-- Products will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Add/Edit Product Tab -->
+      <div id="tab-add" style="display: none;">
+        <div class="section-heading">
+          <h2 id="form-title">Add New Product</h2>
+        </div>
+        <form class="admin-form" id="product-form" onsubmit="handleFormSubmit(event)">
+          <input type="hidden" id="product-id" />
+
+          <div class="form-group">
+            <label for="name">Product Name *</label>
+            <input type="text" id="name" name="name" required placeholder="Enter product name" />
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category *</label>
+            <select id="category" name="category" required>
+              <option value="necklaces">Necklaces</option>
+              <option value="bracelets">Bracelets</option>
+              <option value="earrings">Earrings</option>
+              <option value="home-decor">Home Decor</option>
+              <option value="bags-accessories">Bags & Accessories</option>
+              <option value="gift-sets">Gift Sets</option>
+              <option value="bridal-occasion">Bridal & Occasion</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="price">Price (KES) *</label>
+            <input type="number" id="price" name="price" required min="0" placeholder="0" />
+          </div>
+
+          <div class="form-group">
+            <label for="badge">Badge (optional)</label>
+            <input type="text" id="badge" name="badge" placeholder="e.g., New, Best Seller" />
+          </div>
+
+          <div class="form-group">
+            <label for="shortDescription">Short Description *</label>
+            <textarea id="shortDescription" name="shortDescription" required rows="3" placeholder="Brief product description"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Full Description *</label>
+            <textarea id="description" name="description" required rows="4" placeholder="Detailed product description"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="heritageStory">Heritage Story *</label>
+            <textarea id="heritageStory" name="heritageStory" required rows="3" placeholder="The cultural story behind this product"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="details">Details (comma-separated)</label>
+            <input type="text" id="details" name="details" placeholder="Handmade in Kenya, Gift ready, etc." />
+          </div>
+
+          <div class="form-group">
+            <label for="images">Image URLs (comma-separated)</label>
+            <input type="text" id="images" name="images" placeholder="/assets/images/product1.jpg, /assets/images/product2.jpg" />
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="featured" name="featured" />
+              Featured on Homepage
+            </label>
+            <label>
+              <input type="checkbox" id="newArrival" name="newArrival" />
+              Mark as New
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submit-btn">Add Product</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Storage key for products
+    const STORAGE_KEY = 'sharoncraft_products';
+
+    // Default products data
+    const defaultProducts = [
+      {
+        id: "uhuru-home-set",
+        name: "Uhuru Home Set",
+        category: "gift-sets",
+        price: 6800,
+        badge: "Best Seller",
+        featured: true,
+        newArrival: false,
+        shortDescription: "A bold beaded wall and rungu-inspired decor set for joyful living spaces.",
+        description: "This matching decor set brings together clean black fabric, bright beadwork, and a handcrafted ceremonial rod. It is an easy conversation piece for a sitting room, hallway, or gifting moment.",
+        details: ["Handmade in Kenya", "Works well for gifting or home styling", "Made to order in 2 to 4 days"],
+        images: ["assets/images/handmade-kenyan-beadwork-jrpr9r.webp"],
+        heritageStory: "The Uhuru Home Set draws inspiration from Kenya's independence spirit, combining traditional ceremonial elements with modern home decor."
+      },
+      {
+        id: "sunburst-cascade-necklace",
+        name: "Sunburst Cascade Necklace",
+        category: "necklaces",
+        price: 3200,
+        badge: "New",
+        featured: true,
+        newArrival: true,
+        shortDescription: "Long beaded strands with a rich drape and a polished cultural look.",
+        description: "The Sunburst Cascade Necklace is made for women who want a soft statement piece. It sits beautifully over dresses, simple tops, and occasion wear without feeling heavy.",
+        details: ["Available in white, black, and mixed bead patterns", "Lightweight for day-to-night wear", "Popular for events and gifting"],
+        images: ["assets/images/sharoncraft-african-necklace-gilyu6.webp"],
+        heritageStory: "Inspired by the sun's journey across the Kenyan savannah, this necklace captures the warmth and light that defines our landscape."
+      },
+      {
+        id: "kenya-pride-bracelet",
+        name: "Kenya Pride Bracelet",
+        category: "bracelets",
+        price: 900,
+        badge: "Best Seller",
+        featured: true,
+        newArrival: false,
+        shortDescription: "A simple flag-inspired bracelet that is easy to wear and easy to gift.",
+        description: "The Kenya Pride Bracelet keeps things simple with familiar national colors and a slim comfortable fit.",
+        details: ["Adjustable fit", "Great for gifts, clubs, and events"],
+        images: ["assets/images/kenya bracelete-opt.webp"],
+        heritageStory: "This bracelet carries the colors of our flag - black for our people, red for the blood shed for independence, white for peace, and green for our land."
+      }
+    ];
+
+    // Initialize products from localStorage or use defaults
+    function getProducts() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      // Initialize with default products
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
+      return defaultProducts;
+    }
+
+    // Save products to localStorage
+    function saveProducts(products) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    }
+
+    // Generate unique ID
+    function generateId() {
+      return 'product-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Show status message
+    function showStatus(message, type = 'success') {
+      const statusEl = document.getElementById('status-message');
+      statusEl.textContent = message;
+      statusEl.className = 'status-message ' + type;
+      setTimeout(() => {
+        statusEl.className = 'status-message';
+      }, 3000);
+    }
+
+    // Show/hide tabs
+    function showTab(tabName) {
+      document.getElementById('tab-products').style.display = tabName === 'products' ? 'block' : 'none';
+      document.getElementById('tab-add').style.display = tabName === 'add' ? 'block' : 'none';
+      
+      document.getElementById('nav-products').classList.toggle('active', tabName === 'products');
+      document.getElementById('nav-add').classList.toggle('active', tabName === 'add');
+      
+      if (tabName === 'products') {
+        renderProducts();
+      }
+    }
+
+    // Render product list
+    function renderProducts() {
+      const products = getProducts();
+      const container = document.getElementById('product-list');
+      
+      if (products.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No products yet. Add your first product!</p></div>';
+        return;
+      }
+
+      const categoryNames = {
+        'necklaces': 'Necklaces',
+        'bracelets': 'Bracelets',
+        'earrings': 'Earrings',
+        'home-decor': 'Home Decor',
+        'bags-accessories': 'Bags & Accessories',
+        'gift-sets': 'Gift Sets',
+        'bridal-occasion': 'Bridal & Occasion'
+      };
+
+      container.innerHTML = products.map(product => `
+        <div class="product-card">
+          <div class="product-card-header">
+            <h3>${product.name}</h3>
+            ${product.badge ? `<span class="badge">${product.badge}</span>` : ''}
+          </div>
+          <p class="category">${categoryNames[product.category] || product.category}</p>
+          <p class="price">KES ${product.price.toLocaleString()}</p>
+          <p class="description">${product.shortDescription}</p>
+          <div class="product-card-actions">
+            <button class="btn btn-primary" onclick="editProduct('${product.id}')">Edit</button>
+            <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Handle form submit
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      
+      const productId = document.getElementById('product-id').value;
+      const productData = {
+        id: productId || generateId(),
+        name: document.getElementById('name').value.trim(),
+        category: document.getElementById('category').value,
+        price: Number(document.getElementById('price').value),
+        badge: document.getElementById('badge').value.trim(),
+        featured: document.getElementById('featured').checked,
+        newArrival: document.getElementById('newArrival').checked,
+        shortDescription: document.getElementById('shortDescription').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        heritageStory: document.getElementById('heritageStory').value.trim(),
+        details: document.getElementById('details').value.split(',').map(d => d.trim()).filter(Boolean),
+        images: document.getElementById('images').value.split(',').map(i => i.trim()).filter(Boolean)
+      };
+
+      let products = getProducts();
+
+      if (productId) {
+        // Edit existing product
+        const index = products.findIndex(p => p.id === productId);
+        if (index !== -1) {
+          products[index] = productData;
+          showStatus('Product updated successfully!');
+        }
+      } else {
+        // Add new product
+        products.unshift(productData);
+        showStatus('Product added successfully!');
+      }
+
+      saveProducts(products);
+      resetForm();
+      showTab('products');
+    }
+
+    // Edit product
+    function editProduct(id) {
+      const products = getProducts();
+      const product = products.find(p => p.id === id);
+      
+      if (!product) return;
+
+      document.getElementById('product-id').value = product.id;
+      document.getElementById('name').value = product.name;
+      document.getElementById('category').value = product.category;
+      document.getElementById('price').value = product.price;
+      document.getElementById('badge').value = product.badge || '';
+      document.getElementById('featured').checked = product.featured;
+      document.getElementById('newArrival').checked = product.newArrival;
+      document.getElementById('shortDescription').value = product.shortDescription;
+      document.getElementById('description').value = product.description;
+      document.getElementById('heritageStory').value = product.heritageStory;
+      document.getElementById('details').value = product.details.join(', ');
+      document.getElementById('images').value = product.images.join(', ');
+
+      document.getElementById('form-title').textContent = 'Edit Product';
+      document.getElementById('submit-btn').textContent = 'Update Product';
+
+      showTab('add');
+    }
+
+    // Delete product
+    function deleteProduct(id) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+
+      let products = getProducts();
+      products = products.filter(p => p.id !== id);
+      saveProducts(products);
+      showStatus('Product deleted successfully!');
+      renderProducts();
+    }
+
+    // Reset form
+    function resetForm() {
+      document.getElementById('product-form').reset();
+      document.getElementById('product-id').value = '';
+      document.getElementById('form-title').textContent = 'Add New Product';
+      document.getElementById('submit-btn').textContent = 'Add Product';
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      renderProducts();
+    });
+  </script>
+</body>
+</html>
