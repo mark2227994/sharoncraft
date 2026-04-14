@@ -269,6 +269,15 @@
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
+.admin-ai-status {
+  margin-top: 10px;
+}
+.admin-ai-status--ok {
+  color: var(--color-moss);
+}
+.admin-ai-status--warning {
+  color: var(--color-terracotta);
+}
 .admin-ai-result__grid,
 .admin-ai-result__copy {
   display: grid;

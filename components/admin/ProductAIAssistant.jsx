@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function formatList(items) {
   if (!Array.isArray(items) || items.length === 0) return "None yet";
@@ -11,6 +11,39 @@ export default function ProductAIAssistant({ values, onApply }) {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [applied, setApplied] = useState(false);
+  const [status, setStatus] = useState({ loading: true, configured: false, textModel: "", visionModel: "" });
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadStatus() {
+      try {
+        const response = await fetch("/api/admin/ai-status", {
+          credentials: "same-origin",
+        });
+        const body = await response.json().catch(() => ({}));
+
+        if (!ignore) {
+          setStatus({
+            loading: false,
+            configured: Boolean(body?.configured),
+            textModel: String(body?.textModel || ""),
+            visionModel: String(body?.visionModel || ""),
+          });
+        }
+      } catch (_error) {
+        if (!ignore) {
+          setStatus({ loading: false, configured: false, textModel: "", visionModel: "" });
+        }
+      }
+    }
+
+    loadStatus();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   async function handleGenerate() {
     setLoading(true);
@@ -52,12 +85,19 @@ export default function ProductAIAssistant({ values, onApply }) {
             Uses Cloudflare AI to read your current product images and suggest a stronger name, copy, materials, and
             shopper-friendly tags.
           </p>
+          <p className={`caption admin-ai-status ${status.configured ? "admin-ai-status--ok" : "admin-ai-status--warning"}`}>
+            {status.loading
+              ? "Checking Cloudflare AI connection..."
+              : status.configured
+                ? `Cloudflare AI connected. Text: ${status.textModel} · Vision: ${status.visionModel}`
+                : "Cloudflare AI is not configured yet. Add the account id and API token to your env first."}
+          </p>
         </div>
         <button
           type="button"
           className="admin-button"
           onClick={handleGenerate}
-          disabled={loading || (!values.image && !values.description)}
+          disabled={loading || !status.configured || (!values.image && !values.description)}
         >
           {loading ? "Generating..." : "Generate with AI"}
         </button>
