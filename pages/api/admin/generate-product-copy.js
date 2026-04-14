@@ -121,6 +121,7 @@ function buildPrompt(body, imageSummaries) {
     "If the item is jewellery, choose one jewelleryType from: necklace, bracelet, earring. Otherwise return an empty string for jewelryType.",
     `Return a single JSON object with exactly these keys: ${PRODUCT_COPY_FIELDS.join(", ")}.`,
     'Use arrays for "materials", "tags", and "photographyNotes".',
+    'If you are unsure, return an empty string or an empty array instead of adding explanation text.',
   ].join("\n");
 }
 
@@ -144,9 +145,37 @@ function parseModelJson(value) {
     try {
       return JSON.parse(objectMatch[0]);
     } catch (_secondError) {
-      return null;
+      const repaired = objectMatch[0]
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/,\s*([}\]])/g, "$1");
+
+      try {
+        return JSON.parse(repaired);
+      } catch (_thirdError) {
+        return null;
+      }
     }
   }
+}
+
+async function repairJsonWithModel(textModel, rawResponse) {
+  const repairPrompt = [
+    "Turn the following text into one valid JSON object only.",
+    `Use exactly these keys: ${PRODUCT_COPY_FIELDS.join(", ")}.`,
+    'Use arrays for "materials", "tags", and "photographyNotes".',
+    "Do not include markdown fences.",
+    "",
+    rawResponse,
+  ].join("\n");
+
+  const result = await runCloudflareAiModel(textModel, {
+    prompt: repairPrompt,
+    max_tokens: 700,
+    temperature: 0.1,
+  });
+
+  return parseModelJson(result?.response);
 }
 
 function normalizeSuggestions(raw) {
@@ -205,7 +234,11 @@ export default async function handler(req, res) {
       temperature: 0.4,
     });
 
-    const parsed = parseModelJson(result?.response);
+    let parsed = parseModelJson(result?.response);
+
+    if (!parsed && result?.response) {
+      parsed = await repairJsonWithModel(textModel, result.response);
+    }
 
     if (!parsed) {
       throw new Error("Cloudflare AI returned text we could not turn into JSON.");
