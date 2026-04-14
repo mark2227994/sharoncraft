@@ -26,6 +26,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "GET") {
+    res.setHeader("Cache-Control", "no-store");
     return res.status(200).json(await readSiteImages());
   }
 
@@ -38,8 +39,8 @@ export default async function handler(req, res) {
       }
     }
     try {
-      const merged = await writeSiteImages(patch);
-      return res.status(200).json({ ok: true, siteImages: merged });
+      const result = await writeSiteImages(patch);
+      return res.status(200).json({ ok: true, siteImages: result.siteImages, persistence: result.persistence });
     } catch (error) {
       return res.status(500).json({ error: `Save failed: ${error.message}` });
     }

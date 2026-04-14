@@ -39,6 +39,68 @@ function JewelryPhotoGuide() {
   );
 }
 
+function MediaPathHelper({ uploadFolder, suggestedFolder }) {
+  const [copiedLabel, setCopiedLabel] = useState("");
+
+  async function copyValue(label, value) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedLabel(label);
+      window.setTimeout(() => {
+        setCopiedLabel((current) => (current === label ? "" : current));
+      }, 1800);
+    } catch (_error) {
+      setCopiedLabel("");
+    }
+  }
+
+  return (
+    <div className="admin-panel admin-media-helper">
+      <div className="admin-media-helper__header">
+        <div>
+          <p className="overline" style={{ marginBottom: "8px" }}>
+            Product image destination
+          </p>
+          <p className="body-sm">
+            Uploads from this form go to Supabase Storage. If you manage files manually in the repo, mirror them in the
+            local media folder below.
+          </p>
+        </div>
+      </div>
+
+      <div className="admin-media-helper__grid">
+        <div className="admin-media-helper__item">
+          <p className="caption admin-media-helper__label">Upload storage folder</p>
+          <code className="admin-media-helper__code">product-images/catalog/{uploadFolder}</code>
+          <button
+            type="button"
+            className="admin-button admin-button--secondary"
+            onClick={() => copyValue("upload", `product-images/catalog/${uploadFolder}`)}
+          >
+            {copiedLabel === "upload" ? "Copied" : "Copy upload path"}
+          </button>
+        </div>
+
+        <div className="admin-media-helper__item">
+          <p className="caption admin-media-helper__label">Local mirror folder</p>
+          <code className="admin-media-helper__code">{suggestedFolder}</code>
+          <button
+            type="button"
+            className="admin-button admin-button--secondary"
+            onClick={() => copyValue("local", suggestedFolder)}
+          >
+            {copiedLabel === "local" ? "Copied" : "Copy local path"}
+          </button>
+        </div>
+      </div>
+
+      <p className="admin-note" style={{ marginBottom: 0 }}>
+        Recommended files: <strong>close-up</strong>, <strong>worn/styled</strong>, and <strong>detail</strong>.
+      </p>
+    </div>
+  );
+}
+
 export default function AdminNewProductPage() {
   const router = useRouter();
   const { register, handleSubmit, setValue, watch } = useForm({
@@ -215,12 +277,7 @@ export default function AdminNewProductPage() {
           </label>
         </div>
 
-        <div className="admin-panel" style={{ padding: "var(--space-4)", marginBottom: "var(--space-4)" }}>
-          <p className="overline" style={{ marginBottom: "8px" }}>
-            Suggested project folder
-          </p>
-          <p className="body-sm">{suggestedFolder}</p>
-        </div>
+        <MediaPathHelper uploadFolder={uploadFolder} suggestedFolder={suggestedFolder} />
 
         {isJewellery ? <JewelryPhotoGuide /> : null}
 

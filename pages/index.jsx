@@ -27,6 +27,7 @@ export default function HomePage({
   collectionCards,
   artisanSpotlight,
   categories,
+  siteContent,
 }) {
   return (
     <>
@@ -34,6 +35,9 @@ export default function HomePage({
       <HeroBanner
         heroImage={artisanSpotlight.heroImage}
         heroImageAlt="Kenyan artisan wearing richly beaded adornment"
+        title={siteContent.heroTitle}
+        subtitle={siteContent.heroSubtitle}
+        trustLine={siteContent.deliveryNote}
       />
       <CategoryStrip categories={categories} activeCategory="All" />
 
@@ -50,6 +54,7 @@ export default function HomePage({
           <div className="editorial-feature__copy">
             <p className="overline">The Artisan Behind It</p>
             <p className="editorial-feature__quote">"{artisanFeature.quote}"</p>
+            <p className="body-base">{siteContent.artisanBio}</p>
             <p className="body-base">
               {artisanFeature.name}
               <br />
@@ -62,6 +67,9 @@ export default function HomePage({
 
         <section id="about-gallery" className="collections-section">
           <SectionHeading title="Browse All Collections" kicker="Explore by mood" />
+          <div className="collections-intro">
+            <p className="body-base">{siteContent.aboutStory}</p>
+          </div>
           <div className="collections-grid">
             {collectionCards.map((collection) => (
               <a key={collection.title} href={collection.href} className="collection-card">
@@ -88,7 +96,7 @@ export default function HomePage({
         </section>
       </main>
 
-      <Footer />
+      <Footer siteContent={siteContent} />
 
       <style jsx>{`
         main {
@@ -145,6 +153,11 @@ export default function HomePage({
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: var(--space-3);
+        }
+        .collections-intro {
+          max-width: var(--max-width);
+          margin: 0 auto;
+          padding: 0 var(--gutter);
         }
         .collection-card {
           position: relative;
@@ -218,6 +231,7 @@ export async function getServerSideProps() {
         heroImage: siteImages.heroImage,
         portrait: siteImages.artisanPortrait,
       },
+      siteContent: siteImages,
     },
   };
 }

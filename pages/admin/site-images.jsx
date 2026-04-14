@@ -5,12 +5,42 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import LocalImageUpload from "../../components/admin/LocalImageUpload";
 
 const IMAGE_FIELDS = [
-  { key: "heroImage", label: "Hero banner photo (top of homepage)" },
-  { key: "artisanPortrait", label: "Artisan photo (beside quote / about section)" },
-  { key: "collectionJewellery", label: "Collection card - Jewellery" },
-  { key: "collectionHome", label: "Collection card - Home decor" },
-  { key: "collectionAccessories", label: "Collection card - Gifted carry" },
-  { key: "pageTexture", label: "Page background texture (SVG or small tile)" },
+  {
+    key: "heroImage",
+    label: "Hero banner photo (top of homepage)",
+    uploadFolder: "site/homepage",
+    localFolder: "public/media/site/homepage",
+  },
+  {
+    key: "artisanPortrait",
+    label: "Artisan photo (beside quote / about section)",
+    uploadFolder: "site/homepage",
+    localFolder: "public/media/site/homepage",
+  },
+  {
+    key: "collectionJewellery",
+    label: "Collection card - Jewellery",
+    uploadFolder: "site/collections",
+    localFolder: "public/media/site/collections",
+  },
+  {
+    key: "collectionHome",
+    label: "Collection card - Home decor",
+    uploadFolder: "site/collections",
+    localFolder: "public/media/site/collections",
+  },
+  {
+    key: "collectionAccessories",
+    label: "Collection card - Gifted carry",
+    uploadFolder: "site/collections",
+    localFolder: "public/media/site/collections",
+  },
+  {
+    key: "pageTexture",
+    label: "Page background texture (SVG or small tile)",
+    uploadFolder: "site/textures",
+    localFolder: "public/media/site/textures",
+  },
 ];
 
 const TEXT_FIELDS = [
@@ -29,6 +59,7 @@ export default function AdminSiteImagesPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [persistence, setPersistence] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,7 +98,12 @@ export default function AdminSiteImagesPage() {
     }
     const data = await response.json();
     if (data.siteImages) setForm(data.siteImages);
-    setMessage("Saved. Refresh the storefront to see changes.");
+    setPersistence(data.persistence || null);
+    if (data.persistence?.durable) {
+      setMessage("Saved and synced to durable storage for the live storefront.");
+    } else {
+      setMessage("Saved locally, but durable storage is not configured yet.");
+    }
   }
 
   return (
@@ -100,6 +136,12 @@ export default function AdminSiteImagesPage() {
                       placeholder="/media/site/..."
                     />
                   </label>
+                  <p className="caption" style={{ marginBottom: "8px" }}>
+                    Upload folder: <code>product-images/catalog/{field.uploadFolder}</code>
+                  </p>
+                  <p className="caption" style={{ marginBottom: "8px" }}>
+                    Local mirror: <code>{field.localFolder}</code>
+                  </p>
                   {form[field.key] ? (
                     <img
                       src={form[field.key]}
@@ -110,7 +152,11 @@ export default function AdminSiteImagesPage() {
                       }}
                     />
                   ) : null}
-                  <LocalImageUpload label="Upload from device" onUploaded={(path) => set(field.key, path)} />
+                  <LocalImageUpload
+                    label="Upload from device"
+                    folder={field.uploadFolder}
+                    onUploaded={(path) => set(field.key, path)}
+                  />
                 </div>
               ))}
             </section>
@@ -149,6 +195,17 @@ export default function AdminSiteImagesPage() {
             {message ? (
               <p className="saved-indicator" style={{ marginTop: "var(--space-3)", color: "#16a34a" }}>
                 {message}
+              </p>
+            ) : null}
+            {persistence ? (
+              <p className="admin-note" style={{ marginTop: "var(--space-2)" }}>
+                Saved to: <code>{persistence.targets.join(", ")}</code>
+              </p>
+            ) : null}
+            {persistence && !persistence.durable ? (
+              <p className="admin-form-error" style={{ marginTop: "var(--space-2)" }}>
+                This environment only saved a local fallback file. On Vercel, set durable storage like Supabase or
+                Vercel Blob so edits appear reliably on the live site.
               </p>
             ) : null}
             {error ? <p className="admin-form-error" style={{ marginTop: "var(--space-3)" }}>{error}</p> : null}
