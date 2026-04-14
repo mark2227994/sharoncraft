@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import Link from "next/link";
@@ -5,6 +6,8 @@ import AdminLayout from "../../../components/admin/AdminLayout";
 import { formatKES } from "../../../lib/formatters";
 
 export default function AdminProductsPage() {
+  const [deleting, setDeleting] = useState(null);
+
   const { data: products, isLoading, isError } = useQuery({
     queryKey: ["admin-products"],
     queryFn: async () => {
@@ -14,10 +17,31 @@ export default function AdminProductsPage() {
     },
   });
 
+  async function handleDelete(product) {
+    if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    setDeleting(product.id);
+    try {
+      const response = await fetch(`/api/admin/products?id=${encodeURIComponent(product.id)}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        alert(body.error || "Could not delete product.");
+        return;
+      }
+      window.location.reload();
+    } catch {
+      alert("Network error. Could not delete product.");
+    } finally {
+      setDeleting(null);
+    }
+  }
+
   return (
     <>
       <Head>
-        <title>Stock — Gallery Admin</title>
+        <title>Stock - Gallery Admin</title>
       </Head>
       <AdminLayout
         title="Stock"
@@ -27,7 +51,7 @@ export default function AdminProductsPage() {
           </Link>
         }
       >
-        {isLoading ? <p className="admin-note">Loading…</p> : null}
+        {isLoading ? <p className="admin-note">Loading...</p> : null}
         {isError ? <p className="admin-form-error">Could not load stock. Check your connection.</p> : null}
 
         {!isLoading && products ? (
@@ -40,7 +64,7 @@ export default function AdminProductsPage() {
                     <th>Artisan</th>
                     <th>Price</th>
                     <th>Stock</th>
-                    <th />
+                    <th style={{ textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -49,11 +73,31 @@ export default function AdminProductsPage() {
                       <td>{product.name}</td>
                       <td>{product.artisan}</td>
                       <td>{product.isSold ? "Sold" : formatKES(product.price)}</td>
-                      <td>{product.isSold ? "—" : product.stock}</td>
-                      <td>
-                        <Link href={`/admin/products/${product.id}`} className="admin-link">
-                          Edit
-                        </Link>
+                      <td>{product.isSold ? "-" : product.stock}</td>
+                      <td style={{ textAlign: "right" }}>
+                        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap" }}>
+                          <Link href={`/admin/products/${product.id}`} className="admin-link">
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            className="admin-button"
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: "0.8rem",
+                              background: "#dc2626",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "var(--radius-md)",
+                              cursor: "pointer",
+                              fontWeight: 600,
+                            }}
+                            disabled={deleting === product.id}
+                            onClick={() => handleDelete(product)}
+                          >
+                            {deleting === product.id ? "Deleting..." : "Delete"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -73,9 +117,29 @@ export default function AdminProductsPage() {
                         {product.artisan}
                       </p>
                     </div>
-                    <Link href={`/admin/products/${product.id}`} className="admin-link">
-                      Edit
-                    </Link>
+                    <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                      <Link href={`/admin/products/${product.id}`} className="admin-link">
+                        Edit
+                      </Link>
+                      <button
+                        type="button"
+                        className="admin-button"
+                        style={{
+                          padding: "6px 12px",
+                          fontSize: "0.8rem",
+                          background: "#dc2626",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "var(--radius-md)",
+                          cursor: "pointer",
+                          fontWeight: 600,
+                        }}
+                        disabled={deleting === product.id}
+                        onClick={() => handleDelete(product)}
+                      >
+                        {deleting === product.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
                   </div>
                   <p style={{ marginTop: "12px", fontWeight: 600 }}>
                     {product.isSold ? "Sold" : formatKES(product.price)}

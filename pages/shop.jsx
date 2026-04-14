@@ -6,7 +6,7 @@ import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import Icon from "../components/icons";
 import { categoryOptions } from "../data/site";
-import { getCatalogCategories } from "../lib/products";
+import { getCatalogCategories, getCategoryPriority } from "../lib/products";
 import { readProducts } from "../lib/store";
 
 export default function ShopPage({ products, categories, initialCategory }) {
@@ -23,7 +23,13 @@ export default function ShopPage({ products, categories, initialCategory }) {
     if (sortBy === "recent") return next.slice().sort((left, right) => Number(right.recent) - Number(left.recent));
     if (sortBy === "price-asc") return next.slice().sort((left, right) => left.price - right.price);
     if (sortBy === "price-desc") return next.slice().sort((left, right) => right.price - left.price);
-    return next.slice().sort((left, right) => Number(right.featured) - Number(left.featured));
+    return next.slice().sort((left, right) => {
+      const featuredDiff = Number(right.featured) - Number(left.featured);
+      if (featuredDiff !== 0) return featuredDiff;
+      const categoryDiff = getCategoryPriority(left.category) - getCategoryPriority(right.category);
+      if (categoryDiff !== 0) return categoryDiff;
+      return left.name.localeCompare(right.name);
+    });
   }, [activeCategory, products, showAvailableOnly, sortBy]);
 
   return (
@@ -95,7 +101,7 @@ export default function ShopPage({ products, categories, initialCategory }) {
 export async function getServerSideProps({ query }) {
   const products = await readProducts();
   const categories = getCatalogCategories(products);
-  const requestedCategory = typeof query.category === "string" ? query.category : "All";
+  const requestedCategory = typeof query.category === "string" ? query.category : "Jewellery";
   const initialCategory = categories.includes(requestedCategory) ? requestedCategory : categoryOptions[0];
 
   return { props: { products, categories, initialCategory } };

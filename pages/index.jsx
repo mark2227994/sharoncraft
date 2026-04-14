@@ -5,7 +5,7 @@ import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import Icon from "../components/icons";
 import { artisanFeature, buildCollectionCards, trustItems } from "../data/site";
-import { getCatalogCategories } from "../lib/products";
+import { getCatalogCategories, prioritizeCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
 
@@ -210,8 +210,8 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      featuredProducts: products.filter((product) => product.featured).slice(0, 8),
-      recentProducts: products.filter((product) => product.recent).slice(0, 12),
+      featuredProducts: prioritizeCategories(products.filter((product) => product.featured)).slice(0, 8),
+      recentProducts: prioritizeCategories(products.filter((product) => product.recent)).slice(0, 12),
       collectionCards: buildCollectionCards(siteImages),
       categories: getCatalogCategories(products),
       artisanSpotlight: {
