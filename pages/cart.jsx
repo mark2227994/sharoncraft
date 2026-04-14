@@ -5,6 +5,7 @@ import { useCart } from "../lib/cart-context";
 
 export default function CartPage() {
   const { items, subtotal, updateQuantity, removeItem } = useCart();
+  const estimatedTotal = subtotal + 300;
 
   return (
     <>
@@ -55,9 +56,14 @@ export default function CartPage() {
                 <span>Delivery</span>
                 <strong>Calculated at checkout</strong>
               </div>
-              <Link href="/checkout" className="cart-page__cta">
-                Proceed to Checkout
+              <div className="cart-page__summary-row cart-page__summary-row--total">
+                <span>Estimated total</span>
+                <strong>KES {estimatedTotal.toLocaleString()}</strong>
+              </div>
+              <Link href="/checkout" className="cart-page__cta" aria-label="Proceed to checkout">
+                Proceed to Checkout <span aria-hidden="true">-&gt;</span>
               </Link>
+              <p className="cart-page__cta-note">Delivery is confirmed at checkout. You can still review your order before sending it.</p>
             </aside>
           </div>
         )}
@@ -113,24 +119,55 @@ export default function CartPage() {
         .cart-page__remove {
           color: var(--color-terracotta);
         }
+        .cart-page__summary {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-1);
+        }
         .cart-page__summary-row {
           display: flex;
           justify-content: space-between;
+          align-items: center;
           padding: var(--space-3) 0;
           border-bottom: 1px solid var(--border-default);
         }
+        .cart-page__summary-row--total {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
         .cart-page__cta {
           margin-top: var(--space-4);
-          display: inline-flex;
+          display: flex;
+          align-items: center;
           justify-content: center;
-          padding: 14px 20px;
+          width: 100%;
+          padding: 15px 20px;
           background: var(--color-terracotta);
           color: var(--color-white);
-          border-radius: var(--radius-md);
+          border-radius: 2px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+          transition: background var(--transition-fast), transform var(--transition-fast);
+        }
+        .cart-page__cta:hover {
+          background: var(--color-terracotta-dark);
+          transform: translateY(-1px);
+        }
+        .cart-page__cta-note {
+          margin-top: var(--space-3);
+          font-size: 0.8125rem;
+          line-height: 1.6;
+          color: var(--text-muted);
         }
         @media (min-width: 960px) {
           .cart-page__layout {
             grid-template-columns: 1.4fr 0.6fr;
+          }
+          .cart-page__summary {
+            position: sticky;
+            top: calc(var(--nav-height) + var(--space-5));
           }
         }
         @media (max-width: 767px) {
