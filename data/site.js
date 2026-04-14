@@ -28,6 +28,7 @@ export const trustItems = [
 ];
 
 export const primaryNavLinks = [
+  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/shop#collections", label: "Collections" },
   { href: "/#artisan-story", label: "Artisans" },
@@ -35,6 +36,7 @@ export const primaryNavLinks = [
 ];
 
 export const mobileNavLinks = [
+  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/shop#collections", label: "Collections" },
   { href: "/#artisan-story", label: "Artisans" },
