@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import AdminLayout from "../../components/admin/AdminLayout";
 
 const PLATFORM_OPTIONS = ["TikTok", "Instagram", "Facebook", "WhatsApp"];
@@ -549,6 +550,11 @@ export default function AdminMarketingPage() {
       <section className="admin-panel marketing-panel" style={{ marginTop: "var(--space-5)" }}>
         <p className="overline marketing-panel__eyebrow">Campaigns</p>
         <h2 className="heading-md marketing-panel__title">See what is live, scheduled, or still in draft</h2>
+        <div className="admin-quick-actions" style={{ marginTop: 0, marginBottom: "var(--space-3)" }}>
+          <Link href="/admin/offers" className="admin-button admin-button--secondary">
+            Open Offers Manager
+          </Link>
+        </div>
         <div className="marketing-list">
           {campaigns.length === 0 ? <p className="admin-note">No campaigns saved yet.</p> : null}
           {campaigns.map((campaign) => (

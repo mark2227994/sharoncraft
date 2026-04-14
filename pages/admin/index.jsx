@@ -187,6 +187,9 @@ export default function AdminDashboardPage() {
         <Link href="/admin/marketing" className="admin-button admin-button--secondary">
           Open Marketing Studio
         </Link>
+        <Link href="/admin/offers" className="admin-button admin-button--secondary">
+          Manage Offers
+        </Link>
         <Link href="/admin/images" className="admin-button admin-button--secondary">
           Open Image Manager
         </Link>
