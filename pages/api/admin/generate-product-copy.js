@@ -2,48 +2,19 @@ import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { runCloudflareAiModel, getCloudflareAiConfig } from "../../../lib/cloudflare-ai";
 import { normalizeCategory, normalizeJewelryType, slugify } from "../../../lib/products";
 
-const PRODUCT_COPY_SCHEMA = {
-  name: "sharoncraft_product_copy",
-  schema: {
-    type: "object",
-    additionalProperties: false,
-    properties: {
-      suggestedName: { type: "string" },
-      slug: { type: "string" },
-      category: { type: "string" },
-      jewelryType: { type: "string" },
-      shortDescription: { type: "string" },
-      fullDescription: { type: "string" },
-      materials: {
-        type: "array",
-        items: { type: "string" },
-      },
-      tags: {
-        type: "array",
-        items: { type: "string" },
-      },
-      seoTitle: { type: "string" },
-      seoDescription: { type: "string" },
-      photographyNotes: {
-        type: "array",
-        items: { type: "string" },
-      },
-    },
-    required: [
-      "suggestedName",
-      "slug",
-      "category",
-      "jewelryType",
-      "shortDescription",
-      "fullDescription",
-      "materials",
-      "tags",
-      "seoTitle",
-      "seoDescription",
-      "photographyNotes",
-    ],
-  },
-};
+const PRODUCT_COPY_FIELDS = [
+  "suggestedName",
+  "slug",
+  "category",
+  "jewelryType",
+  "shortDescription",
+  "fullDescription",
+  "materials",
+  "tags",
+  "seoTitle",
+  "seoDescription",
+  "photographyNotes",
+];
 
 function getOrigin(req) {
   const forwardedProto = req.headers["x-forwarded-proto"];
@@ -123,7 +94,7 @@ function buildPrompt(body, imageSummaries) {
     "Do not sound generic, mass-produced, or overhyped.",
     "Prefer concrete observations over invented claims.",
     "If something is uncertain, keep the wording broad instead of hallucinating.",
-    "Return valid JSON only.",
+    "Return valid JSON only, with no markdown fences and no commentary before or after the object.",
     "",
     "Brand direction:",
     "- Focus especially on jewellery when applicable.",
@@ -148,7 +119,34 @@ function buildPrompt(body, imageSummaries) {
     "",
     "Choose one of these categories when possible: Jewellery, Home Decor, Gift Sets, Accessories, Bridal & Occasion.",
     "If the item is jewellery, choose one jewelleryType from: necklace, bracelet, earring. Otherwise return an empty string for jewelryType.",
+    `Return a single JSON object with exactly these keys: ${PRODUCT_COPY_FIELDS.join(", ")}.`,
+    'Use arrays for "materials", "tags", and "photographyNotes".',
   ].join("\n");
+}
+
+function parseModelJson(value) {
+  if (!value) return null;
+  if (typeof value === "object") return value;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const withoutFences = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/, "").trim();
+
+  try {
+    return JSON.parse(withoutFences);
+  } catch (_error) {
+    const objectMatch = withoutFences.match(/\{[\s\S]*\}/);
+    if (!objectMatch) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(objectMatch[0]);
+    } catch (_secondError) {
+      return null;
+    }
+  }
 }
 
 function normalizeSuggestions(raw) {
@@ -205,22 +203,12 @@ export default async function handler(req, res) {
       prompt,
       max_tokens: 700,
       temperature: 0.4,
-      response_format: {
-        type: "json_schema",
-        json_schema: PRODUCT_COPY_SCHEMA,
-      },
     });
 
-    const rawResponse = result?.response;
-    const parsed =
-      typeof rawResponse === "string"
-        ? JSON.parse(rawResponse)
-        : rawResponse && typeof rawResponse === "object"
-          ? rawResponse
-          : null;
+    const parsed = parseModelJson(result?.response);
 
     if (!parsed) {
-      throw new Error("Cloudflare AI returned an empty response.");
+      throw new Error("Cloudflare AI returned text we could not turn into JSON.");
     }
 
     return res.status(200).json({

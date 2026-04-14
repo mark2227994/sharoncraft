@@ -1,15 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
   <title>SharonCraft favicon</title>
-  <rect width="64" height="64" rx="14" fill="#F9F6EE"/>
+  <rect width="64" height="64" rx="16" fill="#F9F6EE"/>
   <path
-    d="M32 4 10 17v30l22 13 22-13V17L32 4Zm0 8.2 14.8 8.6v7.5H39l-8.1-4.7h-8.5v-2.9l9.6-5.6ZM21.3 29h7.4l14.1 8.2v7.6h-7.2l-14.3-8.3V29Zm3 12.2 8.1 4.7h8.4v3l-9.4 5.5-15-8.7v-7.4h7.9Z"
+    d="M32 5 12 17v30l20 12 20-12V17L32 5Zm0 7.1 14 8.4v8.7H37.8l-8.6-5H22v-1.9l10-6.2Zm-10 18.5h8l15.2 8.8v8.7h-8L22 39.4v-8.8Zm2.8 11.1 8.5 4.9h8.5v2.1L32 54.9 18 46.5v-8.8h6.8Z"
     fill="#C04D29"
-  />
-  <path
-    d="m26.7 24.1 21.8 12.6M15.7 39.7l17 9.7"
-    stroke="#6B4C2A"
-    stroke-linecap="round"
-    stroke-width="2.2"
-    opacity=".55"
   />
 </svg>
