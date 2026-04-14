@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
+import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
 import { categoryOptions } from "../../../data/site";
 import {
   getJewelryTypeLabel,
@@ -102,7 +103,7 @@ export default function AdminProductEditorPage() {
   const id = typeof rawId === "string" ? rawId : null;
   const isNew = id === "new";
 
-  const { register, handleSubmit, reset, watch, setValue } = useForm({ defaultValues: defaults });
+  const { register, handleSubmit, reset, watch, setValue, getValues } = useForm({ defaultValues: defaults });
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -135,6 +136,9 @@ export default function AdminProductEditorPage() {
   const categoryValue = watch("category") || "Jewellery";
   const jewelryTypeValue = watch("jewelryType") || "";
   const slugValue = watch("slug");
+  const primaryImageValue = watch("image");
+  const stylingImageValue = watch("stylingImage");
+  const detailImageValue = watch("detailImage");
 
   const isJewellery = categoryValue === "Jewellery";
   const suggestedFolder = getSuggestedProductMediaFolder({
@@ -162,6 +166,32 @@ export default function AdminProductEditorPage() {
     if (!base) return;
     setValue("slug", base);
     if (isNew) setValue("id", `sc-${base}`);
+  }
+
+  function applyAiSuggestions(suggestions) {
+    if (!suggestions || typeof suggestions !== "object") return;
+
+    if (suggestions.suggestedName) {
+      setValue("name", suggestions.suggestedName, { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.slug) {
+      setValue("slug", suggestions.slug, { shouldValidate: true, shouldDirty: true });
+      if (isNew && !getValues("id")) {
+        setValue("id", `sc-${suggestions.slug}`, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+    if (suggestions.category) {
+      setValue("category", suggestions.category, { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.jewelryType) {
+      setValue("jewelryType", suggestions.jewelryType, { shouldValidate: true, shouldDirty: true });
+    }
+    if (Array.isArray(suggestions.materials) && suggestions.materials.length > 0) {
+      setValue("materialsStr", suggestions.materials.join(", "), { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.fullDescription) {
+      setValue("description", suggestions.fullDescription, { shouldValidate: true, shouldDirty: true });
+    }
   }
 
   async function onSubmit(values) {
@@ -368,6 +398,16 @@ export default function AdminProductEditorPage() {
             </div>
 
             {isJewellery ? <JewelryPhotoGuide /> : null}
+
+            <ProductAIAssistant
+              values={{
+                ...getValues(),
+                image: primaryImageValue,
+                stylingImage: stylingImageValue,
+                detailImage: detailImageValue,
+              }}
+              onApply={applyAiSuggestions}
+            />
 
             <div className="admin-grid-2">
               <label className="admin-field">

@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
+import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
 import { categoryOptions } from "../../../data/site";
 import {
   getJewelryTypeLabel,
@@ -104,7 +105,7 @@ function MediaPathHelper({ uploadFolder, suggestedFolder }) {
 
 export default function AdminNewProductPage() {
   const router = useRouter();
-  const { register, handleSubmit, setValue, watch } = useForm({
+  const { register, handleSubmit, setValue, watch, getValues } = useForm({
     defaultValues: {
       category: "Jewellery",
       jewelryType: "necklace",
@@ -146,6 +147,29 @@ export default function AdminNewProductPage() {
     const nextSlug = slugify(nameValue);
     if (!nextSlug) return;
     setValue("slug", nextSlug, { shouldValidate: true });
+  }
+
+  function applyAiSuggestions(suggestions) {
+    if (!suggestions || typeof suggestions !== "object") return;
+
+    if (suggestions.suggestedName) {
+      setValue("name", suggestions.suggestedName, { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.slug) {
+      setValue("slug", suggestions.slug, { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.category) {
+      setValue("category", suggestions.category, { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.jewelryType) {
+      setValue("jewelryType", suggestions.jewelryType, { shouldValidate: true, shouldDirty: true });
+    }
+    if (Array.isArray(suggestions.materials) && suggestions.materials.length > 0) {
+      setValue("materials", suggestions.materials.join(", "), { shouldValidate: true, shouldDirty: true });
+    }
+    if (suggestions.fullDescription) {
+      setValue("description", suggestions.fullDescription, { shouldValidate: true, shouldDirty: true });
+    }
   }
 
   async function onSubmit(values) {
@@ -293,6 +317,16 @@ export default function AdminNewProductPage() {
         <MediaPathHelper uploadFolder={uploadFolder} suggestedFolder={suggestedFolder} />
 
         {isJewellery ? <JewelryPhotoGuide /> : null}
+
+        <ProductAIAssistant
+          values={{
+            ...getValues(),
+            image: imageValue,
+            stylingImage: stylingImageValue,
+            detailImage: detailImageValue,
+          }}
+          onApply={applyAiSuggestions}
+        />
 
         <div className="admin-grid-2">
           <label className="admin-field">
