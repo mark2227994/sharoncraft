@@ -184,6 +184,9 @@ export default function AdminDashboardPage() {
         <Link href="/admin/orders" className="admin-button admin-button--secondary">
           View WA Orders
         </Link>
+        <Link href="/admin/marketing" className="admin-button admin-button--secondary">
+          Open Marketing Studio
+        </Link>
         <Link href="/admin/images" className="admin-button admin-button--secondary">
           Open Image Manager
         </Link>
