@@ -7,17 +7,9 @@ import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 import { categoryOptions } from "../../../data/site";
+import { slugify } from "../../../lib/products";
 
 const categories = categoryOptions.filter((c) => c !== "All");
-
-function slugify(text) {
-  return String(text || "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-");
-}
 
 const defaults = {
   id: "",

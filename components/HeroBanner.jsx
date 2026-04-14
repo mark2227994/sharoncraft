@@ -14,9 +14,9 @@ export default function HeroBanner({ heroImage, heroImageAlt = "Kenyan artisan c
           Authentic artifacts made by Kenyan artisans. Each piece is one-of-a-kind.
         </p>
         <Link href="/shop" className="hero__cta">
-          Explore the Collection <span aria-hidden="true">→</span>
+          Explore the Collection <span aria-hidden="true">-&gt;</span>
         </Link>
-        <p className="hero__trust">Free delivery within Nairobi · M-Pesa accepted</p>
+        <p className="hero__trust">Free delivery within Nairobi | M-Pesa accepted</p>
       </div>
     </section>
   );

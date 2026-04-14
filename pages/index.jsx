@@ -1,10 +1,11 @@
+import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import HeroBanner from "../components/HeroBanner";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
-import CategoryStrip from "../components/CategoryStrip";
 import Icon from "../components/icons";
 import { artisanFeature, buildCollectionCards, trustItems } from "../data/site";
+import { getCatalogCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
 
@@ -20,12 +21,21 @@ function SectionHeading({ title, kicker }) {
   );
 }
 
-export default function HomePage({ featuredProducts, recentProducts, collectionCards, artisanSpotlight }) {
+export default function HomePage({
+  featuredProducts,
+  recentProducts,
+  collectionCards,
+  artisanSpotlight,
+  categories,
+}) {
   return (
     <>
       <Nav />
-      <HeroBanner heroImage={artisanSpotlight.heroImage} heroImageAlt="Kenyan artisan wearing richly beaded adornment" />
-      <CategoryStrip activeCategory="All" />
+      <HeroBanner
+        heroImage={artisanSpotlight.heroImage}
+        heroImageAlt="Kenyan artisan wearing richly beaded adornment"
+      />
+      <CategoryStrip categories={categories} activeCategory="All" />
 
       <main>
         <section>
@@ -39,7 +49,7 @@ export default function HomePage({ featuredProducts, recentProducts, collectionC
           </div>
           <div className="editorial-feature__copy">
             <p className="overline">The Artisan Behind It</p>
-            <p className="editorial-feature__quote">“{artisanFeature.quote}”</p>
+            <p className="editorial-feature__quote">"{artisanFeature.quote}"</p>
             <p className="body-base">
               {artisanFeature.name}
               <br />
@@ -197,11 +207,13 @@ export default function HomePage({ featuredProducts, recentProducts, collectionC
 
 export async function getServerSideProps() {
   const [products, siteImages] = await Promise.all([readProducts(), readSiteImages()]);
+
   return {
     props: {
       featuredProducts: products.filter((product) => product.featured).slice(0, 8),
       recentProducts: products.filter((product) => product.recent).slice(0, 12),
       collectionCards: buildCollectionCards(siteImages),
+      categories: getCatalogCategories(products),
       artisanSpotlight: {
         heroImage: siteImages.heroImage,
         portrait: siteImages.artisanPortrait,

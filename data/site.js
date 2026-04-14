@@ -1,19 +1,16 @@
 export const categoryOptions = [
   "All",
-  "Woodcarvings",
-  "Beadwork",
-  "Soapstone",
-  "Baskets & Weaving",
-  "Masks",
-  "Textiles",
   "Jewellery",
-  "Ceramics",
+  "Home Decor",
+  "Gift Sets",
+  "Accessories",
+  "Bridal & Occasion",
 ];
 
 export const collectionCardLayout = [
   { title: "Jewellery", href: "/shop?category=Jewellery", imageKey: "collectionJewellery" },
-  { title: "Home Objects", href: "/shop?category=Soapstone", imageKey: "collectionHome" },
-  { title: "Gifted Carry", href: "/shop?category=Baskets%20%26%20Weaving", imageKey: "collectionAccessories" },
+  { title: "Home Objects", href: "/shop?category=Home%20Decor", imageKey: "collectionHome" },
+  { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories" },
 ];
 
 export function buildCollectionCards(siteImages) {

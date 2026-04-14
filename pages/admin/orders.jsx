@@ -1,38 +1,38 @@
 import { useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { formatKES } from "../../lib/formatters";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const STATUS_LABELS = {
   pending: { label: "Pending", cls: "admin-pill--pending" },
   confirmed: { label: "Confirmed", cls: "admin-pill--mpesa" },
-  completed: { label: "Completed ✅", cls: "admin-pill--completed" },
+  completed: { label: "Completed", cls: "admin-pill--completed" },
   cancelled: { label: "Cancelled", cls: "admin-pill--failed" },
 };
 
-function formatDate(ts) {
-  if (!ts) return "—";
-  return new Date(ts).toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" });
+function formatDate(timestamp) {
+  if (!timestamp) return "-";
+  return new Date(timestamp).toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" });
 }
 
 async function updateOrder(payload) {
-  const res = await fetch("/api/admin/orders", {
+  const response = await fetch("/api/admin/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Update failed");
-  return res.json();
+  if (!response.ok) throw new Error("Update failed");
+  return response.json();
 }
 
 async function deleteOrder(id) {
-  const res = await fetch(`/api/admin/orders?id=${encodeURIComponent(id)}`, {
+  const response = await fetch(`/api/admin/orders?id=${encodeURIComponent(id)}`, {
     method: "DELETE",
     credentials: "same-origin",
   });
-  if (!res.ok) throw new Error("Delete failed");
-  return res.json();
+  if (!response.ok) throw new Error("Delete failed");
+  return response.json();
 }
 
 export default function AdminOrdersPage() {
@@ -42,11 +42,11 @@ export default function AdminOrdersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/orders", { credentials: "same-origin" });
-      if (!res.ok) throw new Error("Failed to load orders");
-      return res.json();
+      const response = await fetch("/api/admin/orders", { credentials: "same-origin" });
+      if (!response.ok) throw new Error("Failed to load orders");
+      return response.json();
     },
-    refetchInterval: 30000, // auto-refresh every 30s
+    refetchInterval: 30000,
   });
 
   const mutation = useMutation({
@@ -60,19 +60,17 @@ export default function AdminOrdersPage() {
   });
 
   const allOrders = data?.orders || [];
-  const orders = filter === "all" ? allOrders : allOrders.filter((o) => o.status === filter);
+  const orders = filter === "all" ? allOrders : allOrders.filter((order) => order.status === filter);
 
-  // Counts for quick stats
-  const pending = allOrders.filter((o) => o.status === "pending").length;
-  const confirmed = allOrders.filter((o) => o.status === "confirmed").length;
-  const completed = allOrders.filter((o) => o.status === "completed").length;
+  const pending = allOrders.filter((order) => order.status === "pending").length;
+  const confirmed = allOrders.filter((order) => order.status === "confirmed").length;
+  const completed = allOrders.filter((order) => order.status === "completed").length;
   const revenue = allOrders
-    .filter((o) => o.status === "completed")
-    .reduce((sum, o) => sum + (o.total || 0), 0);
+    .filter((order) => order.status === "completed")
+    .reduce((sum, order) => sum + (order.total || 0), 0);
 
   return (
     <AdminLayout title="WhatsApp Orders">
-      {/* Quick stats */}
       <section className="admin-stats-grid" style={{ marginBottom: "var(--space-5)" }}>
         <article className="admin-stat-card">
           <p className="admin-stat-card__label">Pending</p>
@@ -87,7 +85,7 @@ export default function AdminOrdersPage() {
         <article className="admin-stat-card">
           <p className="admin-stat-card__label">Completed</p>
           <p className="admin-stat-card__value">{completed}</p>
-          <p className="admin-stat-card__delta">Paid &amp; delivered</p>
+          <p className="admin-stat-card__delta">Paid and delivered</p>
         </article>
         <article className="admin-stat-card">
           <p className="admin-stat-card__label">Revenue</p>
@@ -96,32 +94,30 @@ export default function AdminOrdersPage() {
         </article>
       </section>
 
-      {/* Filter tabs */}
       <div className="orders-filter-tabs">
-        {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
+        {["all", "pending", "confirmed", "completed", "cancelled"].map((nextFilter) => (
           <button
-            key={f}
+            key={nextFilter}
             type="button"
-            className={`orders-tab ${filter === f ? "orders-tab--active" : ""}`}
-            onClick={() => setFilter(f)}
+            className={`orders-tab ${filter === nextFilter ? "orders-tab--active" : ""}`}
+            onClick={() => setFilter(nextFilter)}
           >
-            {f === "all" ? `All (${allOrders.length})` : STATUS_LABELS[f]?.label || f}
+            {nextFilter === "all" ? `All (${allOrders.length})` : STATUS_LABELS[nextFilter]?.label || nextFilter}
           </button>
         ))}
       </div>
 
       {isLoading ? (
-        <p className="admin-note">Loading orders…</p>
+        <p className="admin-note">Loading orders...</p>
       ) : orders.length === 0 ? (
         <div className="admin-panel" style={{ padding: "var(--space-6)", textAlign: "center" }}>
           <p className="body-lg">No orders yet.</p>
           <p className="admin-note" style={{ marginTop: "var(--space-2)" }}>
-            When customers checkout via WhatsApp, their orders will appear here.
+            When customers check out via WhatsApp, their orders will appear here.
           </p>
         </div>
       ) : (
         <>
-          {/* Desktop table */}
           <section className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -138,7 +134,7 @@ export default function AdminOrdersPage() {
               </thead>
               <tbody>
                 {orders.map((order) => {
-                  const s = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
+                  const status = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
                   const busy = mutation.isPending && mutation.variables?.id === order.id;
                   return (
                     <tr key={order.id}>
@@ -151,53 +147,53 @@ export default function AdminOrdersPage() {
                           rel="noopener noreferrer"
                           style={{ color: "#25d366", fontWeight: 600 }}
                         >
-                          💬 {order.phone}
+                          WhatsApp: {order.phone}
                         </a>
                       </td>
                       <td>{order.area}</td>
                       <td>
                         {(order.items || []).map((item) => (
                           <div key={item.id} style={{ fontSize: "0.8rem" }}>
-                            {item.name} ×{item.quantity}
+                            {item.name} x{item.quantity}
                           </div>
                         ))}
                       </td>
                       <td>{formatKES(order.total)}</td>
                       <td>
-                        <span className={`admin-pill ${s.cls}`}>{s.label}</span>
+                        <span className={`admin-pill ${status.cls}`}>{status.label}</span>
                       </td>
                       <td>
                         <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
-                          {order.status === "pending" && (
+                          {order.status === "pending" ? (
                             <button
                               type="button"
                               className="order-action-btn order-action-btn--confirm"
                               disabled={busy}
                               onClick={() => mutation.mutate({ id: order.id, status: "confirmed" })}
                             >
-                              ✅ Confirm
+                              Confirm
                             </button>
-                          )}
-                          {order.status === "confirmed" && (
+                          ) : null}
+                          {order.status === "confirmed" ? (
                             <button
                               type="button"
                               className="order-action-btn order-action-btn--complete"
                               disabled={busy}
                               onClick={() => mutation.mutate({ id: order.id, status: "completed" })}
                             >
-                              🏁 Mark Complete
+                              Mark Complete
                             </button>
-                          )}
-                          {order.status !== "cancelled" && order.status !== "completed" && (
+                          ) : null}
+                          {order.status !== "cancelled" && order.status !== "completed" ? (
                             <button
                               type="button"
                               className="order-action-btn order-action-btn--cancel"
                               disabled={busy}
                               onClick={() => mutation.mutate({ id: order.id, status: "cancelled" })}
                             >
-                              ✕ Cancel
+                              Cancel
                             </button>
-                          )}
+                          ) : null}
                           <button
                             type="button"
                             className="order-action-btn order-action-btn--delete"
@@ -208,7 +204,7 @@ export default function AdminOrdersPage() {
                               }
                             }}
                           >
-                            🗑
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -219,10 +215,9 @@ export default function AdminOrdersPage() {
             </table>
           </section>
 
-          {/* Mobile cards */}
           <section className="admin-mobile-cards">
             {orders.map((order) => {
-              const s = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
+              const status = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
               const busy = mutation.isPending && mutation.variables?.id === order.id;
               return (
                 <article key={order.id} className="admin-panel" style={{ padding: "var(--space-4)" }}>
@@ -236,45 +231,45 @@ export default function AdminOrdersPage() {
                         rel="noopener noreferrer"
                         style={{ color: "#25d366", fontSize: "0.9rem" }}
                       >
-                        💬 {order.phone}
+                        WhatsApp: {order.phone}
                       </a>
                     </div>
-                    <span className={`admin-pill ${s.cls}`}>{s.label}</span>
+                    <span className={`admin-pill ${status.cls}`}>{status.label}</span>
                   </div>
                   <p className="body-sm" style={{ marginTop: "var(--space-2)" }}>
-                    📍 {order.area} · 💰 {formatKES(order.total)}
+                    {order.area} | {formatKES(order.total)}
                   </p>
                   <div style={{ display: "flex", gap: 8, marginTop: "var(--space-3)", flexWrap: "wrap" }}>
-                    {order.status === "pending" && (
+                    {order.status === "pending" ? (
                       <button
                         type="button"
                         className="order-action-btn order-action-btn--confirm"
                         disabled={busy}
                         onClick={() => mutation.mutate({ id: order.id, status: "confirmed" })}
                       >
-                        ✅ Confirm
+                        Confirm
                       </button>
-                    )}
-                    {order.status === "confirmed" && (
+                    ) : null}
+                    {order.status === "confirmed" ? (
                       <button
                         type="button"
                         className="order-action-btn order-action-btn--complete"
                         disabled={busy}
                         onClick={() => mutation.mutate({ id: order.id, status: "completed" })}
                       >
-                        🏁 Mark Complete
+                        Mark Complete
                       </button>
-                    )}
-                    {order.status !== "cancelled" && order.status !== "completed" && (
+                    ) : null}
+                    {order.status !== "cancelled" && order.status !== "completed" ? (
                       <button
                         type="button"
                         className="order-action-btn order-action-btn--cancel"
                         disabled={busy}
                         onClick={() => mutation.mutate({ id: order.id, status: "cancelled" })}
                       >
-                        ✕ Cancel
+                        Cancel
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 </article>
               );
@@ -314,15 +309,38 @@ export default function AdminOrdersPage() {
           font-weight: 600;
           white-space: nowrap;
         }
-        .order-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .order-action-btn--confirm { background: #22c55e; color: #fff; }
-        .order-action-btn--confirm:hover:not(:disabled) { background: #16a34a; }
-        .order-action-btn--complete { background: #6366f1; color: #fff; }
-        .order-action-btn--complete:hover:not(:disabled) { background: #4f46e5; }
-        .order-action-btn--cancel { background: #f59e0b; color: #fff; }
-        .order-action-btn--cancel:hover:not(:disabled) { background: #d97706; }
-        .order-action-btn--delete { background: #dc2626; color: #fff; }
-        .order-action-btn--delete:hover:not(:disabled) { background: #b91c1c; }
+        .order-action-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .order-action-btn--confirm {
+          background: #22c55e;
+          color: #fff;
+        }
+        .order-action-btn--confirm:hover:not(:disabled) {
+          background: #16a34a;
+        }
+        .order-action-btn--complete {
+          background: #6366f1;
+          color: #fff;
+        }
+        .order-action-btn--complete:hover:not(:disabled) {
+          background: #4f46e5;
+        }
+        .order-action-btn--cancel {
+          background: #f59e0b;
+          color: #fff;
+        }
+        .order-action-btn--cancel:hover:not(:disabled) {
+          background: #d97706;
+        }
+        .order-action-btn--delete {
+          background: #dc2626;
+          color: #fff;
+        }
+        .order-action-btn--delete:hover:not(:disabled) {
+          background: #b91c1c;
+        }
       `}</style>
     </AdminLayout>
   );

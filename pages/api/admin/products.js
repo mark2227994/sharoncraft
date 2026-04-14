@@ -1,4 +1,5 @@
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
+import { normalizeProduct, slugify } from "../../../lib/products";
 import { readProducts, writeProducts } from "../../../lib/store";
 
 export default async function handler(req, res) {
@@ -13,12 +14,22 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const incoming = req.body || {};
     const products = await readProducts();
-    const index = products.findIndex((product) => product.id === incoming.id);
+    const incomingId = String(incoming.id || "").trim();
+    const incomingSlug = slugify(incoming.slug || incoming.name || incoming.id);
+    const index = products.findIndex(
+      (product) =>
+        product.id === incomingId ||
+        product.slug === incomingSlug,
+    );
+    const mergedProduct =
+      index >= 0
+        ? normalizeProduct({ ...products[index], ...incoming })
+        : normalizeProduct(incoming);
 
     if (index >= 0) {
-      products[index] = { ...products[index], ...incoming };
+      products[index] = mergedProduct;
     } else {
-      products.unshift(incoming);
+      products.unshift(mergedProduct);
     }
 
     await writeProducts(products);

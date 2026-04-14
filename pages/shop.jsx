@@ -6,10 +6,11 @@ import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import Icon from "../components/icons";
 import { categoryOptions } from "../data/site";
+import { getCatalogCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 
-export default function ShopPage({ products }) {
-  const [activeCategory, setActiveCategory] = useState("All");
+export default function ShopPage({ products, categories, initialCategory }) {
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -28,7 +29,7 @@ export default function ShopPage({ products }) {
   return (
     <>
       <Nav />
-      <CategoryStrip activeCategory={activeCategory} onSelect={setActiveCategory} />
+      <CategoryStrip categories={categories} activeCategory={activeCategory} onSelect={setActiveCategory} />
 
       <main className="shop-page">
         <div className="shop-page__hero">
@@ -54,7 +55,7 @@ export default function ShopPage({ products }) {
         setShowAvailableOnly={setShowAvailableOnly}
         sortBy={sortBy}
         setSortBy={setSortBy}
-        categories={categoryOptions}
+        categories={categories}
       />
       <Footer />
 
@@ -91,6 +92,11 @@ export default function ShopPage({ products }) {
   );
 }
 
-export async function getServerSideProps() {
-  return { props: { products: await readProducts() } };
+export async function getServerSideProps({ query }) {
+  const products = await readProducts();
+  const categories = getCatalogCategories(products);
+  const requestedCategory = typeof query.category === "string" ? query.category : "All";
+  const initialCategory = categories.includes(requestedCategory) ? requestedCategory : categoryOptions[0];
+
+  return { props: { products, categories, initialCategory } };
 }

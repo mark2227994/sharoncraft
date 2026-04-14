@@ -6,11 +6,13 @@ import { useCart } from "../../lib/cart-context";
 import { readProducts } from "../../lib/store";
 
 function ProductStoryPreview({ story }) {
+  const artisanMeta = [story.artisanName, story.artisanLocation].filter(Boolean).join(" | ");
+
   return (
     <div className="story-preview">
-      {story.artisanName ? (
+      {artisanMeta ? (
         <p className="overline" style={{ color: "var(--color-ochre)", marginBottom: "4px" }}>
-          {story.artisanName} · {story.artisanLocation}
+          {artisanMeta}
         </p>
       ) : null}
       {story.text ? (
@@ -57,6 +59,14 @@ function ProductStoryPreview({ story }) {
   );
 }
 
+function SectionTitle({ title }) {
+  return (
+    <h2 className="display-md" style={{ marginBottom: "16px" }}>
+      {title}
+    </h2>
+  );
+}
+
 export default function ProductDetailPage({ product, relatedProducts }) {
   const { addItem } = useCart();
 
@@ -92,11 +102,11 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             <div className="product-page__facts">
               <div>
                 <span className="overline">Location</span>
-                <p>{product.artisanLocation}</p>
+                <p>{product.artisanLocation || "Kenya"}</p>
               </div>
               <div>
                 <span className="overline">Years of Practice</span>
-                <p>{product.yearsOfPractice}</p>
+                <p>{product.yearsOfPractice || "-"}</p>
               </div>
             </div>
           </div>
@@ -220,10 +230,6 @@ export default function ProductDetailPage({ product, relatedProducts }) {
       `}</style>
     </>
   );
-}
-
-function SectionTitle({ title }) {
-  return <h2 className="display-md" style={{ marginBottom: "16px" }}>{title}</h2>;
 }
 
 export async function getServerSideProps({ params }) {

@@ -3,7 +3,7 @@ import Icon from "./icons";
 
 export default function ProductCard({ product }) {
   const { slug, name, artisan, price, originalPrice, image, images, isSold, isNew } = product;
-  const imageSrc = image || images?.[0]?.src;
+  const imageSrc = image || images?.[0]?.src || "/media/site/placeholder.svg";
   const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : null;
 
   return (

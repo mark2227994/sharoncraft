@@ -5,35 +5,39 @@ import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import { useCart } from "../lib/cart-context";
 
-const WHATSAPP_NUMBER = "254112222572"; // 0112222572 in international format
+const WHATSAPP_NUMBER = "254112222572";
 
 function buildWhatsAppMessage({ name, phone, area, items, subtotal, total }) {
   const lines = [];
-  lines.push("Hello SharonCraft! 👋");
+  lines.push("Hello SharonCraft.");
   lines.push("");
   lines.push("I'd like to place an order:");
   lines.push("");
-  lines.push("📦 *Items:*");
+  lines.push("Items:");
   items.forEach((item) => {
     const lineTotal = (item.price * item.quantity).toLocaleString();
-    lines.push(`  - ${item.name} × ${item.quantity} — KES ${lineTotal}`);
+    lines.push(`- ${item.name} x ${item.quantity} - KES ${lineTotal}`);
   });
   lines.push("");
-  lines.push(`🛒 Subtotal: KES ${subtotal.toLocaleString()}`);
-  lines.push(`🚚 Delivery: KES 300`);
-  lines.push(`💰 *Total: KES ${total.toLocaleString()}*`);
+  lines.push(`Subtotal: KES ${subtotal.toLocaleString()}`);
+  lines.push("Delivery: KES 300");
+  lines.push(`Total: KES ${total.toLocaleString()}`);
   lines.push("");
-  lines.push(`📍 Delivery area: ${area}`);
-  lines.push(`👤 Name: ${name}`);
-  lines.push(`📞 Phone: ${phone}`);
+  lines.push(`Delivery area: ${area}`);
+  lines.push(`Name: ${name}`);
+  lines.push(`Phone: ${phone}`);
   lines.push("");
-  lines.push("Please confirm my order. Thank you! 🙏");
+  lines.push("Please confirm my order. Thank you.");
   return lines.join("\n");
 }
 
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [completed, setCompleted] = useState(false);
 
   const delivery = 300;
@@ -51,18 +55,15 @@ export default function CheckoutPage() {
       total,
     });
 
-    // Save order to admin tracking (fire-and-forget — don't block on failure)
     fetch("/api/orders/create-wa", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: data.name, phone: data.phone, area: data.area, items, subtotal, total }),
-    }).catch(() => {}); // silently ignore if it fails
+    }).catch(() => {});
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     clear();
     setCompleted(true);
-
-    // Open WhatsApp in a new tab
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
@@ -72,8 +73,12 @@ export default function CheckoutPage() {
         <Nav />
         <main className="checkout-page">
           <div className="checkout-page__card" style={{ textAlign: "center", padding: "var(--space-7)" }}>
-            <p className="body-lg" style={{ marginBottom: "var(--space-4)" }}>Your cart is empty.</p>
-            <Link href="/shop" className="checkout-page__cta">Browse the gallery</Link>
+            <p className="body-lg" style={{ marginBottom: "var(--space-4)" }}>
+              Your cart is empty.
+            </p>
+            <Link href="/shop" className="checkout-page__cta">
+              Browse the gallery
+            </Link>
           </div>
         </main>
         <Footer />
@@ -93,20 +98,21 @@ export default function CheckoutPage() {
 
         {completed ? (
           <div className="checkout-page__card checkout-page__success">
-            <div className="checkout-page__success-icon">✅</div>
-            <h2 className="display-sm">Order sent to WhatsApp!</h2>
+            <div className="checkout-page__success-icon">Order sent</div>
+            <h2 className="display-md">Your WhatsApp draft is ready</h2>
             <p className="body-base">
-              A WhatsApp chat with SharonCraft should have opened. If it didn&apos;t,{" "}
+              A WhatsApp chat with SharonCraft should have opened. If it did not,{" "}
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "var(--color-terracotta)", textDecoration: "underline" }}
               >
-                click here to open WhatsApp
-              </a>.
+                open WhatsApp here
+              </a>
+              .
             </p>
-            <p className="body-sm" style={{ color: "var(--color-muted, #888)", marginTop: "var(--space-3)" }}>
+            <p className="body-sm" style={{ color: "var(--text-muted)", marginTop: "var(--space-3)" }}>
               Sharon will confirm your order and share payment details shortly.
             </p>
             <Link href="/shop" className="checkout-page__cta" style={{ marginTop: "var(--space-5)" }}>
@@ -126,7 +132,7 @@ export default function CheckoutPage() {
                     className="admin-input"
                     placeholder="e.g. Jane Mwangi"
                   />
-                  {errors.name && <span className="checkout-page__error">{errors.name.message}</span>}
+                  {errors.name ? <span className="checkout-page__error">{errors.name.message}</span> : null}
                 </label>
                 <label className="checkout-page__field">
                   <span>Phone number *</span>
@@ -136,7 +142,7 @@ export default function CheckoutPage() {
                     placeholder="e.g. 0712 345 678"
                     type="tel"
                   />
-                  {errors.phone && <span className="checkout-page__error">{errors.phone.message}</span>}
+                  {errors.phone ? <span className="checkout-page__error">{errors.phone.message}</span> : null}
                 </label>
               </div>
 
@@ -147,19 +153,19 @@ export default function CheckoutPage() {
                   className="admin-input"
                   placeholder="e.g. Westlands, Nairobi"
                 />
-                {errors.area && <span className="checkout-page__error">{errors.area.message}</span>}
+                {errors.area ? <span className="checkout-page__error">{errors.area.message}</span> : null}
               </label>
 
               <div className="checkout-page__whatsapp-note">
-                <span>📲</span>
+                <span className="checkout-page__note-label">WhatsApp</span>
                 <p>
-                  Clicking <strong>Send Order via WhatsApp</strong> will open WhatsApp with your order
-                  details pre-filled. Sharon will confirm and share payment instructions.
+                  Selecting <strong>Send Order via WhatsApp</strong> opens a pre-filled message with your order
+                  details. Sharon will confirm the order and share payment instructions.
                 </p>
               </div>
 
               <button type="submit" className="checkout-page__cta checkout-page__cta--whatsapp">
-                <span>💬</span> Send Order via WhatsApp
+                Send Order via WhatsApp
               </button>
             </form>
 
@@ -167,7 +173,9 @@ export default function CheckoutPage() {
               <p className="overline">Order summary</p>
               {items.map((item) => (
                 <div key={item.id} className="checkout-page__summary-row">
-                  <span>{item.name} × {item.quantity}</span>
+                  <span>
+                    {item.name} x {item.quantity}
+                  </span>
                   <strong>KES {(item.price * item.quantity).toLocaleString()}</strong>
                 </div>
               ))}
@@ -228,19 +236,27 @@ const styles = `
     gap: var(--space-2);
   }
   .checkout-page__error {
-    color: #c0392b;
+    color: var(--color-terracotta);
     font-size: 0.8rem;
   }
   .checkout-page__whatsapp-note {
     display: flex;
     gap: var(--space-3);
     align-items: flex-start;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
+    background: #f0f6ef;
+    border: 1px solid #d3dfd0;
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-4);
     font-size: 0.875rem;
-    color: #166534;
+    color: var(--color-moss);
+  }
+  .checkout-page__note-label {
+    min-width: 74px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-moss);
   }
   .checkout-page__whatsapp-note p {
     margin: 0;
@@ -272,11 +288,10 @@ const styles = `
     text-decoration: none;
   }
   .checkout-page__cta--whatsapp {
-    background: #25d366;
-    font-size: 1rem;
+    background: var(--color-moss);
   }
   .checkout-page__cta--whatsapp:hover {
-    background: #1ebe5d;
+    background: #394035;
   }
   .checkout-page__success {
     text-align: center;
@@ -284,7 +299,9 @@ const styles = `
     padding: var(--space-7) var(--space-5);
   }
   .checkout-page__success-icon {
-    font-size: 3rem;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--color-terracotta);
   }
   @media (min-width: 960px) {
     .checkout-page__layout {

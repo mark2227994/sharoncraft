@@ -3,12 +3,23 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
+import { categoryOptions } from "../../../data/site";
+import { slugify } from "../../../lib/products";
+
+const categories = categoryOptions.filter((category) => category !== "All");
 
 export default function AdminNewProductPage() {
   const router = useRouter();
   const { register, handleSubmit, setValue, watch } = useForm();
   const [submitError, setSubmitError] = useState("");
   const imageValue = watch("image");
+  const nameValue = watch("name");
+
+  function fillSlugFromName() {
+    const nextSlug = slugify(nameValue);
+    if (!nextSlug) return;
+    setValue("slug", nextSlug, { shouldValidate: true });
+  }
 
   async function onSubmit(values) {
     setSubmitError("");
@@ -86,9 +97,21 @@ export default function AdminNewProductPage() {
             <span>Slug</span>
             <input className="admin-input" {...register("slug", { required: true })} />
           </label>
+          <div className="admin-field">
+            <span>Fill from product name</span>
+            <button type="button" className="admin-button admin-button--secondary" onClick={fillSlugFromName}>
+              Generate slug
+            </button>
+          </div>
           <label className="admin-field">
             <span>Category</span>
-            <input className="admin-input" {...register("category", { required: true })} />
+            <select className="admin-select" defaultValue="Jewellery" {...register("category", { required: true })}>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="admin-field">
             <span>Artisan</span>

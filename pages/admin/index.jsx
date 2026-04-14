@@ -17,12 +17,11 @@ export default function AdminDashboardPage() {
   const orders = data?.orders || [];
   const waOrders = data?.waOrders || [];
 
-  // WA order quick stats
-  const waPending = waOrders.filter((o) => o.status === "pending").length;
-  const waCompleted = waOrders.filter((o) => o.status === "completed").length;
+  const waPending = waOrders.filter((order) => order.status === "pending").length;
+  const waCompleted = waOrders.filter((order) => order.status === "completed").length;
   const waRevenue = waOrders
-    .filter((o) => o.status === "completed")
-    .reduce((sum, o) => sum + (o.total || 0), 0);
+    .filter((order) => order.status === "completed")
+    .reduce((sum, order) => sum + (order.total || 0), 0);
 
   return (
     <AdminLayout
@@ -33,8 +32,9 @@ export default function AdminDashboardPage() {
         </Link>
       }
     >
-      {/* Product stats */}
-      <p className="overline" style={{ marginBottom: "var(--space-2)" }}>Product Overview</p>
+      <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
+        Product Overview
+      </p>
       <section className="admin-stats-grid" style={{ marginBottom: "var(--space-6)" }}>
         {stats.map((stat) => (
           <article key={stat.label} className="admin-stat-card">
@@ -47,11 +47,10 @@ export default function AdminDashboardPage() {
         ))}
       </section>
 
-      {/* WhatsApp order stats */}
       <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
-        💬 WhatsApp Orders{" "}
+        WhatsApp Orders
         <Link href="/admin/orders" style={{ color: "var(--color-terracotta)", marginLeft: 8, fontWeight: 600 }}>
-          View all →
+          View all
         </Link>
       </p>
       <section className="admin-stats-grid" style={{ marginBottom: "var(--space-6)" }}>
@@ -70,7 +69,7 @@ export default function AdminDashboardPage() {
         <article className="admin-stat-card">
           <p className="admin-stat-card__label">Completed</p>
           <p className="admin-stat-card__value">{waCompleted}</p>
-          <p className="admin-stat-card__delta">Paid &amp; delivered</p>
+          <p className="admin-stat-card__delta">Paid and delivered</p>
         </article>
         <article className="admin-stat-card">
           <p className="admin-stat-card__label">WA Revenue</p>
@@ -79,10 +78,11 @@ export default function AdminDashboardPage() {
         </article>
       </section>
 
-      {/* Recent WhatsApp orders */}
-      {waOrders.length > 0 && (
+      {waOrders.length > 0 ? (
         <>
-          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>Recent WhatsApp Orders</p>
+          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
+            Recent WhatsApp Orders
+          </p>
           <section className="admin-table-wrap" style={{ marginBottom: "var(--space-6)" }}>
             <table className="admin-table">
               <thead>
@@ -106,17 +106,22 @@ export default function AdminDashboardPage() {
                         rel="noopener noreferrer"
                         style={{ color: "#25d366", fontWeight: 600 }}
                       >
-                        💬 {order.phone}
+                        WhatsApp: {order.phone}
                       </a>
                     </td>
                     <td>{formatKES(order.total)}</td>
                     <td>
-                      <span className={`admin-pill ${
-                        order.status === "completed" ? "admin-pill--completed"
-                        : order.status === "confirmed" ? "admin-pill--mpesa"
-                        : order.status === "cancelled" ? "admin-pill--failed"
-                        : "admin-pill--pending"
-                      }`}>
+                      <span
+                        className={`admin-pill ${
+                          order.status === "completed"
+                            ? "admin-pill--completed"
+                            : order.status === "confirmed"
+                              ? "admin-pill--mpesa"
+                              : order.status === "cancelled"
+                                ? "admin-pill--failed"
+                                : "admin-pill--pending"
+                        }`}
+                      >
                         {order.status}
                       </span>
                     </td>
@@ -126,12 +131,13 @@ export default function AdminDashboardPage() {
             </table>
           </section>
         </>
-      )}
+      ) : null}
 
-      {/* M-Pesa orders (legacy) */}
-      {orders.length > 0 && (
+      {orders.length > 0 ? (
         <>
-          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>M-Pesa Orders</p>
+          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
+            M-Pesa Orders
+          </p>
           <section className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -177,14 +183,14 @@ export default function AdminDashboardPage() {
             </table>
           </section>
         </>
-      )}
+      ) : null}
 
       <section className="admin-quick-actions" style={{ marginTop: "var(--space-5)" }}>
         <Link href="/admin/products/new" className="admin-button">
           Add New Product
         </Link>
         <Link href="/admin/orders" className="admin-button admin-button--secondary">
-          💬 View WA Orders
+          View WA Orders
         </Link>
         <Link href="/admin/site-images" className="admin-button admin-button--secondary">
           Edit Site Content
