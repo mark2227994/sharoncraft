@@ -7,12 +7,16 @@ import { useCart } from "../lib/cart-context";
 
 const WHATSAPP_NUMBER = "254112222572";
 
-function buildWhatsAppMessage({ name, phone, area, items, subtotal, total }) {
+function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtotal, total }) {
   const lines = [];
   lines.push("Hello SharonCraft.");
   lines.push("");
   lines.push("I'd like to place an order:");
   lines.push("");
+  if (orderReference) {
+    lines.push(`Order Ref: ${orderReference}`);
+    lines.push("");
+  }
   lines.push("Items:");
   items.forEach((item) => {
     const lineTotal = (item.price * item.quantity).toLocaleString();
@@ -39,32 +43,48 @@ export default function CheckoutPage() {
     formState: { errors },
   } = useForm();
   const [completed, setCompleted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const delivery = 300;
   const total = subtotal + delivery;
 
   async function onSubmit(data) {
     if (items.length === 0) return;
+    setSubmitError("");
+    setSubmitting(true);
 
-    const message = buildWhatsAppMessage({
-      name: data.name,
-      phone: data.phone,
-      area: data.area,
-      items,
-      subtotal,
-      total,
-    });
+    try {
+      const response = await fetch("/api/orders/create-wa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: data.name, phone: data.phone, area: data.area, items, subtotal, total }),
+      });
 
-    fetch("/api/orders/create-wa", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: data.name, phone: data.phone, area: data.area, items, subtotal, total }),
-    }).catch(() => {});
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body.error || "We could not save your order for admin follow-up.");
+      }
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    clear();
-    setCompleted(true);
-    window.open(url, "_blank", "noopener,noreferrer");
+      const message = buildWhatsAppMessage({
+        orderReference: body.orderReference,
+        name: data.name,
+        phone: data.phone,
+        area: data.area,
+        items,
+        subtotal,
+        total,
+      });
+
+      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      clear();
+      setCompleted(true);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      setSubmitError(error.message || "We could not save your order. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (items.length === 0 && !completed) {
@@ -164,9 +184,10 @@ export default function CheckoutPage() {
                 </p>
               </div>
 
-              <button type="submit" className="checkout-page__cta checkout-page__cta--whatsapp">
-                Send Order via WhatsApp
+              <button type="submit" className="checkout-page__cta checkout-page__cta--whatsapp" disabled={submitting}>
+                {submitting ? "Saving your order..." : "Send Order via WhatsApp"}
               </button>
+              {submitError ? <p className="checkout-page__error">{submitError}</p> : null}
             </form>
 
             <aside className="checkout-page__card">

@@ -7,6 +7,7 @@ import { categoryOptions } from "../../../data/site";
 import {
   getJewelryTypeLabel,
   getProductAssetFolder,
+  publishStatusOptions,
   getSuggestedProductMediaFolder,
   jewelryTypeOptions,
   slugify,
@@ -107,6 +108,7 @@ export default function AdminNewProductPage() {
     defaultValues: {
       category: "Jewellery",
       jewelryType: "necklace",
+      publishStatus: "published",
       stock: 1,
     },
   });
@@ -159,6 +161,7 @@ export default function AdminNewProductPage() {
       materials: values.materials.split(",").map((item) => item.trim()).filter(Boolean),
       category: values.category,
       jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
+      publishStatus: values.publishStatus,
       price: Number(values.price || 0),
       originalPrice: values.originalPrice ? Number(values.originalPrice) : null,
       image: values.image,
@@ -251,6 +254,16 @@ export default function AdminNewProductPage() {
               </select>
             </label>
           ) : null}
+          <label className="admin-field">
+            <span>Visibility</span>
+            <select className="admin-select" {...register("publishStatus", { required: true })}>
+              {publishStatusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {status === "published" ? "Published" : "Draft"}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="admin-field">
             <span>Artisan</span>
             <input className="admin-input" {...register("artisan", { required: true })} />

@@ -1,10 +1,11 @@
 /**
- * GET  /api/admin/orders  — list all WhatsApp orders
- * POST /api/admin/orders  — update a single order (status, note)
- * DELETE /api/admin/orders?id=wa_xxx — remove an order
+ * GET  /api/admin/orders  - list all WhatsApp orders
+ * POST /api/admin/orders  - update a single order (status, note, contact)
+ * DELETE /api/admin/orders?id=wa_xxx - remove an order
  */
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { readWaOrders, writeWaOrders } from "../../../lib/store";
+import { updateWaOrder } from "../../../lib/wa-orders";
 
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
@@ -17,19 +18,21 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { id, status, note } = req.body || {};
+    const { id, status, note, lastContactAt } = req.body || {};
     if (!id) return res.status(400).json({ error: "id required" });
 
     const orders = await readWaOrders();
-    const idx = orders.findIndex((o) => o.id === id);
-    if (idx === -1) return res.status(404).json({ error: "Order not found" });
+    const index = orders.findIndex((order) => order.id === id);
+    if (index === -1) return res.status(404).json({ error: "Order not found" });
 
-    if (status) orders[idx].status = status;
-    if (note !== undefined) orders[idx].note = note;
-    if (status === "completed") orders[idx].completedAt = new Date().toISOString();
+    orders[index] = updateWaOrder(orders[index], {
+      ...(status ? { status } : {}),
+      ...(note !== undefined ? { note: String(note) } : {}),
+      ...(lastContactAt ? { lastContactAt: String(lastContactAt) } : {}),
+    });
 
     await writeWaOrders(orders);
-    return res.status(200).json({ ok: true, order: orders[idx] });
+    return res.status(200).json({ ok: true, order: orders[index] });
   }
 
   if (req.method === "DELETE") {
@@ -37,7 +40,7 @@ export default async function handler(req, res) {
     if (!id) return res.status(400).json({ error: "id required" });
 
     const orders = await readWaOrders();
-    const filtered = orders.filter((o) => o.id !== id);
+    const filtered = orders.filter((order) => order.id !== id);
     await writeWaOrders(filtered);
     return res.status(200).json({ ok: true });
   }

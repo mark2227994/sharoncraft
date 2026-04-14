@@ -7,6 +7,7 @@ import Nav from "../components/Nav";
 import Icon from "../components/icons";
 import { categoryOptions } from "../data/site";
 import {
+  filterPublishedProducts,
   getCatalogCategories,
   getCategoryPriority,
   getJewelryTypeLabel,
@@ -173,7 +174,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
 }
 
 export async function getServerSideProps({ query }) {
-  const products = await readProducts();
+  const products = filterPublishedProducts(await readProducts());
   const categories = getCatalogCategories(products);
   const requestedCategory = typeof query.category === "string" ? query.category : "Jewellery";
   const initialCategory = categories.includes(requestedCategory) ? requestedCategory : categoryOptions[0];

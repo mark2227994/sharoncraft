@@ -4,6 +4,7 @@
  * Stores the order in Supabase so the admin can track it.
  */
 import { readWaOrders, writeWaOrders } from "../../../lib/store";
+import { buildOrderReference, normalizeWaOrder } from "../../../lib/wa-orders";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -18,9 +19,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const order = {
-    id: `wa_${Date.now()}`,
-    timestamp: new Date().toISOString(),
+  const timestamp = new Date().toISOString();
+  const id = `wa_${Date.now()}`;
+  const order = normalizeWaOrder({
+    id,
+    orderReference: buildOrderReference(id, timestamp),
+    timestamp,
     name: String(name).trim(),
     phone: String(phone).trim(),
     area: String(area || "").trim(),
@@ -28,15 +32,21 @@ export default async function handler(req, res) {
     subtotal: Number(subtotal) || 0,
     delivery: 300,
     total: Number(total) || 0,
-    status: "pending", // pending | confirmed | completed | cancelled
+    status: "new",
     note: "",
-  };
+    source: "checkout",
+  });
 
   try {
     const orders = await readWaOrders();
     orders.unshift(order); // newest first
     await writeWaOrders(orders);
-    return res.status(200).json({ ok: true, orderId: order.id });
+    return res.status(200).json({
+      ok: true,
+      orderId: order.id,
+      orderReference: order.orderReference,
+      order,
+    });
   } catch (error) {
     return res.status(500).json({ error: `Could not save order: ${error.message}` });
   }

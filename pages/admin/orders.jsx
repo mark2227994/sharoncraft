@@ -1,119 +1,238 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { formatKES } from "../../lib/formatters";
+import {
+  buildAdminWhatsAppMessage,
+  buildOrderWhatsAppHref,
+  getWaOrderStatusMeta,
+  WA_ORDER_STATUS_FLOW,
+} from "../../lib/wa-orders";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const STATUS_LABELS = {
-  pending: { label: "Pending", cls: "admin-pill--pending" },
-  confirmed: { label: "Confirmed", cls: "admin-pill--mpesa" },
-  completed: { label: "Completed", cls: "admin-pill--completed" },
-  cancelled: { label: "Cancelled", cls: "admin-pill--failed" },
+  all: "All orders",
+  attention: "Needs follow-up",
+  new: "New",
+  seen: "Seen",
+  confirmed: "Confirmed",
+  paid: "Paid",
+  dispatched: "Dispatched",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
 };
+
+const ATTENTION_STATUSES = new Set(["new", "seen", "confirmed", "paid", "dispatched"]);
 
 function formatDate(timestamp) {
   if (!timestamp) return "-";
   return new Date(timestamp).toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" });
 }
 
-async function updateOrder(payload) {
+function getOrderActions(order) {
+  if (!order) return [];
+  if (order.status === "new") return ["seen", "confirmed", "cancelled"];
+  if (order.status === "seen") return ["confirmed", "cancelled"];
+  if (order.status === "confirmed") return ["paid", "dispatched", "cancelled"];
+  if (order.status === "paid") return ["dispatched", "delivered"];
+  if (order.status === "dispatched") return ["delivered"];
+  return [];
+}
+
+async function fetchOrders() {
+  const response = await fetch("/api/admin/orders", { credentials: "same-origin" });
+  if (!response.ok) throw new Error("Failed to load orders");
+  return response.json();
+}
+
+async function saveOrder(payload) {
   const response = await fetch("/api/admin/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error("Update failed");
+  if (!response.ok) throw new Error("Could not update order");
   return response.json();
 }
 
-async function deleteOrder(id) {
+async function removeOrder(id) {
   const response = await fetch(`/api/admin/orders?id=${encodeURIComponent(id)}`, {
     method: "DELETE",
     credentials: "same-origin",
   });
-  if (!response.ok) throw new Error("Delete failed");
+  if (!response.ok) throw new Error("Could not delete order");
   return response.json();
+}
+
+function OrderStats({ orders }) {
+  const newCount = orders.filter((order) => order.status === "new").length;
+  const attentionCount = orders.filter((order) => ATTENTION_STATUSES.has(order.status)).length;
+  const deliveredCount = orders.filter((order) => order.status === "delivered").length;
+  const revenue = orders
+    .filter((order) => order.status === "paid" || order.status === "delivered")
+    .reduce((sum, order) => sum + (order.total || 0), 0);
+
+  return (
+    <section className="admin-stats-grid" style={{ marginBottom: "var(--space-5)" }}>
+      <article className="admin-stat-card">
+        <p className="admin-stat-card__label">New Orders</p>
+        <p className="admin-stat-card__value">{newCount}</p>
+        <p className="admin-stat-card__delta">Fresh from checkout</p>
+      </article>
+      <article className="admin-stat-card">
+        <p className="admin-stat-card__label">Needs Follow-up</p>
+        <p className="admin-stat-card__value">{attentionCount}</p>
+        <p className="admin-stat-card__delta">Seen, confirmed, paid, or dispatched</p>
+      </article>
+      <article className="admin-stat-card">
+        <p className="admin-stat-card__label">Delivered</p>
+        <p className="admin-stat-card__value">{deliveredCount}</p>
+        <p className="admin-stat-card__delta">Finished orders</p>
+      </article>
+      <article className="admin-stat-card">
+        <p className="admin-stat-card__label">Tracked Revenue</p>
+        <p className="admin-stat-card__value admin-stat-card__value--terracotta">{formatKES(revenue)}</p>
+        <p className="admin-stat-card__delta">Paid and delivered orders</p>
+      </article>
+    </section>
+  );
 }
 
 export default function AdminOrdersPage() {
   const queryClient = useQueryClient();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("attention");
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+  const [statusDraft, setStatusDraft] = useState("new");
+  const [noteDraft, setNoteDraft] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-orders"],
-    queryFn: async () => {
-      const response = await fetch("/api/admin/orders", { credentials: "same-origin" });
-      if (!response.ok) throw new Error("Failed to load orders");
-      return response.json();
-    },
+    queryFn: fetchOrders,
     refetchInterval: 30000,
   });
 
-  const mutation = useMutation({
-    mutationFn: updateOrder,
-    onSuccess: () => queryClient.invalidateQueries(["admin-orders"]),
+  const saveMutation = useMutation({
+    mutationFn: saveOrder,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-orders"] }),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteOrder,
-    onSuccess: () => queryClient.invalidateQueries(["admin-orders"]),
+    mutationFn: removeOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      setSelectedId("");
+    },
   });
 
   const allOrders = data?.orders || [];
-  const orders = filter === "all" ? allOrders : allOrders.filter((order) => order.status === filter);
+  const filteredOrders = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return allOrders.filter((order) => {
+      const matchesFilter =
+        filter === "all"
+          ? true
+          : filter === "attention"
+            ? ATTENTION_STATUSES.has(order.status)
+            : order.status === filter;
 
-  const pending = allOrders.filter((order) => order.status === "pending").length;
-  const confirmed = allOrders.filter((order) => order.status === "confirmed").length;
-  const completed = allOrders.filter((order) => order.status === "completed").length;
-  const revenue = allOrders
-    .filter((order) => order.status === "completed")
-    .reduce((sum, order) => sum + (order.total || 0), 0);
+      if (!matchesFilter) return false;
+      if (!query) return true;
+
+      return [
+        order.orderReference,
+        order.name,
+        order.phone,
+        order.area,
+        order.note,
+        ...(Array.isArray(order.items) ? order.items.map((item) => item.name) : []),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+  }, [allOrders, filter, search]);
+
+  const selectedOrder = useMemo(
+    () => filteredOrders.find((order) => order.id === selectedId) || allOrders.find((order) => order.id === selectedId) || null,
+    [allOrders, filteredOrders, selectedId],
+  );
+
+  useEffect(() => {
+    if (!selectedOrder) return;
+    setStatusDraft(selectedOrder.status);
+    setNoteDraft(selectedOrder.note || "");
+  }, [selectedOrder]);
+
+  async function handleSave() {
+    if (!selectedOrder) return;
+    await saveMutation.mutateAsync({
+      id: selectedOrder.id,
+      status: statusDraft,
+      note: noteDraft,
+    });
+  }
+
+  async function handleStatusStep(nextStatus) {
+    if (!selectedOrder) return;
+    await saveMutation.mutateAsync({
+      id: selectedOrder.id,
+      status: nextStatus,
+    });
+    setStatusDraft(nextStatus);
+  }
+
+  async function handleWhatsAppAction(variant) {
+    if (!selectedOrder) return;
+    const statusMap = {
+      seen: "seen",
+      confirmed: "confirmed",
+      paid: "paid",
+      dispatched: "dispatched",
+      delivered: "delivered",
+    };
+    const nextStatus = statusMap[variant];
+    const href = buildOrderWhatsAppHref(selectedOrder, buildAdminWhatsAppMessage(selectedOrder, variant));
+
+    await saveMutation.mutateAsync({
+      id: selectedOrder.id,
+      ...(nextStatus ? { status: nextStatus } : {}),
+      lastContactAt: new Date().toISOString(),
+      note: noteDraft,
+    });
+
+    window.open(href, "_blank", "noopener,noreferrer");
+  }
 
   return (
-    <AdminLayout title="WhatsApp Orders">
-      <section className="admin-stats-grid" style={{ marginBottom: "var(--space-5)" }}>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Pending</p>
-          <p className="admin-stat-card__value">{pending}</p>
-          <p className="admin-stat-card__delta">Need follow-up</p>
-        </article>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Confirmed</p>
-          <p className="admin-stat-card__value">{confirmed}</p>
-          <p className="admin-stat-card__delta">Awaiting payment</p>
-        </article>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Completed</p>
-          <p className="admin-stat-card__value">{completed}</p>
-          <p className="admin-stat-card__delta">Paid and delivered</p>
-        </article>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Revenue</p>
-          <p className="admin-stat-card__value admin-stat-card__value--terracotta">{formatKES(revenue)}</p>
-          <p className="admin-stat-card__delta">From completed orders</p>
-        </article>
-      </section>
+    <AdminLayout title="Orders">
+      <OrderStats orders={allOrders} />
 
-      <div className="orders-filter-tabs">
-        {["all", "pending", "confirmed", "completed", "cancelled"].map((nextFilter) => (
-          <button
-            key={nextFilter}
-            type="button"
-            className={`orders-tab ${filter === nextFilter ? "orders-tab--active" : ""}`}
-            onClick={() => setFilter(nextFilter)}
-          >
-            {nextFilter === "all" ? `All (${allOrders.length})` : STATUS_LABELS[nextFilter]?.label || nextFilter}
-          </button>
-        ))}
-      </div>
+      <section className="admin-panel" style={{ marginBottom: "var(--space-4)" }}>
+        <div className="orders-toolbar">
+          <input
+            className="admin-input"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by customer, phone, order ref, or item"
+          />
+          <select className="admin-select" value={filter} onChange={(event) => setFilter(event.target.value)}>
+            {["attention", "all", ...WA_ORDER_STATUS_FLOW].map((value) => (
+              <option key={value} value={value}>
+                {STATUS_LABELS[value] || value}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
 
       {isLoading ? (
         <p className="admin-note">Loading orders...</p>
-      ) : orders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         <div className="admin-panel" style={{ padding: "var(--space-6)", textAlign: "center" }}>
-          <p className="body-lg">No orders yet.</p>
+          <p className="body-lg">No orders match this view.</p>
           <p className="admin-note" style={{ marginTop: "var(--space-2)" }}>
-            When customers check out via WhatsApp, their orders will appear here.
+            Checkout orders will appear here automatically once a customer submits their details.
           </p>
         </div>
       ) : (
@@ -122,91 +241,51 @@ export default function AdminOrdersPage() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Date</th>
+                  <th>Order Ref</th>
                   <th>Customer</th>
-                  <th>Phone</th>
+                  <th>WhatsApp</th>
                   <th>Area</th>
-                  <th>Items</th>
                   <th>Total</th>
                   <th>Status</th>
+                  <th>Updated</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order) => {
-                  const status = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
-                  const busy = mutation.isPending && mutation.variables?.id === order.id;
+                {filteredOrders.map((order) => {
+                  const statusMeta = getWaOrderStatusMeta(order.status);
                   return (
                     <tr key={order.id}>
-                      <td style={{ whiteSpace: "nowrap" }}>{formatDate(order.timestamp)}</td>
-                      <td>{order.name}</td>
+                      <td style={{ whiteSpace: "nowrap" }}>{order.orderReference}</td>
+                      <td>
+                        <strong>{order.name}</strong>
+                        <div className="caption">{formatDate(order.timestamp)}</div>
+                      </td>
                       <td>
                         <a
-                          href={`https://wa.me/254${order.phone?.replace(/^0/, "")}`}
+                          href={buildOrderWhatsAppHref(order)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: "#25d366", fontWeight: 600 }}
+                          className="admin-link"
                         >
-                          WhatsApp: {order.phone}
+                          {order.phone}
                         </a>
                       </td>
-                      <td>{order.area}</td>
-                      <td>
-                        {(order.items || []).map((item) => (
-                          <div key={item.id} style={{ fontSize: "0.8rem" }}>
-                            {item.name} x{item.quantity}
-                          </div>
-                        ))}
-                      </td>
+                      <td>{order.area || "-"}</td>
                       <td>{formatKES(order.total)}</td>
                       <td>
-                        <span className={`admin-pill ${status.cls}`}>{status.label}</span>
+                        <span className={`admin-pill ${statusMeta.cls}`}>{statusMeta.label}</span>
                       </td>
-                      <td>
-                        <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
-                          {order.status === "pending" ? (
-                            <button
-                              type="button"
-                              className="order-action-btn order-action-btn--confirm"
-                              disabled={busy}
-                              onClick={() => mutation.mutate({ id: order.id, status: "confirmed" })}
-                            >
-                              Confirm
-                            </button>
-                          ) : null}
-                          {order.status === "confirmed" ? (
-                            <button
-                              type="button"
-                              className="order-action-btn order-action-btn--complete"
-                              disabled={busy}
-                              onClick={() => mutation.mutate({ id: order.id, status: "completed" })}
-                            >
-                              Mark Complete
-                            </button>
-                          ) : null}
-                          {order.status !== "cancelled" && order.status !== "completed" ? (
-                            <button
-                              type="button"
-                              className="order-action-btn order-action-btn--cancel"
-                              disabled={busy}
-                              onClick={() => mutation.mutate({ id: order.id, status: "cancelled" })}
-                            >
-                              Cancel
-                            </button>
-                          ) : null}
-                          <button
-                            type="button"
-                            className="order-action-btn order-action-btn--delete"
-                            disabled={deleteMutation.isPending && deleteMutation.variables === order.id}
-                            onClick={() => {
-                              if (confirm(`Delete order from ${order.name}?`)) {
-                                deleteMutation.mutate(order.id);
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
+                      <td>{formatDate(order.updatedAt)}</td>
+                      <td style={{ textAlign: "right" }}>
+                        <button
+                          type="button"
+                          className="admin-button admin-button--secondary"
+                          style={{ padding: "8px 12px", fontSize: "0.8rem" }}
+                          onClick={() => setSelectedId(order.id)}
+                        >
+                          Manage
+                        </button>
                       </td>
                     </tr>
                   );
@@ -216,61 +295,30 @@ export default function AdminOrdersPage() {
           </section>
 
           <section className="admin-mobile-cards">
-            {orders.map((order) => {
-              const status = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
-              const busy = mutation.isPending && mutation.variables?.id === order.id;
+            {filteredOrders.map((order) => {
+              const statusMeta = getWaOrderStatusMeta(order.status);
               return (
-                <article key={order.id} className="admin-panel" style={{ padding: "var(--space-4)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <article key={order.id} className="admin-panel order-card-mobile">
+                  <div className="order-card-mobile__top">
                     <div>
-                      <p className="overline">{formatDate(order.timestamp)}</p>
+                      <p className="overline">{order.orderReference}</p>
                       <h2 className="heading-md">{order.name}</h2>
-                      <a
-                        href={`https://wa.me/254${order.phone?.replace(/^0/, "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#25d366", fontSize: "0.9rem" }}
-                      >
-                        WhatsApp: {order.phone}
-                      </a>
+                      <p className="body-sm">{order.area || "Area not provided"}</p>
                     </div>
-                    <span className={`admin-pill ${status.cls}`}>{status.label}</span>
+                    <span className={`admin-pill ${statusMeta.cls}`}>{statusMeta.label}</span>
                   </div>
-                  <p className="body-sm" style={{ marginTop: "var(--space-2)" }}>
-                    {order.area} | {formatKES(order.total)}
-                  </p>
-                  <div style={{ display: "flex", gap: 8, marginTop: "var(--space-3)", flexWrap: "wrap" }}>
-                    {order.status === "pending" ? (
-                      <button
-                        type="button"
-                        className="order-action-btn order-action-btn--confirm"
-                        disabled={busy}
-                        onClick={() => mutation.mutate({ id: order.id, status: "confirmed" })}
-                      >
-                        Confirm
-                      </button>
-                    ) : null}
-                    {order.status === "confirmed" ? (
-                      <button
-                        type="button"
-                        className="order-action-btn order-action-btn--complete"
-                        disabled={busy}
-                        onClick={() => mutation.mutate({ id: order.id, status: "completed" })}
-                      >
-                        Mark Complete
-                      </button>
-                    ) : null}
-                    {order.status !== "cancelled" && order.status !== "completed" ? (
-                      <button
-                        type="button"
-                        className="order-action-btn order-action-btn--cancel"
-                        disabled={busy}
-                        onClick={() => mutation.mutate({ id: order.id, status: "cancelled" })}
-                      >
-                        Cancel
-                      </button>
-                    ) : null}
-                  </div>
+                  <p className="body-sm">{formatKES(order.total)}</p>
+                  <a href={buildOrderWhatsAppHref(order)} target="_blank" rel="noopener noreferrer" className="admin-link">
+                    Open WhatsApp
+                  </a>
+                  <button
+                    type="button"
+                    className="admin-button admin-button--secondary"
+                    style={{ marginTop: "var(--space-3)" }}
+                    onClick={() => setSelectedId(order.id)}
+                  >
+                    Manage Order
+                  </button>
                 </article>
               );
             })}
@@ -278,68 +326,262 @@ export default function AdminOrdersPage() {
         </>
       )}
 
+      {selectedOrder ? (
+        <div className="manual-match-drawer" role="dialog" aria-modal="true" aria-label="Manage order">
+          <button type="button" className="manual-match-drawer__overlay" onClick={() => setSelectedId("")} />
+          <aside className="manual-match-drawer__panel order-drawer">
+            <div className="order-drawer__header">
+              <div>
+                <p className="overline">{selectedOrder.orderReference}</p>
+                <h2 className="display-md">Manage order</h2>
+              </div>
+              <button type="button" className="admin-button admin-button--secondary" onClick={() => setSelectedId("")}>
+                Close
+              </button>
+            </div>
+
+            <div className="order-drawer__meta">
+              <div>
+                <span className="caption">Customer</span>
+                <p>{selectedOrder.name}</p>
+              </div>
+              <div>
+                <span className="caption">Phone</span>
+                <p>{selectedOrder.phone}</p>
+              </div>
+              <div>
+                <span className="caption">Area</span>
+                <p>{selectedOrder.area || "-"}</p>
+              </div>
+              <div>
+                <span className="caption">Total</span>
+                <p>{formatKES(selectedOrder.total)}</p>
+              </div>
+            </div>
+
+            <div className="order-drawer__section">
+              <p className="overline">Quick steps</p>
+              <div className="order-drawer__actions">
+                {getOrderActions(selectedOrder).map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    className={`order-step-btn order-step-btn--${getWaOrderStatusMeta(status).tone}`}
+                    onClick={() => handleStatusStep(status)}
+                    disabled={saveMutation.isPending}
+                  >
+                    Mark {getWaOrderStatusMeta(status).label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="order-drawer__section">
+              <p className="overline">Status and notes</p>
+              <label className="admin-field">
+                <span className="caption">Workflow stage</span>
+                <select className="admin-select" value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)}>
+                  {WA_ORDER_STATUS_FLOW.map((status) => (
+                    <option key={status} value={status}>
+                      {getWaOrderStatusMeta(status).label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-field">
+                <span className="caption">Admin note</span>
+                <textarea
+                  className="admin-textarea"
+                  rows={5}
+                  value={noteDraft}
+                  onChange={(event) => setNoteDraft(event.target.value)}
+                  placeholder="Add follow-up notes, payment context, delivery details, or customer preferences."
+                />
+              </label>
+              <div className="admin-quick-actions" style={{ marginTop: 0 }}>
+                <button type="button" className="admin-button" onClick={handleSave} disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? "Saving..." : "Save order changes"}
+                </button>
+                <button
+                  type="button"
+                  className="admin-button admin-button--secondary"
+                  onClick={() => window.open(buildOrderWhatsAppHref(selectedOrder), "_blank", "noopener,noreferrer")}
+                >
+                  Open WhatsApp
+                </button>
+              </div>
+            </div>
+
+            <div className="order-drawer__section">
+              <p className="overline">WhatsApp follow-up</p>
+              <div className="order-drawer__actions">
+                {["seen", "confirmed", "paid", "dispatched", "delivered"].map((variant) => (
+                  <button
+                    key={variant}
+                    type="button"
+                    className="admin-button admin-button--secondary"
+                    onClick={() => handleWhatsAppAction(variant)}
+                    disabled={saveMutation.isPending}
+                  >
+                    {getWaOrderStatusMeta(variant).label} message
+                  </button>
+                ))}
+              </div>
+              <p className="caption" style={{ marginTop: "8px" }}>
+                Last contact: {selectedOrder.lastContactAt ? formatDate(selectedOrder.lastContactAt) : "Not recorded yet"}
+              </p>
+            </div>
+
+            <div className="order-drawer__section">
+              <p className="overline">Items</p>
+              <div className="order-drawer__items">
+                {(selectedOrder.items || []).map((item) => (
+                  <div key={`${selectedOrder.id}-${item.id}`} className="order-drawer__item">
+                    <span>{item.name}</span>
+                    <span>
+                      x{item.quantity} · {formatKES((item.price || 0) * (item.quantity || 0))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="order-drawer__section">
+              <p className="overline">Timeline</p>
+              <div className="order-drawer__timeline">
+                {[
+                  ["Placed", selectedOrder.timestamp],
+                  ["Seen", selectedOrder.seenAt],
+                  ["Confirmed", selectedOrder.confirmedAt],
+                  ["Paid", selectedOrder.paidAt],
+                  ["Dispatched", selectedOrder.dispatchedAt],
+                  ["Delivered", selectedOrder.deliveredAt],
+                  ["Cancelled", selectedOrder.cancelledAt],
+                ]
+                  .filter(([, value]) => value)
+                  .map(([label, value]) => (
+                    <div key={label} className="order-drawer__item">
+                      <span>{label}</span>
+                      <span>{formatDate(value)}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="order-step-btn order-step-btn--delete"
+              onClick={() => {
+                if (confirm(`Delete order ${selectedOrder.orderReference}?`)) {
+                  deleteMutation.mutate(selectedOrder.id);
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete order"}
+            </button>
+          </aside>
+        </div>
+      ) : null}
+
       <style jsx>{`
-        .orders-filter-tabs {
+        .orders-toolbar {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 220px;
+          gap: var(--space-3);
+        }
+        .order-card-mobile {
+          padding: var(--space-4);
+        }
+        .order-card-mobile__top {
           display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin-bottom: var(--space-4);
+          justify-content: space-between;
+          gap: var(--space-3);
+          margin-bottom: var(--space-3);
         }
-        .orders-tab {
-          padding: 6px 14px;
+        .order-drawer {
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-4);
+        }
+        .order-drawer__header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: var(--space-3);
+        }
+        .order-drawer__meta {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: var(--space-3);
+          padding: var(--space-4);
           border: 1px solid var(--border-default);
-          border-radius: 9999px;
-          background: transparent;
-          cursor: pointer;
-          font-size: 0.85rem;
-          color: var(--color-text);
-        }
-        .orders-tab--active {
-          background: var(--color-terracotta);
-          color: #fff;
-          border-color: var(--color-terracotta);
-          font-weight: 600;
-        }
-        .order-action-btn {
-          padding: 5px 11px;
           border-radius: var(--radius-md);
-          border: none;
-          cursor: pointer;
-          font-size: 0.78rem;
+          background: var(--bg-card-alt);
+        }
+        .order-drawer__meta p {
+          margin-top: 4px;
+        }
+        .order-drawer__section {
+          border-top: 1px solid var(--border-default);
+          padding-top: var(--space-4);
+        }
+        .order-drawer__actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+          margin-top: var(--space-3);
+        }
+        .order-drawer__items,
+        .order-drawer__timeline {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+          margin-top: var(--space-3);
+        }
+        .order-drawer__item {
+          display: flex;
+          justify-content: space-between;
+          gap: var(--space-3);
+          padding: 10px 12px;
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          background: var(--color-white);
+          font-size: 0.875rem;
+        }
+        .order-step-btn {
+          padding: 9px 14px;
+          border-radius: var(--radius-md);
+          color: var(--color-white);
+          font-size: 0.8125rem;
           font-weight: 600;
-          white-space: nowrap;
         }
-        .order-action-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+        .order-step-btn--new {
+          background: var(--color-ochre);
         }
-        .order-action-btn--confirm {
-          background: #22c55e;
-          color: #fff;
+        .order-step-btn--seen,
+        .order-step-btn--dispatch {
+          background: var(--color-bark);
         }
-        .order-action-btn--confirm:hover:not(:disabled) {
-          background: #16a34a;
+        .order-step-btn--confirm,
+        .order-step-btn--complete {
+          background: var(--color-moss);
         }
-        .order-action-btn--complete {
-          background: #6366f1;
-          color: #fff;
+        .order-step-btn--cancel,
+        .order-step-btn--delete {
+          background: var(--color-terracotta);
         }
-        .order-action-btn--complete:hover:not(:disabled) {
-          background: #4f46e5;
-        }
-        .order-action-btn--cancel {
-          background: #f59e0b;
-          color: #fff;
-        }
-        .order-action-btn--cancel:hover:not(:disabled) {
-          background: #d97706;
-        }
-        .order-action-btn--delete {
-          background: #dc2626;
-          color: #fff;
-        }
-        .order-action-btn--delete:hover:not(:disabled) {
-          background: #b91c1c;
+        @media (max-width: 767px) {
+          .orders-toolbar,
+          .order-drawer__meta {
+            grid-template-columns: 1fr;
+          }
+          .order-drawer__header,
+          .order-drawer__item,
+          .order-card-mobile__top {
+            flex-direction: column;
+          }
         }
       `}</style>
     </AdminLayout>

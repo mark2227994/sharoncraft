@@ -5,7 +5,7 @@ import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import Icon from "../components/icons";
 import { artisanFeature, buildCollectionCards, trustItems } from "../data/site";
-import { getCatalogCategories, prioritizeCategories } from "../lib/products";
+import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
 
@@ -220,13 +220,14 @@ export default function HomePage({
 
 export async function getServerSideProps() {
   const [products, siteImages] = await Promise.all([readProducts(), readSiteImages()]);
+  const publishedProducts = filterPublishedProducts(products);
 
   return {
     props: {
-      featuredProducts: prioritizeCategories(products.filter((product) => product.featured)).slice(0, 8),
-      recentProducts: prioritizeCategories(products.filter((product) => product.recent)).slice(0, 12),
+      featuredProducts: prioritizeCategories(publishedProducts.filter((product) => product.featured)).slice(0, 8),
+      recentProducts: prioritizeCategories(publishedProducts.filter((product) => product.recent)).slice(0, 12),
       collectionCards: buildCollectionCards(siteImages),
-      categories: getCatalogCategories(products),
+      categories: getCatalogCategories(publishedProducts),
       artisanSpotlight: {
         heroImage: siteImages.heroImage,
         portrait: siteImages.artisanPortrait,

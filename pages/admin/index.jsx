@@ -17,10 +17,12 @@ export default function AdminDashboardPage() {
   const orders = data?.orders || [];
   const waOrders = data?.waOrders || [];
 
-  const waPending = waOrders.filter((order) => order.status === "pending").length;
-  const waCompleted = waOrders.filter((order) => order.status === "completed").length;
+  const waPending = waOrders.filter((order) =>
+    ["new", "seen", "confirmed", "paid", "dispatched"].includes(order.status),
+  ).length;
+  const waCompleted = waOrders.filter((order) => order.status === "delivered").length;
   const waRevenue = waOrders
-    .filter((order) => order.status === "completed")
+    .filter((order) => order.status === "paid" || order.status === "delivered")
     .reduce((sum, order) => sum + (order.total || 0), 0);
 
   return (
@@ -60,21 +62,21 @@ export default function AdminDashboardPage() {
           <p className="admin-stat-card__delta">All time</p>
         </article>
         <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Pending</p>
+          <p className="admin-stat-card__label">Needs Follow-up</p>
           <p className="admin-stat-card__value" style={waPending > 0 ? { color: "#f59e0b" } : {}}>
             {waPending}
           </p>
           <p className="admin-stat-card__delta">Need follow-up</p>
         </article>
         <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Completed</p>
+          <p className="admin-stat-card__label">Delivered</p>
           <p className="admin-stat-card__value">{waCompleted}</p>
-          <p className="admin-stat-card__delta">Paid and delivered</p>
+          <p className="admin-stat-card__delta">Completed customer orders</p>
         </article>
         <article className="admin-stat-card">
           <p className="admin-stat-card__label">WA Revenue</p>
           <p className="admin-stat-card__value admin-stat-card__value--terracotta">{formatKES(waRevenue)}</p>
-          <p className="admin-stat-card__delta">From completed orders</p>
+          <p className="admin-stat-card__delta">From paid and delivered orders</p>
         </article>
       </section>
 
@@ -111,18 +113,8 @@ export default function AdminDashboardPage() {
                     </td>
                     <td>{formatKES(order.total)}</td>
                     <td>
-                      <span
-                        className={`admin-pill ${
-                          order.status === "completed"
-                            ? "admin-pill--completed"
-                            : order.status === "confirmed"
-                              ? "admin-pill--mpesa"
-                              : order.status === "cancelled"
-                                ? "admin-pill--failed"
-                                : "admin-pill--pending"
-                        }`}
-                      >
-                        {order.status}
+                      <span className={`admin-pill ${order.statusClass || "admin-pill--pending"}`}>
+                        {order.statusLabel || order.status}
                       </span>
                     </td>
                   </tr>
@@ -191,6 +183,9 @@ export default function AdminDashboardPage() {
         </Link>
         <Link href="/admin/orders" className="admin-button admin-button--secondary">
           View WA Orders
+        </Link>
+        <Link href="/admin/images" className="admin-button admin-button--secondary">
+          Open Image Manager
         </Link>
         <Link href="/admin/site-images" className="admin-button admin-button--secondary">
           Edit Site Content

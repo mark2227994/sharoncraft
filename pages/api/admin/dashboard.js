@@ -1,5 +1,6 @@
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { getDashboardSnapshot } from "../../../lib/store";
+import { getWaOrderStatusMeta } from "../../../lib/wa-orders";
 
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
@@ -20,16 +21,23 @@ export default async function handler(req, res) {
   const revenueThisMonth = mpesa
     .filter((transaction) => transaction.status === "Success" && inThisMonth(transaction.timestamp))
     .reduce((total, transaction) => total + Number(transaction.amount_kes || 0), 0);
-  const pendingOrders = orders.filter((order) => order.status === "Pending").length;
+  const pendingOrders = waOrders.filter((order) =>
+    ["new", "seen", "confirmed", "paid", "dispatched"].includes(order.status),
+  ).length;
+  const draftProducts = products.filter((product) => product.publishStatus === "draft").length;
 
   return res.status(200).json({
     stats: [
-      { label: "Total Products", value: products.length, delta: `${products.filter((product) => !product.isSold).length} ready to sell` },
+      { label: "Total Products", value: products.length, delta: `${draftProducts} drafts in progress` },
       { label: "Products Sold This Month", value: soldThisMonth, delta: "Completed order count" },
       { label: "Revenue This Month", value: revenueThisMonth, delta: "From successful M-Pesa callbacks", terracotta: true },
-      { label: "Pending Orders", value: pendingOrders, delta: "Need follow-up" },
+      { label: "Active WA Orders", value: pendingOrders, delta: "Need follow-up" },
     ],
     orders,
-    waOrders,
+    waOrders: waOrders.map((order) => ({
+      ...order,
+      statusLabel: getWaOrderStatusMeta(order.status).label,
+      statusClass: getWaOrderStatusMeta(order.status).cls,
+    })),
   });
 }

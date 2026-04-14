@@ -3,7 +3,7 @@ import Footer from "../../components/Footer";
 import Nav from "../../components/Nav";
 import Icon from "../../components/icons";
 import { useCart } from "../../lib/cart-context";
-import { getComplementaryJewelryTypes, getJewelryTypeLabel } from "../../lib/products";
+import { getComplementaryJewelryTypes, getJewelryTypeLabel, isPublishedProduct } from "../../lib/products";
 import { readProducts } from "../../lib/store";
 
 function ProductStoryPreview({ story }) {
@@ -246,13 +246,13 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
 
 export async function getServerSideProps({ params }) {
   const products = await readProducts();
-  const product = products.find((item) => item.slug === params.slug);
+  const product = products.find((item) => item.slug === params.slug && isPublishedProduct(item));
 
   if (!product) {
     return { notFound: true };
   }
 
-  const otherProducts = products.filter((item) => item.id !== product.id && !item.isSold);
+  const otherProducts = products.filter((item) => item.id !== product.id && !item.isSold && isPublishedProduct(item));
   const preferredTypes = getComplementaryJewelryTypes(product.jewelryType);
   const preferredProducts = preferredTypes.flatMap((type) =>
     otherProducts.filter((item) => item.category === "Jewellery" && item.jewelryType === type),

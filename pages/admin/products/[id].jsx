@@ -10,6 +10,7 @@ import { categoryOptions } from "../../../data/site";
 import {
   getJewelryTypeLabel,
   getProductAssetFolder,
+  publishStatusOptions,
   getSuggestedProductMediaFolder,
   jewelryTypeOptions,
   slugify,
@@ -27,6 +28,7 @@ const defaults = {
   materialsStr: "",
   category: "Jewellery",
   jewelryType: "necklace",
+  publishStatus: "published",
   price: 0,
   originalPrice: "",
   image: "",
@@ -77,6 +79,7 @@ function toFormValues(product) {
     materialsStr: Array.isArray(product.materials) ? product.materials.join(", ") : "",
     category: product.category,
     jewelryType: product.jewelryType || "necklace",
+    publishStatus: product.publishStatus || "published",
     price: product.price,
     originalPrice: product.originalPrice ?? "",
     image: product.image ?? "",
@@ -180,6 +183,7 @@ export default function AdminProductEditorPage() {
       materials,
       category: values.category,
       jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
+      publishStatus: values.publishStatus,
       price: Number(values.price),
       originalPrice,
       image: values.image.trim(),
@@ -322,6 +326,16 @@ export default function AdminProductEditorPage() {
                   </select>
                 </label>
               ) : null}
+              <label className="admin-field">
+                <span className="admin-note">Visibility</span>
+                <select className="admin-select" {...register("publishStatus")}>
+                  {publishStatusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {status === "published" ? "Published" : "Draft"}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="admin-field">
                 <span className="admin-note">Years of practice</span>
                 <input className="admin-input" type="number" min={0} {...register("yearsOfPractice")} />
