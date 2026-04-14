@@ -1,93 +1,87 @@
-HOW TO ADD PRODUCT PHOTOS — SharonCraft
-=========================================
-
-DROP YOUR PHOTOS IN THIS FOLDER: public/media/products/
-
-NAMING RULE: [product-id]-main.webp  (main photo)
-             [product-id]-2.webp     (second photo)
-             [product-id]-3.webp     (third photo, optional)
-
-
-CURRENT PRODUCTS — FILES NEEDED
+SHARONCRAFT PRODUCT PHOTO LAYOUT
 ================================
 
-uhuru-home-set
-  → uhuru-home-set-main.webp   ← main shop card photo
-  → uhuru-home-set-2.webp
-  → uhuru-home-set-3.webp
+This folder now has category-first structure so new products are easier to add and easier to find later.
 
-sunburst-cascade-necklace
-  → sunburst-cascade-necklace-main.webp
-  → sunburst-cascade-necklace-2.webp
-  → sunburst-cascade-necklace-3.webp
-
-malkia-collar
-  → malkia-collar-main.webp
-  → malkia-collar-2.webp
-  → malkia-collar-3.webp
-
-kenya-pride-bracelet
-  → kenya-pride-bracelet-main.webp
-  → kenya-pride-bracelet-2.webp
-  → kenya-pride-bracelet-3.webp
-
-rainbow-loop-stack
-  → rainbow-loop-stack-main.webp
-  → rainbow-loop-stack-2.webp
-  → rainbow-loop-stack-3.webp
-
-sunlit-drop-earrings
-  → sunlit-drop-earrings-main.webp
-  → sunlit-drop-earrings-2.webp
-  → sunlit-drop-earrings-3.webp
-
-twiga-statement-earrings
-  → twiga-statement-earrings-main.webp
-  → twiga-statement-earrings-2.webp
-  → twiga-statement-earrings-3.webp
-
-kijani-mirror-duo
-  → kijani-mirror-duo-main.webp
-  → kijani-mirror-duo-2.webp
-  → kijani-mirror-duo-3.webp
-
-unity-table-placemats
-  → unity-table-placemats-main.webp
-  → unity-table-placemats-2.webp
-  → unity-table-placemats-3.webp
-
-beaded-carry-net
-  → beaded-carry-net-main.webp
-  → beaded-carry-net-2.webp
-  → beaded-carry-net-3.webp
-
-harvest-fringe-bag
-  → harvest-fringe-bag-main.webp
-  → harvest-fringe-bag-2.webp
-  → harvest-fringe-bag-3.webp
-
-royal-occasion-set
-  → royal-occasion-set-main.webp
-  → royal-occasion-set-2.webp
-  → royal-occasion-set-3.webp
-
-color-loop-jewelry-set
-  → color-loop-jewelry-set-main.webp
-  → color-loop-jewelry-set-2.webp
-  → color-loop-jewelry-set-3.webp
+Keep existing flat files if they are already in use. Do not break old paths just to reorganize them.
+Use the new folder structure for all new products going forward.
 
 
-PHOTO SIZE GUIDE
+FOLDER STRUCTURE
 ================
-- Best size: 1000 × 1300 px (portrait 4:5 ratio) or 1200 × 1200 px square
-- Minimum width: 900 px
-- Keep each file under 300 KB if possible
-- Format: WebP (preferred) or JPG
+
+Jewellery
+  public/media/products/jewellery/necklaces/<product-slug>/
+  public/media/products/jewellery/bracelets/<product-slug>/
+  public/media/products/jewellery/earrings/<product-slug>/
+
+Other categories
+  public/media/products/home-decor/<product-slug>/
+  public/media/products/gift-sets/<product-slug>/
+  public/media/products/accessories/<product-slug>/
+  public/media/products/bridal-occasion/<product-slug>/
 
 
-ADDING A BRAND NEW PRODUCT
-===========================
-1. Add photos here:  public/media/products/my-new-product-main.webp
-2. Open this file:   data/store/products.json
-3. Add a new entry with "id": "my-new-product" and images: ["/media/products/my-new-product-main.webp"]
-4. Commit and push to GitHub → Vercel auto-deploys
+SHOT ORDER
+==========
+
+Jewellery
+  01-close-up
+  02-worn-or-styled
+  03-detail
+
+Home decor, gift sets, accessories, bridal occasion
+  01-hero
+  02-in-use-or-styled
+  03-detail
+
+
+PHOTO RULES
+===========
+
+Necklaces, bracelets, earrings
+  1. Start with one clean close-up.
+  2. Add one worn-on-body photo when possible.
+  3. Add one detail shot showing bead texture, clasp, or hand-finishing.
+
+All other categories
+  1. Start with one clear hero image.
+  2. Add one styled-in-space or in-use image.
+  3. Add one detail shot.
+
+
+NAMING RULE
+===========
+
+Use the product slug in every exported image name.
+
+Examples
+  sunburst-cascade-necklace-main.webp
+  sunburst-cascade-necklace-worn.webp
+  sunburst-cascade-necklace-detail.webp
+
+  kijani-mirror-duo-main.webp
+  kijani-mirror-duo-styled.webp
+  kijani-mirror-duo-detail.webp
+
+
+ADMIN WORKFLOW
+==============
+
+The admin product form now shows a suggested project folder and uploads to a matching organized storage path.
+
+Recommended flow:
+  1. Drop raw photos into the matching category folder in this project.
+  2. Pick the best close-up, styled, and detail images.
+  3. Upload them through the admin form in that same order.
+  4. Keep the product slug, folder name, and image names aligned.
+
+
+ONE EXTRA RECOMMENDATION
+========================
+
+For every new jewellery product, keep one simple matching note in the product description or admin notes:
+  "Pairs with drop earrings"
+  "Pairs with a layered necklace"
+
+That makes future bundles and "Wear it with" pairings easier to maintain.

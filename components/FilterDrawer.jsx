@@ -3,6 +3,8 @@ export default function FilterDrawer({
   onClose,
   activeCategory,
   setActiveCategory,
+  activeJewelryType,
+  setActiveJewelryType,
   showAvailableOnly,
   setShowAvailableOnly,
   sortBy,
@@ -40,6 +42,25 @@ export default function FilterDrawer({
           </select>
         </div>
 
+        {activeCategory === "Jewellery" ? (
+          <div className="filter-drawer__group">
+            <label className="heading-sm" htmlFor="filter-jewelry-type">
+              Jewellery Type
+            </label>
+            <select
+              id="filter-jewelry-type"
+              className="admin-select"
+              value={activeJewelryType}
+              onChange={(event) => setActiveJewelryType(event.target.value)}
+            >
+              <option value="all">All jewellery</option>
+              <option value="necklace">Necklaces</option>
+              <option value="bracelet">Bracelets</option>
+              <option value="earring">Earrings</option>
+            </select>
+          </div>
+        ) : null}
+
         <div className="filter-drawer__group">
           <span className="heading-sm">Availability</span>
           <label className="filter-drawer__option">
@@ -75,6 +96,7 @@ export default function FilterDrawer({
             className="filter-drawer__action"
             onClick={() => {
               setActiveCategory("All");
+              setActiveJewelryType("all");
               setShowAvailableOnly(false);
               setSortBy("featured");
             }}

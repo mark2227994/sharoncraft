@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import { formatKES } from "../../../lib/formatters";
+import { getJewelryTypeLabel } from "../../../lib/products";
 
 export default function AdminProductsPage() {
   const [deleting, setDeleting] = useState(null);
@@ -70,7 +71,15 @@ export default function AdminProductsPage() {
                 <tbody>
                   {products.map((product) => (
                     <tr key={product.id}>
-                      <td>{product.name}</td>
+                      <td>
+                        <div>
+                          <div>{product.name}</div>
+                          <div className="admin-note" style={{ marginTop: "4px" }}>
+                            {product.category}
+                            {product.jewelryType ? ` | ${getJewelryTypeLabel(product.jewelryType)}` : ""}
+                          </div>
+                        </div>
+                      </td>
                       <td>{product.artisan}</td>
                       <td>{product.isSold ? "Sold" : formatKES(product.price)}</td>
                       <td>{product.isSold ? "-" : product.stock}</td>
@@ -115,6 +124,7 @@ export default function AdminProductsPage() {
                       </p>
                       <p className="admin-note" style={{ marginTop: "4px" }}>
                         {product.artisan}
+                        {product.jewelryType ? ` | ${getJewelryTypeLabel(product.jewelryType)}` : ""}
                       </p>
                     </div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>

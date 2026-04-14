@@ -3,6 +3,7 @@ import Footer from "../../components/Footer";
 import Nav from "../../components/Nav";
 import Icon from "../../components/icons";
 import { useCart } from "../../lib/cart-context";
+import { getComplementaryJewelryTypes, getJewelryTypeLabel } from "../../lib/products";
 import { readProducts } from "../../lib/store";
 
 function ProductStoryPreview({ story }) {
@@ -67,7 +68,7 @@ function SectionTitle({ title }) {
   );
 }
 
-export default function ProductDetailPage({ product, relatedProducts }) {
+export default function ProductDetailPage({ product, wearItWithProducts, wearItWithTitle }) {
   const { addItem } = useCart();
 
   return (
@@ -100,6 +101,12 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             </div>
 
             <div className="product-page__facts">
+              {product.jewelryType ? (
+                <div>
+                  <span className="overline">Type</span>
+                  <p>{getJewelryTypeLabel(product.jewelryType)}</p>
+                </div>
+              ) : null}
               <div>
                 <span className="overline">Location</span>
                 <p>{product.artisanLocation || "Kenya"}</p>
@@ -129,12 +136,18 @@ export default function ProductDetailPage({ product, relatedProducts }) {
             />
           </div>
           <div>
-            <SectionTitle title="More From the Gallery" />
+            <SectionTitle title={wearItWithTitle} />
             <div className="product-page__related">
-              {relatedProducts.map((item) => (
+              {wearItWithProducts.map((item) => (
                 <Link key={item.id} href={`/product/${item.slug}`} className="product-page__related-card">
                   <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
+                  <span className="overline" style={{ marginTop: "12px", color: "var(--color-ochre)" }}>
+                    {item.collectionLabel}
+                  </span>
                   <span>{item.name}</span>
+                  <span className="price" style={{ marginTop: "6px" }}>
+                    KES {item.price.toLocaleString()}
+                  </span>
                 </Link>
               ))}
             </div>
@@ -193,7 +206,7 @@ export default function ProductDetailPage({ product, relatedProducts }) {
         }
         .product-page__facts {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
           gap: var(--space-4);
           padding-top: var(--space-4);
           border-top: 1px solid var(--border-default);
@@ -207,7 +220,6 @@ export default function ProductDetailPage({ product, relatedProducts }) {
           gap: var(--space-3);
         }
         .product-page__related-card span {
-          margin-top: var(--space-2);
           display: block;
           font-size: 0.875rem;
         }
@@ -240,10 +252,33 @@ export async function getServerSideProps({ params }) {
     return { notFound: true };
   }
 
+  const otherProducts = products.filter((item) => item.id !== product.id && !item.isSold);
+  const preferredTypes = getComplementaryJewelryTypes(product.jewelryType);
+  const preferredProducts = preferredTypes.flatMap((type) =>
+    otherProducts.filter((item) => item.category === "Jewellery" && item.jewelryType === type),
+  );
+  const fallbackJewellery = otherProducts.filter(
+    (item) =>
+      item.category === "Jewellery" &&
+      item.jewelryType &&
+      item.jewelryType !== product.jewelryType,
+  );
+  const fallbackGallery = otherProducts;
+  const wearItWithProducts = [];
+  const seen = new Set();
+
+  for (const candidate of [...preferredProducts, ...fallbackJewellery, ...fallbackGallery]) {
+    if (seen.has(candidate.id)) continue;
+    seen.add(candidate.id);
+    wearItWithProducts.push(candidate);
+    if (wearItWithProducts.length === 3) break;
+  }
+
   return {
     props: {
       product,
-      relatedProducts: products.filter((item) => item.id !== product.id).slice(0, 3),
+      wearItWithTitle: product.jewelryType ? "Wear it with" : "More From the Gallery",
+      wearItWithProducts,
     },
   };
 }

@@ -7,7 +7,13 @@ import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 import { categoryOptions } from "../../../data/site";
-import { slugify } from "../../../lib/products";
+import {
+  getJewelryTypeLabel,
+  getProductAssetFolder,
+  getSuggestedProductMediaFolder,
+  jewelryTypeOptions,
+  slugify,
+} from "../../../lib/products";
 
 const categories = categoryOptions.filter((c) => c !== "All");
 
@@ -20,9 +26,12 @@ const defaults = {
   yearsOfPractice: 5,
   materialsStr: "",
   category: "Jewellery",
+  jewelryType: "necklace",
   price: 0,
   originalPrice: "",
   image: "",
+  stylingImage: "",
+  detailImage: "",
   stock: 1,
   isSold: false,
   isNew: true,
@@ -30,6 +39,31 @@ const defaults = {
   recent: true,
   description: "",
 };
+
+function buildGalleryImages(values) {
+  return [values.image, values.stylingImage, values.detailImage]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .map((src) => ({ src }));
+}
+
+function JewelryPhotoGuide() {
+  return (
+    <div className="admin-panel" style={{ padding: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+      <p className="overline" style={{ marginBottom: "8px" }}>
+        Jewellery photo guide
+      </p>
+      <p className="body-sm" style={{ marginBottom: "8px" }}>
+        Keep every jewellery listing to a clean close-up first, then one worn-on-body frame, then one detail image of
+        the clasp, bead texture, or hand-finishing.
+      </p>
+      <p className="caption">
+        That sequence gives necklaces, bracelets, and earrings a more premium feel and makes the pairings section read
+        naturally.
+      </p>
+    </div>
+  );
+}
 
 function toFormValues(product) {
   if (!product) return defaults;
@@ -42,9 +76,12 @@ function toFormValues(product) {
     yearsOfPractice: product.yearsOfPractice ?? 0,
     materialsStr: Array.isArray(product.materials) ? product.materials.join(", ") : "",
     category: product.category,
+    jewelryType: product.jewelryType || "necklace",
     price: product.price,
     originalPrice: product.originalPrice ?? "",
     image: product.image ?? "",
+    stylingImage: product.images?.[1]?.src ?? "",
+    detailImage: product.images?.[2]?.src ?? "",
     stock: product.stock ?? 0,
     isSold: Boolean(product.isSold),
     isNew: Boolean(product.isNew),
@@ -74,7 +111,7 @@ export default function AdminProductEditorPage() {
     },
   });
 
-  const existing = useMemo(() => (products && id && !isNew ? products.find((p) => p.id === id) : null), [
+  const existing = useMemo(() => (products && id && !isNew ? products.find((product) => product.id === id) : null), [
     products,
     id,
     isNew,
@@ -92,6 +129,30 @@ export default function AdminProductEditorPage() {
   }, [router.isReady, id, isNew, products, existing, reset]);
 
   const nameValue = watch("name");
+  const categoryValue = watch("category") || "Jewellery";
+  const jewelryTypeValue = watch("jewelryType") || "";
+  const slugValue = watch("slug");
+
+  const isJewellery = categoryValue === "Jewellery";
+  const suggestedFolder = getSuggestedProductMediaFolder({
+    category: categoryValue,
+    jewelryType: jewelryTypeValue,
+    slug: slugValue || nameValue,
+  });
+  const uploadFolder = getProductAssetFolder({
+    category: categoryValue,
+    jewelryType: jewelryTypeValue,
+    slug: slugValue || nameValue,
+  });
+
+  useEffect(() => {
+    if (isJewellery && !jewelryTypeValue) {
+      setValue("jewelryType", "necklace");
+    }
+    if (!isJewellery && jewelryTypeValue) {
+      setValue("jewelryType", "");
+    }
+  }, [isJewellery, jewelryTypeValue, setValue]);
 
   function fillIdsFromName() {
     const base = slugify(nameValue);
@@ -118,24 +179,30 @@ export default function AdminProductEditorPage() {
       yearsOfPractice: Number(values.yearsOfPractice) || 0,
       materials,
       category: values.category,
+      jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
       price: Number(values.price),
       originalPrice,
       image: values.image.trim(),
-      images: values.image.trim() ? [{ src: values.image.trim() }] : [],
+      images: buildGalleryImages(values),
       stock: Number(values.stock),
       isSold: Boolean(values.isSold),
       isNew: Boolean(values.isNew),
       featured: Boolean(values.featured),
       recent: Boolean(values.recent),
       description: values.description.trim(),
-      story: existing?.story ?? {
+      story: {
+        ...(existing?.story ?? {}),
         artisanName: values.artisan.trim(),
         artisanLocation: values.artisanLocation.trim(),
         yearsOfPractice: Number(values.yearsOfPractice) || 0,
         materials,
-        text: "",
-        culturalNote: "",
-        behindScenesPhoto: "",
+        text: existing?.story?.text || values.description.trim(),
+        culturalNote: existing?.story?.culturalNote || "",
+        behindScenesPhoto:
+          values.stylingImage.trim() ||
+          values.detailImage.trim() ||
+          existing?.story?.behindScenesPhoto ||
+          values.image.trim(),
       },
     };
 
@@ -176,7 +243,7 @@ export default function AdminProductEditorPage() {
   return (
     <>
       <Head>
-        <title>{isNew ? "New piece" : "Edit piece"} — Gallery Admin</title>
+        <title>{isNew ? "New piece" : "Edit piece"} - Gallery Admin</title>
       </Head>
       <AdminLayout
         title={isNew ? "New piece" : "Edit piece"}
@@ -186,7 +253,7 @@ export default function AdminProductEditorPage() {
           </Link>
         }
       >
-        {!router.isReady || isLoading ? <p className="admin-note">Loading…</p> : null}
+        {!router.isReady || isLoading ? <p className="admin-note">Loading...</p> : null}
 
         {notFound ? <p className="admin-form-error">This piece is not in the catalogue.</p> : null}
 
@@ -243,6 +310,18 @@ export default function AdminProductEditorPage() {
                   ))}
                 </select>
               </label>
+              {isJewellery ? (
+                <label className="admin-field">
+                  <span className="admin-note">Jewellery type</span>
+                  <select className="admin-select" {...register("jewelryType")}>
+                    {jewelryTypeOptions.map((type) => (
+                      <option key={type} value={type}>
+                        {getJewelryTypeLabel(type)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
               <label className="admin-field">
                 <span className="admin-note">Years of practice</span>
                 <input className="admin-input" type="number" min={0} {...register("yearsOfPractice")} />
@@ -265,17 +344,58 @@ export default function AdminProductEditorPage() {
                 <span className="admin-note">Stock</span>
                 <input className="admin-input" type="number" min={0} {...register("stock", { required: true })} />
               </label>
+            </div>
+
+            <div className="admin-panel" style={{ padding: "var(--space-4)", marginBottom: "var(--space-4)" }}>
+              <p className="overline" style={{ marginBottom: "8px" }}>
+                Suggested project folder
+              </p>
+              <p className="body-sm">{suggestedFolder}</p>
+            </div>
+
+            {isJewellery ? <JewelryPhotoGuide /> : null}
+
+            <div className="admin-grid-2">
               <label className="admin-field">
-                <span className="admin-note">Image path</span>
+                <span className="admin-note">Primary close-up image</span>
                 <input
                   className="admin-input"
                   placeholder="/media/products/slug-main.webp"
                   {...register("image", { required: true })}
                 />
               </label>
+              <LocalImageUpload
+                label="Upload close-up image"
+                folder={uploadFolder}
+                onUploaded={(uploadedPath) => setValue("image", uploadedPath)}
+              />
+              <label className="admin-field">
+                <span className="admin-note">Worn-on-body or styled photo</span>
+                <input
+                  className="admin-input"
+                  placeholder="Optional second gallery image"
+                  {...register("stylingImage")}
+                />
+              </label>
+              <LocalImageUpload
+                label="Upload second gallery image"
+                folder={uploadFolder}
+                onUploaded={(uploadedPath) => setValue("stylingImage", uploadedPath)}
+              />
+              <label className="admin-field">
+                <span className="admin-note">Detail photo</span>
+                <input
+                  className="admin-input"
+                  placeholder="Optional clasp or texture detail image"
+                  {...register("detailImage")}
+                />
+              </label>
+              <LocalImageUpload
+                label="Upload detail image"
+                folder={uploadFolder}
+                onUploaded={(uploadedPath) => setValue("detailImage", uploadedPath)}
+              />
             </div>
-
-            <LocalImageUpload onUploaded={(uploadedPath) => setValue("image", uploadedPath)} />
 
             <label className="admin-field">
               <span className="admin-note">Short description</span>

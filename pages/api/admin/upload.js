@@ -17,6 +17,20 @@ const SUPABASE_ANON_KEY = "sb_publishable_3CbiLXuCbqRGjKmBp7Ez3w_NV4HaLXa";
 const STORAGE_BUCKET = "product-images";
 const STORAGE_FOLDER = "catalog";
 
+function sanitizeFolderPath(value) {
+  return String(value || "")
+    .split(/[\\/]+/)
+    .map((segment) =>
+      segment
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
+    )
+    .filter(Boolean)
+    .join("/");
+}
+
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -36,9 +50,10 @@ export default async function handler(req, res) {
     filter: ({ mimetype }) => mimetype != null && ALLOWED.has(String(mimetype)),
   });
 
+  let fields;
   let files;
   try {
-    [, files] = await form.parse(req);
+    [fields, files] = await form.parse(req);
   } catch (error) {
     return res.status(400).json({ error: `Parse error: ${String(error.message || error)}` });
   }
@@ -73,7 +88,11 @@ export default async function handler(req, res) {
     .replace(/-+/g, "-")
     .slice(0, 60);
   const fileName = `${baseName}-${Date.now()}${ext}`;
-  const storagePath = `${STORAGE_FOLDER}/${fileName}`;
+  const requestedFolder = Array.isArray(fields?.folder) ? fields.folder[0] : fields?.folder;
+  const cleanFolder = sanitizeFolderPath(requestedFolder);
+  const storagePath = cleanFolder
+    ? `${STORAGE_FOLDER}/${cleanFolder}/${fileName}`
+    : `${STORAGE_FOLDER}/${fileName}`;
 
   // Upload using Supabase JS client
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
