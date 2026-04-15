@@ -1,10 +1,11 @@
+import ArtisanCarousel from "../components/ArtisanCarousel";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import HeroBanner from "../components/HeroBanner";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import Icon from "../components/icons";
-import { artisanFeature, buildCollectionCards, trustItems } from "../data/site";
+import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
@@ -24,8 +25,9 @@ function SectionHeading({ title, kicker }) {
 export default function HomePage({
   featuredProducts,
   recentProducts,
+  allProducts,
   collectionCards,
-  artisanSpotlight,
+  artisans,
   categories,
   siteContent,
 }) {
@@ -33,7 +35,7 @@ export default function HomePage({
     <>
       <Nav />
       <HeroBanner
-        heroImage={artisanSpotlight.heroImage}
+        heroImage={siteContent.heroImage}
         heroImageAlt="Kenyan artisan wearing richly beaded adornment"
         title={siteContent.heroTitle}
         subtitle={siteContent.heroSubtitle}
@@ -47,23 +49,7 @@ export default function HomePage({
           <MasonryGrid products={featuredProducts} />
         </section>
 
-        <section id="artisan-story" className="editorial-feature">
-          <div className="editorial-feature__image">
-            <img src={artisanSpotlight.portrait} alt={artisanFeature.name} loading="lazy" decoding="async" />
-          </div>
-          <div className="editorial-feature__copy">
-            <p className="overline">The Artisan Behind It</p>
-            <p className="editorial-feature__quote">"{artisanFeature.quote}"</p>
-            <p className="body-base">{siteContent.artisanBio}</p>
-            <p className="body-base">
-              {artisanFeature.name}
-              <br />
-              <span className="caption" style={{ color: "var(--text-secondary)" }}>
-                {artisanFeature.location}
-              </span>
-            </p>
-          </div>
-        </section>
+        <ArtisanCarousel artisans={artisans} products={allProducts} />
 
         <section id="about-gallery" className="collections-section">
           <SectionHeading title="Browse All Collections" kicker="Explore by mood" />
@@ -116,32 +102,6 @@ export default function HomePage({
           background: var(--color-terracotta);
           opacity: 0.45;
           margin-top: 18px;
-        }
-        .editorial-feature {
-          max-width: var(--max-width);
-          margin: var(--space-7) auto;
-          padding: 0 var(--gutter);
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: var(--space-5);
-        }
-        .editorial-feature__image img {
-          width: 100%;
-          border-radius: var(--radius-lg);
-          object-fit: cover;
-          min-height: 320px;
-        }
-        .editorial-feature__copy {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          gap: var(--space-3);
-        }
-        .editorial-feature__quote {
-          font-family: var(--font-display);
-          font-style: italic;
-          font-size: clamp(1.75rem, 4vw, 2.5rem);
-          line-height: 1.25;
         }
         .collections-section {
           padding: var(--space-3) 0 var(--space-4);
@@ -203,9 +163,6 @@ export default function HomePage({
           border-radius: var(--radius-md);
         }
         @media (min-width: 900px) {
-          .editorial-feature {
-            grid-template-columns: 1fr 1fr;
-          }
           .collections-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
@@ -224,14 +181,12 @@ export async function getServerSideProps() {
 
   return {
     props: {
+      allProducts: prioritizeCategories(publishedProducts),
       featuredProducts: prioritizeCategories(publishedProducts.filter((product) => product.featured)).slice(0, 8),
       recentProducts: prioritizeCategories(publishedProducts.filter((product) => product.recent)).slice(0, 12),
       collectionCards: buildCollectionCards(siteImages),
       categories: getCatalogCategories(publishedProducts),
-      artisanSpotlight: {
-        heroImage: siteImages.heroImage,
-        portrait: siteImages.artisanPortrait,
-      },
+      artisans: buildFeaturedArtisans(siteImages),
       siteContent: siteImages,
     },
   };

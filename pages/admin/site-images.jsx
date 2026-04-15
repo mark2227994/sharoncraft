@@ -47,6 +47,16 @@ const TEXT_FIELDS = [
   { key: "heroTitle", label: "Hero title", type: "input", placeholder: "Handmade Kenyan jewellery and home decor" },
   { key: "heroSubtitle", label: "Hero subtitle / tagline", type: "input", placeholder: "Every piece tells a story." },
   { key: "artisanBio", label: "Artisan bio (short, shown on homepage)", type: "textarea", placeholder: "Sharon is a Kenyan artisan..." },
+  {
+    key: "artisanStories",
+    label: "Featured artisans carousel (one artisan per line)",
+    type: "textarea",
+    rows: 6,
+    placeholder:
+      "Nafula Wambui | Karatina, Nyeri County | Jewellery | /media/site/homepage/nafula.jpg | /shop?category=Jewellery | Nafula creates beadwork with a balanced, ceremonial feel.",
+    help:
+      "Format: Name | Location | Craft | Image path | Shop link | Short story. Leave image or link empty if you want the site to use a fallback.",
+  },
   { key: "aboutStory", label: "About / origin story", type: "textarea", placeholder: "SharonCraft was born from..." },
   { key: "deliveryNote", label: "Delivery note", type: "input", placeholder: "We deliver across Kenya. Standard delivery KES 300." },
   { key: "businessHours", label: "Business hours", type: "input", placeholder: "Mon-Sat, 9am-6pm EAT" },
@@ -172,7 +182,7 @@ export default function AdminSiteImagesPage() {
                       value={form[field.key] || ""}
                       onChange={(event) => set(field.key, event.target.value)}
                       placeholder={field.placeholder}
-                      rows={3}
+                      rows={field.rows || 3}
                     />
                   ) : (
                     <input
@@ -182,6 +192,7 @@ export default function AdminSiteImagesPage() {
                       placeholder={field.placeholder}
                     />
                   )}
+                  {field.help ? <p className="admin-note" style={{ marginTop: "8px" }}>{field.help}</p> : null}
                 </label>
               ))}
             </section>
