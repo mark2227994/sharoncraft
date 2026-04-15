@@ -253,6 +253,9 @@ export async function getServerSideProps({ params }) {
   }
 
   const otherProducts = products.filter((item) => item.id !== product.id && !item.isSold && isPublishedProduct(item));
+  const manualWearItWith = (product.wearItWithIds || [])
+    .map((id) => otherProducts.find((item) => item.id === id))
+    .filter(Boolean);
   const preferredTypes = getComplementaryJewelryTypes(product.jewelryType);
   const preferredProducts = preferredTypes.flatMap((type) =>
     otherProducts.filter((item) => item.category === "Jewellery" && item.jewelryType === type),
@@ -267,7 +270,7 @@ export async function getServerSideProps({ params }) {
   const wearItWithProducts = [];
   const seen = new Set();
 
-  for (const candidate of [...preferredProducts, ...fallbackJewellery, ...fallbackGallery]) {
+  for (const candidate of [...manualWearItWith, ...preferredProducts, ...fallbackJewellery, ...fallbackGallery]) {
     if (seen.has(candidate.id)) continue;
     seen.add(candidate.id);
     wearItWithProducts.push(candidate);

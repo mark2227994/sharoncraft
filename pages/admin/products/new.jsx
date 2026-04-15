@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
+import WearItWithPicker from "../../../components/admin/WearItWithPicker";
 import { categoryOptions } from "../../../data/site";
 import {
   getJewelryTypeLabel,
@@ -105,6 +106,7 @@ function MediaPathHelper({ uploadFolder, suggestedFolder }) {
 
 export default function AdminNewProductPage() {
   const router = useRouter();
+  const [catalogProducts, setCatalogProducts] = useState([]);
   const { register, handleSubmit, setValue, watch, getValues } = useForm({
     defaultValues: {
       category: "Jewellery",
@@ -121,6 +123,7 @@ export default function AdminNewProductPage() {
   const jewelryTypeValue = watch("jewelryType") || "";
   const stylingImageValue = watch("stylingImage");
   const detailImageValue = watch("detailImage");
+  const wearItWithIds = watch("wearItWithIds") || [];
 
   const isJewellery = categoryValue === "Jewellery";
   const suggestedFolder = getSuggestedProductMediaFolder({
@@ -142,6 +145,27 @@ export default function AdminNewProductPage() {
       setValue("jewelryType", "");
     }
   }, [isJewellery, jewelryTypeValue, setValue]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/admin/products", { credentials: "same-origin" });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled) {
+          setCatalogProducts(Array.isArray(data) ? data : []);
+        }
+      } catch (_error) {
+        // keep the picker empty if loading fails
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function fillSlugFromName() {
     const nextSlug = slugify(nameValue);
@@ -185,6 +209,7 @@ export default function AdminNewProductPage() {
       materials: values.materials.split(",").map((item) => item.trim()).filter(Boolean),
       category: values.category,
       jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
+      wearItWithIds,
       publishStatus: values.publishStatus,
       price: Number(values.price || 0),
       originalPrice: values.originalPrice ? Number(values.originalPrice) : null,
@@ -378,6 +403,13 @@ export default function AdminNewProductPage() {
           <span>Materials Used</span>
           <input className="admin-input" placeholder="Glass beads, brass clasp" {...register("materials")} />
         </label>
+        <WearItWithPicker
+          products={catalogProducts}
+          selectedIds={wearItWithIds}
+          onChange={(nextIds) => setValue("wearItWithIds", nextIds, { shouldDirty: true, shouldValidate: false })}
+          currentProductId={getValues("id")}
+          currentProductSlug={slugValue}
+        />
         <label className="admin-field">
           <span>Description</span>
           <textarea className="admin-textarea" {...register("description", { required: true })} />

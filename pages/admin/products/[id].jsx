@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
+import WearItWithPicker from "../../../components/admin/WearItWithPicker";
 import { categoryOptions } from "../../../data/site";
 import {
   getJewelryTypeLabel,
@@ -41,6 +42,7 @@ const defaults = {
   featured: false,
   recent: true,
   description: "",
+  wearItWithIds: [],
 };
 
 function buildGalleryImages(values) {
@@ -92,6 +94,7 @@ function toFormValues(product) {
     featured: Boolean(product.featured),
     recent: Boolean(product.recent),
     description: product.description ?? "",
+    wearItWithIds: Array.isArray(product.wearItWithIds) ? product.wearItWithIds : [],
   };
 }
 
@@ -139,6 +142,7 @@ export default function AdminProductEditorPage() {
   const primaryImageValue = watch("image");
   const stylingImageValue = watch("stylingImage");
   const detailImageValue = watch("detailImage");
+  const wearItWithIds = watch("wearItWithIds") || [];
 
   const isJewellery = categoryValue === "Jewellery";
   const suggestedFolder = getSuggestedProductMediaFolder({
@@ -213,6 +217,7 @@ export default function AdminProductEditorPage() {
       materials,
       category: values.category,
       jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
+      wearItWithIds,
       publishStatus: values.publishStatus,
       price: Number(values.price),
       originalPrice,
@@ -332,6 +337,14 @@ export default function AdminProductEditorPage() {
               <span className="admin-note">Materials (comma separated)</span>
               <input className="admin-input" {...register("materialsStr")} />
             </label>
+
+            <WearItWithPicker
+              products={Array.isArray(products) ? products : []}
+              selectedIds={wearItWithIds}
+              onChange={(nextIds) => setValue("wearItWithIds", nextIds, { shouldDirty: true, shouldValidate: false })}
+              currentProductId={getValues("id")}
+              currentProductSlug={slugValue}
+            />
 
             <div className="admin-grid-2">
               <label className="admin-field">
