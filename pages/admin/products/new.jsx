@@ -7,6 +7,8 @@ import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
 import WearItWithPicker from "../../../components/admin/WearItWithPicker";
 import { categoryOptions } from "../../../data/site";
 import {
+  fulfillmentTypeOptions,
+  getFulfillmentTypeLabel,
   getJewelryTypeLabel,
   getProductAssetFolder,
   publishStatusOptions,
@@ -112,6 +114,7 @@ export default function AdminNewProductPage() {
       category: "Jewellery",
       jewelryType: "necklace",
       publishStatus: "published",
+      fulfillmentType: "ready_to_ship",
       stock: 1,
     },
   });
@@ -211,6 +214,8 @@ export default function AdminNewProductPage() {
       jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
       wearItWithIds,
       publishStatus: values.publishStatus,
+      fulfillmentType: values.fulfillmentType,
+      productionNote: values.productionNote || "",
       price: Number(values.price || 0),
       originalPrice: values.originalPrice ? Number(values.originalPrice) : null,
       image: values.image,
@@ -314,6 +319,16 @@ export default function AdminNewProductPage() {
             </select>
           </label>
           <label className="admin-field">
+            <span>Fulfillment</span>
+            <select className="admin-select" {...register("fulfillmentType", { required: true })}>
+              {fulfillmentTypeOptions.map((type) => (
+                <option key={type} value={type}>
+                  {getFulfillmentTypeLabel(type)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="admin-field">
             <span>Artisan</span>
             <input className="admin-input" {...register("artisan", { required: true })} />
           </label>
@@ -402,6 +417,14 @@ export default function AdminNewProductPage() {
         <label className="admin-field">
           <span>Materials Used</span>
           <input className="admin-input" placeholder="Glass beads, brass clasp" {...register("materials")} />
+        </label>
+        <label className="admin-field">
+          <span>Production note for admin / WhatsApp</span>
+          <input
+            className="admin-input"
+            placeholder="Example: 3 to 5 days after confirmation, confirm colours first"
+            {...register("productionNote")}
+          />
         </label>
         <WearItWithPicker
           products={catalogProducts}

@@ -17,7 +17,7 @@ function getCheckoutDraftId() {
   return next;
 }
 
-function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtotal, total }) {
+function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtotal, total, whatsappNote }) {
   const lines = [];
   lines.push("Hello SharonCraft.");
   lines.push("");
@@ -40,6 +40,10 @@ function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtot
   lines.push(`Delivery area: ${area}`);
   lines.push(`Name: ${name}`);
   lines.push(`Phone: ${phone}`);
+  if (whatsappNote) {
+    lines.push("");
+    lines.push(whatsappNote);
+  }
   lines.push("");
   lines.push("Please confirm my order. Thank you.");
   return lines.join("\n");
@@ -122,6 +126,7 @@ export default function CheckoutPage() {
         items,
         subtotal,
         total,
+        whatsappNote: body.whatsappNote,
       });
 
       const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

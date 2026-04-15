@@ -3,7 +3,7 @@
  * Called from the checkout page when a customer sends a WhatsApp order.
  * Stores the order in Supabase so the admin can track it.
  */
-import { readWaOrders, writeWaOrders } from "../../../lib/store";
+import { readProducts, readWaOrders, writeWaOrders } from "../../../lib/store";
 import { buildOrderReference, normalizeWaOrder } from "../../../lib/wa-orders";
 
 export default async function handler(req, res) {
@@ -21,6 +21,22 @@ export default async function handler(req, res) {
 
   const timestamp = new Date().toISOString();
   const id = `wa_${Date.now()}`;
+  const products = await readProducts();
+  const matchedProducts = items
+    .map((item) => products.find((product) => product.id === item.id || product.slug === item.slug))
+    .filter(Boolean);
+  const fulfillmentType = matchedProducts.some((product) => product.fulfillmentType === "custom_order")
+    ? "custom_order"
+    : matchedProducts.some((product) => product.fulfillmentType === "made_to_order")
+      ? "made_to_order"
+      : "ready_to_ship";
+  const productionNotes = Array.from(
+    new Set(
+      matchedProducts
+        .map((product) => String(product.productionNote || "").trim())
+        .filter(Boolean),
+    ),
+  );
   const order = normalizeWaOrder({
     id,
     orderReference: buildOrderReference(id, timestamp),
@@ -33,9 +49,18 @@ export default async function handler(req, res) {
     delivery: 300,
     total: Number(total) || 0,
     status: "new",
+    fulfillmentType,
+    productionNote: productionNotes.join(" | "),
     note: "",
     source: "checkout",
   });
+
+  const whatsappNote =
+    fulfillmentType === "made_to_order"
+      ? "This order includes a made-to-order piece. Please confirm the production timeline and final details with SharonCraft."
+      : fulfillmentType === "custom_order"
+        ? "This order includes a custom design item. Please confirm design details, timeline, and next steps with SharonCraft."
+        : productionNotes[0] || "";
 
   try {
     const orders = await readWaOrders();
@@ -45,6 +70,7 @@ export default async function handler(req, res) {
       ok: true,
       orderId: order.id,
       orderReference: order.orderReference,
+      whatsappNote,
       order,
     });
   } catch (error) {

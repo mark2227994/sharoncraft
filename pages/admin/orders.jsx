@@ -4,6 +4,7 @@ import { formatKES } from "../../lib/formatters";
 import {
   buildAdminWhatsAppMessage,
   buildOrderWhatsAppHref,
+  getFulfillmentTypeMeta,
   getWaOrderStatusMeta,
   WA_ORDER_STATUS_FLOW,
 } from "../../lib/wa-orders";
@@ -36,6 +37,10 @@ function getOrderActions(order) {
   if (order.status === "paid") return ["dispatched", "delivered"];
   if (order.status === "dispatched") return ["delivered"];
   return [];
+}
+
+function getSourceLabel(order) {
+  return order?.source === "custom-design" ? "Custom Design" : "Checkout";
 }
 
 async function fetchOrders() {
@@ -243,6 +248,7 @@ export default function AdminOrdersPage() {
                 <tr>
                   <th>Order Ref</th>
                   <th>Customer</th>
+                  <th>Fulfillment</th>
                   <th>WhatsApp</th>
                   <th>Area</th>
                   <th>Total</th>
@@ -254,12 +260,18 @@ export default function AdminOrdersPage() {
               <tbody>
                 {filteredOrders.map((order) => {
                   const statusMeta = getWaOrderStatusMeta(order.status);
+                  const fulfillmentMeta = getFulfillmentTypeMeta(order.fulfillmentType);
                   return (
                     <tr key={order.id}>
                       <td style={{ whiteSpace: "nowrap" }}>{order.orderReference}</td>
                       <td>
                         <strong>{order.name}</strong>
-                        <div className="caption">{formatDate(order.timestamp)}</div>
+                        <div className="caption">{getSourceLabel(order)} - {formatDate(order.timestamp)}</div>
+                      </td>
+                      <td>
+                        <span className="caption" style={{ color: "var(--color-bark)", fontWeight: 600 }}>
+                          {fulfillmentMeta.label}
+                        </span>
                       </td>
                       <td>
                         <a
@@ -297,13 +309,15 @@ export default function AdminOrdersPage() {
           <section className="admin-mobile-cards">
             {filteredOrders.map((order) => {
               const statusMeta = getWaOrderStatusMeta(order.status);
+              const fulfillmentMeta = getFulfillmentTypeMeta(order.fulfillmentType);
               return (
                 <article key={order.id} className="admin-panel order-card-mobile">
                   <div className="order-card-mobile__top">
                     <div>
                       <p className="overline">{order.orderReference}</p>
                       <h2 className="heading-md">{order.name}</h2>
-                      <p className="body-sm">{order.area || "Area not provided"}</p>
+                      <p className="body-sm">{order.area || getSourceLabel(order)}</p>
+                      <p className="caption" style={{ marginTop: "4px" }}>{fulfillmentMeta.label}</p>
                     </div>
                     <span className={`admin-pill ${statusMeta.cls}`}>{statusMeta.label}</span>
                   </div>
@@ -346,6 +360,10 @@ export default function AdminOrdersPage() {
                 <p>{selectedOrder.name}</p>
               </div>
               <div>
+                <span className="caption">Request Source</span>
+                <p>{getSourceLabel(selectedOrder)}</p>
+              </div>
+              <div>
                 <span className="caption">Phone</span>
                 <p>{selectedOrder.phone}</p>
               </div>
@@ -357,7 +375,55 @@ export default function AdminOrdersPage() {
                 <span className="caption">Total</span>
                 <p>{formatKES(selectedOrder.total)}</p>
               </div>
+              <div>
+                <span className="caption">Fulfillment</span>
+                <p>{getFulfillmentTypeMeta(selectedOrder.fulfillmentType).label}</p>
+              </div>
             </div>
+
+            {selectedOrder.productionNote ? (
+              <div className="order-drawer__section">
+                <p className="overline">Production note</p>
+                <p className="body-sm" style={{ marginTop: "var(--space-2)" }}>{selectedOrder.productionNote}</p>
+              </div>
+            ) : null}
+
+            {selectedOrder.customRequest ? (
+              <div className="order-drawer__section">
+                <p className="overline">Custom request</p>
+                <div className="order-drawer__timeline">
+                  {selectedOrder.customRequest.designType ? (
+                    <div className="order-drawer__item"><span>Design type</span><span>{selectedOrder.customRequest.designType}</span></div>
+                  ) : null}
+                  {selectedOrder.customRequest.colors ? (
+                    <div className="order-drawer__item"><span>Colors</span><span>{selectedOrder.customRequest.colors}</span></div>
+                  ) : null}
+                  {selectedOrder.customRequest.occasion ? (
+                    <div className="order-drawer__item"><span>Occasion</span><span>{selectedOrder.customRequest.occasion}</span></div>
+                  ) : null}
+                  {selectedOrder.customRequest.budgetRange ? (
+                    <div className="order-drawer__item"><span>Budget</span><span>{selectedOrder.customRequest.budgetRange}</span></div>
+                  ) : null}
+                  {selectedOrder.customRequest.neededBy ? (
+                    <div className="order-drawer__item"><span>Needed by</span><span>{selectedOrder.customRequest.neededBy}</span></div>
+                  ) : null}
+                </div>
+                {selectedOrder.customRequest.designBrief ? (
+                  <p className="body-sm" style={{ marginTop: "var(--space-3)" }}>{selectedOrder.customRequest.designBrief}</p>
+                ) : null}
+                {selectedOrder.customRequest.referenceImage ? (
+                  <a
+                    href={selectedOrder.customRequest.referenceImage}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="admin-link"
+                    style={{ marginTop: "var(--space-2)", display: "inline-flex" }}
+                  >
+                    Open reference image
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
 
             <div className="order-drawer__section">
               <p className="overline">Quick steps</p>

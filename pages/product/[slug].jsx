@@ -69,7 +69,8 @@ function SectionTitle({ title }) {
 }
 
 export default function ProductDetailPage({ product, wearItWithProducts, wearItWithTitle }) {
-  const { addItem } = useCart();
+  const { addItem, isWishlisted, toggleWishlist } = useCart();
+  const saved = isWishlisted(product.id);
 
   return (
     <>
@@ -92,7 +93,15 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
               <button type="button" className="product-page__cta" onClick={() => addItem(product)}>
                 Add to Cart
               </button>
-              <button type="button" className="product-page__ghost">
+              <button
+                type="button"
+                className="product-page__ghost"
+                onClick={() => toggleWishlist(product)}
+                style={{
+                  color: saved ? "var(--color-terracotta)" : undefined,
+                  borderColor: saved ? "rgba(192,77,41,0.22)" : undefined,
+                }}
+              >
                 <Icon name="heart" size={18} /> Wishlist
               </button>
               <button type="button" className="product-page__ghost">

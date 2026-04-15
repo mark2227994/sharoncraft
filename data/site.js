@@ -13,6 +13,9 @@ export const collectionCardLayout = [
   { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories" },
 ];
 
+export const defaultAboutStory =
+  "SharonCraft brings together handmade Kenyan beadwork, jewellery, and home pieces chosen for craft, warmth, and cultural memory. Each piece is meant to feel personal, giftable, and grounded in the story of the hands that made it.";
+
 export function buildCollectionCards(siteImages) {
   return collectionCardLayout.map((row) => ({
     title: row.title,
@@ -32,7 +35,7 @@ export const primaryNavLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/shop#collections", label: "Collections" },
   { href: "/#artisan-story", label: "Artisans" },
-  { href: "/#about-gallery", label: "About" },
+  { href: "/#about-story", label: "About" },
 ];
 
 export const mobileNavLinks = [
@@ -40,7 +43,8 @@ export const mobileNavLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/shop#collections", label: "Collections" },
   { href: "/#artisan-story", label: "Artisans" },
-  { href: "/#about-gallery", label: "About" },
+  { href: "/#about-story", label: "About" },
+  { href: "/wishlist", label: "Wishlist" },
   { href: "/cart", label: "Cart" },
 ];
 

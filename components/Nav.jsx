@@ -7,7 +7,7 @@ import Icon from "./icons";
 export default function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { count } = useCart();
+  const { count, wishlistCount } = useCart();
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 100);
@@ -36,6 +36,10 @@ export default function Nav() {
         </nav>
 
         <div className="nav__actions">
+          <Link href="/wishlist" className="nav__icon-btn" aria-label="View wishlist">
+            <Icon name="heart" size={18} />
+            {wishlistCount > 0 ? <span className="cart-badge">{wishlistCount}</span> : null}
+          </Link>
           <Link href="/cart" className="nav__icon-btn" aria-label="View cart">
             <Icon name="cart" size={18} />
             {count > 0 ? <span className="cart-badge">{count}</span> : null}

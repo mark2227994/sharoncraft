@@ -2,9 +2,11 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const CartContext = createContext(null);
 const CART_STORAGE_KEY = "sharoncraft-cart-v2";
+const WISHLIST_STORAGE_KEY = "sharoncraft-wishlist-v1";
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
+  const [wishlistItems, setWishlistItems] = useState([]);
 
   useEffect(() => {
     try {
@@ -19,20 +21,53 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     try {
+      const stored = window.localStorage.getItem(WISHLIST_STORAGE_KEY);
+      if (stored) {
+        setWishlistItems(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.warn("Unable to restore wishlist from storage.", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
       window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
       console.warn("Unable to persist cart to storage.", error);
     }
   }, [items]);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlistItems));
+    } catch (error) {
+      console.warn("Unable to persist wishlist to storage.", error);
+    }
+  }, [wishlistItems]);
+
   const value = useMemo(() => {
     const count = items.reduce((total, item) => total + item.quantity, 0);
     const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+    const wishlistCount = wishlistItems.length;
+
+    function toWishlistItem(product) {
+      return {
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        artisan: product.artisan,
+      };
+    }
 
     return {
       items,
+      wishlistItems,
       count,
       subtotal,
+      wishlistCount,
       addItem(product) {
         setItems((current) => {
           const existing = current.find((item) => item.id === product.id);
@@ -63,8 +98,28 @@ export function CartProvider({ children }) {
       clear() {
         setItems([]);
       },
+      isWishlisted(productId) {
+        return wishlistItems.some((item) => item.id === productId);
+      },
+      addToWishlist(product) {
+        setWishlistItems((current) => {
+          if (current.some((item) => item.id === product.id)) return current;
+          return current.concat(toWishlistItem(product));
+        });
+      },
+      removeFromWishlist(productId) {
+        setWishlistItems((current) => current.filter((item) => item.id !== productId));
+      },
+      toggleWishlist(product) {
+        setWishlistItems((current) => {
+          if (current.some((item) => item.id === product.id)) {
+            return current.filter((item) => item.id !== product.id);
+          }
+          return current.concat(toWishlistItem(product));
+        });
+      },
     };
-  }, [items]);
+  }, [items, wishlistItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

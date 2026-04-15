@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { formatKES, formatShortDate } from "../../lib/formatters";
 
@@ -16,6 +17,24 @@ export default function AdminDashboardPage() {
   const stats = data?.stats || [];
   const orders = data?.orders || [];
   const waOrders = data?.waOrders || [];
+  const finance = data?.finance || null;
+  const [costForm, setCostForm] = useState({
+    stripeFees: 0,
+    materialCosts: 0,
+    shippingCosts: 0,
+  });
+  const [financeMessage, setFinanceMessage] = useState("");
+  const [financeError, setFinanceError] = useState("");
+  const [savingFinance, setSavingFinance] = useState(false);
+
+  useEffect(() => {
+    if (!finance) return;
+    setCostForm({
+      stripeFees: finance.stripeFees || 0,
+      materialCosts: finance.materialCosts || 0,
+      shippingCosts: finance.shippingCosts || 0,
+    });
+  }, [finance]);
 
   const waPending = waOrders.filter((order) =>
     ["new", "seen", "confirmed", "paid", "dispatched"].includes(order.status),
@@ -24,6 +43,37 @@ export default function AdminDashboardPage() {
   const waRevenue = waOrders
     .filter((order) => order.status === "paid" || order.status === "delivered")
     .reduce((sum, order) => sum + (order.total || 0), 0);
+
+  async function saveWeeklyCosts(event) {
+    event.preventDefault();
+    if (!finance?.weekStart) return;
+
+    setSavingFinance(true);
+    setFinanceMessage("");
+    setFinanceError("");
+
+    const response = await fetch("/api/admin/dashboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        weekStart: finance.weekStart,
+        stripeFees: Number(costForm.stripeFees || 0),
+        materialCosts: Number(costForm.materialCosts || 0),
+        shippingCosts: Number(costForm.shippingCosts || 0),
+      }),
+    });
+
+    setSavingFinance(false);
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      setFinanceError(body?.error || "Could not save weekly costs.");
+      return;
+    }
+
+    setFinanceMessage("Weekly cost totals saved.");
+    window.location.reload();
+  }
 
   return (
     <AdminLayout
@@ -37,6 +87,97 @@ export default function AdminDashboardPage() {
       <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
         Product Overview
       </p>
+
+      {finance ? (
+        <section className="admin-panel admin-finance-panel" style={{ marginBottom: "var(--space-6)" }}>
+          <div className="admin-finance-panel__hero">
+            <div>
+              <p className="overline" style={{ color: "var(--color-ochre)", marginBottom: "8px" }}>
+                Weekly Profit
+              </p>
+              <p className="caption">{finance.weekLabel}</p>
+              <p className="admin-finance-panel__profit">{formatKES(finance.netProfit)}</p>
+              <p className="body-sm" style={{ color: "var(--text-secondary)" }}>
+                Net Profit = Money In - Money Out
+              </p>
+            </div>
+            <div className="admin-finance-panel__money-grid">
+              <div className="admin-finance-mini">
+                <span className="admin-finance-mini__label">Money In</span>
+                <strong>{formatKES(finance.moneyIn)}</strong>
+              </div>
+              <div className="admin-finance-mini">
+                <span className="admin-finance-mini__label">Money Out</span>
+                <strong>{formatKES(finance.moneyOut)}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-stats-grid" style={{ marginBottom: "var(--space-5)" }}>
+            <article className="admin-stat-card">
+              <p className="admin-stat-card__label">Sales</p>
+              <p className="admin-stat-card__value">{formatKES(finance.moneyIn)}</p>
+              <p className="admin-stat-card__delta">WA + M-Pesa received this week</p>
+            </article>
+            <article className="admin-stat-card">
+              <p className="admin-stat-card__label">Stripe Fees</p>
+              <p className="admin-stat-card__value">{formatKES(finance.stripeFees)}</p>
+              <p className="admin-stat-card__delta">Enter your total this week</p>
+            </article>
+            <article className="admin-stat-card">
+              <p className="admin-stat-card__label">Material Costs</p>
+              <p className="admin-stat-card__value">{formatKES(finance.materialCosts)}</p>
+              <p className="admin-stat-card__delta">Beads, clasps, packaging, and supplies</p>
+            </article>
+            <article className="admin-stat-card">
+              <p className="admin-stat-card__label">Shipping</p>
+              <p className="admin-stat-card__value">{formatKES(finance.shippingCosts)}</p>
+              <p className="admin-stat-card__delta">Your actual outgoing delivery cost</p>
+            </article>
+          </div>
+
+          <form className="admin-finance-form" onSubmit={saveWeeklyCosts}>
+            <label className="admin-field">
+              <span>Stripe fees</span>
+              <input
+                type="number"
+                min="0"
+                className="admin-input"
+                value={costForm.stripeFees}
+                onChange={(event) => setCostForm((current) => ({ ...current, stripeFees: event.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Material costs</span>
+              <input
+                type="number"
+                min="0"
+                className="admin-input"
+                value={costForm.materialCosts}
+                onChange={(event) => setCostForm((current) => ({ ...current, materialCosts: event.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Shipping</span>
+              <input
+                type="number"
+                min="0"
+                className="admin-input"
+                value={costForm.shippingCosts}
+                onChange={(event) => setCostForm((current) => ({ ...current, shippingCosts: event.target.value }))}
+              />
+            </label>
+            <div className="admin-finance-form__actions">
+              <button type="submit" className="admin-button" disabled={savingFinance}>
+                {savingFinance ? "Saving..." : "Save weekly costs"}
+              </button>
+              {financeMessage ? <p className="admin-note">{financeMessage}</p> : null}
+              {financeError ? <p className="admin-form-error">{financeError}</p> : null}
+            </div>
+          </form>
+        </section>
+      ) : null}
+
       <section className="admin-stats-grid" style={{ marginBottom: "var(--space-6)" }}>
         {stats.map((stat) => (
           <article key={stat.label} className="admin-stat-card">
@@ -197,6 +338,62 @@ export default function AdminDashboardPage() {
           Edit Site Content
         </Link>
       </section>
+
+      <style jsx>{`
+        .admin-finance-panel__hero {
+          display: flex;
+          justify-content: space-between;
+          gap: var(--space-5);
+          align-items: flex-start;
+          margin-bottom: var(--space-5);
+        }
+        .admin-finance-panel__profit {
+          font-family: var(--font-display);
+          font-size: clamp(2.5rem, 6vw, 4.5rem);
+          line-height: 1;
+          color: var(--color-terracotta);
+          margin: 12px 0;
+        }
+        .admin-finance-panel__money-grid {
+          display: grid;
+          gap: var(--space-3);
+          min-width: 240px;
+        }
+        .admin-finance-mini {
+          padding: var(--space-4);
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          display: grid;
+          gap: 6px;
+        }
+        .admin-finance-mini__label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--text-muted);
+        }
+        .admin-finance-form {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: var(--space-4);
+          align-items: end;
+        }
+        .admin-finance-form__actions {
+          display: grid;
+          gap: 8px;
+        }
+        @media (max-width: 900px) {
+          .admin-finance-panel__hero,
+          .admin-finance-form {
+            grid-template-columns: 1fr;
+            display: grid;
+          }
+          .admin-finance-panel__money-grid {
+            min-width: 0;
+          }
+        }
+      `}</style>
     </AdminLayout>
   );
 }

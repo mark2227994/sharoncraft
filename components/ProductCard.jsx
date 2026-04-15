@@ -1,10 +1,13 @@
 import Link from "next/link";
 import Icon from "./icons";
+import { useCart } from "../lib/cart-context";
 
 export default function ProductCard({ product }) {
+  const { isWishlisted, toggleWishlist } = useCart();
   const { slug, name, artisan, price, originalPrice, image, images, isSold, isNew } = product;
   const imageSrc = image || images?.[0]?.src || "/media/site/placeholder.svg";
   const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : null;
+  const saved = isWishlisted(product.id);
 
   return (
     <Link href={`/product/${slug}`} className="product-card" aria-label={`View ${name}`}>
@@ -23,9 +26,15 @@ export default function ProductCard({ product }) {
         ) : null}
         <button
           className="product-card__wishlist"
-          aria-label="Add to wishlist"
+          aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
           onClick={(event) => {
             event.preventDefault();
+            toggleWishlist(product);
+          }}
+          style={{
+            color: saved ? "var(--color-terracotta)" : "currentColor",
+            borderColor: saved ? "rgba(192,77,41,0.22)" : undefined,
+            background: saved ? "rgba(255,255,255,0.96)" : undefined,
           }}
         >
           <Icon name="heart" size={18} />

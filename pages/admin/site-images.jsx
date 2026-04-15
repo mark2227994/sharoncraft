@@ -57,7 +57,7 @@ const TEXT_FIELDS = [
     help:
       "Format: Name | Location | Craft | Image path | Shop link | Short story. Leave image or link empty if you want the site to use a fallback.",
   },
-  { key: "aboutStory", label: "About / origin story", type: "textarea", placeholder: "SharonCraft was born from..." },
+  { key: "aboutStory", label: "About / origin story (homepage About section)", type: "textarea", placeholder: "SharonCraft was born from..." },
   { key: "deliveryNote", label: "Delivery note", type: "input", placeholder: "We deliver across Kenya. Standard delivery KES 300." },
   { key: "businessHours", label: "Business hours", type: "input", placeholder: "Mon-Sat, 9am-6pm EAT" },
   { key: "contactWhatsApp", label: "WhatsApp contact number (digits only, e.g. 0712345678)", type: "input", placeholder: "0112222572" },

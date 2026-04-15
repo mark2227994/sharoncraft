@@ -10,6 +10,8 @@ import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
 import WearItWithPicker from "../../../components/admin/WearItWithPicker";
 import { categoryOptions } from "../../../data/site";
 import {
+  fulfillmentTypeOptions,
+  getFulfillmentTypeLabel,
   getJewelryTypeLabel,
   getProductAssetFolder,
   publishStatusOptions,
@@ -31,6 +33,8 @@ const defaults = {
   category: "Jewellery",
   jewelryType: "necklace",
   publishStatus: "published",
+  fulfillmentType: "ready_to_ship",
+  productionNote: "",
   price: 0,
   originalPrice: "",
   image: "",
@@ -83,6 +87,8 @@ function toFormValues(product) {
     category: product.category,
     jewelryType: product.jewelryType || "necklace",
     publishStatus: product.publishStatus || "published",
+    fulfillmentType: product.fulfillmentType || "ready_to_ship",
+    productionNote: product.productionNote || "",
     price: product.price,
     originalPrice: product.originalPrice ?? "",
     image: product.image ?? "",
@@ -219,6 +225,8 @@ export default function AdminProductEditorPage() {
       jewelryType: values.category === "Jewellery" ? values.jewelryType : "",
       wearItWithIds,
       publishStatus: values.publishStatus,
+      fulfillmentType: values.fulfillmentType,
+      productionNote: values.productionNote || "",
       price: Number(values.price),
       originalPrice,
       image: values.image.trim(),
@@ -337,6 +345,14 @@ export default function AdminProductEditorPage() {
               <span className="admin-note">Materials (comma separated)</span>
               <input className="admin-input" {...register("materialsStr")} />
             </label>
+            <label className="admin-field">
+              <span className="admin-note">Production note for admin / WhatsApp</span>
+              <input
+                className="admin-input"
+                placeholder="Example: 3 to 5 days after confirmation, confirm colours first"
+                {...register("productionNote")}
+              />
+            </label>
 
             <WearItWithPicker
               products={Array.isArray(products) ? products : []}
@@ -375,6 +391,16 @@ export default function AdminProductEditorPage() {
                   {publishStatusOptions.map((status) => (
                     <option key={status} value={status}>
                       {status === "published" ? "Published" : "Draft"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-field">
+                <span className="admin-note">Fulfillment</span>
+                <select className="admin-select" {...register("fulfillmentType")}>
+                  {fulfillmentTypeOptions.map((type) => (
+                    <option key={type} value={type}>
+                      {getFulfillmentTypeLabel(type)}
                     </option>
                   ))}
                 </select>
