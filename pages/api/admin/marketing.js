@@ -5,6 +5,8 @@ function createId(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+const VALID_SECTIONS = ["campaigns", "planner", "leads", "abandonedCheckouts"];
+
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -17,7 +19,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     const { section, item } = req.body || {};
-    if (!section || !["campaigns", "planner", "leads"].includes(section)) {
+    if (!section || !VALID_SECTIONS.includes(section)) {
       return res.status(400).json({ error: "Valid section required" });
     }
 
@@ -36,7 +38,7 @@ export default async function handler(req, res) {
 
   if (req.method === "DELETE") {
     const { section, id } = req.query;
-    if (!section || !id || !["campaigns", "planner", "leads"].includes(section)) {
+    if (!section || !id || !VALID_SECTIONS.includes(section)) {
       return res.status(400).json({ error: "section and id required" });
     }
 

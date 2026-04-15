@@ -1,11 +1,21 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import { useCart } from "../lib/cart-context";
 
 const WHATSAPP_NUMBER = "254112222572";
+const CHECKOUT_DRAFT_KEY = "sharoncraft-checkout-draft-v1";
+
+function getCheckoutDraftId() {
+  if (typeof window === "undefined") return "";
+  const current = window.localStorage.getItem(CHECKOUT_DRAFT_KEY);
+  if (current) return current;
+  const next = `draft_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  window.localStorage.setItem(CHECKOUT_DRAFT_KEY, next);
+  return next;
+}
 
 function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtotal, total }) {
   const lines = [];
@@ -40,14 +50,44 @@ export default function CheckoutPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
   const [completed, setCompleted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const watchedName = watch("name", "");
+  const watchedPhone = watch("phone", "");
+  const watchedArea = watch("area", "");
 
   const delivery = 300;
   const total = subtotal + delivery;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || items.length === 0 || completed) return;
+    if (![watchedName, watchedPhone, watchedArea].some((value) => String(value || "").trim())) return;
+
+    const timeoutId = window.setTimeout(() => {
+      fetch("/api/orders/abandoned-wa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          draftId: getCheckoutDraftId(),
+          name: watchedName,
+          phone: watchedPhone,
+          area: watchedArea,
+          items,
+          subtotal,
+          total,
+          status: "open",
+        }),
+      }).catch(() => {});
+    }, 900);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [completed, items, subtotal, total, watchedArea, watchedName, watchedPhone]);
 
   async function onSubmit(data) {
     if (items.length === 0) return;
@@ -58,7 +98,15 @@ export default function CheckoutPage() {
       const response = await fetch("/api/orders/create-wa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: data.name, phone: data.phone, area: data.area, items, subtotal, total }),
+        body: JSON.stringify({
+          draftId: getCheckoutDraftId(),
+          name: data.name,
+          phone: data.phone,
+          area: data.area,
+          items,
+          subtotal,
+          total,
+        }),
       });
 
       const body = await response.json().catch(() => ({}));
@@ -77,6 +125,23 @@ export default function CheckoutPage() {
       });
 
       const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      fetch("/api/orders/abandoned-wa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          draftId: getCheckoutDraftId(),
+          name: data.name,
+          phone: data.phone,
+          area: data.area,
+          items,
+          subtotal,
+          total,
+          status: "converted",
+        }),
+      }).catch(() => {});
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(CHECKOUT_DRAFT_KEY);
+      }
       clear();
       setCompleted(true);
       window.open(url, "_blank", "noopener,noreferrer");

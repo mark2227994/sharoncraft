@@ -70,6 +70,17 @@ function SnippetCard({ title, text }) {
   );
 }
 
+function formatCurrency(value) {
+  return `KES ${Number(value || 0).toLocaleString()}`;
+}
+
+function splitTags(value) {
+  return String(value || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
 export default function AdminMarketingPage() {
   const queryClient = useQueryClient();
   const [angle, setAngle] = useState("style");
@@ -95,6 +106,7 @@ export default function AdminMarketingPage() {
     phone: "",
     interest: "",
     status: "new lead",
+    tags: "",
     note: "",
   });
 
@@ -118,7 +130,7 @@ export default function AdminMarketingPage() {
   });
 
   const products = data?.products || [];
-  const studio = data?.studio || { campaigns: [], planner: [], leads: [] };
+  const studio = data?.studio || { campaigns: [], planner: [], leads: [], abandonedCheckouts: [] };
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId || product.slug === selectedProductId) || null,
     [products, selectedProductId],
@@ -128,14 +140,17 @@ export default function AdminMarketingPage() {
   const plannerItems = studio.planner || [];
   const campaigns = studio.campaigns || [];
   const leads = studio.leads || [];
+  const abandonedCheckouts = studio.abandonedCheckouts || [];
 
   const plannerUpcoming = plannerItems.filter((item) => item.status !== "posted").length;
   const activeCampaigns = campaigns.filter((item) => ["draft", "scheduled", "boosting"].includes(item.status)).length;
   const warmLeads = leads.filter((item) => ["ready to order", "bridal inquiry", "asked price"].includes(item.status)).length;
+  const openAbandoned = abandonedCheckouts.filter((item) => item.status !== "converted").length;
 
   async function handleSaveCampaign() {
     const resolvedTitle = campaignForm.title.trim() || generatedPack?.campaignTitle || selectedProduct?.name || "";
     if (!resolvedTitle) return;
+
     await saveMutation.mutateAsync({
       section: "campaigns",
       item: {
@@ -147,11 +162,13 @@ export default function AdminMarketingPage() {
         generatedPack,
       },
     });
+
     setCampaignForm((current) => ({ ...current, title: "", cta: "" }));
   }
 
   async function handleSavePlanner() {
     if (!plannerForm.title.trim()) return;
+
     await saveMutation.mutateAsync({
       section: "planner",
       item: {
@@ -162,11 +179,13 @@ export default function AdminMarketingPage() {
         status: plannerForm.status,
       },
     });
+
     setPlannerForm((current) => ({ ...current, title: "", scheduledFor: "" }));
   }
 
   async function handleSaveLead() {
     if (!leadForm.name.trim()) return;
+
     await saveMutation.mutateAsync({
       section: "leads",
       item: {
@@ -175,16 +194,42 @@ export default function AdminMarketingPage() {
         phone: leadForm.phone.trim(),
         interest: leadForm.interest.trim(),
         status: leadForm.status,
+        tags: splitTags(leadForm.tags),
         note: leadForm.note.trim(),
       },
     });
+
     setLeadForm({
       name: "",
       source: "WhatsApp",
       phone: "",
       interest: "",
       status: "new lead",
+      tags: "",
       note: "",
+    });
+  }
+
+  async function handleConvertAbandoned(entry) {
+    await saveMutation.mutateAsync({
+      section: "leads",
+      item: {
+        name: entry.name || "Checkout lead",
+        source: "Checkout",
+        phone: entry.phone || "",
+        interest: (entry.items || []).map((item) => item.name).filter(Boolean).join(", "),
+        status: "follow up later",
+        tags: ["abandoned-checkout", "checkout-intent"],
+        note: entry.area ? `Delivery area: ${entry.area}` : "",
+      },
+    });
+
+    await saveMutation.mutateAsync({
+      section: "abandonedCheckouts",
+      item: {
+        ...entry,
+        status: "converted",
+      },
     });
   }
 
@@ -194,6 +239,7 @@ export default function AdminMarketingPage() {
         <CompactStat label="Active Campaigns" value={activeCampaigns} note="Drafts, scheduled, and boosting" />
         <CompactStat label="Upcoming Posts" value={plannerUpcoming} note="Content still waiting to go live" />
         <CompactStat label="Warm Leads" value={warmLeads} note="People most likely to convert next" attention={warmLeads > 0} />
+        <CompactStat label="Abandoned Checkouts" value={openAbandoned} note="Started checkout but did not finish" attention={openAbandoned > 0} />
       </section>
 
       {isLoading ? <p className="admin-note">Loading Marketing Studio...</p> : null}
@@ -232,219 +278,6 @@ export default function AdminMarketingPage() {
               </select>
             </label>
           </div>
-
-          <div className="admin-grid-2">
-            <label className="admin-field">
-              <span>Goal</span>
-              <select className="admin-select" value={goal} onChange={(event) => setGoal(event.target.value)}>
-                <option value="sales">Drive sales</option>
-                <option value="awareness">Build awareness</option>
-                <option value="whatsapp">Push WhatsApp inquiries</option>
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>Notes</span>
-              <input
-                className="admin-input"
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Bride request, gift season, Nairobi delivery, custom colors..."
-              />
-            </label>
-          </div>
-
-          <div className="admin-quick-actions" style={{ marginTop: 0 }}>
-            <button
-              type="button"
-              className="admin-button"
-              disabled={!selectedProductId || generateMutation.isPending}
-              onClick={() =>
-                generateMutation.mutate({
-                  productId: selectedProductId,
-                  angle,
-                  goal,
-                  notes,
-                })
-              }
-            >
-              {generateMutation.isPending ? "Generating..." : "Generate Launch Pack"}
-            </button>
-          </div>
-
-          {generateMutation.error ? <p className="admin-form-error">{generateMutation.error.message}</p> : null}
-
-          {selectedProduct ? (
-            <div className="marketing-product-chip">
-              <div>
-                <p className="caption marketing-pack__label">Selected product</p>
-                <p className="body-sm">
-                  {selectedProduct.name} · {selectedProduct.category}
-                </p>
-              </div>
-              {selectedProduct.image ? <img src={selectedProduct.image} alt={selectedProduct.name} /> : null}
-            </div>
-          ) : null}
-
-          {generatedPack ? (
-            <div className="marketing-pack">
-              <div className="marketing-pack__headline">
-                <div>
-                  <p className="overline">Generated launch pack</p>
-                  <h3 className="heading-md">{generatedPack.campaignTitle}</h3>
-                </div>
-                <span className="admin-pill admin-pill--pending">{generatedPack.angle || angle}</span>
-              </div>
-
-              <div className="marketing-pack__grid">
-                <SnippetCard title="TikTok hook" text={generatedPack.tiktokHook} />
-                <SnippetCard title="CTA" text={generatedPack.cta} />
-                <SnippetCard title="TikTok caption" text={generatedPack.tiktokCaption} />
-                <SnippetCard title="Instagram caption" text={generatedPack.instagramCaption} />
-                <SnippetCard title="Facebook caption" text={generatedPack.facebookCaption} />
-                <SnippetCard title="WhatsApp promo" text={generatedPack.whatsappPromo} />
-                <SnippetCard title="Follow-up message" text={generatedPack.followUpMessage} />
-                <SnippetCard title="Hashtags" text={(generatedPack.hashtags || []).join(" ")} />
-              </div>
-
-              <div className="marketing-pack__save">
-                <div className="admin-grid-2">
-                  <label className="admin-field">
-                    <span>Campaign title</span>
-                    <input
-                      className="admin-input"
-                      value={campaignForm.title}
-                      onChange={(event) => setCampaignForm((current) => ({ ...current, title: event.target.value }))}
-                      placeholder={generatedPack.campaignTitle}
-                    />
-                  </label>
-                  <label className="admin-field">
-                    <span>Platform</span>
-                    <select
-                      className="admin-select"
-                      value={campaignForm.platform}
-                      onChange={(event) => setCampaignForm((current) => ({ ...current, platform: event.target.value }))}
-                    >
-                      {PLATFORM_OPTIONS.map((platform) => (
-                        <option key={platform} value={platform}>
-                          {platform}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-                <div className="admin-grid-2">
-                  <label className="admin-field">
-                    <span>Status</span>
-                    <select
-                      className="admin-select"
-                      value={campaignForm.status}
-                      onChange={(event) => setCampaignForm((current) => ({ ...current, status: event.target.value }))}
-                    >
-                      {CAMPAIGN_STATUS_OPTIONS.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="admin-field">
-                    <span>CTA</span>
-                    <input
-                      className="admin-input"
-                      value={campaignForm.cta}
-                      onChange={(event) => setCampaignForm((current) => ({ ...current, cta: event.target.value }))}
-                      placeholder={generatedPack.cta}
-                    />
-                  </label>
-                </div>
-                <button type="button" className="admin-button" onClick={handleSaveCampaign} disabled={saveMutation.isPending}>
-                  Save as Campaign
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="marketing-side-stack">
-          <div className="admin-panel marketing-panel">
-            <p className="overline marketing-panel__eyebrow">Planner</p>
-            <h2 className="heading-md marketing-panel__title">Keep your next posts visible</h2>
-            <div className="admin-grid-2">
-              <label className="admin-field">
-                <span>Post title</span>
-                <input
-                  className="admin-input"
-                  value={plannerForm.title}
-                  onChange={(event) => setPlannerForm((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="Bridal bead set reel"
-                />
-              </label>
-              <label className="admin-field">
-                <span>Platform</span>
-                <select
-                  className="admin-select"
-                  value={plannerForm.platform}
-                  onChange={(event) => setPlannerForm((current) => ({ ...current, platform: event.target.value }))}
-                >
-                  {PLATFORM_OPTIONS.map((platform) => (
-                    <option key={platform} value={platform}>
-                      {platform}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="admin-grid-2">
-              <label className="admin-field">
-                <span>Content type</span>
-                <select
-                  className="admin-select"
-                  value={plannerForm.contentType}
-                  onChange={(event) => setPlannerForm((current) => ({ ...current, contentType: event.target.value }))}
-                >
-                  {CONTENT_TYPE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="admin-field">
-                <span>Date</span>
-                <input
-                  type="date"
-                  className="admin-input"
-                  value={plannerForm.scheduledFor}
-                  onChange={(event) => setPlannerForm((current) => ({ ...current, scheduledFor: event.target.value }))}
-                />
-              </label>
-            </div>
-            <button type="button" className="admin-button" onClick={handleSavePlanner} disabled={saveMutation.isPending}>
-              Save Planner Item
-            </button>
-
-            <div className="marketing-list">
-              {plannerItems.length === 0 ? <p className="admin-note">No planned posts yet.</p> : null}
-              {plannerItems.map((item) => (
-                <div key={item.id} className="marketing-list__item">
-                  <div>
-                    <p className="heading-sm">{item.title}</p>
-                    <p className="caption">
-                      {item.platform} · {item.contentType} · {item.scheduledFor || "No date yet"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="admin-button admin-button--secondary"
-                    onClick={() => deleteMutation.mutate({ section: "planner", id: item.id })}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="admin-panel marketing-panel">
             <p className="overline marketing-panel__eyebrow">Leads</p>
             <h2 className="heading-md marketing-panel__title">Track interested buyers simply</h2>
@@ -465,7 +298,7 @@ export default function AdminMarketingPage() {
                   value={leadForm.source}
                   onChange={(event) => setLeadForm((current) => ({ ...current, source: event.target.value }))}
                 >
-                  {PLATFORM_OPTIONS.map((platform) => (
+                  {[...PLATFORM_OPTIONS, "Checkout", "Facebook DM", "Instagram DM"].map((platform) => (
                     <option key={platform} value={platform}>
                       {platform}
                     </option>
@@ -508,6 +341,15 @@ export default function AdminMarketingPage() {
               />
             </label>
             <label className="admin-field">
+              <span>Customer tags / segments</span>
+              <input
+                className="admin-input"
+                value={leadForm.tags}
+                onChange={(event) => setLeadForm((current) => ({ ...current, tags: event.target.value }))}
+                placeholder="bridal, repeat buyer, gift, custom order"
+              />
+            </label>
+            <label className="admin-field">
               <span>Note</span>
               <textarea
                 className="admin-textarea"
@@ -528,10 +370,20 @@ export default function AdminMarketingPage() {
                   <div>
                     <p className="heading-sm">{lead.name}</p>
                     <p className="caption">
-                      {lead.source} · {lead.status}
+                      {lead.source} - {lead.status}
                     </p>
                     <p className="body-sm">{lead.interest || "No interest note yet."}</p>
                     {lead.phone ? <p className="caption">{lead.phone}</p> : null}
+                    {lead.tags?.length ? (
+                      <div className="marketing-tag-row">
+                        {lead.tags.map((tag) => (
+                          <span key={tag} className="marketing-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {lead.note ? <p className="caption marketing-note">{lead.note}</p> : null}
                   </div>
                   <button
                     type="button"
@@ -540,6 +392,61 @@ export default function AdminMarketingPage() {
                   >
                     Remove
                   </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="admin-panel marketing-panel">
+            <p className="overline marketing-panel__eyebrow">Abandoned Checkout</p>
+            <h2 className="heading-md marketing-panel__title">Follow up before interest goes cold</h2>
+            <p className="body-sm marketing-panel__intro">
+              Customers appear here as soon as they start typing at checkout. Save them as leads if you want to follow
+              up on WhatsApp or Instagram later.
+            </p>
+
+            <div className="marketing-list">
+              {abandonedCheckouts.length === 0 ? <p className="admin-note">No checkout leads yet.</p> : null}
+              {abandonedCheckouts.map((entry) => (
+                <div key={entry.id} className="marketing-list__item marketing-list__item--stack">
+                  <div style={{ width: "100%" }}>
+                    <div className="marketing-abandoned__top">
+                      <div>
+                        <p className="heading-sm">{entry.name || "Unnamed checkout"}</p>
+                        <p className="caption">
+                          {entry.phone || "No phone yet"} - {entry.area || "No area yet"}
+                        </p>
+                      </div>
+                      <span className={`admin-pill ${entry.status === "converted" ? "admin-pill--paid" : "admin-pill--pending"}`}>
+                        {entry.status === "converted" ? "Converted" : "Open"}
+                      </span>
+                    </div>
+
+                    <p className="body-sm marketing-abandoned__items">
+                      {(entry.items || []).map((item) => `${item.name} x ${item.quantity}`).join(", ") || "No items yet."}
+                    </p>
+                    <p className="caption">Estimated total: {formatCurrency(entry.total || entry.subtotal)}</p>
+                  </div>
+
+                  <div className="marketing-inline-actions">
+                    {entry.status !== "converted" ? (
+                      <button
+                        type="button"
+                        className="admin-button"
+                        onClick={() => handleConvertAbandoned(entry)}
+                        disabled={saveMutation.isPending}
+                      >
+                        Save as Lead
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="admin-button admin-button--secondary"
+                      onClick={() => deleteMutation.mutate({ section: "abandonedCheckouts", id: entry.id })}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -563,7 +470,7 @@ export default function AdminMarketingPage() {
                 <div>
                   <p className="heading-sm">{campaign.title}</p>
                   <p className="caption">
-                    {campaign.platform} · {campaign.status}
+                    {campaign.platform} - {campaign.status}
                   </p>
                 </div>
                 <button
@@ -625,6 +532,13 @@ export default function AdminMarketingPage() {
           object-fit: cover;
           border-radius: var(--radius-md);
         }
+        .marketing-tip-card {
+          margin-top: var(--space-5);
+          padding: var(--space-4);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          background: var(--bg-card-alt);
+        }
         .marketing-pack {
           display: grid;
           gap: var(--space-4);
@@ -671,17 +585,40 @@ export default function AdminMarketingPage() {
           background: var(--bg-card-alt);
         }
         .marketing-list__item--stack {
-          align-items: center;
+          align-items: flex-start;
         }
         .marketing-campaign-card {
           flex-direction: column;
         }
-        .marketing-campaign-card__top {
+        .marketing-campaign-card__top,
+        .marketing-abandoned__top,
+        .marketing-inline-actions {
           width: 100%;
           display: flex;
           justify-content: space-between;
           gap: var(--space-3);
           align-items: flex-start;
+        }
+        .marketing-tag-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 10px;
+        }
+        .marketing-tag {
+          padding: 3px 10px;
+          border-radius: var(--radius-pill);
+          background: rgba(74, 82, 64, 0.08);
+          border: 1px solid rgba(74, 82, 64, 0.18);
+          color: var(--color-moss);
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+        .marketing-note {
+          margin-top: 10px;
+        }
+        .marketing-abandoned__items {
+          margin: 10px 0 8px;
         }
         @media (max-width: 1100px) {
           .marketing-grid,
@@ -693,7 +630,9 @@ export default function AdminMarketingPage() {
           .marketing-product-chip,
           .marketing-pack__headline,
           .marketing-list__item,
-          .marketing-campaign-card__top {
+          .marketing-campaign-card__top,
+          .marketing-abandoned__top,
+          .marketing-inline-actions {
             flex-direction: column;
           }
         }
