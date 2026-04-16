@@ -7,17 +7,19 @@ export default function CategoryStrip({
   categories = categoryOptions,
 }) {
   return (
-    <div className={`category-strip ${className}`.trim()}>
-      {categories.map((category) => (
-        <button
-          key={category}
-          type="button"
-          className={`category-pill ${activeCategory === category ? "category-pill--active" : ""}`}
-          onClick={() => onSelect?.(category)}
-        >
-          {category}
-        </button>
-      ))}
+    <div className={`category-strip-shell ${className}`.trim()}>
+      <div className="category-strip">
+        {categories.map((category) => (
+          <button
+            key={category}
+            type="button"
+            className={`category-pill ${activeCategory === category ? "category-pill--active" : ""}`}
+            onClick={() => onSelect?.(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
