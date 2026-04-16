@@ -82,6 +82,8 @@ async function describeImage(visionModel, imageInput, index) {
 }
 
 function buildPrompt(body, imageSummaries) {
+  const lockedCategory = normalizeCategory(body?.category || "Jewellery");
+  const lockedJewelryType = lockedCategory === "Jewellery" ? normalizeJewelryType(body?.jewelryType || "") : "";
   const currentMaterials = Array.isArray(body?.materials)
     ? body.materials
     : String(body?.materials || "")
@@ -97,7 +99,7 @@ function buildPrompt(body, imageSummaries) {
     "Return valid JSON only, with no markdown fences and no commentary before or after the object.",
     "",
     "Brand direction:",
-    "- Focus especially on jewellery when applicable.",
+    "- Follow the selected admin category path instead of inventing a new one.",
     "- Product titles should be commercially useful, calm, and elegant.",
     "- Descriptions should feel human and curated, not AI-generated.",
     "- Keep shortDescription to 1-2 sentences.",
@@ -107,8 +109,8 @@ function buildPrompt(body, imageSummaries) {
     "",
     "Known product context:",
     `Current name: ${String(body?.name || "").trim() || "Unknown"}`,
-    `Current category: ${String(body?.category || "").trim() || "Unknown"}`,
-    `Current jewellery type: ${String(body?.jewelryType || "").trim() || "Unknown"}`,
+    `Selected category path: ${lockedCategory}`,
+    `Selected jewellery type path: ${lockedJewelryType || "Not applicable"}`,
     `Artisan: ${String(body?.artisan || "").trim() || "Unknown"}`,
     `Artisan location: ${String(body?.artisanLocation || "").trim() || "Unknown"}`,
     `Current materials: ${currentMaterials.join(", ") || "Unknown"}`,
@@ -117,8 +119,12 @@ function buildPrompt(body, imageSummaries) {
     "Image observations:",
     imageSummaries.length > 0 ? imageSummaries.map((summary, index) => `${index + 1}. ${summary}`).join("\n") : "No images available.",
     "",
-    "Choose one of these categories when possible: Jewellery, Home Decor, Gift Sets, Accessories, Bridal & Occasion.",
-    "If the item is jewellery, choose one jewelleryType from: necklace, bracelet, earring. Otherwise return an empty string for jewelryType.",
+    `category must be exactly "${lockedCategory}". Do not suggest any other category.`,
+    lockedCategory === "Jewellery"
+      ? lockedJewelryType
+        ? `jewelryType must be exactly "${lockedJewelryType}". Do not suggest another jewellery type.`
+        : 'If category is "Jewellery", choose one jewelryType from: necklace, bracelet, earring.'
+      : 'Because category is not "Jewellery", jewelryType must be an empty string.',
     `Return a single JSON object with exactly these keys: ${PRODUCT_COPY_FIELDS.join(", ")}.`,
     'Use arrays for "materials", "tags", and "photographyNotes".',
     'If you are unsure, return an empty string or an empty array instead of adding explanation text.',
@@ -178,10 +184,10 @@ async function repairJsonWithModel(textModel, rawResponse) {
   return parseModelJson(result?.response);
 }
 
-function normalizeSuggestions(raw) {
+function normalizeSuggestions(raw, body) {
   const suggestedName = String(raw?.suggestedName || "").trim();
-  const category = normalizeCategory(raw?.category || "Jewellery");
-  const jewelryType = category === "Jewellery" ? normalizeJewelryType(raw?.jewelryType) : "";
+  const category = normalizeCategory(body?.category || raw?.category || "Jewellery");
+  const jewelryType = category === "Jewellery" ? normalizeJewelryType(body?.jewelryType || raw?.jewelryType) : "";
   const slug = slugify(raw?.slug || suggestedName);
 
   return {
@@ -246,7 +252,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      suggestions: normalizeSuggestions(parsed),
+      suggestions: normalizeSuggestions(parsed, req.body),
       imageSummaries,
     });
   } catch (error) {

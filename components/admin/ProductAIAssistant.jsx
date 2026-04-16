@@ -134,7 +134,7 @@ export default function ProductAIAssistant({ values, onApply }) {
               </p>
             </div>
             <div className="admin-ai-result__card">
-              <p className="caption admin-media-helper__label">Suggested category</p>
+              <p className="caption admin-media-helper__label">Category path used</p>
               <p className="body-sm">
                 {result.suggestions.category}
                 {result.suggestions.jewelryType ? ` · ${result.suggestions.jewelryType}` : ""}

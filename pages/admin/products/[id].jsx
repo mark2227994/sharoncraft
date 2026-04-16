@@ -190,9 +190,6 @@ export default function AdminProductEditorPage() {
         setValue("id", `sc-${suggestions.slug}`, { shouldValidate: true, shouldDirty: true });
       }
     }
-    if (suggestions.category) {
-      setValue("category", suggestions.category, { shouldValidate: true, shouldDirty: true });
-    }
     if (suggestions.jewelryType) {
       setValue("jewelryType", suggestions.jewelryType, { shouldValidate: true, shouldDirty: true });
     }
