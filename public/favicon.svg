@@ -1,8 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
   <title>SharonCraft favicon</title>
-  <rect width="64" height="64" rx="16" fill="#F9F6EE"/>
+  <defs>
+    <radialGradient id="bgGlow" cx="32%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#D9744F"/>
+      <stop offset="58%" stop-color="#C04D29"/>
+      <stop offset="100%" stop-color="#8F3118"/>
+    </radialGradient>
+    <linearGradient id="ringShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E58A67" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#842C16" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="#F9F6EE"/>
+  <circle cx="32" cy="32" r="25" fill="url(#bgGlow)"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="url(#ringShade)" stroke-width="2"/>
+  <circle cx="32" cy="32" r="19.5" fill="none" stroke="#FFF9F1" stroke-opacity="0.14" stroke-width="1"/>
   <path
-    d="M32 5 12 17v30l20 12 20-12V17L32 5Zm0 7.1 14 8.4v8.7H37.8l-8.6-5H22v-1.9l10-6.2Zm-10 18.5h8l15.2 8.8v8.7h-8L22 39.4v-8.8Zm2.8 11.1 8.5 4.9h8.5v2.1L32 54.9 18 46.5v-8.8h6.8Z"
-    fill="#C04D29"
+    d="M32 14 19 21.8v20.4L32 50l13-7.8V21.8L32 14Zm0 4.8 8.9 5.2v5.4h-5.2l-5.5-3.1h-4.6v-1.3l6.4-3.9Zm-6.3 11.6h5.1l9.8 5.7v5.5h-5.2l-9.7-5.6v-5.6Zm1.8 7.1 5.5 3.2h5.4V42L32 45.8l-8.9-5.3v-5.7h4.4Z"
+    fill="#FFF9F1"
   />
 </svg>
