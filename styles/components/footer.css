@@ -12,8 +12,12 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-5);
 }
+.footer__grid > * {
+  min-width: 0;
+}
 .footer__brand {
   max-width: 280px;
+  min-width: 0;
 }
 .footer__logo {
   font-family: var(--font-display);
@@ -37,6 +41,7 @@
 .footer__link {
   color: rgba(249, 246, 238, 0.92);
   transition: color var(--transition-fast);
+  overflow-wrap: anywhere;
 }
 .footer__link:hover {
   color: var(--color-terracotta);
@@ -50,6 +55,14 @@
   gap: var(--space-2);
   font-size: 0.8125rem;
   color: rgba(249, 246, 238, 0.78);
+}
+@media (max-width: 560px) {
+  .footer__grid {
+    grid-template-columns: 1fr;
+  }
+  .footer__brand {
+    max-width: 100%;
+  }
 }
 @media (min-width: 900px) {
   .footer__grid {

@@ -70,7 +70,12 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
@@ -78,6 +83,8 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  max-width: 100%;
+  overflow-x: hidden;
   /* Page texture URL is set from data/site-images.json via pages/_document.jsx */
   background-repeat: repeat;
   background-size: 200px 200px;
