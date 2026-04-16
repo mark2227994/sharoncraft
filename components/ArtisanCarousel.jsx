@@ -181,17 +181,17 @@ export default function ArtisanCarousel({ artisans = [], products = [] }) {
           display: grid;
           grid-template-columns: 1fr;
           gap: var(--space-5);
-          padding: var(--space-5);
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(237, 232, 222, 0.88));
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-card);
+          padding: 0;
+          background: transparent;
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
         }
         .artisan-carousel__image-wrap img {
           width: 100%;
           min-height: 340px;
           object-fit: cover;
-          border-radius: var(--radius-lg);
+          border-radius: 0;
         }
         .artisan-carousel__copy {
           display: flex;
@@ -280,9 +280,6 @@ export default function ArtisanCarousel({ artisans = [], products = [] }) {
           .artisan-carousel__actions {
             flex-direction: column;
             align-items: flex-start;
-          }
-          .artisan-carousel__panel {
-            padding: var(--space-4);
           }
           .artisan-carousel__image-wrap img {
             min-height: 280px;
