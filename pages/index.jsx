@@ -6,7 +6,7 @@ import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
-import { buildCollectionCards, buildFeaturedArtisans, defaultAboutStory, trustItems } from "../data/site";
+import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
@@ -32,8 +32,6 @@ export default function HomePage({
   categories,
   siteContent,
 }) {
-  const aboutStory = String(siteContent.aboutStory || "").trim() || defaultAboutStory;
-
   return (
     <>
       <SeoHead
@@ -58,23 +56,6 @@ export default function HomePage({
         </section>
 
         <ArtisanCarousel artisans={artisans} products={allProducts} />
-
-        <section id="about-story" className="about-section">
-          <div className="about-section__panel">
-            <div className="about-section__copy">
-              <p className="overline">About SharonCraft</p>
-              <h2 className="display-md">A gallery shaped by craft, memory, and everyday beauty.</h2>
-              <p className="body-lg">{aboutStory}</p>
-            </div>
-            <div className="about-section__detail">
-              <p className="caption">What you will find here</p>
-              <p className="body-sm">
-                Handmade pieces chosen for thoughtful gifting, meaningful personal style, and a stronger connection to
-                Kenyan artisan work.
-              </p>
-            </div>
-          </div>
-        </section>
 
         <section id="about-gallery" className="collections-section">
           <SectionHeading title="Browse All Collections" kicker="Explore by mood" />
@@ -124,32 +105,6 @@ export default function HomePage({
           background: var(--color-terracotta);
           opacity: 0.45;
           margin-top: 18px;
-        }
-        .about-section {
-          max-width: var(--max-width);
-          margin: 0 auto;
-          padding: 0 var(--gutter);
-        }
-        .about-section__panel {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: var(--space-4);
-          padding: var(--space-5);
-          background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(237,232,222,0.9));
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-card);
-        }
-        .about-section__copy {
-          display: grid;
-          gap: var(--space-3);
-        }
-        .about-section__detail {
-          align-self: end;
-          padding: var(--space-4);
-          background: rgba(255, 255, 255, 0.72);
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-md);
         }
         .collections-section {
           padding: var(--space-3) 0 var(--space-4);
@@ -211,9 +166,6 @@ export default function HomePage({
           border-radius: var(--radius-md);
         }
         @media (min-width: 900px) {
-          .about-section__panel {
-            grid-template-columns: 1.2fr 0.8fr;
-          }
           .collections-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }

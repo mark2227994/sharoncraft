@@ -61,7 +61,7 @@ export default function Footer({ siteContent }) {
     {
       title: "Company",
       links: [
-        { label: "About", href: "/#about-story" },
+        { label: "About", href: "/about" },
         { label: "Artisans", href: "/#artisan-story" },
         { label: "Custom Design", href: "/custom-order" },
         { label: "Checkout", href: "/checkout" },
@@ -80,7 +80,7 @@ export default function Footer({ siteContent }) {
         },
         {
           label: content.businessHours || fallbackSiteContent.businessHours,
-          href: "/#about-story",
+          href: "/about",
         },
       ],
     },
