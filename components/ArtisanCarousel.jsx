@@ -152,7 +152,7 @@ export default function ArtisanCarousel({ artisans = [], products = [] }) {
           justify-content: space-between;
           align-items: flex-end;
           gap: var(--space-4);
-          margin-bottom: var(--space-4);
+          margin-bottom: var(--space-5);
         }
         .artisan-carousel__controls {
           display: flex;
@@ -198,6 +198,7 @@ export default function ArtisanCarousel({ artisans = [], products = [] }) {
           flex-direction: column;
           justify-content: center;
           gap: var(--space-3);
+          padding: 0 0 var(--space-2);
         }
         .artisan-carousel__meta {
           color: var(--color-ochre);
@@ -276,13 +277,69 @@ export default function ArtisanCarousel({ artisans = [], products = [] }) {
           }
         }
         @media (max-width: 767px) {
+          .artisan-carousel {
+            margin: var(--space-6) auto;
+          }
           .artisan-carousel__header,
           .artisan-carousel__actions {
             flex-direction: column;
             align-items: flex-start;
+            gap: var(--space-3);
+          }
+          .artisan-carousel__header {
+            margin-bottom: var(--space-4);
+          }
+          .artisan-carousel__controls {
+            gap: 6px;
+          }
+          .artisan-carousel__control {
+            width: 38px;
+            height: 38px;
           }
           .artisan-carousel__image-wrap img {
             min-height: 280px;
+          }
+          .artisan-carousel__copy {
+            padding: var(--space-4) 0 0;
+            gap: var(--space-2);
+          }
+          .artisan-carousel__story {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          .artisan-carousel__pieces {
+            padding-top: var(--space-3);
+          }
+          .artisan-carousel__piece-list {
+            gap: var(--space-2);
+          }
+          .artisan-carousel__piece-card:nth-child(n + 3) {
+            display: none;
+          }
+          .artisan-carousel__piece-card {
+            padding: 12px 14px;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+          }
+          .artisan-carousel__piece-card:hover {
+            transform: none;
+            box-shadow: none;
+          }
+          .artisan-carousel__cta {
+            width: 100%;
+          }
+          .artisan-carousel__dots {
+            gap: 6px;
+          }
+          .artisan-carousel__dot {
+            width: 8px;
+            height: 8px;
+          }
+          .artisan-carousel__dot--active {
+            width: 20px;
           }
         }
       `}</style>
