@@ -189,11 +189,18 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           display: grid;
           gap: var(--space-3);
         }
-        .product-page__gallery img,
-        .product-page__bts {
+        .product-page__gallery img {
           width: 100%;
           border-radius: var(--radius-lg);
           background: var(--color-cream-dark);
+        }
+        .product-page__bts {
+          width: 100%;
+          max-height: 320px;
+          object-fit: cover;
+          border-radius: 0;
+          background: var(--color-cream-dark);
+          box-shadow: none;
         }
         .product-page__summary {
           display: flex;
@@ -252,6 +259,9 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           }
         }
         @media (max-width: 767px) {
+          .product-page__bts {
+            max-height: 260px;
+          }
           .product-page__related {
             grid-template-columns: 1fr;
           }
