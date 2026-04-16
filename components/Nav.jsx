@@ -20,7 +20,13 @@ export default function Nav() {
     <>
       <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>
         <Link href="/" className="nav__logo" aria-label="SharonCraft home">
-          Sharon<span className="nav__logo-dot">&bull;</span>Craft
+          <img
+            src="/media/site/Gemini_Generated_Image_bxwnt0bxwnt0bxwn.png"
+            alt="SharonCraft"
+            className="nav__logo-image"
+            loading="eager"
+            decoding="async"
+          />
         </Link>
 
         <nav aria-label="Primary">
