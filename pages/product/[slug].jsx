@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Footer from "../../components/Footer";
 import Nav from "../../components/Nav";
+import SeoHead from "../../components/SeoHead";
 import Icon from "../../components/icons";
 import { useCart } from "../../lib/cart-context";
 import { getComplementaryJewelryTypes, getJewelryTypeLabel, isPublishedProduct } from "../../lib/products";
@@ -74,6 +75,13 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
 
   return (
     <>
+      <SeoHead
+        title={product.name}
+        description={product.description}
+        path={`/product/${product.slug}`}
+        image={product.image}
+        type="product"
+      />
       <Nav />
       <main className="product-page">
         <div className="product-page__grid">

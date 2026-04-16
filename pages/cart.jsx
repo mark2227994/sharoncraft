@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
+import SeoHead from "../components/SeoHead";
 import { useCart } from "../lib/cart-context";
 
 export default function CartPage() {
@@ -9,6 +10,12 @@ export default function CartPage() {
 
   return (
     <>
+      <SeoHead
+        title="Cart"
+        description="Review your SharonCraft selections before checkout."
+        path="/cart"
+        noindex
+      />
       <Nav />
       <main className="cart-page">
         <div>

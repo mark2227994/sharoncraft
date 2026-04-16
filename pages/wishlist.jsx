@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
+import SeoHead from "../components/SeoHead";
 import { useCart } from "../lib/cart-context";
 
 export default function WishlistPage() {
@@ -8,6 +9,12 @@ export default function WishlistPage() {
 
   return (
     <>
+      <SeoHead
+        title="Wishlist"
+        description="Saved SharonCraft pieces you may want to come back to."
+        path="/wishlist"
+        noindex
+      />
       <Nav />
       <main className="wishlist-page">
         <div className="wishlist-page__header">

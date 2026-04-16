@@ -4,6 +4,7 @@ import FilterDrawer from "../components/FilterDrawer";
 import Footer from "../components/Footer";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
+import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
 import { categoryOptions } from "../data/site";
 import {
@@ -58,6 +59,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
   return (
     <>
+      <SeoHead
+        title="Shop Handmade Kenyan Jewellery, Gifts And Decor"
+        description="Browse SharonCraft necklaces, bracelets, earrings, home decor, gift sets, and artisan-made pieces from Kenya."
+        path="/shop"
+      />
       <Nav />
       <CategoryStrip categories={categories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
 

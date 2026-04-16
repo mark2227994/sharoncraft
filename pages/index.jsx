@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import HeroBanner from "../components/HeroBanner";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
+import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
 import { buildCollectionCards, buildFeaturedArtisans, defaultAboutStory, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
@@ -35,6 +36,11 @@ export default function HomePage({
 
   return (
     <>
+      <SeoHead
+        title="Kenya Handmade Jewelry, Gifts And Decor"
+        description="Shop SharonCraft for handmade Kenyan jewellery, beaded gifts, home decor, and custom artisan pieces with simple WhatsApp ordering."
+        path="/"
+      />
       <Nav />
       <HeroBanner
         heroImage={siteContent.heroImage}

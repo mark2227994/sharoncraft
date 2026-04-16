@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
+import SeoHead from "../components/SeoHead";
 import { useCart } from "../lib/cart-context";
 
 const WHATSAPP_NUMBER = "254112222572";
@@ -160,6 +161,12 @@ export default function CheckoutPage() {
   if (items.length === 0 && !completed) {
     return (
       <>
+        <SeoHead
+          title="Checkout"
+          description="Complete your SharonCraft order and confirm delivery details through WhatsApp."
+          path="/checkout"
+          noindex
+        />
         <Nav />
         <main className="checkout-page">
           <div className="checkout-page__card" style={{ textAlign: "center", padding: "var(--space-7)" }}>
@@ -179,6 +186,12 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <SeoHead
+        title="Checkout"
+        description="Complete your SharonCraft order and confirm delivery details through WhatsApp."
+        path="/checkout"
+        noindex
+      />
       <Nav />
       <main className="checkout-page">
         <div>

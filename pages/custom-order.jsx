@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
+import SeoHead from "../components/SeoHead";
 
 const WHATSAPP_NUMBER = "254112222572";
 
@@ -79,6 +80,11 @@ export default function CustomOrderPage() {
 
   return (
     <>
+      <SeoHead
+        title="Custom Design Request"
+        description="Request a custom SharonCraft piece for bridal, gifting, personal style, or special occasions."
+        path="/custom-order"
+      />
       <Nav />
       <main className="custom-order-page">
         <div className="custom-order-page__intro">
