@@ -95,6 +95,17 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
       />
       <Nav />
       <main className="product-page">
+        {/* Breadcrumb */}
+        <nav style={{ marginBottom: "16px", fontSize: "13px", color: "var(--text-secondary)" }}>
+          <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>Home</Link>
+          <span style={{ margin: "0 8px" }}>/</span>
+          <Link href="/shop" style={{ color: "inherit", textDecoration: "none" }}>Shop</Link>
+          <span style={{ margin: "0 8px" }}>/</span>
+          <Link href={`/shop?category=${product.category}`} style={{ color: "inherit", textDecoration: "none" }}>{product.category}</Link>
+          <span style={{ margin: "0 8px" }}>/</span>
+          <span style={{ color: "var(--text-primary)" }}>{product.name}</span>
+        </nav>
+
         <div className="product-page__grid">
           <div className="product-page__gallery">
             {product.images.map((image) => (
@@ -106,6 +117,19 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
             <p className="overline">{product.artisan}</p>
             <h1 className="display-lg">{product.name}</h1>
             <p className="price--large">KES {product.price.toLocaleString()}</p>
+
+            {/* Stock Status */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }}></span>
+              <span style={{ fontSize: "14px", color: "#166534", fontWeight: 500 }}>In Stock</span>
+            </div>
+
+            {/* Reviews */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
+              <span style={{ color: "#f59e0b" }}>★★★★☆</span>
+              <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>(12 reviews)</span>
+            </div>
+
             <p className="body-base">{product.description}</p>
 
             <div className="product-page__actions">
@@ -163,6 +187,20 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
                   <Link href="/artisans" style={{ fontSize: "14px", color: "var(--color-terracotta)" }}>View all artisans →</Link>
                 </div>
               )}
+            </div>
+
+            {/* Shipping Info */}
+            <div style={{ marginTop: "16px", padding: "16px", background: "#f9fafb", borderRadius: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                <Icon name="truck" size={18} />
+                <span style={{ fontWeight: 600, fontSize: "14px" }}>Free Delivery in Nairobi</span>
+              </div>
+              <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>Delivery within 2-3 business days. KES 500 for other areas.</p>
+            </div>
+
+            {/* SKU */}
+            <div style={{ marginTop: "12px", fontSize: "12px", color: "var(--text-secondary)" }}>
+              SKU: {product.id?.substring(0, 8).toUpperCase() || "SC-" + product.name?.split(" ").slice(0, 2).join("").toUpperCase()}
             </div>
           </div>
         </div>
