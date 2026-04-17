@@ -52,7 +52,7 @@
 .masonry-item {
   margin-bottom: var(--masonry-gutter);
   opacity: 0;
-  animation: fadeUpIn 420ms ease forwards;
+  animation: fadeUpIn 220ms ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -65,7 +65,7 @@
 @keyframes fadeUpIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

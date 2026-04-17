@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import CategoryStrip from "../components/CategoryStrip";
 import FilterDrawer from "../components/FilterDrawer";
 import Footer from "../components/Footer";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
+import Pagination from "../components/Pagination";
 import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
 import { categoryOptions } from "../data/site";
@@ -17,12 +19,25 @@ import {
 } from "../lib/products";
 import { readProducts } from "../lib/store";
 
-export default function ShopPage({ products, categories, initialCategory, initialJewelryType }) {
+const PRODUCTS_PER_PAGE = 12;
+
+export default function ShopPage({
+  products,
+  categories,
+  initialCategory,
+  initialJewelryType,
+  initialShowAvailableOnly,
+  initialSortBy,
+  initialPage,
+}) {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeJewelryType, setActiveJewelryType] = useState(initialJewelryType);
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-  const [sortBy, setSortBy] = useState("featured");
+  const [showAvailableOnly, setShowAvailableOnly] = useState(initialShowAvailableOnly);
+  const [sortBy, setSortBy] = useState(initialSortBy);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const listingRef = useRef(null);
 
   const isJewelleryView = activeCategory === "Jewellery";
 
@@ -50,11 +65,70 @@ export default function ShopPage({ products, categories, initialCategory, initia
     });
   }, [activeCategory, activeJewelryType, isJewelleryView, products, showAvailableOnly, sortBy]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const currentProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  }, [currentPage, filteredProducts]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    const nextQuery = {};
+
+    if (activeCategory !== "All") nextQuery.category = activeCategory;
+    if (activeCategory === "Jewellery" && activeJewelryType !== "all") nextQuery.jewelryType = activeJewelryType;
+    if (showAvailableOnly) nextQuery.available = "1";
+    if (sortBy !== "featured") nextQuery.sort = sortBy;
+    if (currentPage > 1) nextQuery.page = String(currentPage);
+
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: nextQuery,
+      },
+      undefined,
+      { shallow: true, scroll: false },
+    );
+  }, [activeCategory, activeJewelryType, currentPage, router, showAvailableOnly, sortBy]);
+
+  function scrollToListing() {
+    if (!listingRef.current) return;
+    const top = listingRef.current.getBoundingClientRect().top + window.scrollY - (60 + 24);
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+
+  function handlePageChange(nextPage) {
+    if (nextPage < 1 || nextPage > totalPages || nextPage === currentPage) return;
+    setCurrentPage(nextPage);
+    window.requestAnimationFrame(scrollToListing);
+  }
+
   function handleCategorySelect(nextCategory) {
     setActiveCategory(nextCategory);
     if (nextCategory !== "Jewellery") {
       setActiveJewelryType("all");
     }
+    setCurrentPage(1);
+  }
+
+  function handleJewelryTypeSelect(nextType) {
+    setActiveJewelryType(nextType);
+    setCurrentPage(1);
+  }
+
+  function handleAvailableOnly(nextValue) {
+    setShowAvailableOnly(nextValue);
+    setCurrentPage(1);
+  }
+
+  function handleSort(nextSort) {
+    setSortBy(nextSort);
+    setCurrentPage(1);
   }
 
   return (
@@ -84,7 +158,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
             <button
               type="button"
               className={`shop-page__sub-pill ${activeJewelryType === "all" ? "shop-page__sub-pill--active" : ""}`}
-              onClick={() => setActiveJewelryType("all")}
+              onClick={() => handleJewelryTypeSelect("all")}
             >
               All jewellery
             </button>
@@ -93,7 +167,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                 key={type}
                 type="button"
                 className={`shop-page__sub-pill ${activeJewelryType === type ? "shop-page__sub-pill--active" : ""}`}
-                onClick={() => setActiveJewelryType(type)}
+                onClick={() => handleJewelryTypeSelect(type)}
               >
                 {getJewelryTypeLabel(type)}
               </button>
@@ -101,7 +175,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
           </div>
         ) : null}
 
-        <MasonryGrid products={filteredProducts} />
+        <div ref={listingRef}>
+          <MasonryGrid products={currentProducts} animationKey={`page-${currentPage}`} />
+        </div>
+
+        <div className="shop-page__pagination">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        </div>
       </main>
 
       <FilterDrawer
@@ -110,11 +190,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
         activeCategory={activeCategory}
         setActiveCategory={handleCategorySelect}
         activeJewelryType={activeJewelryType}
-        setActiveJewelryType={setActiveJewelryType}
+        setActiveJewelryType={handleJewelryTypeSelect}
         showAvailableOnly={showAvailableOnly}
-        setShowAvailableOnly={setShowAvailableOnly}
+        setShowAvailableOnly={handleAvailableOnly}
         sortBy={sortBy}
-        setSortBy={setSortBy}
+        setSortBy={handleSort}
         categories={categories}
       />
       <Footer />
@@ -168,10 +248,69 @@ export default function ShopPage({ products, categories, initialCategory, initia
           border-color: var(--color-terracotta);
           color: var(--color-white);
         }
+        .shop-page__pagination {
+          max-width: var(--max-width);
+          margin: 0 auto;
+          padding: 0 var(--gutter) var(--space-7);
+        }
+        :global(.pagination) {
+          display: grid;
+          gap: var(--space-3);
+          border-top: 1px solid rgba(28, 18, 9, 0.08);
+          padding-top: var(--space-4);
+        }
+        :global(.pagination__desktop),
+        :global(.pagination__mobile) {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-3);
+        }
+        :global(.pagination__numbers) {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        :global(.pagination__control),
+        :global(.pagination__page) {
+          min-height: 42px;
+          min-width: 42px;
+          padding: 0 14px;
+          border: 1px solid rgba(28, 18, 9, 0.12);
+          background: var(--color-white);
+          color: var(--text-primary);
+          transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+        }
+        :global(.pagination__control:disabled),
+        :global(.pagination__page:disabled) {
+          opacity: 0.38;
+          cursor: not-allowed;
+        }
+        :global(.pagination__page--active) {
+          border-color: var(--color-terracotta);
+          color: var(--color-terracotta);
+        }
+        :global(.pagination__ellipsis),
+        :global(.pagination__status) {
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+        }
+        :global(.pagination__mobile) {
+          display: none;
+        }
         @media (max-width: 767px) {
           .shop-page__hero {
             flex-direction: column;
             align-items: stretch;
+          }
+          :global(.pagination__desktop) {
+            display: none;
+          }
+          :global(.pagination__mobile) {
+            display: flex;
+          }
+          :global(.pagination__control) {
+            flex: 0 0 auto;
           }
         }
       `}</style>
@@ -188,6 +327,22 @@ export async function getServerSideProps({ query }) {
     typeof query.jewelryType === "string" && jewelryTypeOptions.includes(query.jewelryType)
       ? query.jewelryType
       : "all";
+  const initialShowAvailableOnly = query.available === "1";
+  const allowedSorts = new Set(["featured", "recent", "price-asc", "price-desc"]);
+  const initialSortBy =
+    typeof query.sort === "string" && allowedSorts.has(query.sort) ? query.sort : "featured";
+  const parsedPage = Number.parseInt(Array.isArray(query.page) ? query.page[0] : query.page || "1", 10);
+  const initialPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
-  return { props: { products, categories, initialCategory, initialJewelryType: requestedJewelryType } };
+  return {
+    props: {
+      products,
+      categories,
+      initialCategory,
+      initialJewelryType: requestedJewelryType,
+      initialShowAvailableOnly,
+      initialSortBy,
+      initialPage,
+    },
+  };
 }
