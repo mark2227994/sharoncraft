@@ -8,9 +8,9 @@ export const categoryOptions = [
 ];
 
 export const collectionCardLayout = [
-  { title: "Jewellery", href: "/shop?category=Jewellery", imageKey: "collectionJewellery" },
-  { title: "Home Objects", href: "/shop?category=Home%20Decor", imageKey: "collectionHome" },
-  { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories" },
+  { title: "Jewellery", href: "/shop?category=Jewellery", imageKey: "collectionJewellery", itemCount: 24 },
+  { title: "Home Objects", href: "/shop?category=Home%20Decor", imageKey: "collectionHome", itemCount: 18 },
+  { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories", itemCount: 12 },
 ];
 
 export const defaultAboutStory =
@@ -21,6 +21,7 @@ export function buildCollectionCards(siteImages) {
     title: row.title,
     href: row.href,
     image: siteImages[row.imageKey] || "",
+    itemCount: row.itemCount || 0,
   }));
 }
 

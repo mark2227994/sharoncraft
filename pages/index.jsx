@@ -62,8 +62,9 @@ export default function HomePage({
           <div className="collections-grid">
             {collectionCards.map((collection) => (
               <a key={collection.title} href={collection.href} className="collection-card">
-                <img src={collection.image} alt={collection.title} loading="lazy" decoding="async" />
+                <img src={collection.image} alt={collection.title} className="collection-card__image" loading="lazy" decoding="async" />
                 <span className="collection-card__overlay" />
+                {collection.itemCount && <span className="collection-card__badge">{collection.itemCount} items</span>}
                 <span className="collection-card__title display-md">{collection.title}</span>
               </a>
             ))}
@@ -113,9 +114,15 @@ export default function HomePage({
           max-width: var(--max-width);
           margin: 0 auto;
           padding: var(--space-4) var(--gutter);
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          display: flex;
           gap: var(--space-3);
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .collections-grid::-webkit-scrollbar {
+          display: none;
         }
         .collections-intro {
           max-width: var(--max-width);
@@ -123,17 +130,46 @@ export default function HomePage({
           padding: 0 var(--gutter);
         }
         .collection-card {
+          flex: 0 0 85vw;
+          scroll-snap-align: start;
           position: relative;
-          min-height: 220px;
+          min-height: 200px;
           overflow: hidden;
           border-radius: var(--radius-lg);
         }
-        .collection-card img,
-        .collection-card__overlay {
+        .collection-card:hover .collection-card__image {
+          transform: scale(1.08);
+        }
+        .collection-card__image {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
+          object-fit: cover;
+          transition: transform 0.4s ease;
+        }
+        .collection-card__overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(28, 18, 9, 0.7), transparent 70%);
+        }
+        .collection-card__badge {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: var(--color-white);
+          color: var(--text-primary);
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: var(--text-xs);
+          font-weight: 600;
+        }
+        .collection-card__title {
+          position: absolute;
+          left: 18px;
+          bottom: 18px;
+          color: var(--color-cream);
+          z-index: 1;
         }
         .collection-card img {
           object-fit: cover;
@@ -165,9 +201,20 @@ export default function HomePage({
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
         }
+        @media (min-width: 600px) {
+          .collection-card {
+            flex: 0 0 45vw;
+          }
+        }
         @media (min-width: 900px) {
           .collections-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            overflow: visible;
+          }
+          .collection-card {
+            flex: none;
+            min-height: 260px;
           }
           .trust-bar {
             grid-template-columns: repeat(3, minmax(0, 1fr));
