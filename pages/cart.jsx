@@ -39,19 +39,23 @@ export default function CartPage() {
               {items.map((item) => (
                 <article key={item.id} className="cart-page__item">
                   <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
-                  <div>
-                    <p className="overline">{item.artisan}</p>
-                    <h2 className="heading-md">{item.name}</h2>
-                    <p className="price">KES {item.price.toLocaleString()}</p>
+                  <div className="cart-page__item-main">
+                    <div>
+                      <p className="overline">{item.artisan}</p>
+                      <h2 className="cart-page__item-name">{item.name}</h2>
+                      <p className="cart-page__item-price">KES {item.price.toLocaleString()}</p>
+                    </div>
+                    <div className="cart-page__item-actions">
+                      <div className="cart-page__qty">
+                        <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                        <span>{item.quantity}</span>
+                        <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                      </div>
+                      <button type="button" className="cart-page__remove" onClick={() => removeItem(item.id)}>
+                        Remove
+                      </button>
+                    </div>
                   </div>
-                  <div className="cart-page__qty">
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
-                    <span>{item.quantity}</span>
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                  </div>
-                  <button type="button" className="cart-page__remove" onClick={() => removeItem(item.id)}>
-                    Remove
-                  </button>
                 </article>
               ))}
             </div>
@@ -116,42 +120,78 @@ export default function CartPage() {
         .cart-page__summary,
         .cart-page__empty {
           background: var(--color-white);
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-lg);
+          border: 1px solid rgba(28, 18, 9, 0.12);
           padding: var(--space-5);
         }
         .cart-page__item {
           display: grid;
-          grid-template-columns: 110px 1fr auto auto;
-          align-items: center;
+          grid-template-columns: 104px 1fr;
+          align-items: start;
           gap: var(--space-4);
-          padding: var(--space-3) 0;
-          border-bottom: 1px solid var(--border-default);
+          padding: var(--space-4) 0;
+          border-bottom: 1px solid rgba(28, 18, 9, 0.1);
         }
         .cart-page__item:last-child {
           border-bottom: none;
         }
         .cart-page__item img {
-          width: 110px;
-          height: 110px;
+          width: 104px;
+          height: 118px;
           object-fit: cover;
-          border-radius: var(--radius-md);
+          background: var(--color-cream-dark);
+        }
+        .cart-page__item-main {
+          min-width: 0;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: var(--space-4);
+        }
+        .cart-page__item-name {
+          font-size: 0.98rem;
+          line-height: 1.35;
+          font-weight: 600;
+          margin-top: 2px;
+        }
+        .cart-page__item-price {
+          margin-top: 6px;
+          font-size: 0.95rem;
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+        .cart-page__item-actions {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: var(--space-2);
+          flex: 0 0 auto;
         }
         .cart-page__qty {
           display: inline-flex;
           align-items: center;
-          gap: var(--space-3);
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-pill);
-          padding: 6px 12px;
+          border: 1px solid rgba(28, 18, 9, 0.16);
+        }
+        .cart-page__qty button,
+        .cart-page__qty span {
+          min-width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.9rem;
+        }
+        .cart-page__qty span {
+          border-left: 1px solid rgba(28, 18, 9, 0.16);
+          border-right: 1px solid rgba(28, 18, 9, 0.16);
         }
         .cart-page__remove {
           color: var(--color-terracotta);
+          font-size: 0.82rem;
         }
         .cart-page__summary {
           display: flex;
           flex-direction: column;
-          gap: var(--space-1);
+          gap: 2px;
         }
         .cart-page__delivery {
           display: grid;
@@ -192,11 +232,12 @@ export default function CartPage() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: var(--space-3) 0;
-          border-bottom: 1px solid var(--border-default);
+          padding: 10px 0;
+          border-bottom: 1px solid rgba(28, 18, 9, 0.1);
+          font-size: 0.92rem;
         }
         .cart-page__summary-row--total {
-          font-size: 1rem;
+          font-size: 1.03rem;
           font-weight: 600;
           color: var(--text-primary);
         }
@@ -222,7 +263,7 @@ export default function CartPage() {
         .cart-page__cta-note {
           margin-top: var(--space-3);
           font-size: 0.8125rem;
-          line-height: 1.6;
+          line-height: 1.5;
           color: var(--text-muted);
         }
         @media (min-width: 960px) {
@@ -235,8 +276,50 @@ export default function CartPage() {
           }
         }
         @media (max-width: 767px) {
+          .cart-page {
+            gap: var(--space-4);
+            padding: calc(var(--nav-height) + var(--space-5)) var(--gutter) var(--space-6);
+          }
+          .cart-page__items,
+          .cart-page__summary {
+            padding: var(--space-4);
+          }
           .cart-page__item {
-            grid-template-columns: 1fr;
+            grid-template-columns: 78px 1fr;
+            gap: var(--space-3);
+            padding: 12px 0;
+          }
+          .cart-page__item img {
+            width: 78px;
+            height: 92px;
+          }
+          .cart-page__item-main {
+            flex-direction: column;
+            gap: var(--space-2);
+          }
+          .cart-page__item-name {
+            font-size: 0.93rem;
+            line-height: 1.3;
+          }
+          .cart-page__item-price {
+            margin-top: 4px;
+            font-size: 0.92rem;
+          }
+          .cart-page__item-actions {
+            width: 100%;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .cart-page__remove {
+            font-size: 0.8rem;
+          }
+          .cart-page__summary-row {
+            font-size: 0.85rem;
+            padding: 9px 0;
+          }
+          .cart-page__summary-row--total {
+            font-size: 1rem;
           }
         }
       `}</style>
