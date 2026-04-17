@@ -7,6 +7,7 @@ const WISHLIST_STORAGE_KEY = "sharoncraft-wishlist-v1";
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -65,9 +66,19 @@ export function CartProvider({ children }) {
     return {
       items,
       wishlistItems,
+      isCartOpen,
       count,
       subtotal,
       wishlistCount,
+      openCart() {
+        setIsCartOpen(true);
+      },
+      closeCart() {
+        setIsCartOpen(false);
+      },
+      toggleCart() {
+        setIsCartOpen((current) => !current);
+      },
       addItem(product) {
         setItems((current) => {
           const existing = current.find((item) => item.id === product.id);
@@ -119,7 +130,7 @@ export function CartProvider({ children }) {
         });
       },
     };
-  }, [items, wishlistItems]);
+  }, [isCartOpen, items, wishlistItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

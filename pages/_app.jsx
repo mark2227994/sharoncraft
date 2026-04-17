@@ -9,6 +9,8 @@ import "../styles/components/product-card.css";
 import "../styles/components/filters.css";
 import "../styles/components/footer.css";
 import "../styles/components/admin.css";
+import "../styles/components/cart-drawer.css";
+import CartDrawer from "../components/CartDrawer";
 import { CartProvider } from "../lib/cart-context";
 
 export default function SharonCraftApp({ Component, pageProps }) {
@@ -28,6 +30,7 @@ export default function SharonCraftApp({ Component, pageProps }) {
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <Component {...pageProps} />
+        <CartDrawer />
       </CartProvider>
     </QueryClientProvider>
   );
