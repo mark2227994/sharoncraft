@@ -15,6 +15,9 @@ export default function LoginPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (loading) return;
+
     setError("");
     setLoading(true);
 
@@ -28,13 +31,13 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        setLoading(false);
         throw new Error(data.error || "Login failed");
       }
 
-      router.push("/account");
+      window.location.href = "/account";
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   }
