@@ -1,13 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { DEFAULT_DELIVERY_METHOD, normalizeDeliveryMethod } from "./delivery";
 
 const CartContext = createContext(null);
 const CART_STORAGE_KEY = "sharoncraft-cart-v2";
 const WISHLIST_STORAGE_KEY = "sharoncraft-wishlist-v1";
+const DELIVERY_STORAGE_KEY = "sharoncraft-delivery-v1";
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [wishlistItems, setWishlistItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [deliveryMethod, setDeliveryMethodState] = useState(DEFAULT_DELIVERY_METHOD);
 
   useEffect(() => {
     try {
@@ -33,6 +36,17 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     try {
+      const stored = window.localStorage.getItem(DELIVERY_STORAGE_KEY);
+      if (stored) {
+        setDeliveryMethodState(normalizeDeliveryMethod(stored));
+      }
+    } catch (error) {
+      console.warn("Unable to restore delivery preference from storage.", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
       window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
       console.warn("Unable to persist cart to storage.", error);
@@ -46,6 +60,14 @@ export function CartProvider({ children }) {
       console.warn("Unable to persist wishlist to storage.", error);
     }
   }, [wishlistItems]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(DELIVERY_STORAGE_KEY, deliveryMethod);
+    } catch (error) {
+      console.warn("Unable to persist delivery preference to storage.", error);
+    }
+  }, [deliveryMethod]);
 
   const value = useMemo(() => {
     const count = items.reduce((total, item) => total + item.quantity, 0);
@@ -70,6 +92,10 @@ export function CartProvider({ children }) {
       count,
       subtotal,
       wishlistCount,
+      deliveryMethod,
+      setDeliveryMethod(method) {
+        setDeliveryMethodState(normalizeDeliveryMethod(method));
+      },
       openCart() {
         setIsCartOpen(true);
       },
@@ -130,7 +156,7 @@ export function CartProvider({ children }) {
         });
       },
     };
-  }, [isCartOpen, items, wishlistItems]);
+  }, [deliveryMethod, isCartOpen, items, wishlistItems]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

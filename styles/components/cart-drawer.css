@@ -125,6 +125,49 @@
   gap: var(--space-2);
 }
 
+.cart-drawer__delivery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.cart-drawer__delivery-option {
+  min-height: 52px;
+  border: 1px solid rgba(28, 18, 9, 0.14);
+  background: var(--color-white);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  font-size: 0.8rem;
+}
+
+.cart-drawer__delivery-option--active {
+  border-color: var(--color-terracotta);
+  color: var(--color-terracotta);
+}
+
+.cart-drawer__delivery-option:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.cart-drawer__delivery-price {
+  font-weight: 600;
+}
+
+.cart-drawer__delivery-soon {
+  position: absolute;
+  right: 8px;
+  top: 7px;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .cart-drawer__summary-row {
   display: flex;
   align-items: center;

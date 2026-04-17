@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useCart } from "../lib/cart-context";
+import { DELIVERY_OPTIONS, getDeliveryFee } from "../lib/delivery";
 import Icon from "./icons";
 
 function formatKES(value) {
@@ -8,8 +9,19 @@ function formatKES(value) {
 }
 
 export default function CartDrawer() {
-  const { isCartOpen, items, subtotal, count, closeCart, updateQuantity, removeItem } = useCart();
-  const estimatedTotal = subtotal + (items.length ? 300 : 0);
+  const {
+    isCartOpen,
+    items,
+    subtotal,
+    count,
+    closeCart,
+    updateQuantity,
+    removeItem,
+    deliveryMethod,
+    setDeliveryMethod,
+  } = useCart();
+  const delivery = items.length ? getDeliveryFee(deliveryMethod) : 0;
+  const estimatedTotal = subtotal + delivery;
 
   useEffect(() => {
     if (!isCartOpen) return undefined;
@@ -86,6 +98,27 @@ export default function CartDrawer() {
             </div>
 
             <footer className="cart-drawer__footer">
+              <div className="cart-drawer__delivery" role="radiogroup" aria-label="Delivery option">
+                {Object.entries(DELIVERY_OPTIONS).map(([key, option]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`cart-drawer__delivery-option ${
+                      deliveryMethod === key ? "cart-drawer__delivery-option--active" : ""
+                    }`}
+                    onClick={() => setDeliveryMethod(key)}
+                    disabled={!option.available}
+                    aria-label={option.label}
+                    aria-checked={deliveryMethod === key}
+                    role="radio"
+                    title={option.label}
+                  >
+                    <Icon name={option.icon} size={18} />
+                    <span className="cart-drawer__delivery-price">{formatKES(option.fee)}</span>
+                    {!option.available ? <span className="cart-drawer__delivery-soon">Soon</span> : null}
+                  </button>
+                ))}
+              </div>
               <div className="cart-drawer__summary-row">
                 <span>Items</span>
                 <strong>{count}</strong>
@@ -95,10 +128,16 @@ export default function CartDrawer() {
                 <strong>{formatKES(subtotal)}</strong>
               </div>
               <div className="cart-drawer__summary-row">
+                <span>Delivery</span>
+                <strong>{formatKES(delivery)}</strong>
+              </div>
+              <div className="cart-drawer__summary-row">
                 <span>Estimated total</span>
                 <strong>{formatKES(estimatedTotal)}</strong>
               </div>
-              <p className="cart-drawer__note">Delivery is confirmed at checkout before your WhatsApp order is sent.</p>
+              <p className="cart-drawer__note">
+                Home delivery is active for now via Bolt, Uber, or your delivery agent.
+              </p>
               <div className="cart-drawer__actions">
                 <Link href="/checkout" className="cart-drawer__checkout" onClick={closeCart}>
                   Proceed to Checkout

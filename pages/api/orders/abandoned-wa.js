@@ -1,4 +1,5 @@
 import { readMarketingStudio, writeMarketingStudio } from "../../../lib/store";
+import { getDeliveryFee, normalizeDeliveryMethod } from "../../../lib/delivery";
 
 function normalizeItem(item) {
   return {
@@ -17,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const { draftId, name, phone, area, items, subtotal, total, status = "open" } = body;
+  const { draftId, name, phone, area, items, subtotal, total, delivery, deliveryMethod, status = "open" } = body;
 
   if (!draftId) {
     return res.status(400).json({ error: "draftId required" });
@@ -33,6 +34,8 @@ export default async function handler(req, res) {
   const existing = current.find((entry) => entry.id === draftId);
   const now = new Date().toISOString();
 
+  const normalizedDeliveryMethod = normalizeDeliveryMethod(deliveryMethod);
+  const deliveryFee = Number(delivery) || getDeliveryFee(normalizedDeliveryMethod);
   const nextItem = {
     id: draftId,
     createdAt: existing?.createdAt || now,
@@ -44,6 +47,8 @@ export default async function handler(req, res) {
     area: String(area || "").trim(),
     items: normalizedItems,
     subtotal: Number(subtotal || 0),
+    delivery: Number(deliveryFee || 0),
+    deliveryMethod: normalizedDeliveryMethod,
     total: Number(total || 0),
     source: "checkout",
   };

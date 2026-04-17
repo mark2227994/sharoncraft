@@ -1,12 +1,15 @@
 import Link from "next/link";
 import Footer from "../components/Footer";
+import Icon from "../components/icons";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
 import { useCart } from "../lib/cart-context";
+import { DELIVERY_OPTIONS, getDeliveryFee } from "../lib/delivery";
 
 export default function CartPage() {
-  const { items, subtotal, updateQuantity, removeItem } = useCart();
-  const estimatedTotal = subtotal + 300;
+  const { items, subtotal, updateQuantity, removeItem, deliveryMethod, setDeliveryMethod } = useCart();
+  const delivery = items.length ? getDeliveryFee(deliveryMethod) : 0;
+  const estimatedTotal = subtotal + delivery;
 
   return (
     <>
@@ -55,13 +58,32 @@ export default function CartPage() {
 
             <aside className="cart-page__summary">
               <p className="overline">Order Summary</p>
+              <div className="cart-page__delivery" role="radiogroup" aria-label="Delivery option">
+                {Object.entries(DELIVERY_OPTIONS).map(([key, option]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`cart-page__delivery-option ${deliveryMethod === key ? "cart-page__delivery-option--active" : ""}`}
+                    onClick={() => setDeliveryMethod(key)}
+                    disabled={!option.available}
+                    aria-label={option.label}
+                    aria-checked={deliveryMethod === key}
+                    role="radio"
+                    title={option.label}
+                  >
+                    <Icon name={option.icon} size={18} />
+                    <span>{option.fee}</span>
+                    {!option.available ? <span className="cart-page__delivery-soon">Soon</span> : null}
+                  </button>
+                ))}
+              </div>
               <div className="cart-page__summary-row">
                 <span>Subtotal</span>
                 <strong>KES {subtotal.toLocaleString()}</strong>
               </div>
               <div className="cart-page__summary-row">
                 <span>Delivery</span>
-                <strong>Calculated at checkout</strong>
+                <strong>KES {delivery.toLocaleString()}</strong>
               </div>
               <div className="cart-page__summary-row cart-page__summary-row--total">
                 <span>Estimated total</span>
@@ -130,6 +152,41 @@ export default function CartPage() {
           display: flex;
           flex-direction: column;
           gap: var(--space-1);
+        }
+        .cart-page__delivery {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: var(--space-2);
+          margin: var(--space-2) 0;
+        }
+        .cart-page__delivery-option {
+          min-height: 48px;
+          border: 1px solid rgba(28, 18, 9, 0.12);
+          background: var(--color-white);
+          color: var(--text-primary);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          position: relative;
+          font-size: 0.82rem;
+          font-weight: 600;
+        }
+        .cart-page__delivery-option--active {
+          border-color: var(--color-terracotta);
+          color: var(--color-terracotta);
+        }
+        .cart-page__delivery-option:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .cart-page__delivery-soon {
+          position: absolute;
+          right: 8px;
+          top: 7px;
+          font-size: 0.62rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
         }
         .cart-page__summary-row {
           display: flex;

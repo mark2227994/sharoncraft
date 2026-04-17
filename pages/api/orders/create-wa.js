@@ -4,6 +4,7 @@
  * Stores the order in Supabase so the admin can track it.
  */
 import { readProducts, readWaOrders, writeWaOrders } from "../../../lib/store";
+import { getDeliveryFee, normalizeDeliveryMethod } from "../../../lib/delivery";
 import { buildOrderReference, normalizeWaOrder } from "../../../lib/wa-orders";
 
 export default async function handler(req, res) {
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const { name, phone, area, items, subtotal, total } = body;
+  const { name, phone, area, items, subtotal, total, delivery, deliveryMethod } = body;
 
   if (!name || !phone || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -37,6 +38,10 @@ export default async function handler(req, res) {
         .filter(Boolean),
     ),
   );
+  const normalizedDeliveryMethod = normalizeDeliveryMethod(deliveryMethod);
+  const deliveryFee = Number(delivery) || getDeliveryFee(normalizedDeliveryMethod);
+  const normalizedSubtotal = Number(subtotal) || 0;
+  const normalizedTotal = Number(total) || normalizedSubtotal + deliveryFee;
   const order = normalizeWaOrder({
     id,
     orderReference: buildOrderReference(id, timestamp),
@@ -45,9 +50,9 @@ export default async function handler(req, res) {
     phone: String(phone).trim(),
     area: String(area || "").trim(),
     items,
-    subtotal: Number(subtotal) || 0,
-    delivery: 300,
-    total: Number(total) || 0,
+    subtotal: normalizedSubtotal,
+    delivery: deliveryFee,
+    total: normalizedTotal,
     status: "new",
     fulfillmentType,
     productionNote: productionNotes.join(" | "),

@@ -26,6 +26,8 @@ const paths = {
   arrowR:    "M5 12h14M12 5l7 7-7 7",
   star:      "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
   leaf:      "M19 3c-5.5 0-10 4.5-10 10 0 4.42 3.58 8 8 8 5.5 0 7-6 4-18h-2zM5 21c0-5 4-9 9-9",
+  truck:     "M10 17H3V6h10v11zM13 10h4l4 4v3h-2M7 20a2 2 0 100-4 2 2 0 000 4zM17 20a2 2 0 100-4 2 2 0 000 4z",
+  pin:       "M12 21s7-5.33 7-11a7 7 0 10-14 0c0 5.67 7 11 7 11zM12 12a3 3 0 100-6 3 3 0 000 6z",
 };
 
 export default function Icon({ name, size = 24, color = "currentColor", strokeWidth = 1.5, className = "" }) {

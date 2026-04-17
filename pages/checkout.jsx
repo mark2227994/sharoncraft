@@ -2,9 +2,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Footer from "../components/Footer";
+import Icon from "../components/icons";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
 import { useCart } from "../lib/cart-context";
+import { DELIVERY_OPTIONS, getDeliveryFee } from "../lib/delivery";
 
 const WHATSAPP_NUMBER = "254112222572";
 const CHECKOUT_DRAFT_KEY = "sharoncraft-checkout-draft-v1";
@@ -18,7 +20,18 @@ function getCheckoutDraftId() {
   return next;
 }
 
-function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtotal, total, whatsappNote }) {
+function buildWhatsAppMessage({
+  orderReference,
+  name,
+  phone,
+  area,
+  items,
+  subtotal,
+  total,
+  whatsappNote,
+  deliveryMethod,
+  deliveryFee,
+}) {
   const lines = [];
   lines.push("Hello SharonCraft.");
   lines.push("");
@@ -35,7 +48,7 @@ function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtot
   });
   lines.push("");
   lines.push(`Subtotal: KES ${subtotal.toLocaleString()}`);
-  lines.push("Delivery: KES 300");
+  lines.push(`Delivery (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"}): KES ${deliveryFee.toLocaleString()}`);
   lines.push(`Total: KES ${total.toLocaleString()}`);
   lines.push("");
   lines.push(`Delivery area: ${area}`);
@@ -51,7 +64,7 @@ function buildWhatsAppMessage({ orderReference, name, phone, area, items, subtot
 }
 
 export default function CheckoutPage() {
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, deliveryMethod, setDeliveryMethod } = useCart();
   const {
     register,
     handleSubmit,
@@ -65,7 +78,7 @@ export default function CheckoutPage() {
   const watchedPhone = watch("phone", "");
   const watchedArea = watch("area", "");
 
-  const delivery = 300;
+  const delivery = getDeliveryFee(deliveryMethod);
   const total = subtotal + delivery;
 
   useEffect(() => {
@@ -83,6 +96,8 @@ export default function CheckoutPage() {
           area: watchedArea,
           items,
           subtotal,
+          delivery,
+          deliveryMethod,
           total,
           status: "open",
         }),
@@ -92,7 +107,7 @@ export default function CheckoutPage() {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [completed, items, subtotal, total, watchedArea, watchedName, watchedPhone]);
+  }, [completed, delivery, deliveryMethod, items, subtotal, total, watchedArea, watchedName, watchedPhone]);
 
   async function onSubmit(data) {
     if (items.length === 0) return;
@@ -110,6 +125,8 @@ export default function CheckoutPage() {
           area: data.area,
           items,
           subtotal,
+          delivery,
+          deliveryMethod,
           total,
         }),
       });
@@ -126,6 +143,8 @@ export default function CheckoutPage() {
         area: data.area,
         items,
         subtotal,
+        deliveryMethod,
+        deliveryFee: delivery,
         total,
         whatsappNote: body.whatsappNote,
       });
@@ -141,6 +160,8 @@ export default function CheckoutPage() {
           area: data.area,
           items,
           subtotal,
+          delivery,
+          deliveryMethod,
           total,
           status: "converted",
         }),
@@ -259,6 +280,28 @@ export default function CheckoutPage() {
                 {errors.area ? <span className="checkout-page__error">{errors.area.message}</span> : null}
               </label>
 
+              <div className="checkout-page__delivery-icons" role="radiogroup" aria-label="Delivery option">
+                {Object.entries(DELIVERY_OPTIONS).map(([key, option]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`checkout-page__delivery-icon ${
+                      deliveryMethod === key ? "checkout-page__delivery-icon--active" : ""
+                    }`}
+                    onClick={() => setDeliveryMethod(key)}
+                    disabled={!option.available}
+                    aria-label={option.label}
+                    aria-checked={deliveryMethod === key}
+                    role="radio"
+                    title={option.label}
+                  >
+                    <Icon name={option.icon} size={18} />
+                    <span>{option.fee}</span>
+                    {!option.available ? <span className="checkout-page__delivery-soon">Soon</span> : null}
+                  </button>
+                ))}
+              </div>
+
               <div className="checkout-page__whatsapp-note">
                 <span className="checkout-page__note-label">WhatsApp</span>
                 <p>
@@ -285,7 +328,7 @@ export default function CheckoutPage() {
               ))}
               <div className="checkout-page__summary-row">
                 <span>Delivery</span>
-                <strong>KES 300</strong>
+                <strong>KES {delivery.toLocaleString()}</strong>
               </div>
               <div className="checkout-page__summary-row checkout-page__summary-row--total">
                 <span>Total</span>
@@ -353,6 +396,40 @@ const styles = `
     padding: var(--space-3) var(--space-4);
     font-size: 0.875rem;
     color: var(--color-moss);
+  }
+  .checkout-page__delivery-icons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .checkout-page__delivery-icon {
+    min-height: 52px;
+    border: 1px solid var(--border-default);
+    background: var(--color-white);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+  .checkout-page__delivery-icon--active {
+    border-color: var(--color-terracotta);
+    color: var(--color-terracotta);
+  }
+  .checkout-page__delivery-icon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .checkout-page__delivery-soon {
+    position: absolute;
+    right: 8px;
+    top: 7px;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
   .checkout-page__note-label {
     min-width: 74px;
