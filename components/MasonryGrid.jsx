@@ -8,7 +8,7 @@ function readMasonryGutter() {
   return 8;
 }
 
-export default function MasonryGrid({ products, animationKey }) {
+export default function MasonryGrid({ products }) {
   const gridRef = useRef(null);
   const masonryRef = useRef(null);
   const roRef = useRef(null);
@@ -86,7 +86,7 @@ export default function MasonryGrid({ products, animationKey }) {
       if (masonryRef.current) masonryRef.current.destroy();
       masonryRef.current = null;
     };
-  }, [animationKey, products.length, initMasonry, layoutWhenImagesReady]);
+  }, [products.length, initMasonry, layoutWhenImagesReady]);
 
   return (
     <div className="masonry-grid-wrapper">
@@ -97,7 +97,7 @@ export default function MasonryGrid({ products, animationKey }) {
         ) : (
           products.map((product, index) => (
             <div
-              key={`${animationKey || "base"}-${product.id}`}
+              key={product.id}
               className="masonry-item"
               style={{ animationDelay: `${Math.min(index, 20) * 35}ms` }}
             >
