@@ -5,7 +5,9 @@ import Icon from "../icons";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
+  { href: "/admin/artisans", label: "Artisans", icon: "heart" },
   { href: "/admin/orders", label: "Orders", icon: "package" },
+  { href: "/admin/custom-orders", label: "Custom Orders", icon: "edit" },
   { href: "/admin/products", label: "Products", icon: "package" },
   { href: "/admin/marketing", label: "Marketing", icon: "star" },
   { href: "/admin/offers", label: "Offers", icon: "tag" },
