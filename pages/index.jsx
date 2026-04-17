@@ -1,4 +1,4 @@
-import ArtisanCarousel from "../components/ArtisanCarousel";
+import ArtisanTimeline from "../components/ArtisanTimeline";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import HeroBanner from "../components/HeroBanner";
@@ -55,7 +55,7 @@ export default function HomePage({
           <MasonryGrid products={featuredProducts} />
         </section>
 
-        <ArtisanCarousel artisans={artisans} products={allProducts} />
+        <ArtisanTimeline artisans={artisans} />
 
         <section id="about-gallery" className="collections-section">
           <SectionHeading title="Browse All Collections" kicker="Explore by mood" />
