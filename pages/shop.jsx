@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import CategoryStrip from "../components/CategoryStrip";
-import FilterDrawer from "../components/FilterDrawer";
 import Footer from "../components/Footer";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
+import ShopSidebar from "../components/ShopSidebar";
 import { categoryOptions } from "../data/site";
 import {
   filterPublishedProducts,
@@ -23,8 +23,18 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 900);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const isJewelleryView = activeCategory === "Jewellery";
+
+  const hasActiveFilters = activeCategory !== "All" || activeJewelryType !== "all" || showAvailableOnly;
 
   const filteredProducts = useMemo(() => {
     const next = products
@@ -68,69 +78,80 @@ export default function ShopPage({ products, categories, initialCategory, initia
       <CategoryStrip categories={categories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
 
       <main className="shop-page">
-        <div className="shop-page__hero">
-          <div>
+        {/* Mobile: Show Filter button, Desktop: Hide (sidebar instead) */}
+        <div className="shop-page__header">
+          <div className="shop-page__header-left">
             <p className="overline">Kenyan Artisan Gallery</p>
-            <h1 className="display-lg">Shop the collection slowly, like a wall of stories.</h1>
+            <h1 className="display-lg">Shop the collection</h1>
           </div>
-          <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
-            <Icon name="filter" size={18} />
-            Filters
-          </button>
+          {isMobile && (
+            <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
+              <Icon name="filter" size={18} />
+              Filters
+              {hasActiveFilters && <span className="shop-page__filter-dot" />}
+            </button>
+          )}
         </div>
 
-        {isJewelleryView ? (
-          <div className="shop-page__subcategories">
+        {/* Product count */}
+        <div className="shop-page__count">
+          <span>{filteredProducts.length} products</span>
+          {hasActiveFilters && (
             <button
-              type="button"
-              className={`shop-page__sub-pill ${activeJewelryType === "all" ? "shop-page__sub-pill--active" : ""}`}
-              onClick={() => setActiveJewelryType("all")}
+              onClick={() => {
+                setActiveCategory("All");
+                setActiveJewelryType("all");
+                setShowAvailableOnly(false);
+              }}
+              className="shop-page__clear"
             >
-              All jewellery
+              Clear filters
             </button>
-            {jewelryTypeOptions.map((type) => (
-              <button
-                key={type}
-                type="button"
-                className={`shop-page__sub-pill ${activeJewelryType === type ? "shop-page__sub-pill--active" : ""}`}
-                onClick={() => setActiveJewelryType(type)}
-              >
-                {getJewelryTypeLabel(type)}
-              </button>
-            ))}
-          </div>
-        ) : null}
+          )}
+        </div>
 
-        <MasonryGrid products={filteredProducts} />
+        {/* Main content with sidebar */}
+        <div className="shop-page__layout">
+          <ShopSidebar
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={(cat) => {
+              setActiveCategory(cat);
+              if (cat !== "Jewellery") setActiveJewelryType("all");
+            }}
+            activeJewelryType={activeJewelryType}
+            onJewelryTypeChange={setActiveJewelryType}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            showAvailableOnly={showAvailableOnly}
+            onShowAvailableChange={setShowAvailableOnly}
+            isMobile={isMobile}
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+          />
+
+          <div className="shop-page__grid">
+            <MasonryGrid products={filteredProducts} />
+          </div>
+        </div>
       </main>
 
-      <FilterDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        activeCategory={activeCategory}
-        setActiveCategory={handleCategorySelect}
-        activeJewelryType={activeJewelryType}
-        setActiveJewelryType={setActiveJewelryType}
-        showAvailableOnly={showAvailableOnly}
-        setShowAvailableOnly={setShowAvailableOnly}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        categories={categories}
-      />
       <Footer />
 
       <style jsx>{`
         .shop-page {
           padding-top: calc(var(--nav-height) + 74px);
         }
-        .shop-page__hero {
+        .shop-page__header {
           max-width: var(--max-width);
           margin: 0 auto;
-          padding: var(--space-5) var(--gutter) 0;
+          padding: var(--space-4) var(--gutter);
           display: flex;
-          align-items: flex-end;
           justify-content: space-between;
-          gap: var(--space-4);
+          align-items: center;
+        }
+        .shop-page__header-left p {
+          margin-bottom: 4px;
         }
         .shop-page__filter-btn {
           display: inline-flex;
@@ -140,38 +161,55 @@ export default function ShopPage({ products, categories, initialCategory, initia
           background: var(--color-white);
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
+          cursor: pointer;
+          position: relative;
         }
-        .shop-page__subcategories {
+        .shop-page__filter-dot {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 8px;
+          height: 8px;
+          background: var(--color-terracotta);
+          border-radius: 50%;
+        }
+        .shop-page__count {
           max-width: var(--max-width);
           margin: 0 auto;
-          padding: var(--space-4) var(--gutter) 0;
+          padding: 0 var(--gutter) var(--space-3);
           display: flex;
-          gap: var(--space-2);
-          flex-wrap: wrap;
-        }
-        .shop-page__sub-pill {
-          padding: 7px 16px;
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-pill);
-          background: var(--color-white);
+          justify-content: space-between;
+          align-items: center;
+          font-size: var(--text-sm);
           color: var(--text-secondary);
-          font-size: 0.8125rem;
-          font-weight: 500;
-          transition: all var(--transition-fast);
         }
-        .shop-page__sub-pill:hover {
-          border-color: var(--color-terracotta);
+        .shop-page__clear {
+          background: none;
+          border: none;
           color: var(--color-terracotta);
+          font-size: var(--text-sm);
+          cursor: pointer;
+          text-decoration: underline;
         }
-        .shop-page__sub-pill--active {
-          background: var(--color-terracotta);
-          border-color: var(--color-terracotta);
-          color: var(--color-white);
+        .shop-page__layout {
+          max-width: var(--max-width);
+          margin: 0 auto;
+          padding: 0 var(--gutter) var(--space-7);
+          display: flex;
+          gap: var(--space-5);
         }
-        @media (max-width: 767px) {
-          .shop-page__hero {
+        .shop-page__grid {
+          flex: 1;
+          min-width: 0;
+        }
+        @media (max-width: 899px) {
+          .shop-page__header {
             flex-direction: column;
-            align-items: stretch;
+            align-items: flex-start;
+            gap: var(--space-3);
+          }
+          .shop-page__layout {
+            flex-direction: column;
           }
         }
       `}</style>
