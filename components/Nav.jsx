@@ -7,6 +7,7 @@ import Icon from "./icons";
 export default function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const { count, wishlistCount, openCart } = useCart();
 
   useEffect(() => {
@@ -15,6 +16,20 @@ export default function Nav() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  async function checkSession() {
+    try {
+      const res = await fetch("/api/auth/session");
+      const data = await res.json();
+      setUser(data.user);
+    } catch (e) {
+      setUser(null);
+    }
+  }
 
   return (
     <>
@@ -42,6 +57,9 @@ export default function Nav() {
         </nav>
 
         <div className="nav__actions">
+          <Link href={user ? "/account" : "/login"} className="nav__icon-btn" aria-label={user ? "My account" : "Login"}>
+            <Icon name="user" size={18} />
+          </Link>
           <Link href="/wishlist" className="nav__icon-btn" aria-label="View wishlist">
             <Icon name="heart" size={18} />
             {wishlistCount > 0 ? <span className="cart-badge">{wishlistCount}</span> : null}
