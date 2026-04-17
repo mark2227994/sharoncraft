@@ -167,38 +167,21 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           </div>
         </div>
 
-        <section className="product-page__story">
-          <SectionTitle title="The Story of the Piece" />
-          <ProductStoryPreview story={product.story} />
-        </section>
-
-        <section className="product-page__story-grid">
-          <div>
-            <SectionTitle title="Behind the Scenes" />
-            <img
-              src={product.story.behindScenesPhoto}
-              alt={`Behind the scenes with ${product.story.artisanName}`}
-              loading="lazy"
-              decoding="async"
-              className="product-page__bts"
-            />
-          </div>
-          <div>
-            <SectionTitle title={wearItWithTitle} />
-            <div className="product-page__related">
-              {wearItWithProducts.map((item) => (
-                <Link key={item.id} href={`/product/${item.slug}`} className="product-page__related-card">
-                  <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
-                  <span className="overline" style={{ marginTop: "12px", color: "var(--color-ochre)" }}>
-                    {item.collectionLabel}
-                  </span>
-                  <span>{item.name}</span>
-                  <span className="price" style={{ marginTop: "6px" }}>
-                    KES {item.price.toLocaleString()}
-                  </span>
-                </Link>
-              ))}
-            </div>
+        <section className="product-page__related-section">
+          <SectionTitle title={wearItWithTitle} />
+          <div className="product-page__related">
+            {wearItWithProducts.map((item) => (
+              <Link key={item.id} href={`/product/${item.slug}`} className="product-page__related-card">
+                <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
+                <span className="overline" style={{ marginTop: "12px", color: "var(--color-ochre)" }}>
+                  {item.collectionLabel}
+                </span>
+                <span>{item.name}</span>
+                <span className="price" style={{ marginTop: "6px" }}>
+                  KES {item.price.toLocaleString()}
+                </span>
+              </Link>
+            ))}
           </div>
         </section>
       </main>
@@ -210,8 +193,7 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           max-width: var(--max-width);
           margin: 0 auto;
         }
-        .product-page__grid,
-        .product-page__story-grid {
+        .product-page__grid {
           display: grid;
           grid-template-columns: 1fr;
           gap: var(--space-6);
@@ -224,14 +206,6 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           width: 100%;
           border-radius: var(--radius-lg);
           background: var(--color-cream-dark);
-        }
-        .product-page__bts {
-          width: 100%;
-          max-height: 320px;
-          object-fit: cover;
-          border-radius: 0;
-          background: var(--color-cream-dark);
-          box-shadow: none;
         }
         .product-page__summary {
           display: flex;
@@ -269,6 +243,11 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
         .product-page__story {
           margin-top: var(--space-7);
         }
+        .product-page__related-section {
+          margin-top: var(--space-7);
+          padding-top: var(--space-5);
+          border-top: 1px solid var(--border-default);
+        }
         .product-page__related {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -285,14 +264,8 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           .product-page__grid {
             grid-template-columns: 1.05fr 0.95fr;
           }
-          .product-page__story-grid {
-            grid-template-columns: 1fr 1fr;
-          }
         }
         @media (max-width: 767px) {
-          .product-page__bts {
-            max-height: 260px;
-          }
           .product-page__related {
             grid-template-columns: 1fr;
           }
