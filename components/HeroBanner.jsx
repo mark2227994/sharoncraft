@@ -6,7 +6,7 @@ export default function HeroBanner({
   title = "Where Every Object Carries a Story",
   subtitle = "Authentic artifacts made by Kenyan artisans. Each piece is one-of-a-kind.",
   trustLine = "Free delivery within Nairobi | M-Pesa accepted",
-  whatsappNumber = "254796450534",
+  whatsappNumber = "254112222572",
 }) {
   const handleWhatsApp = () => {
     const message = "Hi SharonCraft! I'm interested in your products. Can you help me?";
