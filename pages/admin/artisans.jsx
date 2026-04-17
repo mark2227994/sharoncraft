@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 
 const DEFAULT_ARTISAN = {
@@ -20,15 +20,30 @@ export default function AdminArtisansPage() {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(DEFAULT_ARTISAN);
   const [message, setMessage] = useState("");
+  const [availableImages, setAvailableImages] = useState([]);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/artisan-images")
+      .then(res => res.json())
+      .then(data => {
+        setAvailableImages(data.images || []);
+        setLoadingImages(false);
+      })
+      .catch(() => setLoadingImages(false));
+  }, []);
 
   function handleNew() {
     setEditingId(null);
     setFormData({ ...DEFAULT_ARTISAN, id: Date.now() });
+    setShowImagePicker(false);
   }
 
   function handleEdit(artisan) {
     setEditingId(artisan.id);
     setFormData(artisan);
+    setShowImagePicker(false);
   }
 
   function handleDelete(id) {
@@ -55,12 +70,19 @@ export default function AdminArtisansPage() {
 
     setEditingId(null);
     setFormData(DEFAULT_ARTISAN);
+    setShowImagePicker(false);
     setTimeout(() => setMessage(""), 3000);
   }
 
   function handleCancel() {
     setEditingId(null);
     setFormData(DEFAULT_ARTISAN);
+    setShowImagePicker(false);
+  }
+
+  function selectImage(imageUrl) {
+    setFormData({ ...formData, image: imageUrl });
+    setShowImagePicker(false);
   }
 
   return (
@@ -106,10 +128,48 @@ export default function AdminArtisansPage() {
                   <option value="Home Decor">Home Decor</option>
                 </select>
               </div>
-              <div>
-                <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Image URL</label>
-                <input type="text" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 6 }} />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Image</label>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {formData.image ? (
+                  <img src={formData.image} alt="Preview" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 6, border: "1px solid #e5e5e5" }} />
+                ) : (
+                  <div style={{ width: 80, height: 80, background: "#f5f5f5", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#999" }}>No image</div>
+                )}
+                <button type="button" onClick={() => setShowImagePicker(!showImagePicker)} style={{ padding: "8px 16px", background: "#f5f5f5", border: "1px solid #e5e5e5", borderRadius: 6, cursor: "pointer" }}>
+                  {showImagePicker ? "Hide Images" : "Choose Image"}
+                </button>
+                {formData.image && (
+                  <button type="button" onClick={() => setFormData({...formData, image: ""})} style={{ padding: "8px 16px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 6, cursor: "pointer" }}>
+                    Remove
+                  </button>
+                )}
               </div>
+              {formData.image && (
+                <input type="text" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={{ width: "100%", marginTop: 8, padding: "8px 12px", border: "1px solid #e5e5e5", borderRadius: 6, fontSize: 12 }} placeholder="Or paste a custom URL" />
+              )}
+              {showImagePicker && (
+                <div style={{ marginTop: 12, maxHeight: 200, overflowY: "auto", border: "1px solid #e5e5e5", borderRadius: 6, padding: 8 }}>
+                  {loadingImages ? (
+                    <p style={{ color: "#666" }}>Loading images...</p>
+                  ) : availableImages.length === 0 ? (
+                    <div>
+                      <p style={{ color: "#666", marginBottom: 8 }}>No images found in /public/media/site/artisans/</p>
+                      <p style={{ fontSize: 12, color: "#999" }}>Add images to that folder, then they'll appear here.</p>
+                    </div>
+                  ) : (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                      {availableImages.map(img => (
+                        <div key={img.url} onClick={() => selectImage(img.url)} style={{ cursor: "pointer", border: formData.image === img.url ? "2px solid #C04D29" : "2px solid transparent", borderRadius: 4, overflow: "hidden" }}>
+                          <img src={img.url} alt={img.name} style={{ width: "100%", height: 60, objectFit: "cover" }} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: 16 }}>
@@ -132,10 +192,17 @@ export default function AdminArtisansPage() {
         <div style={{ display: "grid", gap: 12 }}>
           {artisans.map(artisan => (
             <div key={artisan.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 16, background: "white", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-              <div>
-                <h4 style={{ marginBottom: 4 }}>{artisan.name}</h4>
-                <p style={{ fontSize: 14, color: "#666", marginBottom: 4 }}>{artisan.location} · {artisan.craft}</p>
-                <p style={{ fontSize: 14, color: "#666" }}>{artisan.story?.substring(0, 80)}...</p>
+              <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                {artisan.image ? (
+                  <img src={artisan.image} alt={artisan.name} style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 6 }} />
+                ) : (
+                  <div style={{ width: 60, height: 60, background: "#f5f5f5", borderRadius: 6 }} />
+                )}
+                <div>
+                  <h4 style={{ marginBottom: 4 }}>{artisan.name}</h4>
+                  <p style={{ fontSize: 14, color: "#666", marginBottom: 4 }}>{artisan.location} · {artisan.craft}</p>
+                  <p style={{ fontSize: 14, color: "#666" }}>{artisan.story?.substring(0, 80)}...</p>
+                </div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => handleEdit(artisan)} style={{ padding: "6px 12px", background: "#f5f5f5", border: "none", borderRadius: 4, fontSize: 14, cursor: "pointer" }}>Edit</button>
