@@ -42,6 +42,21 @@
   background: var(--color-terracotta-dark);
   transform: translateY(-2px);
 }
+.hero__cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.hero__cta--whatsapp {
+  background: #25d366;
+}
+.hero__cta--whatsapp:hover {
+  background: #128c7e;
+}
+.hero__cta--whatsapp svg {
+  margin-right: var(--space-2);
+}
 .hero__trust {
   font-size: 0.8125rem;
   color: var(--text-muted);
