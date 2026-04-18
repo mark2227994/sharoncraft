@@ -163,13 +163,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
       <style jsx>{`
         .shop-page {
-          padding-top: calc(var(--nav-height) + 74px);
+          padding-top: calc(var(--nav-height) + 20px);
           min-height: 100vh;
         }
         .shop-page__header {
           max-width: 1400px;
           margin: 0 auto;
-          padding: var(--space-4) var(--gutter);
+          padding: var(--space-2) var(--gutter);
           display: flex;
           justify-content: space-between;
           align-items: center;
