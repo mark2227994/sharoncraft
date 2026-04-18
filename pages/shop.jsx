@@ -141,9 +141,10 @@ export default function ShopPage({ products, categories, initialCategory, initia
       <style jsx>{`
         .shop-page {
           padding-top: calc(var(--nav-height) + 74px);
+          min-height: 100vh;
         }
         .shop-page__header {
-          max-width: var(--max-width);
+          max-width: 1400px;
           margin: 0 auto;
           padding: var(--space-4) var(--gutter);
           display: flex;
@@ -174,7 +175,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           border-radius: 50%;
         }
         .shop-page__count {
-          max-width: var(--max-width);
+          max-width: 1400px;
           margin: 0 auto;
           padding: 0 var(--gutter) var(--space-3);
           display: flex;
@@ -192,11 +193,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           text-decoration: underline;
         }
         .shop-page__layout {
-          max-width: var(--max-width);
+          max-width: 1400px;
           margin: 0 auto;
           padding: 0 var(--gutter) var(--space-7);
           display: flex;
           gap: var(--space-5);
+          align-items: flex-start;
         }
         .shop-page__grid {
           flex: 1;
@@ -210,6 +212,10 @@ export default function ShopPage({ products, categories, initialCategory, initia
           }
           .shop-page__layout {
             flex-direction: column;
+            padding: 0 var(--gutter) var(--space-5);
+          }
+          .shop-page__grid {
+            width: 100%;
           }
         }
       `}</style>
