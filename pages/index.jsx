@@ -364,23 +364,15 @@ export default function HomePage({
           margin-top: 18px;
         }
         .collections-section {
-          padding: var(--space-3) 0 var(--space-4);
+          padding: var(--space-6) 0 var(--space-8);
         }
         .collections-grid {
           max-width: var(--max-width);
           margin: 0 auto;
-          padding: var(--space-4) var(--gutter);
-          display: flex;
-          gap: var(--space-3);
-          overflow-x: auto;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          position: relative;
-          background: linear-gradient(to right, transparent 0%, transparent calc(100% - 40px), rgba(249, 246, 238, 0.8) 100%);
-        }
-        .collections-grid::-webkit-scrollbar {
-          display: none;
+          padding: 0 var(--gutter);
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: var(--space-4);
         }
         .collections-intro {
           max-width: var(--max-width);
@@ -388,12 +380,16 @@ export default function HomePage({
           padding: 0 var(--gutter);
         }
         .collection-card {
-          flex: 0 0 85vw;
-          scroll-snap-align: start;
           position: relative;
-          min-height: 200px;
+          min-height: 280px;
           overflow: hidden;
-          border-radius: var(--radius-lg);
+          border-radius: 2px;
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .collection-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
         }
         .collection-card:hover .collection-card__image {
           transform: scale(1.08);
@@ -646,20 +642,31 @@ export default function HomePage({
           font-size: 0.875rem;
         }
 
-        @media (min-width: 600px) {
+        @media (max-width: 599px) {
+          .collections-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-3);
+          }
           .collection-card {
-            flex: 0 0 45vw;
+            min-height: 220px;
+          }
+        }
+        @media (min-width: 600px) and (max-width: 899px) {
+          .collections-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+          }
+          .collection-card {
+            min-height: 260px;
           }
         }
         @media (min-width: 900px) {
           .collections-grid {
-            display: grid;
             grid-template-columns: repeat(3, 1fr);
-            overflow: visible;
+            gap: var(--space-4);
           }
           .collection-card {
-            flex: none;
-            min-height: 260px;
+            min-height: 280px;
           }
           .trust-bar {
             grid-template-columns: repeat(3, minmax(0, 1fr));
