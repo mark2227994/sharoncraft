@@ -4,27 +4,34 @@ import { useEffect, useState } from "react";
 import Icon from "../icons";
 
 const navItems = [
+  // TIER 1: CORE OPERATIONS (Most Important - Upgraded)
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/artisans", label: "Artisans", icon: "heart" },
+  { href: "/admin/products/new", label: "Add Product", icon: "plus" },
+  { href: "/admin/products", label: "Products", icon: "package" },
+  
+  // TIER 2: CUSTOMER & ORDER MANAGEMENT (Upgraded)
   { href: "/admin/orders", label: "Orders", icon: "package" },
   { href: "/admin/custom-orders", label: "Custom Orders", icon: "edit" },
   { href: "/admin/customers", label: "Customers", icon: "users" },
-  { href: "/admin/inventory", label: "Inventory", icon: "box" },
+  { href: "/admin/artisans", label: "Artisans", icon: "heart" },
+  
+  // TIER 3: OPERATIONAL MANAGEMENT (Upgraded)
   { href: "/admin/designers", label: "Designers", icon: "heart" },
   { href: "/admin/expenses", label: "Expenses", icon: "dollar" },
   { href: "/admin/prices", label: "Prices", icon: "tag" },
-  { href: "/admin/abandoned-carts", label: "Abandoned", icon: "cart" },
-  { href: "/admin/newsletter", label: "Newsletter", icon: "mail" },
-  { href: "/admin/seo", label: "SEO", icon: "search" },
-  { href: "/admin/products", label: "Products", icon: "package" },
-  { href: "/admin/marketing", label: "Marketing", icon: "star" },
-  { href: "/admin/offers", label: "Offers", icon: "tag" },
   { href: "/admin/images", label: "Images", icon: "eye" },
-  { href: "/admin/products/new", label: "Add Product", icon: "plus" },
-  { href: "/admin/product-story", label: "Stories", icon: "edit" },
   { href: "/admin/site-images", label: "Site Content", icon: "edit" },
-  { href: "/admin/health", label: "Health", icon: "search" },
+  
+  // TIER 4: SECONDARY TOOLS (To be upgraded)
+  { href: "/admin/inventory", label: "Inventory", icon: "box" },
+  { href: "/admin/product-story", label: "Stories", icon: "edit" },
+  { href: "/admin/abandoned-carts", label: "Abandoned", icon: "cart" },
+  { href: "/admin/marketing", label: "Marketing", icon: "star" },
+  { href: "/admin/newsletter", label: "Newsletter", icon: "mail" },
+  { href: "/admin/offers", label: "Offers", icon: "tag" },
+  { href: "/admin/seo", label: "SEO", icon: "search" },
   { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
+  { href: "/admin/health", label: "Health", icon: "search" },
 ];
 
 const STATUS_BY_ROUTE = [
