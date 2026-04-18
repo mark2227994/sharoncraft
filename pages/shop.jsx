@@ -93,6 +93,29 @@ export default function ShopPage({ products, categories, initialCategory, initia
           )}
         </div>
 
+        {/* Jewellery subcategories - horizontal scroll */}
+        {activeCategory === "Jewellery" && (
+          <div className="shop-page__subcategories">
+            <button
+              type="button"
+              className={`shop-page__sub-pill ${activeJewelryType === "all" ? "shop-page__sub-pill--active" : ""}`}
+              onClick={() => setActiveJewelryType("all")}
+            >
+              All
+            </button>
+            {jewelryTypeOptions.map((type) => (
+              <button
+                key={type}
+                type="button"
+                className={`shop-page__sub-pill ${activeJewelryType === type ? "shop-page__sub-pill--active" : ""}`}
+                onClick={() => setActiveJewelryType(type)}
+              >
+                {getJewelryTypeLabel(type)}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Product count */}
         <div className="shop-page__count">
           <span>{filteredProducts.length} products</span>
@@ -173,6 +196,42 @@ export default function ShopPage({ products, categories, initialCategory, initia
           height: 8px;
           background: var(--color-terracotta);
           border-radius: 50%;
+        }
+        .shop-page__subcategories {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: var(--space-3) var(--gutter);
+          display: flex;
+          gap: var(--space-2);
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .shop-page__subcategories::-webkit-scrollbar {
+          display: none;
+        }
+        .shop-page__sub-pill {
+          flex-shrink: 0;
+          padding: 8px 16px;
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-pill);
+          background: var(--color-white);
+          color: var(--text-secondary);
+          font-size: var(--text-sm);
+          font-weight: 500;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all var(--transition-fast);
+        }
+        .shop-page__sub-pill:hover {
+          border-color: var(--color-terracotta);
+          color: var(--color-terracotta);
+        }
+        .shop-page__sub-pill--active {
+          background: var(--color-terracotta);
+          border-color: var(--color-terracotta);
+          color: var(--color-white);
         }
         .shop-page__count {
           max-width: 1400px;
