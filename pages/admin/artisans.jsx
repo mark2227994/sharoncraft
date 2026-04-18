@@ -7,16 +7,82 @@ const DEFAULT_ARTISAN = {
   craft: "",
   image: "",
   story: "",
-  href: ""
+  href: "",
 };
+
+const DEFAULT_ARTISANS = [
+  {
+    id: 1,
+    name: "Nafula Wambui",
+    location: "Karatina, Nyeri County",
+    craft: "Jewellery",
+    image: "",
+    story: "Nafula creates beadwork with a balanced, ceremonial feel.",
+    href: "/shop?category=Jewellery",
+  },
+  {
+    id: 2,
+    name: "Achieng Atieno",
+    location: "Kisumu County",
+    craft: "Earrings",
+    image: "",
+    story: "Achieng focuses on lighter jewellery meant to move well with the body.",
+    href: "/shop?category=Jewellery&jewelryType=earring",
+  },
+  {
+    id: 3,
+    name: "Muthoni Wairimu",
+    location: "Nairobi",
+    craft: "Necklaces",
+    image: "",
+    story: "Muthoni's necklace work leans toward bold centerpieces and bridal styling.",
+    href: "/shop?category=Jewellery&jewelryType=necklace",
+  },
+];
+
+function normalizeArtisanEntry(entry, index) {
+  return {
+    id: Number(entry?.id) || Date.now() + index,
+    name: String(entry?.name || "").trim(),
+    location: String(entry?.location || "").trim(),
+    craft: String(entry?.craft || "").trim(),
+    image: String(entry?.image || "").trim(),
+    story: String(entry?.story || "").trim(),
+    href: String(entry?.href || "").trim(),
+  };
+}
+
+function parseArtisanStories(value) {
+  if (Array.isArray(value)) {
+    return value.map(normalizeArtisanEntry).filter((entry) => entry.name);
+  }
+
+  const raw = String(value || "").trim();
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeArtisanEntry).filter((entry) => entry.name);
+  } catch {
+    return [];
+  }
+}
+
+function toPersistedArtisans(artisans) {
+  return artisans.map((artisan) => ({
+    name: artisan.name,
+    location: artisan.location,
+    craft: artisan.craft,
+    image: artisan.image,
+    story: artisan.story,
+    href: artisan.href,
+  }));
+}
 
 export default function AdminArtisansPage() {
   const fileInputRef = useRef(null);
-  const [artisans, setArtisans] = useState([
-    { id: 1, name: "Nafula Wambui", location: "Karatina, Nyeri County", craft: "Jewellery", image: "", story: "Nafula creates beadwork with a balanced, ceremonial feel.", href: "/shop?category=Jewellery" },
-    { id: 2, name: "Achieng Atieno", location: "Kisumu County", craft: "Earrings", image: "", story: "Achieng focuses on lighter jewellery meant to move well with the body.", href: "/shop?category=Jewellery&jewelryType=earring" },
-    { id: 3, name: "Muthoni Wairimu", location: "Nairobi", craft: "Necklaces", image: "", story: "Muthoni's necklace work leans toward bold centerpieces and bridal styling.", href: "/shop?category=Jewellery&jewelryType=necklace" },
-  ]);
+  const [artisans, setArtisans] = useState(DEFAULT_ARTISANS);
 
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -26,6 +92,48 @@ export default function AdminArtisansPage() {
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [loadingImages, setLoadingImages] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [savingArtisans, setSavingArtisans] = useState(false);
+
+  async function persistArtisans(nextArtisans, successMessage) {
+    setSavingArtisans(true);
+    try {
+      const response = await fetch("/api/admin/site-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          artisanStories: JSON.stringify(toPersistedArtisans(nextArtisans)),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "Could not save artisan stories");
+      }
+
+      setArtisans(nextArtisans);
+      setMessage(successMessage);
+      setTimeout(() => setMessage(""), 3000);
+    } catch (error) {
+      setMessage(String(error?.message || "Could not save artisan stories"));
+      setTimeout(() => setMessage(""), 3500);
+    } finally {
+      setSavingArtisans(false);
+    }
+  }
+
+  async function loadSavedArtisans() {
+    try {
+      const response = await fetch("/api/admin/site-images");
+      if (!response.ok) return;
+
+      const result = await response.json();
+      const parsed = parseArtisanStories(result?.artisanStories);
+      if (parsed.length > 0) {
+        setArtisans(parsed);
+      }
+    } catch {
+      // keep defaults if loading fails
+    }
+  }
 
   async function loadAvailableImages() {
     setLoadingImages(true);
@@ -40,6 +148,7 @@ export default function AdminArtisansPage() {
 
   useEffect(() => {
     loadAvailableImages().catch(() => {});
+    loadSavedArtisans().catch(() => {});
   }, []);
 
   async function handleLocalImageUpload(event) {
@@ -62,7 +171,7 @@ export default function AdminArtisansPage() {
         throw new Error(result?.error || "Could not upload image");
       }
 
-      setFormData(current => ({ ...current, image: result.path }));
+      setFormData((current) => ({ ...current, image: result.path }));
       setShowImagePicker(false);
       setMessage("Image uploaded and selected.");
       await loadAvailableImages();
@@ -91,33 +200,32 @@ export default function AdminArtisansPage() {
     setShowImagePicker(false);
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     if (confirm("Delete this artisan?")) {
-      setArtisans(artisans.filter(a => a.id !== id));
-      setMessage("Artisan deleted");
-      setTimeout(() => setMessage(""), 2000);
+      const nextArtisans = artisans.filter((artisan) => artisan.id !== id);
+      await persistArtisans(nextArtisans, "Artisan deleted");
     }
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!formData.name || !formData.story) {
       setMessage("Name and story are required");
       return;
     }
 
+    let nextArtisans = artisans;
     if (editingId) {
-      setArtisans(artisans.map(a => a.id === editingId ? { ...formData } : a));
-      setMessage("Artisan updated!");
+      nextArtisans = artisans.map((artisan) => (artisan.id === editingId ? { ...formData } : artisan));
     } else {
-      setArtisans([...artisans, { ...formData, id: Date.now() }]);
-      setMessage("New artisan added!");
+      nextArtisans = [...artisans, { ...formData, id: Date.now() }];
     }
+
+    await persistArtisans(nextArtisans, editingId ? "Artisan updated!" : "New artisan added!");
 
     setEditingId(null);
     setShowForm(false);
     setFormData(DEFAULT_ARTISAN);
     setShowImagePicker(false);
-    setTimeout(() => setMessage(""), 3000);
   }
 
   function handleCancel() {
@@ -138,7 +246,7 @@ export default function AdminArtisansPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
           <div>
             <p style={{ fontSize: 14, color: "#666", marginBottom: 8 }}>
-              Copy this JSON to update artisans in data/site.js later:
+              Saved here appears live on Home and Artisans pages:
             </p>
             <pre style={{ background: "#f5f5f5", padding: 8, fontSize: 10, overflow: "auto", maxHeight: 100 }}>
               {JSON.stringify(artisans, null, 2)}
@@ -240,8 +348,12 @@ export default function AdminArtisansPage() {
             </div>
 
             <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={handleSave} style={{ padding: "10px 20px", background: "#C04D29", color: "white", border: "none", borderRadius: 6, fontWeight: 600, cursor: "pointer" }}>
-                {editingId ? "Save Changes" : "Add Artisan"}
+              <button
+                onClick={handleSave}
+                style={{ padding: "10px 20px", background: "#C04D29", color: "white", border: "none", borderRadius: 6, fontWeight: 600, cursor: savingArtisans ? "wait" : "pointer", opacity: savingArtisans ? 0.8 : 1 }}
+                disabled={savingArtisans}
+              >
+                {savingArtisans ? "Saving..." : editingId ? "Save Changes" : "Add Artisan"}
               </button>
               <button onClick={handleCancel} style={{ padding: "10px 20px", background: "#f5f5f5", color: "#333", border: "none", borderRadius: 6, fontWeight: 600, cursor: "pointer" }}>
                 Cancel
@@ -262,13 +374,19 @@ export default function AdminArtisansPage() {
                 )}
                 <div>
                   <h4 style={{ marginBottom: 4 }}>{artisan.name}</h4>
-                  <p style={{ fontSize: 14, color: "#666", marginBottom: 4 }}>{artisan.location} · {artisan.craft}</p>
+                  <p style={{ fontSize: 14, color: "#666", marginBottom: 4 }}>{artisan.location} - {artisan.craft}</p>
                   <p style={{ fontSize: 14, color: "#666" }}>{artisan.story?.substring(0, 80)}...</p>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => handleEdit(artisan)} style={{ padding: "6px 12px", background: "#f5f5f5", border: "none", borderRadius: 4, fontSize: 14, cursor: "pointer" }}>Edit</button>
-                <button onClick={() => handleDelete(artisan.id)} style={{ padding: "6px 12px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, fontSize: 14, cursor: "pointer" }}>Delete</button>
+                <button
+                  onClick={() => handleDelete(artisan.id)}
+                  style={{ padding: "6px 12px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, fontSize: 14, cursor: savingArtisans ? "wait" : "pointer", opacity: savingArtisans ? 0.8 : 1 }}
+                  disabled={savingArtisans}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}

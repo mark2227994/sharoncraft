@@ -13,6 +13,7 @@ const ALLOWED_KEYS = [
   "heroTitle",
   "heroSubtitle",
   "artisanBio",
+  "artisanStories",
   "aboutStory",
   "contactWhatsApp",
   "contactEmail",
