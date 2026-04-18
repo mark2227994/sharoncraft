@@ -4,17 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import { formatKES } from "../../lib/formatters";
 
 async function fetchProducts() {
-  const res = await fetch("/api/products");
+  const res = await fetch("/api/admin/products", { credentials: "same-origin" });
   if (!res.ok) throw new Error("Failed to load products");
   return res.json();
 }
 
 export default function PriceEditorPage() {
-  const { data: products = [], isLoading } = useQuery({ queryKey: ["products"], queryFn: fetchProducts });
+  const { data: products = [], isLoading, refetch } = useQuery({ queryKey: ["admin-products-prices"], queryFn: fetchProducts });
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [changes, setChanges] = useState({});
   const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const categories = useMemo(() => {
     const cats = new Set(products.map(p => p.category).filter(Boolean));
@@ -38,12 +40,39 @@ export default function PriceEditorPage() {
   }
 
   async function handleSaveAll() {
+    const changedEntries = Object.entries(changes).filter(([id, price]) => {
+      const product = products.find((item) => item.id === id);
+      return product && Number(price) >= 0 && Number(price) !== Number(product.price);
+    });
+    if (changedEntries.length === 0) return;
+
     setSaving(true);
-    // In production, this would call an API to update prices
-    await new Promise(r => setTimeout(r, 1000));
-    setSaving(false);
-    setChanges({});
-    alert("Prices updated successfully!");
+    setMessage("");
+    setError("");
+    try {
+      for (const [id, price] of changedEntries) {
+        const existing = products.find((item) => item.id === id);
+        const payload = { ...existing, price: Number(price) };
+        const response = await fetch("/api/admin/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body?.error || `Failed to update ${existing?.name || id}`);
+        }
+      }
+
+      setChanges({});
+      setMessage(`Updated ${changedEntries.length} product price${changedEntries.length > 1 ? "s" : ""}.`);
+      await refetch();
+    } catch (err) {
+      setError(String(err?.message || "Could not save price changes."));
+    } finally {
+      setSaving(false);
+    }
   }
 
   const hasChanges = Object.keys(changes).length > 0;
@@ -73,6 +102,8 @@ export default function PriceEditorPage() {
         </select>
         {hasChanges && <button className="admin-button" onClick={handleSaveAll} disabled={saving}>{saving ? "Saving..." : "Save All Changes"}</button>}
       </div>
+      {message ? <p className="saved-indicator">{message}</p> : null}
+      {error ? <p className="admin-form-error">{error}</p> : null}
 
       {isLoading ? <p className="admin-note">Loading...</p> : (
         <div className="admin-table-wrapper">

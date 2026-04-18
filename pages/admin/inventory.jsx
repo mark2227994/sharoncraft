@@ -19,7 +19,7 @@ async function saveInventoryItem(item) {
 }
 
 async function fetchProducts() {
-  const res = await fetch("/api/products");
+  const res = await fetch("/api/admin/products", { credentials: "same-origin" });
   if (!res.ok) throw new Error("Failed to load products");
   return res.json();
 }
