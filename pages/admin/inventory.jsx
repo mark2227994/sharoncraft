@@ -121,7 +121,10 @@ export default function InventoryPage() {
                 const isLow = (item.quantity || 0) <= (item.reorderLevel || 5);
                 return (
                   <tr key={item.id} className={isLow ? "admin-row--warning" : ""}>
-                    <td><strong>{item.name || "-"}</strong>{item.supplier && <br/><span className="admin-text-muted">{item.supplier}</span>}</td>
+                    <td>
+                      <strong>{item.name || "-"}</strong>
+                      {item.supplier ? <><br/><span className="admin-text-muted">{item.supplier}</span></> : null}
+                    </td>
                     <td>{item.sku || "-"}</td>
                     <td>{item.category}</td>
                     <td className={isLow ? "admin-text-danger" : ""}>{item.quantity}</td>
