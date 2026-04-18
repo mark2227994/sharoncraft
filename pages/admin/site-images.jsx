@@ -132,76 +132,80 @@ export default function AdminSiteImagesPage() {
         {!form ? (
           <p className="admin-note">Loading...</p>
         ) : (
-          <form className="admin-form-card" onSubmit={onSubmit}>
-            <section>
-              <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "var(--space-3)" }}>Photos</h2>
-              {IMAGE_FIELDS.map((field) => (
-                <div key={field.key} className="admin-panel" style={{ padding: "var(--space-4)", marginBottom: "var(--space-3)" }}>
-                  <label className="admin-field">
-                    <span className="admin-note">{field.label}</span>
-                    <input
-                      className="admin-input"
-                      value={form[field.key] || ""}
-                      onChange={(event) => set(field.key, event.target.value)}
-                      placeholder="/media/site/..."
+          <form className="site-content-form" onSubmit={onSubmit}>
+            <section className="site-content-section">
+              <h2 className="site-content-section-title">📷 Photos</h2>
+              <div className="site-content-fields">
+                {IMAGE_FIELDS.map((field) => (
+                  <div key={field.key} className="site-image-field">
+                    <label className="admin-field">
+                      <span className="admin-note">{field.label}</span>
+                      <input
+                        className="admin-input"
+                        value={form[field.key] || ""}
+                        onChange={(event) => set(field.key, event.target.value)}
+                        placeholder="/media/site/..."
+                      />
+                    </label>
+                    <p className="caption" style={{ marginBottom: "8px" }}>
+                      Upload folder: <code>product-images/catalog/{field.uploadFolder}</code>
+                    </p>
+                    <p className="caption" style={{ marginBottom: "8px" }}>
+                      Local mirror: <code>{field.localFolder}</code>
+                    </p>
+                    {form[field.key] ? (
+                      <img
+                        src={form[field.key]}
+                        alt=""
+                        style={{ marginTop: 8, maxHeight: 80, maxWidth: 200, objectFit: "cover", borderRadius: 6 }}
+                        onError={(event) => {
+                          event.target.style.display = "none";
+                        }}
+                      />
+                    ) : null}
+                    <LocalImageUpload
+                      label="Upload from device"
+                      folder={field.uploadFolder}
+                      onUploaded={(path) => set(field.key, path)}
                     />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="site-content-section">
+              <h2 className="site-content-section-title">✍️ Text Content</h2>
+              <div className="site-content-fields">
+                {TEXT_FIELDS.map((field) => (
+                  <label key={field.key} className="admin-field site-content-text-field">
+                    <span>{field.label}</span>
+                    {field.type === "textarea" ? (
+                      <textarea
+                        className="admin-textarea"
+                        value={form[field.key] || ""}
+                        onChange={(event) => set(field.key, event.target.value)}
+                        placeholder={field.placeholder}
+                        rows={field.rows || 3}
+                      />
+                    ) : (
+                      <input
+                        className="admin-input"
+                        value={form[field.key] || ""}
+                        onChange={(event) => set(field.key, event.target.value)}
+                        placeholder={field.placeholder}
+                      />
+                    )}
+                    {field.help ? <p className="admin-note" style={{ marginTop: "8px" }}>{field.help}</p> : null}
                   </label>
-                  <p className="caption" style={{ marginBottom: "8px" }}>
-                    Upload folder: <code>product-images/catalog/{field.uploadFolder}</code>
-                  </p>
-                  <p className="caption" style={{ marginBottom: "8px" }}>
-                    Local mirror: <code>{field.localFolder}</code>
-                  </p>
-                  {form[field.key] ? (
-                    <img
-                      src={form[field.key]}
-                      alt=""
-                      style={{ marginTop: 8, maxHeight: 80, maxWidth: 200, objectFit: "cover", borderRadius: 6 }}
-                      onError={(event) => {
-                        event.target.style.display = "none";
-                      }}
-                    />
-                  ) : null}
-                  <LocalImageUpload
-                    label="Upload from device"
-                    folder={field.uploadFolder}
-                    onUploaded={(path) => set(field.key, path)}
-                  />
-                </div>
-              ))}
+                ))}
+              </div>
             </section>
 
-            <section style={{ marginTop: "var(--space-5)" }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "var(--space-3)" }}>Text Content</h2>
-              {TEXT_FIELDS.map((field) => (
-                <label key={field.key} className="admin-field" style={{ marginBottom: "var(--space-4)" }}>
-                  <span>{field.label}</span>
-                  {field.type === "textarea" ? (
-                    <textarea
-                      className="admin-textarea"
-                      value={form[field.key] || ""}
-                      onChange={(event) => set(field.key, event.target.value)}
-                      placeholder={field.placeholder}
-                      rows={field.rows || 3}
-                    />
-                  ) : (
-                    <input
-                      className="admin-input"
-                      value={form[field.key] || ""}
-                      onChange={(event) => set(field.key, event.target.value)}
-                      placeholder={field.placeholder}
-                    />
-                  )}
-                  {field.help ? <p className="admin-note" style={{ marginTop: "8px" }}>{field.help}</p> : null}
-                </label>
-              ))}
-            </section>
-
-            <div className="admin-quick-actions" style={{ marginTop: "var(--space-4)" }}>
-              <button type="submit" className="admin-button" disabled={saving}>
+            <section className="site-content-section site-content-section--actions">
+              <button type="submit" className="admin-button site-content-submit-btn" disabled={saving}>
                 {saving ? "Saving..." : "Save all changes"}
               </button>
-            </div>
+            </section>
 
             {message ? (
               <p className="saved-indicator" style={{ marginTop: "var(--space-3)", color: "#16a34a" }}>
@@ -220,6 +224,113 @@ export default function AdminSiteImagesPage() {
               </p>
             ) : null}
             {error ? <p className="admin-form-error" style={{ marginTop: "var(--space-3)" }}>{error}</p> : null}
+
+            <style jsx>{`
+              .site-content-form {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+              }
+
+              .site-content-section {
+                background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+                border: 1px solid #e0e0e0;
+                border-radius: 12px;
+                padding: 1.5rem;
+                transition: all 0.3s ease;
+              }
+
+              .site-content-section:hover {
+                border-color: #d4a574;
+                box-shadow: 0 2px 8px rgba(212, 165, 116, 0.08);
+              }
+
+              .site-content-section--actions {
+                background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
+                border: 2px solid #d4a574;
+              }
+
+              .site-content-section-title {
+                margin: 0 0 1.25rem 0;
+                font-size: 1rem;
+                font-weight: 700;
+                color: #333;
+                padding-bottom: 0.75rem;
+                border-bottom: 2px solid #f0f0f0;
+              }
+
+              .site-content-fields {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+              }
+
+              .site-image-field {
+                background: white;
+                border: 1px solid #e8e8e8;
+                border-radius: 8px;
+                padding: 1rem;
+                transition: all 0.2s ease;
+              }
+
+              .site-image-field:hover {
+                border-color: #d4a574;
+                box-shadow: 0 2px 6px rgba(212, 165, 116, 0.1);
+              }
+
+              .site-content-text-field {
+                background: white;
+                border: 1px solid #e8e8e8;
+                border-radius: 8px;
+                padding: 1rem;
+                margin: 0;
+                transition: all 0.2s ease;
+              }
+
+              .site-content-text-field:hover {
+                border-color: #d4a574;
+                box-shadow: 0 2px 6px rgba(212, 165, 116, 0.1);
+              }
+
+              .site-content-submit-btn {
+                background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+                color: white;
+                border: none;
+                padding: 0.85rem 2rem;
+                font-size: 0.95rem;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+              }
+
+              .site-content-submit-btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+              }
+
+              .site-content-submit-btn:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+              }
+
+              @media (max-width: 1200px) {
+                .site-content-section {
+                  padding: 1.25rem;
+                }
+              }
+
+              @media (max-width: 767px) {
+                .site-content-form {
+                  gap: 1rem;
+                }
+
+                .site-content-section {
+                  padding: 1rem;
+                }
+              }
+            `}</style>
           </form>
         )}
       </AdminLayout>

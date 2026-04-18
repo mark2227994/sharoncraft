@@ -160,40 +160,345 @@ export default function DesignersPage() {
         </select>
       </div>
 
-      <div className="admin-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr><th>Name</th><th>Location</th><th>Specialty</th><th>Contact</th><th>Orders</th><th>Paid</th><th>Pending</th><th>Status</th><th>Actions</th></tr>
-          </thead>
-          <tbody>
-            {isLoading ? <tr><td colSpan={9} className="admin-empty">Loading designers...</td></tr> : null}
-            {filtered.map(d => (
-              <tr key={d.id}>
-                <td><strong>{d.name}</strong></td>
-                <td>{d.location}</td>
-                <td>{d.specialty}</td>
-                <td>{d.email}<br/><span className="admin-text-muted">{d.phone}</span></td>
-                <td>{d.totalOrders}</td>
-                <td>{formatKES(d.totalPaid)}</td>
-                <td className={d.pendingPayment > 0 ? "admin-text-warning" : ""}>{formatKES(d.pendingPayment)}</td>
-                <td><span className={`admin-pill ${d.status === "active" ? "admin-pill--success" : "admin-pill--muted"}`}>{d.status}</span></td>
-                <td>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button className="admin-btn admin-btn--small" onClick={() => toggleStatus(d)} disabled={saving}>
-                      {d.status === "active" ? "Pause" : "Activate"}
-                    </button>
-                    <button className="admin-btn admin-btn--small admin-btn--success" onClick={() => markPendingPaid(d)} disabled={saving || !d.pendingPayment}>
-                      Mark Paid
-                    </button>
-                    <button className="admin-btn admin-btn--small" onClick={() => removeDesigner(d.id)} disabled={saving}>Delete</button>
+      <section className="designers-grid-wrap">
+        <div className="designers-header">
+          <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#333" }}>
+            {isLoading ? "Loading..." : `${filtered.length} Designer${filtered.length !== 1 ? "s" : ""}`}
+          </h2>
+        </div>
+
+        {isLoading ? (
+          <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>Loading designers...</p>
+        ) : filtered.length === 0 ? (
+          <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>No designers found.</p>
+        ) : (
+          <div className="designers-grid">
+            {filtered.map((d) => (
+              <article key={d.id} className="designer-card">
+                <div className="designer-card-header">
+                  <div className="designer-avatar">
+                    {d.name?.[0]?.toUpperCase() || "?"}
                   </div>
-                </td>
-              </tr>
+                  <div className="designer-name-section">
+                    <h3 className="designer-name">{d.name}</h3>
+                    <p className="designer-location">📍 {d.location}</p>
+                  </div>
+                  <span className={`designer-status ${d.status === "active" ? "designer-status--active" : "designer-status--paused"}`}>
+                    {d.status === "active" ? "✓ Active" : "⊝ Paused"}
+                  </span>
+                </div>
+
+                <div className="designer-specialty">
+                  <p className="designer-specialty-label">Specialty</p>
+                  <p className="designer-specialty-value">{d.specialty}</p>
+                </div>
+
+                <div className="designer-contact">
+                  <a href={`mailto:${d.email}`} className="designer-contact-item">
+                    ✉️ {d.email}
+                  </a>
+                  <a href={`tel:${d.phone}`} className="designer-contact-item">
+                    📱 {d.phone}
+                  </a>
+                </div>
+
+                <div className="designer-stats">
+                  <div className="designer-stat">
+                    <span className="designer-stat-label">Orders</span>
+                    <span className="designer-stat-value">{d.totalOrders}</span>
+                  </div>
+                  <div className="designer-stat">
+                    <span className="designer-stat-label">Paid</span>
+                    <span className="designer-stat-value">{formatKES(d.totalPaid)}</span>
+                  </div>
+                  <div className="designer-stat">
+                    <span className="designer-stat-label">Pending</span>
+                    <span className={`designer-stat-value ${d.pendingPayment > 0 ? "designer-stat-value--warning" : ""}`}>
+                      {formatKES(d.pendingPayment)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="designer-actions">
+                  <button
+                    className="designer-btn designer-btn--secondary"
+                    onClick={() => toggleStatus(d)}
+                    disabled={saving}
+                  >
+                    {d.status === "active" ? "Pause" : "Activate"}
+                  </button>
+                  <button
+                    className="designer-btn designer-btn--success"
+                    onClick={() => markPendingPaid(d)}
+                    disabled={saving || !d.pendingPayment}
+                  >
+                    Mark Paid
+                  </button>
+                  <button
+                    className="designer-btn designer-btn--danger"
+                    onClick={() => removeDesigner(d.id)}
+                    disabled={saving}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
             ))}
-            {!isLoading && filtered.length === 0 ? <tr><td colSpan={9} className="admin-empty">No designers found</td></tr> : null}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+
+        <style jsx>{`
+          .designers-grid-wrap {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+          }
+
+          .designers-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f5f5f5;
+          }
+
+          .designers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
+          }
+
+          .designer-card {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .designer-card:hover {
+            border-color: #d4a574;
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+            transform: translateY(-2px);
+          }
+
+          .designer-card-header {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+          }
+
+          .designer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+          }
+
+          .designer-name-section {
+            flex: 1;
+            min-width: 0;
+          }
+
+          .designer-name {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+          }
+
+          .designer-location {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.8rem;
+            color: #999;
+          }
+
+          .designer-status {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+          }
+
+          .designer-status--active {
+            background: #d1fae5;
+            color: #065f46;
+          }
+
+          .designer-status--paused {
+            background: #f3f4f6;
+            color: #6b7280;
+          }
+
+          .designer-specialty {
+            margin-bottom: 0.75rem;
+          }
+
+          .designer-specialty-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 0 0.25rem 0;
+          }
+
+          .designer-specialty-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+          }
+
+          .designer-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #f9f9f9;
+            border-radius: 6px;
+          }
+
+          .designer-contact-item {
+            font-size: 0.8rem;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            word-break: break-all;
+          }
+
+          .designer-contact-item:hover {
+            color: #d4a574;
+          }
+
+          .designer-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #fffbf0;
+            border-radius: 6px;
+          }
+
+          .designer-stat {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+          }
+
+          .designer-stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .designer-stat-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #d4a574;
+            margin-top: 0.25rem;
+          }
+
+          .designer-stat-value--warning {
+            color: #f59e0b;
+          }
+
+          .designer-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+          }
+
+          .designer-btn {
+            flex: 1;
+            padding: 0.65rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .designer-btn:hover:not(:disabled) {
+            border-color: #d4a574;
+            color: #d4a574;
+            background: #fffbf0;
+          }
+
+          .designer-btn--secondary {
+            background: #f5f5f5;
+          }
+
+          .designer-btn--success {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+          }
+
+          .designer-btn--success:hover:not(:disabled) {
+            background: #a7f3d0;
+          }
+
+          .designer-btn--danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+          }
+
+          .designer-btn--danger:hover:not(:disabled) {
+            background: #fecaca;
+            border-color: #f87171;
+          }
+
+          .designer-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
+          @media (max-width: 1200px) {
+            .designers-grid {
+              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+          }
+
+          @media (max-width: 767px) {
+            .designers-grid {
+              grid-template-columns: 1fr;
+            }
+
+            .designer-stats {
+              grid-template-columns: 1fr;
+            }
+
+            .designer-actions {
+              flex-direction: column;
+            }
+          }
+        `}</style>
+      </section>
 
       {showForm && (
         <div className="admin-modal-overlay" onClick={() => setShowForm(false)}>

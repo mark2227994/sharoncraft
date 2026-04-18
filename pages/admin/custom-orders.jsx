@@ -448,73 +448,262 @@ function AdminCustomOrdersPage() {
         </div>
       </form>
 
-      <section className="admin-table-wrap" style={{ marginTop: "var(--space-5)" }}>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Client Total</th>
-              <th>Designer Pay</th>
-              <th>Expected Profit</th>
-              <th>Status</th>
-              <th>Updated</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan="8">Loading custom orders...</td>
-              </tr>
-            ) : orders.length === 0 ? (
-              <tr>
-                <td colSpan="8">No custom orders tracked yet.</td>
-              </tr>
-            ) : (
-              orders.map((order) => {
-                const statusMeta = getCustomOrderStatusMeta(order.status);
-                return (
-                  <tr key={order.id}>
-                    <td>
-                      <strong>{order.orderName}</strong>
-                      <div className="admin-note">Qty {order.quantity}</div>
-                    </td>
-                    <td>
-                      {order.customerName}
-                      {order.customerPhone ? <div className="admin-note">{order.customerPhone}</div> : null}
-                    </td>
-                    <td>{formatKES(order.clientTotal)}</td>
-                    <td>{formatKES(order.designerTotalPay)}</td>
-                    <td>{formatKES(order.expectedProfit)}</td>
-                    <td>
-                      <span className={`admin-pill ${statusMeta.cls}`}>{statusMeta.label}</span>
-                    </td>
-                    <td>{formatDateTime(order.updatedAt)}</td>
-                    <td>
-                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                        <button
-                          type="button"
-                          className="admin-button admin-button--secondary"
-                          onClick={() => setForm(hydrateForm(order))}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-button admin-button--danger"
-                          onClick={() => removeOrder(order.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+      <section className="custom-orders-grid-wrap" style={{ marginTop: "var(--space-5)" }}>
+        <div className="custom-orders-header">
+          <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#333" }}>
+            {isLoading ? "Loading..." : `${orders.length} Custom Order${orders.length !== 1 ? "s" : ""}`}
+          </h2>
+        </div>
+
+        {isLoading ? (
+          <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>Loading custom orders...</p>
+        ) : orders.length === 0 ? (
+          <p style={{ color: "#999", textAlign: "center", padding: "2rem" }}>No custom orders tracked yet.</p>
+        ) : (
+          <div className="custom-orders-grid">
+            {orders.map((order) => {
+              const statusMeta = getCustomOrderStatusMeta(order.status);
+              return (
+                <article key={order.id} className="custom-order-card">
+                  <div className="custom-order-header">
+                    <div>
+                      <p className="custom-order-ref">{order.id}</p>
+                      <h3 className="custom-order-name">{order.orderName}</h3>
+                      <p className="custom-order-qty">Qty: {order.quantity}</p>
+                    </div>
+                    <span className={`custom-order-status ${statusMeta.cls}`}>
+                      {statusMeta.label}
+                    </span>
+                  </div>
+
+                  <div className="custom-order-details">
+                    <div className="custom-order-detail">
+                      <span className="custom-order-label">Customer</span>
+                      <span className="custom-order-value">{order.customerName}</span>
+                    </div>
+                    <div className="custom-order-detail">
+                      <span className="custom-order-label">Phone</span>
+                      <span className="custom-order-value">{order.customerPhone || "—"}</span>
+                    </div>
+                    <div className="custom-order-detail">
+                      <span className="custom-order-label">Client Total</span>
+                      <span className="custom-order-value">{formatKES(order.clientTotal)}</span>
+                    </div>
+                    <div className="custom-order-detail">
+                      <span className="custom-order-label">Designer Pay</span>
+                      <span className="custom-order-value">{formatKES(order.designerTotalPay)}</span>
+                    </div>
+                  </div>
+
+                  <div className="custom-order-profit">
+                    <span className="custom-order-label">Expected Profit</span>
+                    <span className="custom-order-profit-value">{formatKES(order.expectedProfit)}</span>
+                  </div>
+
+                  <div className="custom-order-actions">
+                    <button
+                      type="button"
+                      className="custom-order-btn custom-order-btn--primary"
+                      onClick={() => setForm(hydrateForm(order))}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="custom-order-btn custom-order-btn--danger"
+                      onClick={() => removeOrder(order.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        <style jsx>{`
+          .custom-orders-grid-wrap {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+          }
+
+          .custom-orders-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f5f5f5;
+          }
+
+          .custom-orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+          }
+
+          .custom-order-card {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .custom-order-card:hover {
+            border-color: #d4a574;
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+            transform: translateY(-2px);
+          }
+
+          .custom-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+          }
+
+          .custom-order-ref {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+          }
+
+          .custom-order-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0.25rem 0 0 0;
+          }
+
+          .custom-order-qty {
+            font-size: 0.75rem;
+            color: #999;
+            margin: 0.25rem 0 0 0;
+          }
+
+          .custom-order-status {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+          }
+
+          .custom-order-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+          }
+
+          .custom-order-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+          }
+
+          .custom-order-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .custom-order-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+          }
+
+          .custom-order-profit {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #fffbf0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+          }
+
+          .custom-order-profit-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #d4a574;
+          }
+
+          .custom-order-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+          }
+
+          .custom-order-btn {
+            flex: 1;
+            padding: 0.65rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .custom-order-btn:hover {
+            border-color: #d4a574;
+            color: #d4a574;
+            background: #fffbf0;
+          }
+
+          .custom-order-btn--primary {
+            background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+            color: white;
+            border: none;
+          }
+
+          .custom-order-btn--primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+          }
+
+          .custom-order-btn--danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+          }
+
+          .custom-order-btn--danger:hover {
+            background: #fecaca;
+            border-color: #f87171;
+          }
+
+          @media (max-width: 767px) {
+            .custom-orders-grid {
+              grid-template-columns: 1fr;
+            }
+
+            .custom-order-details {
+              grid-template-columns: 1fr;
+            }
+          }
+        `}</style>
       </section>
     </AdminLayout>
   );

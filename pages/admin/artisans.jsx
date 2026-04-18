@@ -362,35 +362,237 @@ export default function AdminArtisansPage() {
           </div>
         )}
 
-        <h3 style={{ marginBottom: 16 }}>Current Artisans ({artisans.length})</h3>
-        <div style={{ display: "grid", gap: 12 }}>
-          {artisans.map(artisan => (
-            <div key={artisan.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 16, background: "white", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-              <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                {artisan.image ? (
-                  <img src={artisan.image} alt={artisan.name} style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 6 }} />
-                ) : (
-                  <div style={{ width: 60, height: 60, background: "#f5f5f5", borderRadius: 6 }} />
-                )}
-                <div>
-                  <h4 style={{ marginBottom: 4 }}>{artisan.name}</h4>
-                  <p style={{ fontSize: 14, color: "#666", marginBottom: 4 }}>{artisan.location} - {artisan.craft}</p>
-                  <p style={{ fontSize: 14, color: "#666" }}>{artisan.story?.substring(0, 80)}...</p>
+        <section className="artisans-section">
+          <div className="artisans-header">
+            <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#333" }}>
+              Current Artisans ({artisans.length})
+            </h3>
+          </div>
+          <div className="artisans-grid">
+            {artisans.map(artisan => (
+              <article key={artisan.id} className="artisan-card">
+                <div className="artisan-card-image">
+                  {artisan.image ? (
+                    <img src={artisan.image} alt={artisan.name} />
+                  ) : (
+                    <div className="artisan-card-image-placeholder" />
+                  )}
                 </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => handleEdit(artisan)} style={{ padding: "6px 12px", background: "#f5f5f5", border: "none", borderRadius: 4, fontSize: 14, cursor: "pointer" }}>Edit</button>
-                <button
-                  onClick={() => handleDelete(artisan.id)}
-                  style={{ padding: "6px 12px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, fontSize: 14, cursor: savingArtisans ? "wait" : "pointer", opacity: savingArtisans ? 0.8 : 1 }}
-                  disabled={savingArtisans}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+
+                <div className="artisan-card-content">
+                  <div className="artisan-card-header">
+                    <h4 className="artisan-card-name">{artisan.name}</h4>
+                    <div className="artisan-card-meta">
+                      <p className="artisan-card-location">📍 {artisan.location}</p>
+                      <span className="artisan-card-craft">{artisan.craft}</span>
+                    </div>
+                  </div>
+
+                  <p className="artisan-card-story">{artisan.story?.substring(0, 100)}...</p>
+
+                  <div className="artisan-card-actions">
+                    <button 
+                      onClick={() => handleEdit(artisan)}
+                      className="artisan-btn artisan-btn--primary"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(artisan.id)}
+                      className="artisan-btn artisan-btn--danger"
+                      disabled={savingArtisans}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <style jsx>{`
+            .artisans-section {
+              background: white;
+              border: 1px solid #e0e0e0;
+              border-radius: 12px;
+              padding: 1.5rem;
+              margin-top: 1.5rem;
+            }
+
+            .artisans-header {
+              margin-bottom: 1.5rem;
+              padding-bottom: 1rem;
+              border-bottom: 2px solid #f5f5f5;
+            }
+
+            .artisans-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+              gap: 1.25rem;
+            }
+
+            .artisan-card {
+              background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+              border: 1px solid #e8e8e8;
+              border-radius: 10px;
+              overflow: hidden;
+              transition: all 0.3s ease;
+              display: flex;
+              flex-direction: column;
+            }
+
+            .artisan-card:hover {
+              border-color: #d4a574;
+              box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+              transform: translateY(-2px);
+            }
+
+            .artisan-card-image {
+              width: 100%;
+              height: 160px;
+              overflow: hidden;
+              background: #f5f5f5;
+              position: relative;
+            }
+
+            .artisan-card-image img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            .artisan-card-image-placeholder {
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+            }
+
+            .artisan-card-content {
+              padding: 1rem;
+              display: flex;
+              flex-direction: column;
+              flex: 1;
+            }
+
+            .artisan-card-header {
+              margin-bottom: 0.75rem;
+              padding-bottom: 0.75rem;
+              border-bottom: 1px solid #f0f0f0;
+            }
+
+            .artisan-card-name {
+              margin: 0;
+              font-size: 0.95rem;
+              font-weight: 600;
+              color: #333;
+            }
+
+            .artisan-card-meta {
+              margin-top: 0.5rem;
+              display: flex;
+              gap: 0.5rem;
+              align-items: center;
+              flex-wrap: wrap;
+            }
+
+            .artisan-card-location {
+              margin: 0;
+              font-size: 0.75rem;
+              color: #999;
+            }
+
+            .artisan-card-craft {
+              display: inline-block;
+              font-size: 0.7rem;
+              font-weight: 600;
+              background: #fffbf0;
+              color: #d4a574;
+              padding: 0.25rem 0.5rem;
+              border-radius: 4px;
+              text-transform: uppercase;
+              letter-spacing: 0.3px;
+            }
+
+            .artisan-card-story {
+              margin: 0 0 0.75rem 0;
+              font-size: 0.8rem;
+              color: #666;
+              line-height: 1.4;
+              flex: 1;
+            }
+
+            .artisan-card-actions {
+              display: flex;
+              gap: 0.5rem;
+            }
+
+            .artisan-btn {
+              flex: 1;
+              padding: 0.6rem 0.75rem;
+              border: 1px solid #ddd;
+              border-radius: 6px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              background: white;
+              color: #666;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            }
+
+            .artisan-btn:hover:not(:disabled) {
+              border-color: #d4a574;
+              color: #d4a574;
+              background: #fffbf0;
+            }
+
+            .artisan-btn--primary {
+              background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+              color: white;
+              border: none;
+            }
+
+            .artisan-btn--primary:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+            }
+
+            .artisan-btn--danger {
+              background: #fee2e2;
+              color: #991b1b;
+              border-color: #fca5a5;
+            }
+
+            .artisan-btn--danger:hover:not(:disabled) {
+              background: #fecaca;
+              border-color: #f87171;
+            }
+
+            .artisan-btn:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+            }
+
+            @media (max-width: 1200px) {
+              .artisans-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+              }
+            }
+
+            @media (max-width: 768px) {
+              .artisans-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+              }
+
+              .artisan-card-image {
+                height: 140px;
+              }
+
+              .artisan-card-content {
+                padding: 0.75rem;
+              }
+            }
+          `}</style>
+        </section>
       </div>
     </AdminLayout>
   );
