@@ -39,19 +39,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
   const hasActiveFilters = activeCategory !== "All" || activeJewelryType !== "all" || showAvailableOnly;
 
-  // Pagination
-  const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(start, start + itemsPerPage);
-  }, [filteredProducts, currentPage, itemsPerPage]);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeCategory, activeJewelryType, showAvailableOnly, sortBy]);
-
   const filteredProducts = useMemo(() => {
     const next = products
       .filter((product) => (activeCategory === "All" ? true : product.category === activeCategory))
@@ -75,6 +62,19 @@ export default function ShopPage({ products, categories, initialCategory, initia
       return left.name.localeCompare(right.name);
     });
   }, [activeCategory, activeJewelryType, isJewelleryView, products, showAvailableOnly, sortBy]);
+
+  // Pagination
+  const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, activeJewelryType, showAvailableOnly, sortBy]);
 
   function handleCategorySelect(nextCategory) {
     setActiveCategory(nextCategory);
