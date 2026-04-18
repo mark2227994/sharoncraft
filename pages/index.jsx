@@ -327,6 +327,42 @@ export default function HomePage({
           </div>
         </section>
 
+        <section className="how-it-made-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
+            <p className="overline">Our Process</p>
+            <h2 className="display-md" style={{ marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>How It's Made</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
+              Every SharonCraft piece follows a meticulous handcraft process that ensures quality, authenticity, and love in each design.
+            </p>
+          </div>
+
+          <div className="how-it-made-grid">
+            <div className="how-it-made-step">
+              <div className="how-it-made-number">1</div>
+              <h3 className="how-it-made-title">Sourced</h3>
+              <p className="how-it-made-description">Ethical materials from Kenyan suppliers. Premium quality beads carefully selected for durability and color.</p>
+            </div>
+
+            <div className="how-it-made-step">
+              <div className="how-it-made-number">2</div>
+              <h3 className="how-it-made-title">Designed</h3>
+              <p className="how-it-made-description">Master artisans hand-sketch each piece. Every design is custom-reviewed for balance, proportion, and cultural authenticity.</p>
+            </div>
+
+            <div className="how-it-made-step">
+              <div className="how-it-made-number">3</div>
+              <h3 className="how-it-made-title">Crafted</h3>
+              <p className="how-it-made-description">Traditional beadwork techniques perfected over years. Each piece takes 40+ hours of dedicated handwork and attention.</p>
+            </div>
+
+            <div className="how-it-made-step">
+              <div className="how-it-made-number">4</div>
+              <h3 className="how-it-made-title">Verified</h3>
+              <p className="how-it-made-description">Quality checked & authenticated. Every piece is inspected, packaged with care, and shipped with a certificate of authenticity.</p>
+            </div>
+          </div>
+        </section>
+
         <section className="featured-artisans-showcase" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)', background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, rgba(212, 165, 116, 0.02) 100%)', borderRadius: '12px', border: '1px solid rgba(212, 165, 116, 0.2)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
             <p className="overline">Meet the Makers</p>
@@ -687,6 +723,98 @@ export default function HomePage({
         .custom-order-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 20px rgba(212, 165, 116, 0.4);
+        }
+        .how-it-made-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: var(--space-6);
+          margin-bottom: var(--space-6);
+        }
+        .how-it-made-step {
+          text-align: center;
+          padding: var(--space-4);
+        }
+        .how-it-made-number {
+          font-size: 3rem;
+          font-weight: 700;
+          color: var(--color-terracotta);
+          line-height: 1;
+          margin-bottom: var(--space-3);
+        }
+        .how-it-made-title {
+          font-size: 1.25rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--text-primary);
+          margin: 0 0 var(--space-2);
+        }
+        .how-it-made-description {
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+        @media (max-width: 599px) {
+          .how-it-made-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+          }
+          .how-it-made-number {
+            font-size: 2.5rem;
+          }
+        }
+        @media (min-width: 600px) and (max-width: 899px) {
+          .how-it-made-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-5);
+          }
+        }
+        .how-it-made-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: var(--space-6);
+          margin-bottom: var(--space-6);
+        }
+        .how-it-made-step {
+          text-align: center;
+          padding: var(--space-4);
+        }
+        .how-it-made-number {
+          font-size: 3rem;
+          font-weight: 700;
+          color: var(--color-terracotta);
+          line-height: 1;
+          margin-bottom: var(--space-3);
+        }
+        .how-it-made-title {
+          font-size: 1.25rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--text-primary);
+          margin: 0 0 var(--space-2);
+        }
+        .how-it-made-description {
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+        @media (max-width: 599px) {
+          .how-it-made-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+          }
+          .how-it-made-number {
+            font-size: 2.5rem;
+          }
+        }
+        @media (min-width: 600px) and (max-width: 899px) {
+          .how-it-made-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-5);
+          }
         }
         .artisan-link {
           display: inline-block;
