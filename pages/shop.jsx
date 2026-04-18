@@ -25,6 +25,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [gridView, setGridView] = useState("masonry"); // "masonry" | "4-col" | "2-col" | "list"
   const ITEMS_PER_PAGE_DESKTOP = 24;
   const ITEMS_PER_PAGE_MOBILE = 12;
 
@@ -120,19 +121,72 @@ export default function ShopPage({ products, categories, initialCategory, initia
       <CategoryStrip categories={categories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
 
       <main className="shop-page">
+        {/* Breadcrumb Navigation */}
+        <div className="shop-breadcrumb">
+          <a href="/">Home</a>
+          <span>/</span>
+          <a href="/shop">Shop</a>
+          {activeCategory !== "All" && (
+            <>
+              <span>/</span>
+              <span>{activeCategory}</span>
+            </>
+          )}
+          {activeJewelryType !== "all" && (
+            <>
+              <span>/</span>
+              <span>{getJewelryTypeLabel(activeJewelryType)}</span>
+            </>
+          )}
+        </div>
+
         {/* Mobile: Show Filter button, Desktop: Hide (sidebar instead) */}
         <div className="shop-page__header">
           <div className="shop-page__header-left">
             <p className="overline">Kenyan Artisan Gallery</p>
             <h1 className="display-lg">Shop the collection</h1>
           </div>
-          {isMobile && (
-            <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
-              <Icon name="filter" size={18} />
-              Filters
-              {hasActiveFilters && <span className="shop-page__filter-dot" />}
-            </button>
-          )}
+          <div className="shop-page__header-actions">
+            {!isMobile && (
+              <div className="grid-toggle">
+                <button
+                  title="Masonry view"
+                  className={`grid-toggle__btn ${gridView === "masonry" ? "active" : ""}`}
+                  onClick={() => setGridView("masonry")}
+                >
+                  ≡
+                </button>
+                <button
+                  title="4-column grid"
+                  className={`grid-toggle__btn ${gridView === "4-col" ? "active" : ""}`}
+                  onClick={() => setGridView("4-col")}
+                >
+                  ⊞⊞
+                </button>
+                <button
+                  title="2-column grid"
+                  className={`grid-toggle__btn ${gridView === "2-col" ? "active" : ""}`}
+                  onClick={() => setGridView("2-col")}
+                >
+                  ⊞
+                </button>
+                <button
+                  title="List view"
+                  className={`grid-toggle__btn ${gridView === "list" ? "active" : ""}`}
+                  onClick={() => setGridView("list")}
+                >
+                  ☰
+                </button>
+              </div>
+            )}
+            {isMobile && (
+              <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
+                <Icon name="filter" size={18} />
+                Filters
+                {hasActiveFilters && <span className="shop-page__filter-dot" />}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Jewellery subcategories - horizontal scroll */}
@@ -195,8 +249,35 @@ export default function ShopPage({ products, categories, initialCategory, initia
             onClose={() => setIsDrawerOpen(false)}
           />
 
-          <div className="shop-page__grid">
-            <MasonryGrid products={paginatedProducts} />
+          <div className="shop-page__grid" data-grid-view={gridView}>
+            {gridView === "masonry" && <MasonryGrid products={paginatedProducts} />}
+            {gridView !== "masonry" && (
+              <div className={`shop-products__${gridView}`}>
+                {paginatedProducts.map((product) => (
+                  <a href={`/product/${product.slug}`} key={product.id} className="product-card-link">
+                    <div className="product-card">
+                      <div className="product-card__image-wrap">
+                        <img src={product.image} alt={product.name} className="product-card__image" />
+                        {product.badge && <span className="product-card__badge">{product.badge}</span>}
+                      </div>
+                      <div className="product-card__info">
+                        {gridView === "list" && <p className="product-card__category">{product.category}</p>}
+                        <h3 className="product-card__title">{product.name}</h3>
+                        {gridView === "list" && product.description && (
+                          <p className="product-card__description">{product.description.substring(0, 100)}...</p>
+                        )}
+                        <div className="product-card__footer">
+                          <span className="product-card__price">KES {product.price.toLocaleString()}</span>
+                          {gridView === "list" && (
+                            <button className="product-card__quick-btn">View Details</button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
 
             {/* Item count and pagination info */}
             <div className="shop-pagination__info">
@@ -263,6 +344,29 @@ export default function ShopPage({ products, categories, initialCategory, initia
       <Footer />
 
       <style jsx>{`
+        /* Breadcrumb Navigation */
+        .shop-breadcrumb {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: var(--space-3) var(--gutter);
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+        }
+        .shop-breadcrumb a {
+          color: var(--color-accent);
+          text-decoration: none;
+          transition: color var(--transition-fast);
+        }
+        .shop-breadcrumb a:hover {
+          text-decoration: underline;
+        }
+        .shop-breadcrumb span {
+          color: var(--border-default);
+        }
+
         .shop-page {
           padding-top: calc(var(--nav-height) + 20px);
           min-height: 100vh;
@@ -274,10 +378,49 @@ export default function ShopPage({ products, categories, initialCategory, initia
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: var(--space-3);
         }
         .shop-page__header-left p {
           margin-bottom: 4px;
         }
+        .shop-page__header-actions {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+        }
+
+        /* Grid Toggle */
+        .grid-toggle {
+          display: inline-flex;
+          gap: 4px;
+          padding: 4px;
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+        }
+        .grid-toggle__btn {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          border-radius: 4px;
+          color: var(--text-secondary);
+          font-size: 16px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .grid-toggle__btn:hover {
+          background: var(--border-light);
+          color: var(--text-primary);
+        }
+        .grid-toggle__btn.active {
+          background: var(--color-accent);
+          color: var(--color-white);
+        }
+
         .shop-page__filter-btn {
           display: inline-flex;
           align-items: center;
@@ -298,6 +441,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           background: var(--color-accent);
           border-radius: 50%;
         }
+
+        /* Subcategories */
         .shop-page__subcategories {
           max-width: 1400px;
           margin: 0 auto;
@@ -334,6 +479,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           border-color: var(--color-accent);
           color: var(--color-white);
         }
+
+        /* Product Count */
         .shop-page__count {
           max-width: 1400px;
           margin: 0 auto;
@@ -352,6 +499,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           cursor: pointer;
           text-decoration: underline;
         }
+
+        /* Main Layout */
         .shop-page__layout {
           max-width: 1400px;
           margin: 0 auto;
@@ -364,23 +513,99 @@ export default function ShopPage({ products, categories, initialCategory, initia
           flex: 1;
           min-width: 0;
         }
-        @media (max-width: 899px) {
-          .shop-page__header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--space-3);
-          }
-          .shop-page__layout {
-            flex-direction: column;
-            padding: 0 var(--gutter) var(--space-5);
-          }
-          .shop-page__grid {
-            width: 100%;
-          }
-          .shop-pagination__info {
-            flex-direction: column;
-            gap: var(--space-2);
-          }
+
+        /* Different Grid Views */
+        .shop-products__4-col {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: var(--space-4);
+          margin-bottom: var(--space-6);
+        }
+        .shop-products__2-col {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--space-4);
+          margin-bottom: var(--space-6);
+        }
+        .shop-products__list {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-3);
+          margin-bottom: var(--space-6);
+        }
+
+        /* Product Card Link Styling */
+        .product-card-link {
+          text-decoration: none;
+          color: inherit;
+        }
+
+        /* List View Product Card */
+        .shop-products__list .product-card {
+          display: flex;
+          gap: var(--space-3);
+          padding: var(--space-3);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-md);
+          transition: all var(--transition-fast);
+        }
+        .shop-products__list .product-card:hover {
+          border-color: var(--color-accent);
+          box-shadow: 0 4px 12px rgba(139, 90, 43, 0.1);
+        }
+        .shop-products__list .product-card__image-wrap {
+          width: 150px;
+          height: 150px;
+          flex-shrink: 0;
+        }
+        .shop-products__list .product-card__info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+        }
+        .product-card__category {
+          font-size: var(--text-xs);
+          font-weight: 600;
+          color: var(--color-accent);
+          text-transform: uppercase;
+          margin: 0;
+        }
+        .product-card__title {
+          font-size: var(--text-base);
+          font-weight: 600;
+          margin: 0;
+          line-height: 1.4;
+        }
+        .product-card__description {
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          margin: 0;
+          line-height: 1.5;
+        }
+        .product-card__footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: auto;
+        }
+        .product-card__price {
+          font-weight: 700;
+          font-size: var(--text-base);
+          color: var(--text-primary);
+        }
+        .product-card__quick-btn {
+          padding: 8px 16px;
+          background: var(--color-accent);
+          color: var(--color-white);
+          border: none;
+          border-radius: var(--radius-sm);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .product-card__quick-btn:hover {
+          background: var(--color-accent-dark);
         }
 
         /* Pagination */
@@ -485,6 +710,47 @@ export default function ShopPage({ products, categories, initialCategory, initia
           justify-content: center;
           color: var(--text-secondary);
           font-size: var(--text-sm);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+          .shop-products__4-col {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        @media (max-width: 899px) {
+          .shop-page__header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-3);
+          }
+          .shop-page__layout {
+            flex-direction: column;
+            padding: 0 var(--gutter) var(--space-5);
+          }
+          .shop-page__grid {
+            width: 100%;
+          }
+          .shop-pagination__info {
+            flex-direction: column;
+            gap: var(--space-2);
+          }
+          .grid-toggle {
+            display: none;
+          }
+          .shop-products__4-col {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .shop-products__2-col {
+            grid-template-columns: 1fr;
+          }
+          .shop-products__list .product-card {
+            flex-direction: column;
+          }
+          .shop-products__list .product-card__image-wrap {
+            width: 100%;
+            height: 200px;
+          }
         }
       `}</style>
     </>

@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: 1fr;
   min-height: 70vh;
-  margin-top: var(--nav-height);
+  margin-top: 90px;
 }
 .hero__image-pane {
   position: relative;

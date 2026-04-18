@@ -1,6 +1,61 @@
-.nav {
+/* Announcement Bar */
+.nav__announcement {
   position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: var(--color-white);
+  text-align: center;
+  padding: 8px var(--gutter);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  z-index: 999;
+}
+.nav__announcement p { margin: 0; }
+
+/* Search Form */
+.nav__search-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-cream-dark);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3);
+  flex: 1;
+  max-width: 300px;
+}
+.nav__search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  outline: none;
+}
+.nav__search-input::placeholder {
+  color: var(--text-muted);
+}
+.nav__search-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+.nav__search-btn:hover {
+  color: var(--color-accent);
+}
+
+.nav {
+  position: fixed;
+  top: 30px;
   left: 0;
   right: 0;
   height: var(--nav-height);
@@ -12,6 +67,7 @@
   padding: 0 var(--gutter);
   z-index: 1000;
   transition: background var(--transition-base), backdrop-filter var(--transition-base);
+  gap: var(--space-4);
 }
 .nav--scrolled {
   backdrop-filter: blur(12px);
@@ -22,6 +78,7 @@
   display: inline-flex;
   align-items: center;
   max-width: min(210px, 44vw);
+  flex-shrink: 0;
 }
 .nav__logo-image {
   display: block;
@@ -30,10 +87,19 @@
   max-height: 42px;
   object-fit: contain;
 }
+
+/* Desktop Navigation */
+.nav__desktop-nav {
+  display: none;
+  flex: 1;
+  margin: 0 var(--space-4);
+}
 .nav__links {
   display: none;
   gap: var(--space-6);
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .nav__link {
   font-size: 0.875rem;
@@ -42,8 +108,9 @@
   text-transform: uppercase;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
+  text-decoration: none;
 }
-.nav__link:hover { color: var(--color-terracotta); }
+.nav__link:hover { color: var(--color-accent); }
 .nav__actions { display: flex; align-items: center; gap: var(--space-3); }
 .nav__icon-btn {
   width: 40px; height: 40px;

@@ -13,6 +13,7 @@ export default function AccountPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => { checkAuth(); }, []);
 
@@ -84,45 +85,54 @@ export default function AccountPage() {
       <Nav />
 
       <main className="account-page">
+        {/* Header */}
+        <div className="account-header">
+          <div className="account-welcome">
+            <h1 className="account-title">
+              Welcome back{user.name ? `, ${user.name}` : ""}!
+            </h1>
+            <p className="account-subtitle">Manage your account and view your orders</p>
+          </div>
+          <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <button onClick={handleLogout} className="account-logout-btn">
+            <Icon name="logOut" size={16} />
+            Logout
+          </button>
+        </div>
+
         <div className="account-container">
-          {/* Header */}
-          <div className="account-header">
-            <div className="account-welcome">
-              <h1 className="account-title">
-                Welcome back{user.name ? `, ${user.name}` : ""}!
-              </h1>
-              <p className="account-subtitle">Manage your account and view your orders</p>
+          {/* Sidebar Navigation */}
+          <nav className={`account-sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}>
+            <div className="sidebar-header">
+              <h3>Account</h3>
             </div>
-            <button onClick={handleLogout} className="account-logout-btn">
-              <Icon name="logOut" size={16} />
-              Logout
-            </button>
-          </div>
+            <div className="sidebar-sections">
+              <button className={`sidebar-item ${activeTab === "overview" ? "active" : ""}`} onClick={() => { setActiveTab("overview"); setMobileMenuOpen(false); }}>
+                <Icon name="user" size={18} /> <span>Dashboard</span> {activeTab === "overview" && <span className="sidebar-indicator">→</span>}
+              </button>
+              <button className={`sidebar-item ${activeTab === "orders" ? "active" : ""}`} onClick={() => { setActiveTab("orders"); setMobileMenuOpen(false); }}>
+                <Icon name="package" size={18} /> <span>Order History</span> {activeTab === "orders" && <span className="sidebar-indicator">→</span>} {orders.length > 0 && <span className="sidebar-badge">{orders.length}</span>}
+              </button>
+              <Link href="/wishlist" className="sidebar-item sidebar-link">
+                <Icon name="heart" size={18} /> <span>Wishlist</span>
+              </Link>
+              <button className={`sidebar-item ${activeTab === "addresses" ? "active" : ""}`} onClick={() => { setActiveTab("addresses"); setMobileMenuOpen(false); }}>
+                <Icon name="mapPin" size={18} /> <span>Addresses</span> {activeTab === "addresses" && <span className="sidebar-indicator">→</span>}
+              </button>
+              <button className={`sidebar-item ${activeTab === "settings" ? "active" : ""}`} onClick={() => { setActiveTab("settings"); setMobileMenuOpen(false); }}>
+                <Icon name="settings" size={18} /> <span>Settings</span> {activeTab === "settings" && <span className="sidebar-indicator">→</span>}
+              </button>
+              <a href="https://wa.me/254112222572" target="_blank" rel="noopener noreferrer" className="sidebar-item sidebar-link support">
+                <Icon name="messageCircle" size={18} /> <span>Support</span>
+              </a>
+            </div>
+          </nav>
 
-          {/* Navigation Tabs */}
-          <div className="account-tabs">
-            <button
-              className={`account-tab ${activeTab === "overview" ? "active" : ""}`}
-              onClick={() => setActiveTab("overview")}
-            >
-              Overview
-            </button>
-            <button
-              className={`account-tab ${activeTab === "orders" ? "active" : ""}`}
-              onClick={() => setActiveTab("orders")}
-            >
-              Orders ({orders.length})
-            </button>
-            <button
-              className={`account-tab ${activeTab === "profile" ? "active" : ""}`}
-              onClick={() => setActiveTab("profile")}
-            >
-              Profile
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          <div className="account-content">
+        <div className="account-content">
             {activeTab === "overview" && (
               <div className="account-overview">
                 {/* Quick Stats */}
@@ -803,9 +813,208 @@ export default function AccountPage() {
           .order-items {
             margin-right: 0;
           }
+        }
 
-          .order-total {
-            align-self: flex-end;
+        /* Sidebar Navigation */
+        .account-page {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .account-header {
+          display: flex !important;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: var(--space-4);
+          padding-bottom: var(--space-3);
+          border-bottom: 1px solid var(--border-default);
+        }
+
+        .account-welcome {
+          flex: 1;
+        }
+
+        .mobile-menu-toggle {
+          display: none;
+          flex-direction: column;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          gap: 6px;
+          padding: 0;
+          margin: 0 var(--space-3);
+        }
+
+        .mobile-menu-toggle span {
+          width: 24px;
+          height: 2px;
+          background: var(--text-primary);
+          border-radius: 2px;
+          transition: all 0.3s ease;
+        }
+
+        .account-container {
+          display: grid !important;
+          grid-template-columns: 260px 1fr;
+          gap: var(--space-5);
+          max-width: 1200px;
+          margin: 0 auto !important;
+        }
+
+        .account-sidebar {
+          position: sticky;
+          top: var(--space-4);
+          background: white;
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-lg);
+          padding: 0;
+          height: fit-content;
+          max-height: calc(100vh - 200px);
+          overflow-y: auto;
+        }
+
+        .sidebar-header {
+          padding: var(--space-4);
+          border-bottom: 1px solid var(--border-light);
+        }
+
+        .sidebar-header h3 {
+          font-size: 0.875rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .sidebar-sections {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .sidebar-item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          width: 100%;
+          padding: var(--space-3) var(--space-4);
+          background: transparent;
+          border: none;
+          color: var(--text-secondary);
+          font-size: 0.938rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          text-align: left;
+          position: relative;
+          text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+          background: var(--color-cream);
+          color: var(--color-accent);
+        }
+
+        .sidebar-item.active {
+          background: rgba(212, 175, 55, 0.1);
+          color: var(--color-accent);
+          border-right: 3px solid var(--color-accent);
+        }
+
+        .sidebar-item svg {
+          flex-shrink: 0;
+          opacity: 0.7;
+        }
+
+        .sidebar-item.active svg {
+          opacity: 1;
+        }
+
+        .sidebar-indicator {
+          margin-left: auto;
+          font-size: 1rem;
+          opacity: 0.6;
+        }
+
+        .sidebar-badge {
+          margin-left: auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--color-accent);
+          color: white;
+          border-radius: var(--radius-pill);
+          font-size: 0.75rem;
+          font-weight: 600;
+          width: 24px;
+          height: 24px;
+          min-width: 24px;
+        }
+
+        .sidebar-link {
+          text-decoration: none;
+        }
+
+        .sidebar-link.support {
+          border-top: 1px solid var(--border-light);
+          margin-top: var(--space-2);
+          padding-top: var(--space-3);
+        }
+
+        .account-content {
+          display: grid !important;
+          min-height: 400px;
+          gap: var(--space-4);
+        }
+
+        @media (max-width: 768px) {
+          .account-header {
+            flex-wrap: wrap;
+            gap: var(--space-2);
+          }
+
+          .account-welcome {
+            flex-basis: 100%;
+            order: 1;
+          }
+
+          .mobile-menu-toggle {
+            display: flex;
+            order: 2;
+          }
+
+          .account-logout-btn {
+            order: 3;
+            width: 100%;
+          }
+
+          .account-container {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+          }
+
+          .account-sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            z-index: 999;
+            border-radius: 0;
+            border-right: 1px solid var(--border-default);
+            border-bottom: none;
+            max-height: none;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .account-sidebar.mobile-open {
+            left: 0;
+          }
+
+          .account-content {
+            min-height: auto;
           }
         }
       `}</style>

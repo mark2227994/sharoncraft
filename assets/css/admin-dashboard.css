@@ -17,6 +17,34 @@
   --admin-muted: #76685d;
 }
 
+/* Admin Navigation Sections */
+.admin-nav-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.95rem;
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 246, 238, 0.45);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-nav-section:first-of-type {
+  border-top: none;
+  margin-top: 0;
+}
+
+.admin-nav-section-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 body.admin-dashboard-page {
   background:
     radial-gradient(circle at top left, rgba(242, 201, 76, 0.2), transparent 28%),

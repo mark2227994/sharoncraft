@@ -303,15 +303,51 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
 
             {/* Collapsible Sections */}
             <div style={{ marginTop: "24px" }}>
-              <button onClick={() => toggleSection("details")} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", border: "none", background: "none", cursor: "pointer", borderBottom: "1px solid #eee" }}>
-                <span className="overline">Details</span>
-                <Icon name={openSection === "details" ? "chevronR" : "chevronR"} size={18} style={{ transform: openSection === "details" ? "rotate(90deg)" : "rotate(0deg)", transition: "0.2s" }} />
+              {/* Specifications Table */}
+              <button onClick={() => toggleSection("specs")} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", border: "none", background: "none", cursor: "pointer", borderBottom: "1px solid #eee" }}>
+                <span className="overline">Specifications</span>
+                <Icon name={openSection === "specs" ? "chevronR" : "chevronR"} size={18} style={{ transform: openSection === "specs" ? "rotate(90deg)" : "rotate(0deg)", transition: "0.2s" }} />
               </button>
-              {openSection === "details" && (
-                <div style={{ padding: "12px 0", display: "grid", gap: "8px" }}>
-                  {product.jewelryType && <div><span className="overline" style={{ fontSize: "10px" }}>Type</span><p style={{ margin: 0 }}>{getJewelryTypeLabel(product.jewelryType)}</p></div>}
-                  <div><span className="overline" style={{ fontSize: "10px" }}>Location</span><p style={{ margin: 0 }}>{product.artisanLocation || "Kenya"}</p></div>
-                  {product.story?.materials?.length && <div><span className="overline" style={{ fontSize: "10px" }}>Materials</span><p style={{ margin: 0 }}>{product.story.materials.join(", ")}</p></div>}
+              {openSection === "specs" && (
+                <div style={{ padding: "12px 0" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <tbody>
+                      {product.jewelryType && (
+                        <tr style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "10px 0", fontWeight: 600, fontSize: "13px", color: "var(--text-secondary)" }}>Type</td>
+                          <td style={{ padding: "10px 0", fontSize: "13px" }}>{getJewelryTypeLabel(product.jewelryType)}</td>
+                        </tr>
+                      )}
+                      {product.story?.materials?.length && (
+                        <tr style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "10px 0", fontWeight: 600, fontSize: "13px", color: "var(--text-secondary)" }}>Materials</td>
+                          <td style={{ padding: "10px 0", fontSize: "13px" }}>{product.story.materials.join(", ")}</td>
+                        </tr>
+                      )}
+                      {product.dimensions && (
+                        <tr style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "10px 0", fontWeight: 600, fontSize: "13px", color: "var(--text-secondary)" }}>Dimensions</td>
+                          <td style={{ padding: "10px 0", fontSize: "13px" }}>{product.dimensions}</td>
+                        </tr>
+                      )}
+                      {product.weight && (
+                        <tr style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "10px 0", fontWeight: 600, fontSize: "13px", color: "var(--text-secondary)" }}>Weight</td>
+                          <td style={{ padding: "10px 0", fontSize: "13px" }}>{product.weight}</td>
+                        </tr>
+                      )}
+                      {product.artisanLocation && (
+                        <tr style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "10px 0", fontWeight: 600, fontSize: "13px", color: "var(--text-secondary)" }}>Handmade in</td>
+                          <td style={{ padding: "10px 0", fontSize: "13px" }}>{product.artisanLocation}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td style={{ padding: "10px 0", fontWeight: 600, fontSize: "13px", color: "var(--text-secondary)" }}>Shipping</td>
+                        <td style={{ padding: "10px 0", fontSize: "13px" }}>Ships within 24 hours | Free in Nairobi, KES 500 elsewhere</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               )}
 
@@ -321,19 +357,64 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
               </button>
               {openSection === "reviews" && (
                 <div style={{ padding: "12px 0" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", padding: "12px 0", borderBottom: "1px solid #eee" }}>
+                    <div>
+                      <p style={{ margin: "0 0 4px 0", fontSize: "24px", fontWeight: 700 }}>4.8</p>
+                      <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)" }}>out of 5</p>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "100%", height: "6px", background: "#eee", borderRadius: "3px", overflow: "hidden" }}>
+                          <div style={{ width: "80%", height: "100%", background: "#f59e0b" }}></div>
+                        </div>
+                        <span style={{ fontSize: "12px", color: "var(--text-secondary)", minWidth: "30px" }}>5★</span>
+                      </div>
+                      <div style={{ marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "100%", height: "6px", background: "#eee", borderRadius: "3px", overflow: "hidden" }}>
+                          <div style={{ width: "12%", height: "100%", background: "#f59e0b" }}></div>
+                        </div>
+                        <span style={{ fontSize: "12px", color: "var(--text-secondary)", minWidth: "30px" }}>4★</span>
+                      </div>
+                      <div style={{ marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "100%", height: "6px", background: "#eee", borderRadius: "3px", overflow: "hidden" }}>
+                          <div style={{ width: "5%", height: "100%", background: "#f59e0b" }}></div>
+                        </div>
+                        <span style={{ fontSize: "12px", color: "var(--text-secondary)", minWidth: "30px" }}>3★</span>
+                      </div>
+                    </div>
+                  </div>
                   {[
-                    { name: "Sarah M.", rating: 5, text: "Beautiful piece, exactly as described. Fast delivery!" },
-                    { name: "James K.", rating: 5, text: "Excellent craftsmanship. Genuine handmade quality." },
-                    { name: "Amara J.", rating: 4, text: "Love the design. Packaging was thoughtful." }
+                    { name: "Sarah M.", date: "2 weeks ago", rating: 5, verified: true, text: "Beautiful piece, exactly as described. Fast delivery and excellent packaging! Will definitely buy again." },
+                    { name: "James K.", date: "1 month ago", rating: 5, verified: true, text: "Excellent craftsmanship. Genuine handmade quality. The attention to detail is amazing." },
+                    { name: "Amara J.", date: "1 month ago", rating: 5, verified: true, text: "Love the design and how it arrived. Packaging was thoughtful and the product exceeded expectations." },
+                    { name: "David L.", date: "2 months ago", rating: 4, verified: true, text: "Great product. Slightly different from the photo in lighting but still beautiful." }
                   ].map((review, idx) => (
-                    <div key={idx} style={{ padding: "12px 0", borderBottom: idx < 2 ? "1px solid #eee" : "none" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                        <span style={{ fontWeight: 600, fontSize: "13px" }}>{review.name}</span>
+                    <div key={idx} style={{ padding: "12px 0", borderBottom: idx < 3 ? "1px solid #eee" : "none" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <div>
+                          <span style={{ fontWeight: 600, fontSize: "13px" }}>{review.name}</span>
+                          {review.verified && <span style={{ fontSize: "11px", color: "#22c55e", marginLeft: "6px" }}>✓ Verified Purchase</span>}
+                        </div>
+                        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{review.date}</span>
+                      </div>
+                      <div style={{ marginBottom: "6px" }}>
                         <span style={{ color: "#f59e0b", fontSize: "12px" }}>{'★'.repeat(review.rating)}</span>
                       </div>
                       <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)" }}>{review.text}</p>
                     </div>
                   ))}
+                </div>
+              )}
+
+              <button onClick={() => toggleSection("details")} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", border: "none", background: "none", cursor: "pointer", borderBottom: "1px solid #eee" }}>
+                <span className="overline">Details</span>
+                <Icon name={openSection === "details" ? "chevronR" : "chevronR"} size={18} style={{ transform: openSection === "details" ? "rotate(90deg)" : "rotate(0deg)", transition: "0.2s" }} />
+              </button>
+              {openSection === "details" && (
+                <div style={{ padding: "12px 0", display: "grid", gap: "8px" }}>
+                  {product.jewelryType && <div><span className="overline" style={{ fontSize: "10px" }}>Type</span><p style={{ margin: 0 }}>{getJewelryTypeLabel(product.jewelryType)}</p></div>}
+                  <div><span className="overline" style={{ fontSize: "10px" }}>Location</span><p style={{ margin: 0 }}>{product.artisanLocation || "Kenya"}</p></div>
+                  {product.story?.materials?.length && <div><span className="overline" style={{ fontSize: "10px" }}>Materials</span><p style={{ margin: 0 }}>{product.story.materials.join(", ")}</p></div>}
                 </div>
               )}
 
@@ -378,8 +459,35 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
               </button>
               {openSection === "artisan" && (
                 <div style={{ padding: "12px 0" }}>
-                  <p style={{ margin: "0 0 8px", fontSize: "14px" }}>{product.story?.text?.substring(0, 200)}...</p>
-                  <Link href="/artisans" style={{ fontSize: "14px", color: "var(--color-terracotta)" }}>View all artisans →</Link>
+                  {/* Artisan Card */}
+                  <div style={{ padding: "16px", background: "#f9fafb", borderRadius: "8px", marginBottom: "12px" }}>
+                    <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                      <div style={{ width: "60px", height: "60px", background: "linear-gradient(135deg, #8B5A2B, #D4AF37)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "24px", flexShrink: 0 }}>
+                        👩‍🎨
+                      </div>
+                      <div>
+                        <h3 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>{product.artisan || "Artisan Name"}</h3>
+                        <p style={{ margin: "0 0 4px 0", fontSize: "12px", color: "var(--text-secondary)" }}>📍 {product.artisanLocation || "Kenya"}</p>
+                        <p style={{ margin: 0, fontSize: "12px" }}>
+                          <span style={{ color: "#f59e0b" }}>★★★★★</span>
+                          <span style={{ color: "var(--text-secondary)", marginLeft: "4px" }}>(127 customer ratings)</span>
+                        </p>
+                      </div>
+                    </div>
+                    <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", lineHeight: "1.6" }}>
+                      {product.story?.text || "Skilled artisan handcrafting beautiful beaded pieces with traditional techniques passed down through generations. Each piece is unique and made with attention to detail."}
+                    </p>
+                    {product.story?.culturalNote && (
+                      <div style={{ marginTop: "12px", padding: "12px", background: "white", borderRadius: "4px", borderLeft: "3px solid var(--color-accent)" }}>
+                        <p style={{ margin: "0 0 4px 0", fontSize: "11px", fontWeight: 700, color: "var(--color-accent)", textTransform: "uppercase" }}>Cultural Heritage</p>
+                        <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>{product.story.culturalNote}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <Link href="/artisans" style={{ flex: 1, padding: "10px", textAlign: "center", border: "1px solid var(--border-default)", borderRadius: "4px", textDecoration: "none", color: "var(--color-accent)", fontSize: "13px", fontWeight: 600, transition: "all 0.2s" }}>View all artisans</Link>
+                    <button onClick={handleWhatsApp} style={{ flex: 1, padding: "10px", textAlign: "center", background: "#25d366", border: "none", borderRadius: "4px", color: "white", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>Message artisan</button>
+                  </div>
                 </div>
               )}
             </div>
@@ -418,6 +526,55 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
                 <span className="wear-it-with__price">KES {item.price.toLocaleString()}</span>
               </Link>
             ))}
+          </div>
+        </section>
+
+        {/* Trust Badges Section */}
+        <section style={{ marginTop: "var(--space-6)", padding: "var(--space-4)", background: "#f9fafb", borderRadius: "var(--radius-lg)" }}>
+          <h2 className="display-md" style={{ marginTop: 0, marginBottom: "var(--space-3)", fontSize: "18px" }}>Why shop with SharonCraft?</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "var(--space-3)" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span style={{ fontSize: "24px" }}>🎨</span>
+              <div>
+                <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Handmade Quality</p>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Each piece is crafted by skilled Kenyan artisans</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span style={{ fontSize: "24px" }}>🚚</span>
+              <div>
+                <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Fast Shipping</p>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Ships within 24 hours | Free in Nairobi</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span style={{ fontSize: "24px" }}>↩️</span>
+              <div>
+                <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Easy Returns</p>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>30-day money-back guarantee</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span style={{ fontSize: "24px" }}>💬</span>
+              <div>
+                <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Expert Support</p>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>WhatsApp support for custom requests</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span style={{ fontSize: "24px" }}>✨</span>
+              <div>
+                <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Unique Designs</p>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Limited edition pieces, no mass production</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span style={{ fontSize: "24px" }}>🎁</span>
+              <div>
+                <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Gift Packaging</p>
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Beautiful gift wrapping available</p>
+              </div>
+            </div>
           </div>
         </section>
       </main>

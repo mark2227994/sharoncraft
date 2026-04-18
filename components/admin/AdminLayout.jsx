@@ -4,34 +4,32 @@ import { useEffect, useState } from "react";
 import Icon from "../icons";
 
 const navItems = [
-  // TIER 1: CORE OPERATIONS (Most Important - Upgraded)
+  // TIER 1: CORE OPERATIONS (Must Have)
+  { section: "Core", tier: 1 },
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
   { href: "/admin/products/new", label: "Add Product", icon: "plus" },
   { href: "/admin/products", label: "Products", icon: "package" },
-  
-  // TIER 2: CUSTOMER & ORDER MANAGEMENT (Upgraded)
   { href: "/admin/orders", label: "Orders", icon: "package" },
+  
+  // TIER 2: CUSTOM ORDERS & CUSTOMERS
+  { section: "Customers", tier: 2 },
   { href: "/admin/custom-orders", label: "Custom Orders", icon: "edit" },
   { href: "/admin/customers", label: "Customers", icon: "users" },
   { href: "/admin/artisans", label: "Artisans", icon: "heart" },
   
-  // TIER 3: OPERATIONAL MANAGEMENT (Upgraded)
-  { href: "/admin/designers", label: "Designers", icon: "heart" },
-  { href: "/admin/expenses", label: "Expenses", icon: "dollar" },
-  { href: "/admin/prices", label: "Prices", icon: "tag" },
-  { href: "/admin/images", label: "Images", icon: "eye" },
-  { href: "/admin/site-images", label: "Site Content", icon: "edit" },
-  
-  // TIER 4: SECONDARY TOOLS (To be upgraded)
+  // TIER 3: OPERATIONS
+  { section: "Operations", tier: 3 },
   { href: "/admin/inventory", label: "Inventory", icon: "box" },
-  { href: "/admin/product-story", label: "Stories", icon: "edit" },
-  { href: "/admin/abandoned-carts", label: "Abandoned", icon: "cart" },
-  { href: "/admin/marketing", label: "Marketing", icon: "star" },
-  { href: "/admin/newsletter", label: "Newsletter", icon: "mail" },
-  { href: "/admin/offers", label: "Offers", icon: "tag" },
-  { href: "/admin/seo", label: "SEO", icon: "search" },
+  { href: "/admin/expenses", label: "Expenses", icon: "dollar" },
+  { href: "/admin/designers", label: "Designers", icon: "heart" },
+  
+  // TIER 4: TOOLS & SETTINGS
+  { section: "Tools", tier: 4 },
+  { href: "/admin/prices", label: "Prices", icon: "tag" },
+  { href: "/admin/site-images", label: "Site Content", icon: "edit" },
+  { href: "/admin/images", label: "Images", icon: "eye" },
   { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
-  { href: "/admin/health", label: "Health", icon: "search" },
+  { href: "/admin/newsletter-subscribers", label: "Newsletter", icon: "envelope" },
 ];
 
 const STATUS_BY_ROUTE = [
@@ -119,6 +117,13 @@ export default function AdminLayout({ title, action, children }) {
         </div>
 
         {navItems.map((item) => {
+          if (item.section) {
+            return (
+              <div key={item.section} className="admin-nav-section">
+                <span className="admin-nav-section-title">{item.section}</span>
+              </div>
+            );
+          }
           const isActive = isActiveItem(item.href);
           return (
             <Link

@@ -96,6 +96,108 @@ export default function CustomOrderPage() {
           </p>
         </div>
 
+        {!completed && (
+          <>
+            <section className="custom-order-page__how-it-works">
+              <h2 className="custom-order-page__section-title">How Custom Orders Work</h2>
+              <div className="custom-order-page__process-steps">
+                <div className="process-step">
+                  <div className="process-step__number">1</div>
+                  <div className="process-step__content">
+                    <h3>Submit Request</h3>
+                    <p>Fill out the form below with your design idea, colors, and budget.</p>
+                  </div>
+                </div>
+                <div className="process-step">
+                  <div className="process-step__number">2</div>
+                  <div className="process-step__content">
+                    <h3>Get Quoted</h3>
+                    <p>We'll review your request and send you a detailed quote via WhatsApp (24 hours).</p>
+                  </div>
+                </div>
+                <div className="process-step">
+                  <div className="process-step__number">3</div>
+                  <div className="process-step__content">
+                    <h3>Pay Deposit</h3>
+                    <p>Confirm the design and pay 50% deposit. We'll start production.</p>
+                  </div>
+                </div>
+                <div className="process-step">
+                  <div className="process-step__number">4</div>
+                  <div className="process-step__content">
+                    <h3>We Create</h3>
+                    <p>Our artisans handcraft your piece (5-10 business days). You'll receive photos for approval.</p>
+                  </div>
+                </div>
+                <div className="process-step">
+                  <div className="process-step__number">5</div>
+                  <div className="process-step__content">
+                    <h3>Final Payment</h3>
+                    <p>Pay the remaining 50% + shipping. We dispatch your custom piece.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="custom-order-page__pricing">
+              <h2 className="custom-order-page__section-title">Pricing Guide</h2>
+              <div className="custom-order-page__pricing-table">
+                <div className="pricing-row pricing-row--header">
+                  <div>Item Type</div>
+                  <div>Typical Price</div>
+                  <div>Notes</div>
+                </div>
+                <div className="pricing-row">
+                  <div><strong>Single Necklace</strong></div>
+                  <div>KES 2,500 - 4,500</div>
+                  <div>1-2 days production</div>
+                </div>
+                <div className="pricing-row">
+                  <div><strong>Single Bracelet</strong></div>
+                  <div>KES 1,500 - 3,000</div>
+                  <div>1 day production</div>
+                </div>
+                <div className="pricing-row">
+                  <div><strong>Pair of Earrings</strong></div>
+                  <div>KES 1,800 - 3,500</div>
+                  <div>1 day production</div>
+                </div>
+                <div className="pricing-row">
+                  <div><strong>Full Jewelry Set</strong></div>
+                  <div>KES 5,000 - 10,000</div>
+                  <div>3-5 days production</div>
+                </div>
+                <div className="pricing-row">
+                  <div><strong>Home Decor Item</strong></div>
+                  <div>KES 3,000 - 8,000</div>
+                  <div>Depends on size</div>
+                </div>
+                <div className="pricing-row">
+                  <div><strong>Bulk Order (50+)</strong></div>
+                  <div>Custom quote</div>
+                  <div>Special pricing available</div>
+                </div>
+              </div>
+              <p className="custom-order-page__pricing-note">
+                ⓘ Prices above are estimates. Final quote will depend on specific design, materials, and quantity.
+                <br />
+                All prices include materials. Shipping costs added at final payment.
+              </p>
+            </section>
+
+            <section className="custom-order-page__important">
+              <h3>Important Details</h3>
+              <ul className="custom-order-page__details-list">
+                <li>All items are 100% handmade - perfect for unique, one-of-a-kind pieces</li>
+                <li>Deposit (50%) is non-refundable unless we cannot fulfill the design</li>
+                <li>Production timeline starts after deposit is received and confirmed</li>
+                <li>Reference images help us understand your style - upload links below</li>
+                <li>Most orders complete on time. For rush orders, contact us first</li>
+              </ul>
+            </section>
+          </>
+        )}
+
         {completed ? (
           <section className="custom-order-page__card">
             <h2 className="display-md">Your request is ready in WhatsApp.</h2>
@@ -200,6 +302,130 @@ export default function CustomOrderPage() {
           gap: var(--space-3);
           max-width: 60ch;
         }
+        .custom-order-page__section-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin: 0;
+          color: var(--text-primary);
+        }
+        .custom-order-page__how-it-works {
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-lg);
+          padding: var(--space-6);
+        }
+        .custom-order-page__process-steps {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-4);
+          margin-top: var(--space-4);
+        }
+        .process-step {
+          display: flex;
+          gap: var(--space-3);
+        }
+        .process-step__number {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: var(--color-terracotta);
+          color: white;
+          font-weight: 600;
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+        .process-step__content h3 {
+          margin: 0 0 var(--space-2) 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+        .process-step__content p {
+          margin: 0;
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          line-height: 1.5;
+        }
+        .custom-order-page__pricing {
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-lg);
+          padding: var(--space-6);
+        }
+        .custom-order-page__pricing-table {
+          margin-top: var(--space-4);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          overflow: hidden;
+        }
+        .pricing-row {
+          display: grid;
+          grid-template-columns: 2fr 1.5fr 1.5fr;
+          gap: var(--space-4);
+          padding: var(--space-4);
+          border-bottom: 1px solid var(--border-default);
+          align-items: center;
+        }
+        .pricing-row:last-child {
+          border-bottom: none;
+        }
+        .pricing-row--header {
+          background: var(--bg-secondary);
+          font-weight: 600;
+          border-bottom: 2px solid var(--border-default);
+        }
+        .pricing-row div {
+          font-size: 0.95rem;
+        }
+        .pricing-row--header div {
+          font-size: 0.9rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: var(--text-secondary);
+        }
+        .custom-order-page__pricing-note {
+          margin-top: var(--space-4);
+          padding: var(--space-3);
+          background: var(--bg-secondary);
+          border-radius: var(--radius-md);
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          line-height: 1.6;
+        }
+        .custom-order-page__important {
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-lg);
+          padding: var(--space-6);
+        }
+        .custom-order-page__important h3 {
+          margin: 0 0 var(--space-3) 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+        }
+        .custom-order-page__details-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: grid;
+          gap: var(--space-2);
+        }
+        .custom-order-page__details-list li {
+          padding-left: var(--space-4);
+          position: relative;
+          font-size: 0.95rem;
+          color: var(--text-secondary);
+          line-height: 1.6;
+        }
+        .custom-order-page__details-list li:before {
+          content: "✓";
+          position: absolute;
+          left: 0;
+          color: var(--color-moss);
+          font-weight: bold;
+        }
         .custom-order-page__card {
           background: var(--color-white);
           border: 1px solid var(--border-default);
@@ -226,14 +452,39 @@ export default function CustomOrderPage() {
           background: var(--color-moss);
           color: var(--color-white);
           font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .custom-order-page__cta:hover:not(:disabled) {
+          background: var(--color-moss-dark);
+          transform: translateY(-2px);
+        }
+        .custom-order-page__cta:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
         .custom-order-page__error {
           color: var(--color-terracotta);
           font-size: 0.875rem;
         }
         @media (max-width: 767px) {
+          .custom-order-page {
+            padding: calc(var(--nav-height) + var(--space-4)) var(--gutter) var(--space-5);
+            gap: var(--space-4);
+          }
           .custom-order-page__grid {
             grid-template-columns: 1fr;
+          }
+          .custom-order-page__process-steps {
+            grid-template-columns: 1fr;
+          }
+          .pricing-row {
+            grid-template-columns: 1fr;
+            gap: var(--space-2);
+          }
+          .pricing-row div {
+            font-size: 0.9rem;
           }
         }
       `}</style>

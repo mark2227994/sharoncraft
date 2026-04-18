@@ -206,6 +206,34 @@ export default function HomePage({
         ))}
       </section>
 
+      <section className="payment-methods-section" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-6) var(--gutter)' }}>
+        <div className="payment-methods-content">
+          <div>
+            <p className="overline">Flexible Payment</p>
+            <h3 className="display-sm" style={{ margin: 'var(--space-1) 0 var(--space-2)' }}>We Accept Multiple Payment Methods</h3>
+          </div>
+          <div className="payment-methods-grid">
+            <div className="payment-method">
+              <div className="payment-method__icon">💳</div>
+              <span>M-Pesa</span>
+            </div>
+            <div className="payment-method">
+              <div className="payment-method__icon">🏦</div>
+              <span>Bank Transfer</span>
+            </div>
+            <div className="payment-method">
+              <div className="payment-method__icon">💵</div>
+              <span>Cash on Delivery</span>
+              <span className="payment-method__note">(Nairobi)</span>
+            </div>
+            <div className="payment-method">
+              <div className="payment-method__icon">📱</div>
+              <span>Lipa Na M-Pesa</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <CategoryStrip categories={categories} activeCategory="All" />
 
       <main>
@@ -371,6 +399,63 @@ export default function HomePage({
         .trust-bar__item:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .payment-methods-section {
+          background: linear-gradient(135deg, #F5F3F0 0%, #FAF8F6 100%);
+          border-top: 1px solid var(--border-default);
+          border-bottom: 1px solid var(--border-default);
+          margin-top: var(--space-6);
+        }
+        .payment-methods-content {
+          display: grid;
+          gap: var(--space-4);
+        }
+        .payment-methods-content > div:first-child {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: var(--space-4);
+        }
+        .payment-methods-content .overline {
+          margin: 0;
+          color: var(--text-secondary);
+        }
+        .payment-methods-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: var(--space-3);
+        }
+        .payment-method {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: var(--space-2);
+          padding: var(--space-4);
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          text-align: center;
+          transition: all 0.2s ease;
+        }
+        .payment-method:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          border-color: var(--color-terracotta);
+        }
+        .payment-method__icon {
+          font-size: 2rem;
+          line-height: 1;
+        }
+        .payment-method span {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+        .payment-method__note {
+          font-size: 0.75rem;
+          font-weight: 400;
+          color: var(--text-secondary);
+          margin-top: -2px;
         }
         @keyframes slideInFromLeft {
           from {

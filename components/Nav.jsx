@@ -7,6 +7,8 @@ import Icon from "./icons";
 export default function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
   const { count, wishlistCount, openCart } = useCart();
 
@@ -31,8 +33,20 @@ export default function Nav() {
     }
   }
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/shop?search=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
   return (
     <>
+      {/* Announcement Bar */}
+      <div className="nav__announcement">
+        <p>✨ New collection: Limited edition Maasai-inspired pieces now available! 💚</p>
+      </div>
+
       <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>
         <Link href="/" className="nav__logo" aria-label="SharonCraft home">
           <img
@@ -44,7 +58,22 @@ export default function Nav() {
           />
         </Link>
 
-        <nav aria-label="Primary">
+        {/* Search Bar */}
+        <form className="nav__search-form" onSubmit={handleSearch} style={{ display: searchActive ? "flex" : "none" }}>
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="nav__search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+          <button type="submit" className="nav__search-btn" aria-label="Search">
+            <Icon name="search" size={18} />
+          </button>
+        </form>
+
+        <nav aria-label="Primary" className="nav__desktop-nav">
           <ul className="nav__links">
             {primaryNavLinks.map((link) => (
               <li key={link.label}>
@@ -68,9 +97,14 @@ export default function Nav() {
             <Icon name="cart" size={18} />
             {count > 0 ? <span className="cart-badge">{count}</span> : null}
           </button>
-          <Link href="/shop" className="nav__icon-btn nav__search" aria-label="Search the shop">
+          <button
+            type="button"
+            className="nav__icon-btn"
+            onClick={() => setSearchActive(!searchActive)}
+            aria-label="Search products"
+          >
             <Icon name="search" size={18} />
-          </Link>
+          </button>
           <button
             type="button"
             className="nav__icon-btn nav__hamburger"
