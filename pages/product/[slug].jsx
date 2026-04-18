@@ -207,10 +207,12 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
 
         <section className="wear-it-with">
           <SectionTitle title={wearItWithTitle} />
-          <div className="wear-it-with__tiles">
+          <div className="wear-it-with__list">
             {wearItWithProducts.map((item) => (
-              <Link key={item.id} href={`/product/${item.slug}`} className="wear-it-with__tile" title={item.name}>
+              <Link key={item.id} href={`/product/${item.slug}`} className="wear-it-with__item" title={item.name}>
                 <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
+                <span className="wear-it-with__name">{item.name}</span>
+                <span className="wear-it-with__price">KES {item.price.toLocaleString()}</span>
               </Link>
             ))}
           </div>
@@ -279,37 +281,52 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           padding-top: var(--space-4);
           border-top: 1px solid var(--border-default);
         }
-        .wear-it-with__tiles {
+        .wear-it-with__list {
           display: flex;
-          gap: var(--space-2);
+          gap: var(--space-4);
           margin-top: var(--space-3);
+          overflow-x: auto;
+          padding-bottom: var(--space-2);
         }
-        .wear-it-with__tile {
+        .wear-it-with__item {
+          flex-shrink: 0;
+          width: 80px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-decoration: none;
+          gap: 4px;
+        }
+        .wear-it-with__item img {
           width: 64px;
           height: 64px;
-          flex-shrink: 0;
           border-radius: var(--radius-sm);
-          overflow: hidden;
+          object-fit: cover;
           border: 1px solid var(--border-default);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .wear-it-with__tile:hover {
+        .wear-it-with__item:hover img {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        .wear-it-with__tile img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+        .wear-it-with__name {
+          font-size: 11px;
+          color: var(--text-primary);
+          text-align: center;
+          line-height: 1.2;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .wear-it-with__price {
+          font-size: 10px;
+          color: var(--color-ochre);
+          font-weight: 500;
         }
         @media (min-width: 960px) {
           .product-page__grid {
             grid-template-columns: 1.05fr 0.95fr;
-          }
-        }
-        @media (max-width: 767px) {
-          .wear-it-with {
-            grid-template-columns: 1fr;
           }
         }
       `}</style>
