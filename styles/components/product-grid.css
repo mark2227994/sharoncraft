@@ -55,6 +55,21 @@
   animation: fadeUpIn 420ms ease forwards;
 }
 
+/* Mobile: instant, no animation delay to feel snappy */
+@media (hover: none) {
+  .masonry-item {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* Desktop: scroll-triggered stagger via JS adds --delay custom property */
+@media (hover: hover) {
+  .masonry-item {
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .masonry-item {
     opacity: 1;
@@ -70,6 +85,13 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Desktop smooth hover on grid */
+@media (hover: hover) {
+  .masonry-item .product-card {
+    transition: transform 300ms ease, box-shadow 300ms ease;
   }
 }
 

@@ -210,6 +210,7 @@ export default function ShopSidebar({
           height: fit-content;
           max-height: calc(100vh - 120px);
           overflow-y: auto;
+          transition: opacity 300ms ease, transform 300ms ease;
         }
         @media (max-width: 899px) {
           .shop-sidebar__desktop {
@@ -222,6 +223,12 @@ export default function ShopSidebar({
           border: 1px solid var(--border-default);
           border-radius: var(--radius-lg);
           padding: var(--space-4);
+          transition: box-shadow 300ms ease;
+        }
+        @media (hover: hover) {
+          .shop-sidebar:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          }
         }
         .shop-sidebar__section {
           margin-bottom: var(--space-4);

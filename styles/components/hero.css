@@ -100,7 +100,13 @@
     grid-template-columns: 55fr 45fr;
     min-height: 100vh;
   }
-  .hero__image-pane { min-height: auto; }
+  .hero__image-pane { min-height: auto; overflow: hidden; }
+  .hero__image-pane img {
+    transition: transform 1.2s ease-out;
+  }
+  .hero:hover .hero__image-pane img {
+    transform: scale(1.03);
+  }
   .hero__image-fade {
     background: linear-gradient(to right, transparent 60%, var(--color-cream) 100%);
   }
