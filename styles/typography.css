@@ -35,9 +35,9 @@
 .body-lg   { font-size: 1.0625rem; line-height: 1.7; }
 .body-base { font-size: 1rem;      line-height: 1.65; }
 .body-sm   { font-size: 0.875rem;  line-height: 1.6; }
-.caption   { font-size: 0.75rem;   line-height: 1.5; color: var(--text-muted); letter-spacing: 0.03em; }
+.caption   { font-size: 0.8125rem;   line-height: 1.5; color: var(--text-muted); letter-spacing: 0.03em; }
 .overline  {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;

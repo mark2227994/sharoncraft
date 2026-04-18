@@ -124,11 +124,15 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function buildPrimaryMessage(product) {
-    return `Hello SharonCraft, I would like to order the ${product.name} for ${formatCurrency(product.price)}.`;
+    const artisan = product.artisan || 'SharonCraft';
+    const materials = product.story?.materials?.length ? ` (${product.story.materials.slice(0, 2).join(', ')})` : '';
+    const inStock = product.soldOut ? '⚠️ Limited' : '✓ In stock';
+    return `👋 Hi! I'd like to order:\n\n✨ *${product.name}*${materials}\n💰 ${formatCurrency(product.price)}\n${inStock}\n\nIs it available? 🙏`;
   }
 
   function buildSecondaryMessage(product) {
-    return `Hello SharonCraft, I would like more details about the ${product.name} and whether it can be customized.`;
+    const artisan = product.artisan || 'SharonCraft';
+    return `👋 Hi SharonCraft!\n\n🎨 Can you tell me more about the *${product.name}*?\n\n✓ Care instructions\n✓ Customization options\n✓ Delivery timeline\n\nThanks! 💚`;
   }
 
   function getBadges(product) {

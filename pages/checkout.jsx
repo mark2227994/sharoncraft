@@ -33,33 +33,44 @@ function buildWhatsAppMessage({
   deliveryFee,
 }) {
   const lines = [];
-  lines.push("Hello SharonCraft.");
+  lines.push("👋 *Hello SharonCraft!*");
   lines.push("");
-  lines.push("I'd like to place an order:");
-  lines.push("");
+  lines.push("📦 *New Order Request*");
   if (orderReference) {
-    lines.push(`Order Ref: ${orderReference}`);
-    lines.push("");
+    lines.push(`Order ID: ${orderReference}`);
   }
-  lines.push("Items:");
-  items.forEach((item) => {
+  lines.push("");
+  lines.push("═══════════════════");
+  lines.push("📋 *Items:*");
+  items.forEach((item, idx) => {
     const lineTotal = (item.price * item.quantity).toLocaleString();
-    lines.push(`- ${item.name} x ${item.quantity} - KES ${lineTotal}`);
+    lines.push(`${idx + 1}. *${item.name}*`);
+    lines.push(`   Qty: ${item.quantity} × KES ${item.price.toLocaleString()} = KES ${lineTotal}`);
   });
   lines.push("");
-  lines.push(`Subtotal: KES ${subtotal.toLocaleString()}`);
-  lines.push(`Delivery (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"}): KES ${deliveryFee.toLocaleString()}`);
-  lines.push(`Total: KES ${total.toLocaleString()}`);
+  lines.push("═══════════════════");
+  lines.push(`💰 *Subtotal:*     KES ${subtotal.toLocaleString()}`);
+  lines.push(`🚚 *Delivery:*      KES ${deliveryFee.toLocaleString()} (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"})`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`✅ *TOTAL:*        KES ${total.toLocaleString()}`);
+  lines.push("═══════════════════");
   lines.push("");
-  lines.push(`Delivery area: ${area}`);
+  lines.push("📍 *Delivery Details:*");
+  lines.push(`Area: ${area}`);
   lines.push(`Name: ${name}`);
   lines.push(`Phone: ${phone}`);
-  if (whatsappNote) {
-    lines.push("");
-    lines.push(whatsappNote);
-  }
   lines.push("");
-  lines.push("Please confirm my order. Thank you.");
+  if (whatsappNote) {
+    lines.push(whatsappNote);
+    lines.push("");
+  }
+  lines.push("💳 *Payment Options:*");
+  lines.push("✓ M-Pesa (till 254112222572)");
+  lines.push("✓ Bank transfer");
+  lines.push("✓ Cash on delivery (Nairobi)");
+  lines.push("");
+  lines.push("⏰ Sharon will confirm within 2 hours ✓");
+  lines.push("Thank you for ordering with SharonCraft! 🙏💚");
   return lines.join("\n");
 }
 

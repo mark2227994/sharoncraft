@@ -119,7 +119,13 @@ async function handleRegister(req, res) {
 
 async function handleLogout(req, res) {
   try {
-    const token = req.cookies?.get(COOKIE_NAME)?.value;
+    // Parse cookie from headers (same method as admin auth)
+    const cookieHeader = req.headers.cookie || "";
+    const tokenPair = cookieHeader
+      .split(";")
+      .map((item) => item.trim())
+      .find((item) => item.startsWith(`${COOKIE_NAME}=`));
+    const token = tokenPair ? decodeURIComponent(tokenPair.split("=")[1] || "") : "";
 
     if (token) {
       await supabase.auth.signOut(token);
@@ -145,7 +151,13 @@ async function handleLogout(req, res) {
 
 async function handleSession(req, res) {
   try {
-    const token = req.cookies?.get(COOKIE_NAME)?.value;
+    // Parse cookie from headers (same method as admin auth)
+    const cookieHeader = req.headers.cookie || "";
+    const tokenPair = cookieHeader
+      .split(";")
+      .map((item) => item.trim())
+      .find((item) => item.startsWith(`${COOKIE_NAME}=`));
+    const token = tokenPair ? decodeURIComponent(tokenPair.split("=")[1] || "") : "";
 
     if (!token) {
       return res.status(200).json({ user: null });

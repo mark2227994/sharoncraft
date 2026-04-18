@@ -19,7 +19,7 @@
 .category-pill {
   flex-shrink: 0;
   scroll-snap-align: start;
-  padding: 7px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-default);
   font-size: 0.8125rem;

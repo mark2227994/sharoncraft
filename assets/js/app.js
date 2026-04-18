@@ -2433,23 +2433,26 @@
     const settings = options || {};
     const productName = product && product.name ? product.name : "this SharonCraft piece";
     const productPrice = product && Number.isFinite(Number(product.price)) ? formatCurrency(product.price) : "the listed price";
+    const artisan = product && product.artisan ? product.artisan : "SharonCraft artisans";
+    const materials = product && product.story?.materials?.length ? product.story.materials.slice(0, 2).join(', ') : '';
     const intent = normalizeText(settings.intent) || "order";
     const productPath = product && product.id ? buildProductSharePath(product) : window.location.pathname;
     const productLink = absoluteUrl(productPath);
+    const inStock = product && !product.soldOut ? '✓ In stock' : '⚠️ Limited';
 
     if (intent === "custom") {
-      return `Hello SharonCraft, I would like to ask about custom colors or a similar version of ${productName}. Product link: ${productLink}`;
+      return `👋 Hi SharonCraft!\n\n🎨 I love *${productName}* by ${artisan}${materials ? ` (${materials})` : ''}.\n\nCan I customize the colors or create something similar?\n\n💡 What options do you have?\n\nProduct: ${productLink}`;
     }
 
     if (intent === "gift") {
-      return `Hello SharonCraft, I am considering ${productName} as a gift. Please advise on availability, delivery, and presentation. Product link: ${productLink}`;
+      return `👋 Hi SharonCraft!\n\n🎁 I'm considering *${productName}* as a gift for someone special.\n\nQuestions:\n✓ Availability? ${inStock}\n✓ Delivery timeline?\n✓ Gift wrapping options?\n\n💰 ${productPrice}\n\nProduct: ${productLink}`;
     }
 
     if (intent === "share") {
-      return `Hello, I found this SharonCraft piece and thought you may like it: ${productName}. View it here: ${productLink}`;
+      return `🔗 Hey! Check this out from SharonCraft:\n\n✨ *${productName}* by ${artisan}\n💰 ${productPrice}\n${materials ? `🎨 ${materials}` : ''}\n\nView it: ${productLink}`;
     }
 
-    return `Hello SharonCraft, I would like to order ${productName} for ${productPrice}. Please confirm availability, delivery, and payment steps. Product link: ${productLink}`;
+    return `👋 Hi SharonCraft!\n\n✨ *${productName}* by ${artisan}\n💰 ${productPrice}${materials ? `\n🎨 ${materials}` : ''}\n${inStock}\n\n🚚 Nairobi: 24-48 hrs | Other: 3-5 days\n💳 M-Pesa, transfer, or on delivery\n\nPlease confirm availability & next steps. Thank you! 🙏\n\n${productLink}`;
   }
 
   function waitForData() {

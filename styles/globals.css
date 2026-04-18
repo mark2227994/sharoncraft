@@ -64,7 +64,7 @@
 
   /* Layout */
   --max-width: 1440px;
-  --gutter: 0px;
+  --gutter: 8px;
   --nav-height: 60px;
 }
 

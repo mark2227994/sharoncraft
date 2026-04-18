@@ -47,18 +47,31 @@ export default function HomePage({
         subtitle={siteContent.heroSubtitle}
         trustLine={siteContent.deliveryNote}
       />
+
+      <section className="trust-bar" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-4) var(--gutter)' }}>
+        {trustItems.map((item) => (
+          <div key={item.label} className="trust-bar__item">
+            <Icon name={item.icon} size={20} />
+            <span>{item.label}</span>
+          </div>
+        ))}
+      </section>
+
       <CategoryStrip categories={categories} activeCategory="All" />
 
       <main>
         <section>
-          <SectionHeading title="Featured This Week" kicker="Curated now" />
+          <SectionHeading title="Best Sellers" kicker="Customer favorites" />
           <MasonryGrid products={featuredProducts} />
         </section>
 
-        <ArtisanTimeline artisans={artisans} />
+        <section>
+          <SectionHeading title="New This Week" kicker="Just arrived" />
+          <MasonryGrid products={recentProducts} />
+        </section>
 
         <section id="about-gallery" className="collections-section">
-          <SectionHeading title="Browse All Collections" kicker="Explore by mood" />
+          <SectionHeading title="Shop by Category" kicker="Browse collections" />
           <div className="collections-grid">
             {collectionCards.map((collection) => (
               <a key={collection.title} href={collection.href} className="collection-card">
@@ -71,19 +84,7 @@ export default function HomePage({
           </div>
         </section>
 
-        <section>
-          <SectionHeading title="Recently Added" kicker="Fresh in the gallery" />
-          <MasonryGrid products={recentProducts} />
-        </section>
-
-        <section className="trust-bar">
-          {trustItems.map((item) => (
-            <div key={item.label} className="trust-bar__item">
-              <Icon name={item.icon} size={20} />
-              <span>{item.label}</span>
-            </div>
-          ))}
-        </section>
+        <ArtisanTimeline artisans={artisans} />
       </main>
 
       <Footer siteContent={siteContent} />
@@ -95,7 +96,7 @@ export default function HomePage({
         .section-heading {
           max-width: var(--max-width);
           margin: 0 auto;
-          padding: var(--space-6) var(--gutter) 0;
+          padding: var(--space-6) var(--gutter) var(--space-4);
           display: flex;
           align-items: center;
           gap: var(--space-4);
@@ -120,6 +121,8 @@ export default function HomePage({
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
+          position: relative;
+          background: linear-gradient(to right, transparent 0%, transparent calc(100% - 40px), rgba(249, 246, 238, 0.8) 100%);
         }
         .collections-grid::-webkit-scrollbar {
           display: none;
@@ -147,6 +150,15 @@ export default function HomePage({
           height: 100%;
           object-fit: cover;
           transition: transform 0.4s ease;
+          animation: fadeInImage 0.5s ease-in;
+        }
+        @keyframes fadeInImage {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         .collection-card__overlay {
           position: absolute;
@@ -200,6 +212,31 @@ export default function HomePage({
           padding: 18px;
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
+          animation: slideInFromLeft 0.5s ease-out backwards;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .trust-bar__item:nth-child(1) {
+          animation-delay: 0s;
+        }
+        .trust-bar__item:nth-child(2) {
+          animation-delay: 0.1s;
+        }
+        .trust-bar__item:nth-child(3) {
+          animation-delay: 0.2s;
+        }
+        .trust-bar__item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        @keyframes slideInFromLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
         @media (min-width: 600px) {
           .collection-card {
