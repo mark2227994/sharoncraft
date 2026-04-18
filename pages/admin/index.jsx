@@ -17,6 +17,7 @@ export default function AdminDashboardPage() {
   const stats = data?.stats || [];
   const orders = data?.orders || [];
   const waOrders = data?.waOrders || [];
+  const customOrders = data?.customOrders || [];
   const finance = data?.finance || null;
   const [costForm, setCostForm] = useState({
     stripeFees: 0,
@@ -110,6 +111,10 @@ export default function AdminDashboardPage() {
                 <span className="admin-finance-mini__label">Money Out</span>
                 <strong>{formatKES(finance.moneyOut)}</strong>
               </div>
+              <div className="admin-finance-mini">
+                <span className="admin-finance-mini__label">Active Custom Orders</span>
+                <strong>{finance.activeCustomOrders || 0}</strong>
+              </div>
             </div>
           </div>
 
@@ -133,6 +138,11 @@ export default function AdminDashboardPage() {
               <p className="admin-stat-card__label">Shipping</p>
               <p className="admin-stat-card__value">{formatKES(finance.shippingCosts)}</p>
               <p className="admin-stat-card__delta">Your actual outgoing delivery cost</p>
+            </article>
+            <article className="admin-stat-card">
+              <p className="admin-stat-card__label">Custom Order Profit</p>
+              <p className="admin-stat-card__value">{formatKES(finance.customExpectedProfit)}</p>
+              <p className="admin-stat-card__delta">Expected profit across tracked custom orders</p>
             </article>
           </div>
 
@@ -266,6 +276,46 @@ export default function AdminDashboardPage() {
         </>
       ) : null}
 
+      {customOrders.length > 0 ? (
+        <>
+          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
+            Custom Production Orders
+            <Link href="/admin/custom-orders" style={{ color: "var(--color-terracotta)", marginLeft: 8, fontWeight: 600 }}>
+              View all
+            </Link>
+          </p>
+          <section className="admin-table-wrap" style={{ marginBottom: "var(--space-6)" }}>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th>Client Total</th>
+                  <th>Expected Profit</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customOrders.slice(0, 6).map((order) => (
+                  <tr key={order.id}>
+                    <td>
+                      {order.orderName}
+                      <div className="admin-note">Qty {order.quantity}</div>
+                    </td>
+                    <td>{order.customerName}</td>
+                    <td>{formatKES(order.clientTotal)}</td>
+                    <td>{formatKES(order.expectedProfit)}</td>
+                    <td>
+                      <span className={`admin-pill ${order.statusClass}`}>{order.statusLabel}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </>
+      ) : null}
+
       {orders.length > 0 ? (
         <>
           <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
@@ -324,6 +374,9 @@ export default function AdminDashboardPage() {
         </Link>
         <Link href="/admin/orders" className="admin-button admin-button--secondary">
           View WA Orders
+        </Link>
+        <Link href="/admin/custom-orders" className="admin-button admin-button--secondary">
+          Open Custom Tracker
         </Link>
         <Link href="/admin/marketing" className="admin-button admin-button--secondary">
           Open Marketing Studio

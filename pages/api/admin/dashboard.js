@@ -1,5 +1,6 @@
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { getDashboardSnapshot, writeFinanceDashboard } from "../../../lib/store";
+import { getCustomOrderStatusMeta } from "../../../lib/custom-orders";
 import { getWaOrderStatusMeta } from "../../../lib/wa-orders";
 import { endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
 
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, finance: nextFinance });
   }
 
-  const { products, orders, mpesa, waOrders, finance } = await getDashboardSnapshot();
+  const { products, orders, mpesa, waOrders, finance, customOrders } = await getDashboardSnapshot();
 
   const now = new Date();
   const month = now.getMonth();
@@ -69,12 +70,42 @@ export default async function handler(req, res) {
   const weeklyMpesaSales = mpesa
     .filter((transaction) => transaction.status === "Success" && isThisWeek(transaction.timestamp))
     .reduce((sum, transaction) => sum + Number(transaction.amount_kes || 0), 0);
-  const moneyIn = weeklyWaSales + weeklyMpesaSales;
+  const weeklyCustomCustomerPayments = customOrders.reduce((sum, order) => {
+    let total = sum;
+    if (order.customerDepositPaidAt && isThisWeek(order.customerDepositPaidAt)) {
+      total += Number(order.customerDepositPaid || 0);
+    }
+    if (order.customerBalancePaidAt && isThisWeek(order.customerBalancePaidAt)) {
+      total += Number(order.customerBalancePaid || 0);
+    }
+    return total;
+  }, 0);
+  const weeklyCustomMoneyOut = customOrders.reduce((sum, order) => {
+    let total = sum;
+    if (order.designerDepositPaidAt && isThisWeek(order.designerDepositPaidAt)) {
+      total += Number(order.designerDepositPaid || 0);
+    }
+    if (order.designerBalancePaidAt && isThisWeek(order.designerBalancePaidAt)) {
+      total += Number(order.designerBalancePaid || 0);
+    }
+    if (order.packagingPaidAt && isThisWeek(order.packagingPaidAt)) {
+      total += Number(order.packagingCost || 0);
+    }
+    if (order.deliveryPaidAt && isThisWeek(order.deliveryPaidAt)) {
+      total += Number(order.deliveryCost || 0);
+    }
+    return total;
+  }, 0);
+  const moneyIn = weeklyWaSales + weeklyMpesaSales + weeklyCustomCustomerPayments;
   const stripeFees = Number(weeklyFinance?.stripeFees || 0);
   const materialCosts = Number(weeklyFinance?.materialCosts || 0);
   const shippingCosts = Number(weeklyFinance?.shippingCosts || 0);
-  const moneyOut = stripeFees + materialCosts + shippingCosts;
+  const moneyOut = stripeFees + materialCosts + shippingCosts + weeklyCustomMoneyOut;
   const netProfit = moneyIn - moneyOut;
+  const activeCustomOrders = customOrders.filter((order) =>
+    ["quoted", "waiting_deposit", "deposit_received", "in_production", "ready", "balance_received"].includes(order.status),
+  ).length;
+  const customExpectedProfit = customOrders.reduce((sum, order) => sum + Number(order.expectedProfit || 0), 0);
 
   return res.status(200).json({
     stats: [
@@ -89,6 +120,11 @@ export default async function handler(req, res) {
       statusLabel: getWaOrderStatusMeta(order.status).label,
       statusClass: getWaOrderStatusMeta(order.status).cls,
     })),
+    customOrders: customOrders.map((order) => ({
+      ...order,
+      statusLabel: getCustomOrderStatusMeta(order.status).label,
+      statusClass: getCustomOrderStatusMeta(order.status).cls,
+    })),
     finance: {
       weekStart,
       weekLabel: `${format(weekStartDate, "dd MMM")} - ${format(weekEndDate, "dd MMM")}`,
@@ -100,6 +136,10 @@ export default async function handler(req, res) {
       shippingCosts,
       waSales: weeklyWaSales,
       mpesaSales: weeklyMpesaSales,
+      customCustomerPayments: weeklyCustomCustomerPayments,
+      customMoneyOut: weeklyCustomMoneyOut,
+      activeCustomOrders,
+      customExpectedProfit,
     },
   });
 }

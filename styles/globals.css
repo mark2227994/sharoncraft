@@ -78,6 +78,9 @@
   :root {
     --gutter: 16px;
   }
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* ---- Reset ---- */

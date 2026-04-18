@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 
 const DEFAULT_ARTISAN = {
@@ -11,6 +11,7 @@ const DEFAULT_ARTISAN = {
 };
 
 export default function AdminArtisansPage() {
+  const fileInputRef = useRef(null);
   const [artisans, setArtisans] = useState([
     { id: 1, name: "Nafula Wambui", location: "Karatina, Nyeri County", craft: "Jewellery", image: "", story: "Nafula creates beadwork with a balanced, ceremonial feel.", href: "/shop?category=Jewellery" },
     { id: 2, name: "Achieng Atieno", location: "Kisumu County", craft: "Earrings", image: "", story: "Achieng focuses on lighter jewellery meant to move well with the body.", href: "/shop?category=Jewellery&jewelryType=earring" },
@@ -24,16 +25,58 @@ export default function AdminArtisansPage() {
   const [availableImages, setAvailableImages] = useState([]);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [loadingImages, setLoadingImages] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  async function loadAvailableImages() {
+    setLoadingImages(true);
+    try {
+      const response = await fetch("/api/admin/artisan-images");
+      const data = await response.json();
+      setAvailableImages(data.images || []);
+    } finally {
+      setLoadingImages(false);
+    }
+  }
 
   useEffect(() => {
-    fetch("/api/admin/artisan-images")
-      .then(res => res.json())
-      .then(data => {
-        setAvailableImages(data.images || []);
-        setLoadingImages(false);
-      })
-      .catch(() => setLoadingImages(false));
+    loadAvailableImages().catch(() => {});
   }, []);
+
+  async function handleLocalImageUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const payload = new FormData();
+      payload.append("file", file);
+      payload.append("folder", "site/artisans");
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: payload,
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result?.path) {
+        throw new Error(result?.error || "Could not upload image");
+      }
+
+      setFormData(current => ({ ...current, image: result.path }));
+      setShowImagePicker(false);
+      setMessage("Image uploaded and selected.");
+      await loadAvailableImages();
+      setTimeout(() => setMessage(""), 2500);
+    } catch (error) {
+      setMessage(String(error?.message || "Could not upload image"));
+      setTimeout(() => setMessage(""), 3000);
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }
 
   function handleNew() {
     setEditingId(null);
@@ -145,12 +188,27 @@ export default function AdminArtisansPage() {
                 <button type="button" onClick={() => setShowImagePicker(!showImagePicker)} style={{ padding: "8px 16px", background: "#f5f5f5", border: "1px solid #e5e5e5", borderRadius: 6, cursor: "pointer" }}>
                   {showImagePicker ? "Hide Images" : "Choose Image"}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ padding: "8px 16px", background: "#f5f5f5", border: "1px solid #e5e5e5", borderRadius: 6, cursor: uploadingImage ? "wait" : "pointer" }}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage ? "Uploading..." : "Upload From Computer"}
+                </button>
                 {formData.image && (
                   <button type="button" onClick={() => setFormData({...formData, image: ""})} style={{ padding: "8px 16px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 6, cursor: "pointer" }}>
                     Remove
                   </button>
                 )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLocalImageUpload}
+                style={{ display: "none" }}
+              />
               {formData.image && (
                 <input type="text" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={{ width: "100%", marginTop: 8, padding: "8px 12px", border: "1px solid #e5e5e5", borderRadius: 6, fontSize: 12 }} placeholder="Or paste a custom URL" />
               )}
