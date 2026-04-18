@@ -205,19 +205,12 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           </div>
         </div>
 
-        <section className="product-page__related-section">
+        <section className="wear-it-with">
           <SectionTitle title={wearItWithTitle} />
-          <div className="product-page__related">
+          <div className="wear-it-with__tiles">
             {wearItWithProducts.map((item) => (
-              <Link key={item.id} href={`/product/${item.slug}`} className="product-page__related-card">
+              <Link key={item.id} href={`/product/${item.slug}`} className="wear-it-with__tile" title={item.name}>
                 <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
-                <span className="overline" style={{ marginTop: "12px", color: "var(--color-ochre)" }}>
-                  {item.collectionLabel}
-                </span>
-                <span>{item.name}</span>
-                <span className="price" style={{ marginTop: "6px" }}>
-                  KES {item.price.toLocaleString()}
-                </span>
               </Link>
             ))}
           </div>
@@ -281,22 +274,33 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
         .product-page__story {
           margin-top: var(--space-7);
         }
-        .product-page__related-section {
-          margin-top: var(--space-7);
-          padding-top: var(--space-5);
+        .wear-it-with {
+          margin-top: var(--space-5);
+          padding-top: var(--space-4);
           border-top: 1px solid var(--border-default);
         }
-        .product-page__related {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: var(--space-3);
+        .wear-it-with__tiles {
+          display: flex;
+          gap: var(--space-2);
+          margin-top: var(--space-3);
         }
-        .product-page__related-card span {
-          display: block;
-          font-size: 0.875rem;
+        .wear-it-with__tile {
+          width: 64px;
+          height: 64px;
+          flex-shrink: 0;
+          border-radius: var(--radius-sm);
+          overflow: hidden;
+          border: 1px solid var(--border-default);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .product-page__related-card img {
-          border-radius: var(--radius-md);
+        .wear-it-with__tile:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .wear-it-with__tile img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
         @media (min-width: 960px) {
           .product-page__grid {
@@ -304,7 +308,7 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           }
         }
         @media (max-width: 767px) {
-          .product-page__related {
+          .wear-it-with {
             grid-template-columns: 1fr;
           }
         }
