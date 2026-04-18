@@ -267,177 +267,276 @@ export default function AdminNewProductPage() {
 
   return (
     <AdminLayout title="Add Product">
-      <form className="admin-form-card" onSubmit={handleSubmit(onSubmit)}>
-        <div className="admin-grid-2">
-          <label className="admin-field">
-            <span>Name</span>
-            <input className="admin-input" {...register("name", { required: true })} />
-          </label>
-          <label className="admin-field">
-            <span>Slug</span>
-            <input className="admin-input" {...register("slug", { required: true })} />
-          </label>
-          <div className="admin-field">
-            <span>Fill from product name</span>
-            <button type="button" className="admin-button admin-button--secondary" onClick={fillSlugFromName}>
-              Generate slug
-            </button>
-          </div>
-          <label className="admin-field">
-            <span>Category</span>
-            <select className="admin-select" defaultValue="Jewellery" {...register("category", { required: true })}>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </label>
-          {isJewellery ? (
+      <form className="product-form-container" onSubmit={handleSubmit(onSubmit)}>
+        <section className="product-form-section">
+          <h3 className="product-form-section-title">Basic Information</h3>
+          <div className="admin-grid-2">
             <label className="admin-field">
-              <span>Jewellery type</span>
-              <select className="admin-select" {...register("jewelryType")}>
-                {jewelryTypeOptions.map((type) => (
-                  <option key={type} value={type}>
-                    {getJewelryTypeLabel(type)}
+              <span>Name</span>
+              <input className="admin-input" {...register("name", { required: true })} />
+            </label>
+            <label className="admin-field">
+              <span>Slug</span>
+              <input className="admin-input" {...register("slug", { required: true })} />
+            </label>
+            <div className="admin-field">
+              <span>Fill from product name</span>
+              <button type="button" className="admin-button admin-button--secondary" onClick={fillSlugFromName}>
+                Generate slug
+              </button>
+            </div>
+            <label className="admin-field">
+              <span>Category</span>
+              <select className="admin-select" defaultValue="Jewellery" {...register("category", { required: true })}>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
                   </option>
                 ))}
               </select>
             </label>
+            {isJewellery ? (
+              <label className="admin-field">
+                <span>Jewellery type</span>
+                <select className="admin-select" {...register("jewelryType")}>
+                  {jewelryTypeOptions.map((type) => (
+                    <option key={type} value={type}>
+                      {getJewelryTypeLabel(type)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+            <label className="admin-field">
+              <span>Visibility</span>
+              <select className="admin-select" {...register("publishStatus", { required: true })}>
+                {publishStatusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status === "published" ? "Published" : "Draft"}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-field">
+              <span>Fulfillment</span>
+              <select className="admin-select" {...register("fulfillmentType", { required: true })}>
+                {fulfillmentTypeOptions.map((type) => (
+                  <option key={type} value={type}>
+                    {getFulfillmentTypeLabel(type)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-field">
+              <span>Artisan</span>
+              <input className="admin-input" {...register("artisan", { required: true })} />
+            </label>
+            <label className="admin-field">
+              <span>Artisan Location</span>
+              <input className="admin-input" {...register("artisanLocation", { required: true })} />
+            </label>
+            <label className="admin-field">
+              <span>Years of Practice</span>
+              <input type="number" className="admin-input" {...register("yearsOfPractice")} />
+            </label>
+            <label className="admin-field">
+              <span>Price</span>
+              <input type="number" className="admin-input" {...register("price", { required: true })} />
+            </label>
+            <label className="admin-field">
+              <span>Original Price</span>
+              <input type="number" className="admin-input" {...register("originalPrice")} />
+            </label>
+            <label className="admin-field">
+              <span>Stock</span>
+              <input type="number" className="admin-input" {...register("stock")} />
+            </label>
+          </div>
+        </section>
+
+        <section className="product-form-section">
+          <h3 className="product-form-section-title">Media & Images</h3>
+          <MediaPathHelper uploadFolder={uploadFolder} suggestedFolder={suggestedFolder} />
+
+          {isJewellery ? <JewelryPhotoGuide /> : null}
+
+          <ProductAIAssistant
+            values={{
+              ...getValues(),
+              image: imageValue,
+              stylingImage: stylingImageValue,
+              detailImage: detailImageValue,
+            }}
+            onApply={applyAiSuggestions}
+          />
+
+          <div className="admin-grid-2">
+            <label className="admin-field">
+              <span>Primary close-up image</span>
+              <input className="admin-input" {...register("image", { required: true })} />
+            </label>
+            <LocalImageUpload
+              label="Upload close-up image"
+              folder={uploadFolder}
+              onUploaded={(uploadedPath) => setValue("image", uploadedPath, { shouldValidate: true })}
+            />
+            <label className="admin-field">
+              <span>Worn-on-body or styled photo</span>
+              <input className="admin-input" {...register("stylingImage")} />
+            </label>
+            <LocalImageUpload
+              label="Upload worn-on-body or styled photo"
+              folder={uploadFolder}
+              onUploaded={(uploadedPath) => setValue("stylingImage", uploadedPath, { shouldValidate: true })}
+            />
+            <label className="admin-field">
+              <span>Detail photo</span>
+              <input className="admin-input" {...register("detailImage")} />
+            </label>
+            <LocalImageUpload
+              label="Upload detail photo"
+              folder={uploadFolder}
+              onUploaded={(uploadedPath) => setValue("detailImage", uploadedPath, { shouldValidate: true })}
+            />
+          </div>
+
+          {imageValue ? (
+            <p className="admin-note" style={{ marginBottom: "8px" }}>
+              Main image path: <code>{imageValue}</code>
+            </p>
           ) : null}
-          <label className="admin-field">
-            <span>Visibility</span>
-            <select className="admin-select" {...register("publishStatus", { required: true })}>
-              {publishStatusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status === "published" ? "Published" : "Draft"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="admin-field">
-            <span>Fulfillment</span>
-            <select className="admin-select" {...register("fulfillmentType", { required: true })}>
-              {fulfillmentTypeOptions.map((type) => (
-                <option key={type} value={type}>
-                  {getFulfillmentTypeLabel(type)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="admin-field">
-            <span>Artisan</span>
-            <input className="admin-input" {...register("artisan", { required: true })} />
-          </label>
-          <label className="admin-field">
-            <span>Artisan Location</span>
-            <input className="admin-input" {...register("artisanLocation", { required: true })} />
-          </label>
-          <label className="admin-field">
-            <span>Years of Practice</span>
-            <input type="number" className="admin-input" {...register("yearsOfPractice")} />
-          </label>
-          <label className="admin-field">
-            <span>Price</span>
-            <input type="number" className="admin-input" {...register("price", { required: true })} />
-          </label>
-          <label className="admin-field">
-            <span>Original Price</span>
-            <input type="number" className="admin-input" {...register("originalPrice")} />
-          </label>
-          <label className="admin-field">
-            <span>Stock</span>
-            <input type="number" className="admin-input" {...register("stock")} />
-          </label>
-        </div>
+          {stylingImageValue ? (
+            <p className="admin-note" style={{ marginBottom: "8px" }}>
+              Second image path: <code>{stylingImageValue}</code>
+            </p>
+          ) : null}
+          {detailImageValue ? (
+            <p className="admin-note" style={{ marginBottom: "16px" }}>
+              Detail image path: <code>{detailImageValue}</code>
+            </p>
+          ) : null}
+        </section>
 
-        <MediaPathHelper uploadFolder={uploadFolder} suggestedFolder={suggestedFolder} />
-
-        {isJewellery ? <JewelryPhotoGuide /> : null}
-
-        <ProductAIAssistant
-          values={{
-            ...getValues(),
-            image: imageValue,
-            stylingImage: stylingImageValue,
-            detailImage: detailImageValue,
-          }}
-          onApply={applyAiSuggestions}
-        />
-
-        <div className="admin-grid-2">
+        <section className="product-form-section">
+          <h3 className="product-form-section-title">Details & Content</h3>
           <label className="admin-field">
-            <span>Primary close-up image</span>
-            <input className="admin-input" {...register("image", { required: true })} />
+            <span>Materials Used</span>
+            <input className="admin-input" placeholder="Glass beads, brass clasp" {...register("materials")} />
           </label>
-          <LocalImageUpload
-            label="Upload close-up image"
-            folder={uploadFolder}
-            onUploaded={(uploadedPath) => setValue("image", uploadedPath, { shouldValidate: true })}
+          <label className="admin-field">
+            <span>Production note for admin / WhatsApp</span>
+            <input
+              className="admin-input"
+              placeholder="Example: 3 to 5 days after confirmation, confirm colours first"
+              {...register("productionNote")}
+            />
+          </label>
+          <WearItWithPicker
+            products={catalogProducts}
+            selectedIds={wearItWithIds}
+            onChange={(nextIds) => setValue("wearItWithIds", nextIds, { shouldDirty: true, shouldValidate: false })}
+            currentProductId={getValues("id")}
+            currentProductSlug={slugValue}
           />
           <label className="admin-field">
-            <span>Worn-on-body or styled photo</span>
-            <input className="admin-input" {...register("stylingImage")} />
+            <span>Description</span>
+            <textarea className="admin-textarea" {...register("description", { required: true })} />
           </label>
-          <LocalImageUpload
-            label="Upload worn-on-body or styled photo"
-            folder={uploadFolder}
-            onUploaded={(uploadedPath) => setValue("stylingImage", uploadedPath, { shouldValidate: true })}
-          />
-          <label className="admin-field">
-            <span>Detail photo</span>
-            <input className="admin-input" {...register("detailImage")} />
-          </label>
-          <LocalImageUpload
-            label="Upload detail photo"
-            folder={uploadFolder}
-            onUploaded={(uploadedPath) => setValue("detailImage", uploadedPath, { shouldValidate: true })}
-          />
-        </div>
+        </section>
 
-        {imageValue ? (
-          <p className="admin-note" style={{ marginBottom: "8px" }}>
-            Main image path: <code>{imageValue}</code>
-          </p>
-        ) : null}
-        {stylingImageValue ? (
-          <p className="admin-note" style={{ marginBottom: "8px" }}>
-            Second image path: <code>{stylingImageValue}</code>
-          </p>
-        ) : null}
-        {detailImageValue ? (
-          <p className="admin-note" style={{ marginBottom: "16px" }}>
-            Detail image path: <code>{detailImageValue}</code>
-          </p>
-        ) : null}
+        <section className="product-form-section product-form-section--submit">
+          <button type="submit" className="admin-button product-submit-btn">
+            Save Product
+          </button>
+          {submitError ? <p className="admin-form-error">{submitError}</p> : null}
+        </section>
 
-        <label className="admin-field">
-          <span>Materials Used</span>
-          <input className="admin-input" placeholder="Glass beads, brass clasp" {...register("materials")} />
-        </label>
-        <label className="admin-field">
-          <span>Production note for admin / WhatsApp</span>
-          <input
-            className="admin-input"
-            placeholder="Example: 3 to 5 days after confirmation, confirm colours first"
-            {...register("productionNote")}
-          />
-        </label>
-        <WearItWithPicker
-          products={catalogProducts}
-          selectedIds={wearItWithIds}
-          onChange={(nextIds) => setValue("wearItWithIds", nextIds, { shouldDirty: true, shouldValidate: false })}
-          currentProductId={getValues("id")}
-          currentProductSlug={slugValue}
-        />
-        <label className="admin-field">
-          <span>Description</span>
-          <textarea className="admin-textarea" {...register("description", { required: true })} />
-        </label>
-        <button type="submit" className="admin-button">
-          Save Product
-        </button>
-        {submitError ? <p className="admin-form-error">{submitError}</p> : null}
+        <style jsx>{`
+          .product-form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 100%;
+          }
+
+          .product-form-section {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+          }
+
+          .product-form-section:hover {
+            border-color: #d4a574;
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.08);
+          }
+
+          .product-form-section-title {
+            margin: 0 0 1.25rem 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #333;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f0f0f0;
+          }
+
+          .product-form-section--submit {
+            background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
+            border: 2px solid #d4a574;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+          }
+
+          .product-submit-btn {
+            background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+          }
+
+          .product-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+          }
+
+          .product-submit-btn:active {
+            transform: translateY(0);
+          }
+
+          @media (max-width: 1200px) {
+            .product-form-section {
+              padding: 1.25rem;
+            }
+          }
+
+          @media (max-width: 767px) {
+            .product-form-container {
+              gap: 1rem;
+            }
+
+            .product-form-section {
+              padding: 1rem;
+            }
+
+            .product-form-section--submit {
+              flex-direction: column;
+              align-items: stretch;
+            }
+
+            .product-submit-btn {
+              width: 100%;
+            }
+          }
+        `}</style>
       </form>
     </AdminLayout>
   );
