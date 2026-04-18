@@ -18,6 +18,7 @@ export default function AdminArtisansPage() {
   ]);
 
   const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(DEFAULT_ARTISAN);
   const [message, setMessage] = useState("");
   const [availableImages, setAvailableImages] = useState([]);
@@ -36,6 +37,7 @@ export default function AdminArtisansPage() {
 
   function handleNew() {
     setEditingId(null);
+    setShowForm(true);
     setFormData({ ...DEFAULT_ARTISAN, id: Date.now() });
     setShowImagePicker(false);
   }
@@ -69,6 +71,7 @@ export default function AdminArtisansPage() {
     }
 
     setEditingId(null);
+    setShowForm(false);
     setFormData(DEFAULT_ARTISAN);
     setShowImagePicker(false);
     setTimeout(() => setMessage(""), 3000);
@@ -76,6 +79,7 @@ export default function AdminArtisansPage() {
 
   function handleCancel() {
     setEditingId(null);
+    setShowForm(false);
     setFormData(DEFAULT_ARTISAN);
     setShowImagePicker(false);
   }
@@ -104,7 +108,7 @@ export default function AdminArtisansPage() {
 
         {message && <div style={{ padding: 12, background: "#d4edda", color: "#155724", borderRadius: 6, marginBottom: 16 }}>{message}</div>}
 
-        {(editingId || !editingId && formData.name) && (
+        {(editingId != null || showForm) && (
           <div style={{ background: "white", border: "1px solid #e5e5e5", borderRadius: 8, padding: 20, marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16 }}>{editingId ? "Edit Artisan" : "Add New Artisan"}</h3>
 
