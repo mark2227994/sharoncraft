@@ -10,6 +10,155 @@ import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
+import { useState } from "react";
+
+function CuratedSection({ bestSellers, newArrivals }) {
+  const [activeTab, setActiveTab] = useState("best-sellers");
+  const currentProducts = activeTab === "best-sellers" ? bestSellers : newArrivals;
+  const tabLabel = activeTab === "best-sellers" ? "Best Sellers" : "New This Week";
+  const tabKicker = activeTab === "best-sellers" ? "Customer favorites" : "Just arrived";
+
+  return (
+    <section className="curated-section">
+      <div className="curated-header">
+        <div>
+          <p className="overline">{tabKicker}</p>
+          <h2 className="display-md">{tabLabel}</h2>
+        </div>
+        <div className="curated-tabs">
+          <button
+            className={`curated-tab ${activeTab === "best-sellers" ? "curated-tab--active" : ""}`}
+            onClick={() => setActiveTab("best-sellers")}
+          >
+            <span className="curated-tab-icon">⭐</span>
+            Best Sellers
+          </button>
+          <button
+            className={`curated-tab ${activeTab === "new" ? "curated-tab--active" : ""}`}
+            onClick={() => setActiveTab("new")}
+          >
+            <span className="curated-tab-icon">🆕</span>
+            New This Week
+          </button>
+        </div>
+        <span className="section-heading__rule" aria-hidden="true" />
+      </div>
+      <MasonryGrid products={currentProducts} />
+
+      <style jsx>{`
+        .curated-section {
+          padding: var(--space-6) 0 var(--space-4);
+        }
+
+        .curated-header {
+          max-width: var(--max-width);
+          margin: 0 auto;
+          padding: 0 var(--gutter) var(--space-4);
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+          flex-wrap: wrap;
+          justify-content: space-between;
+        }
+
+        .curated-header > div {
+          flex: 1;
+          min-width: 200px;
+        }
+
+        .curated-header .overline {
+          margin: 0;
+          color: var(--text-secondary);
+        }
+
+        .curated-header .display-md {
+          margin: var(--space-1) 0 0;
+          color: var(--text-primary);
+        }
+
+        .curated-tabs {
+          display: flex;
+          gap: var(--space-2);
+          align-items: center;
+          background: var(--color-white);
+          padding: 6px;
+          border-radius: 8px;
+          border: 1px solid var(--border-default);
+        }
+
+        .curated-tab {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 16px;
+          border: none;
+          background: transparent;
+          color: var(--text-secondary);
+          font-size: var(--text-sm);
+          font-weight: 600;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .curated-tab:hover {
+          background: rgba(212, 165, 116, 0.1);
+          color: var(--color-terracotta);
+        }
+
+        .curated-tab--active {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          color: white;
+          box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+        }
+
+        .curated-tab-icon {
+          font-size: 1.1rem;
+        }
+
+        .section-heading__rule {
+          height: 1px;
+          flex: 1;
+          background: var(--color-terracotta);
+          opacity: 0.45;
+          margin-top: 18px;
+          display: none;
+        }
+
+        @media (min-width: 768px) {
+          .curated-header {
+            flex-wrap: nowrap;
+          }
+
+          .section-heading__rule {
+            display: block;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .curated-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-3);
+          }
+
+          .curated-tabs {
+            width: 100%;
+            justify-content: space-between;
+          }
+
+          .curated-tab {
+            flex: 1;
+            justify-content: center;
+            padding: 10px 12px;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
 
 function SectionHeading({ title, kicker }) {
   return (
@@ -60,15 +209,10 @@ export default function HomePage({
       <CategoryStrip categories={categories} activeCategory="All" />
 
       <main>
-        <section>
-          <SectionHeading title="Best Sellers" kicker="Customer favorites" />
-          <MasonryGrid products={featuredProducts} />
-        </section>
-
-        <section>
-          <SectionHeading title="New This Week" kicker="Just arrived" />
-          <MasonryGrid products={recentProducts} />
-        </section>
+        <CuratedSection 
+          bestSellers={featuredProducts}
+          newArrivals={recentProducts}
+        />
 
         <section id="about-gallery" className="collections-section">
           <SectionHeading title="Shop by Category" kicker="Browse collections" />
