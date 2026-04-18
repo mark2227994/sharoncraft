@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import Icon from "../../components/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatKES } from "../../lib/formatters";
 
@@ -93,7 +94,7 @@ export default function ExpensesPage() {
       {/* KPIs Section */}
       <div className="expenses-kpi-grid">
         <div className="expenses-kpi-card">
-          <div className="expenses-kpi-icon">💰</div>
+          <Icon name="dollar" size={24} className="expenses-kpi-icon" />
           <div className="expenses-kpi-content">
             <p className="expenses-kpi-label">Total Expenses</p>
             <p className="expenses-kpi-value">{formatKES(totalExpenses)}</p>

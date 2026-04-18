@@ -44,7 +44,7 @@ export default function Nav() {
     <>
       {/* Announcement Bar */}
       <div className="nav__announcement">
-        <p>✨ New collection: Limited edition Maasai-inspired pieces now available! 💚</p>
+        <p><Icon name="star" size={16} /> New collection: Limited edition Maasai-inspired pieces now available!</p>
       </div>
 
       <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>

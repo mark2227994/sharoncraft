@@ -1,6 +1,7 @@
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
+import Icon from "../components/icons";
 import { defaultAboutStory } from "../data/site";
 import { readSiteImages } from "../lib/site-images";
 
@@ -76,17 +77,17 @@ export default function AboutPage({ siteContent }) {
           <h2 className="display-md" style={{ textAlign: "center", marginBottom: "var(--space-5)" }}>Our Core Principles</h2>
           <div className="values-grid">
             <div className="value-card">
-              <div className="value-icon">✨</div>
+              <Icon name="star" size={28} className="value-icon" />
               <h3>Authentic Craft</h3>
               <p>Every piece is handmade by skilled Kenyan artisans using traditional techniques. We celebrate the imperfections that make handmade items truly unique.</p>
             </div>
             <div className="value-card">
-              <div className="value-icon">🌍</div>
+              <Icon name="pin" size={28} className="value-icon" />
               <h3>Cultural Pride</h3>
               <p>We honor East African beadwork traditions while celebrating contemporary design. Our pieces connect you to centuries of craft heritage.</p>
             </div>
             <div className="value-card">
-              <div className="value-icon">🤝</div>
+              <Icon name="users" size={28} className="value-icon" />
               <h3>Fair Partnership</h3>
               <p>We believe in transparent, equitable partnerships with our artisans. They're the heart of SharonCraft, and we're committed to supporting their livelihoods.</p>
             </div>

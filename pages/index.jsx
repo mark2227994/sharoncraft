@@ -214,21 +214,76 @@ export default function HomePage({
           </div>
           <div className="payment-methods-grid">
             <div className="payment-method">
-              <div className="payment-method__icon">💳</div>
+              <div className="payment-method__icon"><Icon name="dollar" size={24} /></div>
               <span>M-Pesa</span>
             </div>
             <div className="payment-method">
-              <div className="payment-method__icon">🏦</div>
+              <div className="payment-method__icon"><Icon name="dollar" size={24} /></div>
               <span>Bank Transfer</span>
             </div>
             <div className="payment-method">
-              <div className="payment-method__icon">💵</div>
+              <div className="payment-method__icon"><Icon name="truck" size={24} /></div>
               <span>Cash on Delivery</span>
               <span className="payment-method__note">(Nairobi)</span>
             </div>
             <div className="payment-method">
-              <div className="payment-method__icon">📱</div>
+              <div className="payment-method__icon"><Icon name="mpesa" size={24} /></div>
               <span>Lipa Na M-Pesa</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Signals Section */}
+      <section className="trust-signals" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-8) var(--gutter)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+          <p className="overline">Why Choose SharonCraft</p>
+          <h2 className="display-md" style={{ marginTop: 'var(--space-1)' }}>Trusted by Thousands</h2>
+          <p className="text-lg" style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>
+            Authentic Kenyan artisan crafts with verified quality and proven customer satisfaction
+          </p>
+        </div>
+
+        <div className="trust-grid">
+          <div className="trust-item">
+            <div className="trust-icon"><Icon name="check" size={32} /></div>
+            <h4>Certified Artisans</h4>
+            <p>All products are made by verified Kenyan artisans. We work directly with makers to ensure quality and authenticity.</p>
+          </div>
+          <div className="trust-item">
+            <div className="trust-icon"><Icon name="truck" size={32} /></div>
+            <h4>Fast Delivery</h4>
+            <p>Next-day delivery in Nairobi. Countrywide shipping available. Track your order real-time via WhatsApp.</p>
+          </div>
+          <div className="trust-item">
+            <div className="trust-icon"><Icon name="star" size={32} /></div>
+            <h4>Quality Guaranteed</h4>
+            <p>30-day returns on any product. We stand behind every piece. If it doesn't meet expectations, we make it right.</p>
+          </div>
+          <div className="trust-item">
+            <div className="trust-icon"><Icon name="heart" size={32} /></div>
+            <h4>Ethical Sourcing</h4>
+            <p>Fair prices for artisans. No middlemen. Supporting sustainable livelihoods across Kenya.</p>
+          </div>
+        </div>
+
+        <div className="testimonials">
+          <h3 style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>Customer Love</h3>
+          <div className="testimonials-grid">
+            <div className="testimonial-card">
+              <div className="stars">★★★★★</div>
+              <p>"These beaded earrings are absolutely stunning. The craftsmanship is incredible and they arrived so quickly. Highly recommend!"</p>
+              <div className="testimonial-author">— Sarah K., Nairobi</div>
+            </div>
+            <div className="testimonial-card">
+              <div className="stars">★★★★★</div>
+              <p>"I ordered custom pieces and the communication was amazing. The quality exceeded my expectations. Will definitely order again!"</p>
+              <div className="testimonial-author">— James M., Mombasa</div>
+            </div>
+            <div className="testimonial-card">
+              <div className="stars">★★★★★</div>
+              <p>"Supporting Kenyan artisans while getting beautiful, unique pieces. This is my go-to shop for all my gift needs."</p>
+              <div className="testimonial-author">— Amina H., Kampala</div>
             </div>
           </div>
         </div>
@@ -467,6 +522,102 @@ export default function HomePage({
             transform: translateX(0);
           }
         }
+        @media (min-width: 600px) {
+          .collection-card {
+            flex: 0 0 45vw;
+          }
+        }
+
+        .trust-signals {
+          background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(139, 90, 43, 0.03) 100%);
+          border-radius: var(--radius-lg);
+        }
+
+        .trust-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: var(--space-4);
+          margin-bottom: var(--space-8);
+        }
+
+        .trust-item {
+          text-align: center;
+          padding: var(--space-4);
+        }
+
+        .trust-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 64px;
+          height: 64px;
+          margin: 0 auto var(--space-3);
+          background: white;
+          border-radius: var(--radius-md);
+          border: 2px solid var(--color-terracotta);
+          color: var(--color-terracotta);
+        }
+
+        .trust-item h4 {
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-2);
+          color: var(--text-primary);
+        }
+
+        .trust-item p {
+          margin: 0;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+
+        .text-lg {
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+
+        .testimonials-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--space-4);
+        }
+
+        .testimonial-card {
+          background: white;
+          padding: var(--space-4);
+          border-radius: var(--radius-md);
+          border: 1px solid var(--border-light);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .testimonial-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stars {
+          color: var(--color-terracotta);
+          font-size: 1.1rem;
+          margin-bottom: var(--space-2);
+          letter-spacing: 2px;
+        }
+
+        .testimonial-card p {
+          margin: 0 0 var(--space-3);
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: var(--text-primary);
+          font-style: italic;
+        }
+
+        .testimonial-author {
+          font-weight: 600;
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+        }
+
         @media (min-width: 600px) {
           .collection-card {
             flex: 0 0 45vw;

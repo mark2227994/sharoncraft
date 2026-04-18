@@ -33,29 +33,29 @@ function buildWhatsAppMessage({
   deliveryFee,
 }) {
   const lines = [];
-  lines.push("👋 *Hello SharonCraft!*");
+  lines.push("HELLO SHARONCRAFT");
   lines.push("");
-  lines.push("📦 *New Order Request*");
+  lines.push("NEW ORDER REQUEST");
   if (orderReference) {
     lines.push(`Order ID: ${orderReference}`);
   }
   lines.push("");
   lines.push("═══════════════════");
-  lines.push("📋 *Items:*");
+  lines.push("ITEMS:");
   items.forEach((item, idx) => {
     const lineTotal = (item.price * item.quantity).toLocaleString();
-    lines.push(`${idx + 1}. *${item.name}*`);
+    lines.push(`${idx + 1}. ${item.name}`);
     lines.push(`   Qty: ${item.quantity} × KES ${item.price.toLocaleString()} = KES ${lineTotal}`);
   });
   lines.push("");
   lines.push("═══════════════════");
-  lines.push(`💰 *Subtotal:*     KES ${subtotal.toLocaleString()}`);
-  lines.push(`🚚 *Delivery:*      KES ${deliveryFee.toLocaleString()} (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"})`);
+  lines.push(`SUBTOTAL:     KES ${subtotal.toLocaleString()}`);
+  lines.push(`DELIVERY:      KES ${deliveryFee.toLocaleString()} (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"})`);
   lines.push(`━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`✅ *TOTAL:*        KES ${total.toLocaleString()}`);
+  lines.push(`TOTAL:        KES ${total.toLocaleString()}`);
   lines.push("═══════════════════");
   lines.push("");
-  lines.push("📍 *Delivery Details:*");
+  lines.push("DELIVERY DETAILS:");
   lines.push(`Area: ${area}`);
   lines.push(`Name: ${name}`);
   lines.push(`Phone: ${phone}`);
@@ -64,13 +64,13 @@ function buildWhatsAppMessage({
     lines.push(whatsappNote);
     lines.push("");
   }
-  lines.push("💳 *Payment Options:*");
+  lines.push("PAYMENT OPTIONS:");
   lines.push("✓ M-Pesa (till 254112222572)");
   lines.push("✓ Bank transfer");
   lines.push("✓ Cash on delivery (Nairobi)");
   lines.push("");
-  lines.push("⏰ Sharon will confirm within 2 hours ✓");
-  lines.push("Thank you for ordering with SharonCraft! 🙏💚");
+  lines.push("Sharon will confirm within 2 hours");
+  lines.push("Thank you for ordering with SharonCraft!");
   return lines.join("\n");
 }
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import Icon from "../../components/icons";
 import { formatKES, formatShortDate } from "../../lib/formatters";
 
 export default function AdminDashboardPage() {
@@ -89,7 +90,7 @@ export default function AdminDashboardPage() {
         <section className="dashboard-finance-section" style={{ marginBottom: "var(--space-6)" }}>
           <div className="dashboard-finance-hero">
             <div className="dashboard-finance-main">
-              <p className="dashboard-overline">📊 Weekly Performance</p>
+              <p className="dashboard-overline"><Icon name="star" size={14} /> Weekly Performance</p>
               <h2 className="dashboard-section-title">{finance.weekLabel}</h2>
               <div className="dashboard-profit-display">
                 <div className="dashboard-profit-value">{formatKES(finance.netProfit)}</div>
@@ -99,17 +100,17 @@ export default function AdminDashboardPage() {
             </div>
             <div className="dashboard-finance-quick-stats">
               <div className="dashboard-quick-stat">
-                <span className="dashboard-quick-stat-icon">💰</span>
+                <Icon name="dollar" size={24} className="dashboard-quick-stat-icon" />
                 <span className="dashboard-quick-stat-label">Money In</span>
                 <strong className="dashboard-quick-stat-value">{formatKES(finance.moneyIn)}</strong>
               </div>
               <div className="dashboard-quick-stat">
-                <span className="dashboard-quick-stat-icon">📤</span>
+                <Icon name="truck" size={24} className="dashboard-quick-stat-icon" />
                 <span className="dashboard-quick-stat-label">Money Out</span>
                 <strong className="dashboard-quick-stat-value">{formatKES(finance.moneyOut)}</strong>
               </div>
               <div className="dashboard-quick-stat">
-                <span className="dashboard-quick-stat-icon">🎯</span>
+                <Icon name="package" size={24} className="dashboard-quick-stat-icon" />
                 <span className="dashboard-quick-stat-label">Active Orders</span>
                 <strong className="dashboard-quick-stat-value">{finance.activeCustomOrders || 0}</strong>
               </div>
@@ -119,7 +120,7 @@ export default function AdminDashboardPage() {
           <div className="dashboard-finance-grid">
             <div className="dashboard-finance-card">
               <div className="dashboard-card-header">
-                <span className="dashboard-card-icon">💳</span>
+                <Icon name="dollar" size={18} className="dashboard-card-icon" />
                 <span className="dashboard-card-label">Sales</span>
               </div>
               <div className="dashboard-card-value">{formatKES(finance.moneyIn)}</div>
@@ -127,7 +128,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="dashboard-finance-card">
               <div className="dashboard-card-header">
-                <span className="dashboard-card-icon">💳</span>
+                <Icon name="dollar" size={18} className="dashboard-card-icon" />
                 <span className="dashboard-card-label">Stripe Fees</span>
               </div>
               <div className="dashboard-card-value">{formatKES(finance.stripeFees)}</div>
@@ -135,7 +136,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="dashboard-finance-card">
               <div className="dashboard-card-header">
-                <span className="dashboard-card-icon">📦</span>
+                <Icon name="package" size={18} className="dashboard-card-icon" />
                 <span className="dashboard-card-label">Material Costs</span>
               </div>
               <div className="dashboard-card-value">{formatKES(finance.materialCosts)}</div>
@@ -143,7 +144,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="dashboard-finance-card">
               <div className="dashboard-card-header">
-                <span className="dashboard-card-icon">🚚</span>
+                <Icon name="truck" size={18} className="dashboard-card-icon" />
                 <span className="dashboard-card-label">Shipping</span>
               </div>
               <div className="dashboard-card-value">{formatKES(finance.shippingCosts)}</div>
@@ -151,7 +152,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="dashboard-finance-card">
               <div className="dashboard-card-header">
-                <span className="dashboard-card-icon">✨</span>
+                <Icon name="star" size={18} className="dashboard-card-icon" />
                 <span className="dashboard-card-label">Custom Profit</span>
               </div>
               <div className="dashboard-card-value">{formatKES(finance.customExpectedProfit)}</div>
@@ -160,7 +161,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="dashboard-finance-form-section">
-            <h3 className="dashboard-form-title">📝 Update Weekly Costs</h3>
+            <h3 className="dashboard-form-title"><Icon name="edit" size={16} className="dashboard-form-icon" /> Update Weekly Costs</h3>
             <form className="dashboard-finance-form" onSubmit={saveWeeklyCosts}>
               <div className="dashboard-form-grid">
                 <label className="dashboard-form-field">
@@ -208,7 +209,7 @@ export default function AdminDashboardPage() {
 
       <section className="dashboard-section">
         <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">📈 Product Overview</h2>
+          <h2 className="dashboard-section-title"><Icon name="star" size={18} /> Product Overview</h2>
           <p className="dashboard-section-subtitle">Catalog performance and inventory status</p>
         </div>
         <div className="dashboard-stats-grid">
@@ -226,7 +227,7 @@ export default function AdminDashboardPage() {
 
       <section className="dashboard-section">
         <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title">💬 WhatsApp Orders</h2>
+          <h2 className="dashboard-section-title"><Icon name="mail" size={18} /> WhatsApp Orders</h2>
           <Link href="/admin/orders" className="dashboard-view-all-link">View all →</Link>
         </div>
         <div className="dashboard-stats-grid">
@@ -257,7 +258,7 @@ export default function AdminDashboardPage() {
         <>
           <section className="dashboard-section">
             <div className="dashboard-section-header">
-              <h2 className="dashboard-section-title">📦 Recent WhatsApp Orders</h2>
+              <h2 className="dashboard-section-title"><Icon name="package" size={18} /> Recent WhatsApp Orders</h2>
               <Link href="/admin/orders" className="dashboard-view-all-link">View all →</Link>
             </div>
             <div className="dashboard-orders-grid">
@@ -277,7 +278,7 @@ export default function AdminDashboardPage() {
                       rel="noopener noreferrer"
                       className="dashboard-order-phone"
                     >
-                      💬 {order.phone}
+                      <Icon name="mail" size={16} /> {order.phone}
                     </a>
                   </div>
                   <div className="dashboard-order-footer">
@@ -294,7 +295,7 @@ export default function AdminDashboardPage() {
         <>
           <section className="dashboard-section">
             <div className="dashboard-section-header">
-              <h2 className="dashboard-section-title">✨ Custom Orders</h2>
+              <h2 className="dashboard-section-title"><Icon name="star" size={18} /> Custom Orders</h2>
               <Link href="/admin/custom-orders" className="dashboard-view-all-link">View all →</Link>
             </div>
             <div className="dashboard-custom-grid">
@@ -321,7 +322,7 @@ export default function AdminDashboardPage() {
         <>
           <section className="dashboard-section">
             <div className="dashboard-section-header">
-              <h2 className="dashboard-section-title">💳 M-Pesa Orders</h2>
+              <h2 className="dashboard-section-title"><Icon name="dollar" size={18} /> M-Pesa Orders</h2>
             </div>
             <div className="dashboard-mpesa-grid">
               {orders.slice(0, 12).map((order) => (
@@ -349,31 +350,43 @@ export default function AdminDashboardPage() {
       ) : null}
 
       <section className="dashboard-quick-actions">
-        <h2 className="dashboard-section-title">⚡ Quick Actions</h2>
+        <h2 className="dashboard-section-title"><Icon name="star" size={18} /> Quick Actions</h2>
         <div className="dashboard-actions-grid">
           <Link href="/admin/products/new" className="dashboard-action-btn dashboard-action-btn--primary">
-            ➕ Add Product
+            <Icon name="plus" size={16} /> Add Product
           </Link>
           <Link href="/admin/orders" className="dashboard-action-btn">
-            📋 View Orders
+            <Icon name="package" size={16} /> View Orders
           </Link>
           <Link href="/admin/custom-orders" className="dashboard-action-btn">
-            ✨ Custom Tracker
+            <Icon name="star" size={16} /> Custom Tracker
+          </Link>
+          <Link href="/admin/analytics" className="dashboard-action-btn dashboard-action-btn--highlight">
+            <Icon name="chart" size={16} /> Analytics
+          </Link>
+          <Link href="/admin/leaderboard" className="dashboard-action-btn">
+            <Icon name="trophy" size={16} /> Leaderboard
+          </Link>
+          <Link href="/admin/payments" className="dashboard-action-btn">
+            <Icon name="dollar" size={16} /> Payments
           </Link>
           <Link href="/admin/marketing" className="dashboard-action-btn">
-            📢 Marketing
+            <Icon name="heart" size={16} /> Marketing
           </Link>
           <Link href="/admin/offers" className="dashboard-action-btn">
-            🎁 Offers
+            <Icon name="tag" size={16} /> Offers
           </Link>
           <Link href="/admin/images" className="dashboard-action-btn">
-            🖼️ Images
+            <Icon name="image" size={16} /> Images
           </Link>
           <Link href="/admin/site-images" className="dashboard-action-btn">
-            🎨 Site Content
+            <Icon name="palette" size={16} /> Site Content
+          </Link>
+          <Link href="/admin/inventory-dashboard" className="dashboard-action-btn">
+            <Icon name="package" size={16} /> Inventory
           </Link>
           <Link href="/admin/health" className="dashboard-action-btn">
-            🏥 Storage Health
+            <Icon name="check" size={16} /> Storage Health
           </Link>
         </div>
       </section>

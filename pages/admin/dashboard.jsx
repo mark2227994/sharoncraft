@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import Icon from '../../components/icons';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -66,7 +67,7 @@ export default function AdminDashboard() {
           <div className="kpi-card">
             <div className="kpi-card__header">
               <h3>Today's Sales</h3>
-              <span className="kpi-icon">📊</span>
+              <Icon name="chart" size={20} className="kpi-icon" />
             </div>
             <p className="kpi-value">{todaysSales}</p>
             <p className="kpi-secondary">KES {todaysRevenue.toLocaleString()}</p>
@@ -75,7 +76,7 @@ export default function AdminDashboard() {
           <div className="kpi-card">
             <div className="kpi-card__header">
               <h3>Monthly Total</h3>
-              <span className="kpi-icon">📈</span>
+              <Icon name="chart" size={20} className="kpi-icon" />
             </div>
             <p className="kpi-value">{monthlyTotal}/10</p>
             <div className="progress-bar">
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
           <div className="kpi-card">
             <div className="kpi-card__header">
               <h3>Monthly Revenue</h3>
-              <span className="kpi-icon">💰</span>
+              <Icon name="dollar" size={20} className="kpi-icon" />
             </div>
             <p className="kpi-value">KES {(monthlyRevenue / 1000).toFixed(0)}k</p>
             <div className="progress-bar">
@@ -99,7 +100,7 @@ export default function AdminDashboard() {
           <div className="kpi-card warning">
             <div className="kpi-card__header">
               <h3>Pending Payments</h3>
-              <span className="kpi-icon">⚠️</span>
+              <Icon name="alert" size={20} className="kpi-icon" />
             </div>
             <p className="kpi-value">KES {pendingPayments.toLocaleString()}</p>
             <p className="kpi-secondary">Follow up needed</p>
@@ -109,7 +110,7 @@ export default function AdminDashboard() {
           <div className="kpi-card">
             <div className="kpi-card__header">
               <h3>Pending Shipments</h3>
-              <span className="kpi-icon">📦</span>
+              <Icon name="package" size={20} className="kpi-icon" />
             </div>
             <p className="kpi-value">{pendingShipments}</p>
             <p className="kpi-secondary">Orders to ship</p>
@@ -119,7 +120,7 @@ export default function AdminDashboard() {
           <div className="kpi-card">
             <div className="kpi-card__header">
               <h3>Avg Order Value</h3>
-              <span className="kpi-icon">💵</span>
+              <Icon name="dollar" size={20} className="kpi-icon" />
             </div>
             <p className="kpi-value">KES {monthlyTotal > 0 ? Math.round(monthlyRevenue / monthlyTotal).toLocaleString() : 0}</p>
             <p className="kpi-secondary">Last 30 days</p>
@@ -153,12 +154,30 @@ export default function AdminDashboard() {
                 <div className="col-amount">KES {order.totalPrice?.toLocaleString()}</div>
                 <div className="col-status">
                   <span className={`badge badge-${order.paymentStatus}`}>
-                    {order.paymentStatus === 'paid' ? '✓ Paid' : '⏳ Pending'}
+                    {order.paymentStatus === 'paid' ? (
+                      <>
+                        <Icon name="check" size={14} style={{ display: 'inline', marginRight: '4px' }} /> Paid
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="clock" size={14} style={{ display: 'inline', marginRight: '4px' }} /> Pending
+                      </>
+                    )}
                   </span>
                 </div>
                 <div className="col-shipping">
                   <span className={`badge badge-${order.orderStatus}`}>
-                    {order.orderStatus === 'shipped' ? '🚚 Shipped' : order.orderStatus === 'processing' ? '📦 Processing' : 'Pending'}
+                    {order.orderStatus === 'shipped' ? (
+                      <>
+                        <Icon name="truck" size={14} style={{ display: 'inline', marginRight: '4px' }} /> Shipped
+                      </>
+                    ) : order.orderStatus === 'processing' ? (
+                      <>
+                        <Icon name="package" size={14} style={{ display: 'inline', marginRight: '4px' }} /> Processing
+                      </>
+                    ) : (
+                      'Pending'
+                    )}
                   </span>
                 </div>
                 <div className="col-action">
@@ -174,19 +193,19 @@ export default function AdminDashboard() {
           <h2>Quick Actions</h2>
           <div className="actions-grid">
             <Link href="/admin/orders/new" className="action-btn">
-              <span>➕</span>
+              <Icon name="plus" size={18} />
               Log New Order
             </Link>
             <Link href="/admin/payments" className="action-btn">
-              <span>💳</span>
+              <Icon name="dollar" size={18} />
               Verify Payments
             </Link>
             <Link href="/admin/messages" className="action-btn">
-              <span>💬</span>
+              <Icon name="mail" size={18} />
               View Messages
             </Link>
             <Link href="/admin/products" className="action-btn">
-              <span>📦</span>
+              <Icon name="package" size={18} />
               Manage Products
             </Link>
           </div>

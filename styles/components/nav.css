@@ -165,6 +165,7 @@
 .side-drawer__nav-link:hover { color: var(--color-ochre-light); }
 
 @media (min-width: 768px) {
+  .nav__desktop-nav { display: flex; }
   .nav__links { display: flex; }
   .nav__hamburger { display: none; }
 }

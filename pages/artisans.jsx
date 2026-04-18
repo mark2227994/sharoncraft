@@ -30,12 +30,12 @@ export default function ArtisansPage({ artisans = [] }) {
               <p>Each artisan has years of experience in traditional beadwork techniques, creating unique pieces with authentic heritage.</p>
             </div>
             <div className="artisans-intro__card">
-              <div className="artisans-intro__icon">🌍</div>
+              <Icon name="pin" size={28} className="artisans-intro__icon" />
               <h3>Kenyan Heritage</h3>
               <p>Our artisans are based across Kenya, bringing diverse perspectives and cultural traditions to their work.</p>
             </div>
             <div className="artisans-intro__card">
-              <div className="artisans-intro__icon">✨</div>
+              <Icon name="star" size={28} className="artisans-intro__icon" />
               <h3>Unique Stories</h3>
               <p>Every artisan has a story to share about their craft, inspiration, and journey with SharonCraft.</p>
             </div>

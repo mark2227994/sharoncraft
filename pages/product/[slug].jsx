@@ -534,42 +534,42 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           <h2 className="display-md" style={{ marginTop: 0, marginBottom: "var(--space-3)", fontSize: "18px" }}>Why shop with SharonCraft?</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "var(--space-3)" }}>
             <div style={{ display: "flex", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>🎨</span>
+              <Icon name="edit" size={24} color="currentColor" style={{ flex: "0 0 auto" }} />
               <div>
                 <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Handmade Quality</p>
                 <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Each piece is crafted by skilled Kenyan artisans</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>🚚</span>
+              <Icon name="truck" size={24} color="currentColor" style={{ flex: "0 0 auto" }} />
               <div>
                 <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Fast Shipping</p>
                 <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Ships within 24 hours | Free in Nairobi</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>↩️</span>
+              <Icon name="arrowR" size={24} color="currentColor" style={{ flex: "0 0 auto" }} />
               <div>
                 <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Easy Returns</p>
                 <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>30-day money-back guarantee</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>💬</span>
+              <Icon name="mail" size={24} color="currentColor" style={{ flex: "0 0 auto" }} />
               <div>
                 <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Expert Support</p>
                 <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>WhatsApp support for custom requests</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>✨</span>
+              <Icon name="star" size={24} color="currentColor" style={{ flex: "0 0 auto" }} />
               <div>
                 <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Unique Designs</p>
                 <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Limited edition pieces, no mass production</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>🎁</span>
+              <Icon name="box" size={24} color="currentColor" style={{ flex: "0 0 auto" }} />
               <div>
                 <p style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700 }}>Gift Packaging</p>
                 <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Beautiful gift wrapping available</p>
