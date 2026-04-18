@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { readSiteImages } from "../../lib/site-images";
 import { readProducts } from "../../lib/store";
@@ -29,16 +29,43 @@ function getProductEntries(products) {
     type: "product",
     label: product.name,
     path: product.image || "",
-    extra: `${product.category}${product.jewelryType ? ` · ${product.jewelryType}` : ""}`,
+    extra: `${product.category}${product.jewelryType ? ` - ${product.jewelryType}` : ""}`,
     publishStatus: product.publishStatus,
     imageCount: Array.isArray(product.images) ? product.images.length : 0,
     href: `/admin/products/${product.id}`,
   }));
 }
 
-export default function AdminImagesPage({ siteImages, products }) {
+function toImageSrcList(images) {
+  if (!Array.isArray(images)) return [];
+  return images
+    .map((image) => {
+      if (typeof image === "string") return image.trim();
+      if (image && typeof image === "object") {
+        return String(image.src || image.url || image.image || "").trim();
+      }
+      return "";
+    })
+    .filter(Boolean);
+}
+
+export default function AdminImagesPage({ siteImages: initialSiteImages, products: initialProducts }) {
+  const [siteImages, setSiteImages] = useState(initialSiteImages || {});
+  const [products, setProducts] = useState(initialProducts || []);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [draftPaths, setDraftPaths] = useState({});
+  const [savingId, setSavingId] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const nextDrafts = {};
+    for (const entry of [...getSiteEntries(siteImages), ...getProductEntries(products)]) {
+      nextDrafts[`${entry.type}:${entry.id}`] = entry.path || "";
+    }
+    setDraftPaths(nextDrafts);
+  }, [products, siteImages]);
 
   const entries = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -57,6 +84,88 @@ export default function AdminImagesPage({ siteImages, products }) {
     }
   }
 
+  function getDraftKey(entry) {
+    return `${entry.type}:${entry.id}`;
+  }
+
+  function getDraftPath(entry) {
+    return draftPaths[getDraftKey(entry)] ?? entry.path ?? "";
+  }
+
+  async function saveEntry(entry) {
+    const key = getDraftKey(entry);
+    const nextPath = String(draftPaths[key] || "").trim();
+
+    setSavingId(key);
+    setMessage("");
+    setError("");
+
+    try {
+      if (entry.type === "site") {
+        const response = await fetch("/api/admin/site-images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ [entry.id]: nextPath }),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body?.error || "Could not save site image path");
+        }
+
+        const payload = await response.json();
+        if (payload?.siteImages) {
+          setSiteImages(payload.siteImages);
+        } else {
+          setSiteImages((current) => ({ ...current, [entry.id]: nextPath }));
+        }
+      }
+
+      if (entry.type === "product") {
+        const product = products.find((item) => item.id === entry.id);
+        if (!product) {
+          throw new Error("Product not found");
+        }
+
+        const existingGallery = toImageSrcList(product.images);
+        const nextGallery = [nextPath, ...existingGallery.filter((src) => src !== nextPath)].filter(Boolean);
+
+        const response = await fetch("/api/admin/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            ...product,
+            image: nextPath,
+            images: nextGallery,
+          }),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body?.error || "Could not save product image path");
+        }
+
+        setProducts((current) =>
+          current.map((item) =>
+            item.id === product.id
+              ? {
+                  ...item,
+                  image: nextPath,
+                  images: nextGallery,
+                }
+              : item,
+          ),
+        );
+      }
+
+      setMessage(`${entry.label} image path saved.`);
+    } catch (saveError) {
+      setError(String(saveError?.message || "Could not save image path"));
+    } finally {
+      setSavingId("");
+    }
+  }
+
   return (
     <AdminLayout
       title="Images"
@@ -66,6 +175,9 @@ export default function AdminImagesPage({ siteImages, products }) {
         </Link>
       }
     >
+      {message ? <p className="saved-indicator">{message}</p> : null}
+      {error ? <p className="admin-form-error">{error}</p> : null}
+
       <section className="admin-panel" style={{ marginBottom: "var(--space-4)" }}>
         <div className="images-toolbar">
           <input
@@ -83,29 +195,54 @@ export default function AdminImagesPage({ siteImages, products }) {
       </section>
 
       <section className="images-grid">
-        {entries.map((entry) => (
-          <article key={`${entry.type}-${entry.id}`} className="admin-panel image-card">
-            {entry.path ? (
-              <img src={entry.path} alt="" className="image-card__preview" />
-            ) : (
-              <div className="image-card__empty">No image linked yet</div>
-            )}
-            <p className="overline">{entry.type === "site" ? "Site asset" : "Product asset"}</p>
-            <h2 className="heading-md">{entry.label}</h2>
-            {entry.extra ? <p className="caption">{entry.extra}</p> : null}
-            {entry.publishStatus ? <p className="caption">Visibility: {entry.publishStatus}</p> : null}
-            {typeof entry.imageCount === "number" ? <p className="caption">Gallery images: {entry.imageCount}</p> : null}
-            <code className="image-card__path">{entry.path || "No path yet"}</code>
-            <div className="admin-quick-actions" style={{ marginTop: "var(--space-3)" }}>
-              <button type="button" className="admin-button admin-button--secondary" onClick={() => copyPath(entry.path || "")}>
-                Copy path
-              </button>
-              <Link href={entry.href} className="admin-button">
-                Open editor
-              </Link>
-            </div>
-          </article>
-        ))}
+        {entries.map((entry) => {
+          const draft = getDraftPath(entry);
+          const key = getDraftKey(entry);
+          const isSaving = savingId === key;
+
+          return (
+            <article key={key} className="admin-panel image-card">
+              {draft ? (
+                <img src={draft} alt="" className="image-card__preview" />
+              ) : (
+                <div className="image-card__empty">No image linked yet</div>
+              )}
+              <p className="overline">{entry.type === "site" ? "Site asset" : "Product asset"}</p>
+              <h2 className="heading-md">{entry.label}</h2>
+              {entry.extra ? <p className="caption">{entry.extra}</p> : null}
+              {entry.publishStatus ? <p className="caption">Visibility: {entry.publishStatus}</p> : null}
+              {typeof entry.imageCount === "number" ? <p className="caption">Gallery images: {entry.imageCount}</p> : null}
+
+              <label className="admin-field" style={{ marginTop: "var(--space-3)" }}>
+                <span className="caption">Image path</span>
+                <input
+                  className="admin-input"
+                  value={draft}
+                  onChange={(event) =>
+                    setDraftPaths((current) => ({
+                      ...current,
+                      [key]: event.target.value,
+                    }))
+                  }
+                  placeholder="/media/site/..."
+                />
+              </label>
+
+              <code className="image-card__path">{draft || "No path yet"}</code>
+              <div className="admin-quick-actions" style={{ marginTop: "var(--space-3)" }}>
+                <button type="button" className="admin-button admin-button--secondary" onClick={() => copyPath(draft || "")}>
+                  Copy path
+                </button>
+                <button type="button" className="admin-button" onClick={() => saveEntry(entry)} disabled={isSaving}>
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
+                <Link href={entry.href} className="admin-button admin-button--secondary">
+                  Open editor
+                </Link>
+              </div>
+            </article>
+          );
+        })}
       </section>
 
       <style jsx>{`
@@ -116,7 +253,7 @@ export default function AdminImagesPage({ siteImages, products }) {
         }
         .images-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: var(--space-4);
         }
         .image-card {
@@ -141,7 +278,7 @@ export default function AdminImagesPage({ siteImages, products }) {
         }
         .image-card__path {
           display: block;
-          margin-top: var(--space-3);
+          margin-top: var(--space-2);
           padding: 10px 12px;
           border-radius: var(--radius-md);
           background: var(--bg-card-alt);

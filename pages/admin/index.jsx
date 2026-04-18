@@ -390,6 +390,9 @@ export default function AdminDashboardPage() {
         <Link href="/admin/site-images" className="admin-button admin-button--secondary">
           Edit Site Content
         </Link>
+        <Link href="/admin/health" className="admin-button admin-button--secondary">
+          Storage Health
+        </Link>
       </section>
 
       <style jsx>{`

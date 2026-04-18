@@ -23,13 +23,31 @@ const navItems = [
   { href: "/admin/products/new", label: "Add Product", icon: "plus" },
   { href: "/admin/product-story", label: "Stories", icon: "edit" },
   { href: "/admin/site-images", label: "Site Content", icon: "edit" },
+  { href: "/admin/health", label: "Health", icon: "search" },
   { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
 ];
+
+const STATUS_BY_ROUTE = [
+  { match: "/admin/mpesa", status: "read-only", label: "Read-only" },
+  { match: "/admin/images", status: "read-only", label: "Read-only" },
+  { match: "/admin/login", status: "demo", label: "Demo" },
+  { match: "/admin/settings/hero", status: "live", label: "Live" },
+  { match: "/admin", status: "live", label: "Live" },
+];
+
+function getPageStatus(pathname) {
+  const statusEntry = STATUS_BY_ROUTE.find((item) => pathname === item.match || pathname.startsWith(`${item.match}/`));
+  if (!statusEntry) {
+    return { status: "live", label: "Live" };
+  }
+  return statusEntry;
+}
 
 export default function AdminLayout({ title, action, children }) {
   const router = useRouter();
   const currentId = typeof router.query.id === "string" ? router.query.id : "";
   const [sessionReady, setSessionReady] = useState(false);
+  const pageStatus = getPageStatus(router.pathname || "");
 
   useEffect(() => {
     let isMounted = true;
@@ -118,6 +136,17 @@ export default function AdminLayout({ title, action, children }) {
           <div>
             <p className="overline">Admin workspace</p>
             <h1 className="display-md">{title}</h1>
+            <div className="admin-status-row">
+              <span className="admin-note" style={{ margin: 0 }}>Mode:</span>
+              {["live", "read-only", "demo"].map((status) => (
+                <span
+                  key={status}
+                  className={`admin-status-badge admin-status-badge--${status} ${pageStatus.status === status ? "admin-status-badge--active" : "admin-status-badge--inactive"}`}
+                >
+                  {status === "read-only" ? "Read-only" : status.charAt(0).toUpperCase() + status.slice(1)}
+                </span>
+              ))}
+            </div>
           </div>
           {action}
         </div>
