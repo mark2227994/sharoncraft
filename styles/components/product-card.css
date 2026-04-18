@@ -2,25 +2,26 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-card);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   overflow: hidden;
-  border: 1px solid var(--border-default);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  border: 1px solid rgba(139, 90, 43, 0.08);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   will-change: transform;
   height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 .product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-  border-color: transparent;
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(212, 165, 116, 0.15);
+  border-color: rgba(212, 165, 116, 0.2);
 }
 .product-card:active {
-  transform: translateY(0) scale(0.99);
+  transform: translateY(-2px) scale(0.98);
 }
 .product-card__image-wrap {
   position: relative;
   overflow: hidden;
-  background: var(--color-cream-dark);
+  background: linear-gradient(135deg, #f9f6ee 0%, #ede8df 100%);
   width: 100%;
   aspect-ratio: 1 / 1;
   flex-shrink: 0;

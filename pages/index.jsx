@@ -197,6 +197,25 @@ export default function HomePage({
         trustLine={siteContent.deliveryNote}
       />
 
+      <section className="custom-orders-banner" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-6) auto', padding: 'var(--space-6) var(--gutter)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 'var(--space-6)', alignItems: 'center' }}>
+          <div>
+            <h3 className="display-sm">Design With Us</h3>
+            <p style={{ marginTop: 'var(--space-2)', color: 'var(--text-secondary)', fontSize: '16px' }}>
+              Custom pieces made to your vision
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, marginTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ color: 'var(--color-terracotta)' }}>✓</span> Fully customizable</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ color: 'var(--color-terracotta)' }}>✓</span> Premium materials</li>
+              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ color: 'var(--color-terracotta)' }}>✓</span> 5–10 day delivery</li>
+            </ul>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <a href="/custom-order" className="custom-order-btn">Start Design</a>
+          </div>
+        </div>
+      </section>
+
       <section className="trust-bar" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-4) var(--gutter)' }}>
         {trustItems.map((item) => (
           <div key={item.label} className="trust-bar__item">
@@ -237,53 +256,50 @@ export default function HomePage({
       {/* Trust Signals Section */}
       <section className="trust-signals" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-8) var(--gutter)' }}>
         <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-          <p className="overline">Why Choose SharonCraft</p>
-          <h2 className="display-md" style={{ marginTop: 'var(--space-1)' }}>Trusted by Thousands</h2>
-          <p className="text-lg" style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>
-            Authentic Kenyan artisan crafts with verified quality and proven customer satisfaction
-          </p>
+          <p className="overline">Trusted</p>
+          <h2 className="display-md" style={{ marginTop: 'var(--space-1)' }}>Why SharonCraft</h2>
         </div>
 
         <div className="trust-grid">
           <div className="trust-item">
             <div className="trust-icon"><Icon name="check" size={32} /></div>
-            <h4>Certified Artisans</h4>
-            <p>All products are made by verified Kenyan artisans. We work directly with makers to ensure quality and authenticity.</p>
+            <h4>Verified Artisans</h4>
+            <p>Direct from Kenyan makers</p>
           </div>
           <div className="trust-item">
             <div className="trust-icon"><Icon name="truck" size={32} /></div>
-            <h4>Fast Delivery</h4>
-            <p>Next-day delivery in Nairobi. Countrywide shipping available. Track your order real-time via WhatsApp.</p>
+            <h4>Fast & Tracked</h4>
+            <p>Next-day Nairobi delivery</p>
           </div>
           <div className="trust-item">
             <div className="trust-icon"><Icon name="star" size={32} /></div>
-            <h4>Quality Guaranteed</h4>
-            <p>30-day returns on any product. We stand behind every piece. If it doesn't meet expectations, we make it right.</p>
+            <h4>Guaranteed Quality</h4>
+            <p>30-day returns, always</p>
           </div>
           <div className="trust-item">
             <div className="trust-icon"><Icon name="heart" size={32} /></div>
-            <h4>Ethical Sourcing</h4>
-            <p>Fair prices for artisans. No middlemen. Supporting sustainable livelihoods across Kenya.</p>
+            <h4>Fair Trade</h4>
+            <p>Artisans paid directly</p>
           </div>
         </div>
 
         <div className="testimonials">
-          <h3 style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>Customer Love</h3>
+          <h3 style={{ textAlign: 'center', marginBottom: 'var(--space-4)', fontSize: '18px', fontWeight: 600 }}>Loved</h3>
           <div className="testimonials-grid">
             <div className="testimonial-card">
               <div className="stars">★★★★★</div>
-              <p>"These beaded earrings are absolutely stunning. The craftsmanship is incredible and they arrived so quickly. Highly recommend!"</p>
-              <div className="testimonial-author">— Sarah K., Nairobi</div>
+              <p>"Stunning craftsmanship. Arrived quickly."</p>
+              <div className="testimonial-author">— Sarah K.</div>
             </div>
             <div className="testimonial-card">
               <div className="stars">★★★★★</div>
-              <p>"I ordered custom pieces and the communication was amazing. The quality exceeded my expectations. Will definitely order again!"</p>
-              <div className="testimonial-author">— James M., Mombasa</div>
+              <p>"Custom orders exceeded expectations. Will buy again."</p>
+              <div className="testimonial-author">— James M.</div>
             </div>
             <div className="testimonial-card">
               <div className="stars">★★★★★</div>
-              <p>"Supporting Kenyan artisans while getting beautiful, unique pieces. This is my go-to shop for all my gift needs."</p>
-              <div className="testimonial-author">— Amina H., Kampala</div>
+              <p>"Beautiful, unique pieces. Supporting Kenyan artisans."</p>
+              <div className="testimonial-author">— Amina H.</div>
             </div>
           </div>
         </div>
@@ -311,7 +327,19 @@ export default function HomePage({
           </div>
         </section>
 
-        <ArtisanTimeline artisans={artisans} />
+        <section className="featured-artisans-showcase" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)', background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, rgba(212, 165, 116, 0.02) 100%)', borderRadius: '12px', border: '1px solid rgba(212, 165, 116, 0.2)' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+            <p className="overline">Meet the Makers</p>
+            <h2 className="display-md" style={{ marginTop: 'var(--space-1)' }}>The Artisans Behind SharonCraft</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-2)', maxWidth: '600px', margin: 'var(--space-2) auto 0', fontSize: '16px' }}>
+              Master craftspeople with years of traditional beadwork expertise
+            </p>
+          </div>
+          <ArtisanTimeline artisans={artisans} />
+          <div style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+            <a href="/artisans" className="artisan-link">Meet All Artisans →</a>
+          </div>
+        </section>
       </main>
 
       <Footer siteContent={siteContent} />
@@ -636,6 +664,36 @@ export default function HomePage({
           .trust-bar {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
+        }
+        .custom-order-btn {
+          display: inline-block;
+          padding: 14px 28px;
+          background: linear-gradient(135deg, #d4a574 0%, #c49464 100%);
+          color: white;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 15px;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+        .custom-order-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(212, 165, 116, 0.4);
+        }
+        .artisan-link {
+          display: inline-block;
+          padding: 12px 24px;
+          border: 2px solid var(--color-terracotta);
+          color: var(--color-terracotta);
+          border-radius: 6px;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+        .artisan-link:hover {
+          background: var(--color-terracotta);
+          color: white;
         }
       `}</style>
     </>

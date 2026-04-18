@@ -4,6 +4,17 @@
   min-height: 70vh;
   margin-top: 90px;
 }
+.hero__detail-pane {
+  position: relative;
+  overflow: hidden;
+  min-height: 40vw;
+  display: none;
+}
+.hero__detail-pane img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
 .hero__image-pane {
   position: relative;
   overflow: hidden;
@@ -111,10 +122,24 @@
 }
 @media (min-width: 900px) {
   .hero {
-    grid-template-columns: 55fr 45fr;
+    grid-template-columns: 20fr 25fr 55fr;
     min-height: 100vh;
   }
-  .hero__image-pane { min-height: auto; overflow: hidden; }
+  .hero__detail-pane { 
+    display: block;
+    min-height: auto;
+    overflow: hidden;
+  }
+  .hero__detail-pane img {
+    transition: transform 1.2s ease-out;
+  }
+  .hero:hover .hero__detail-pane img {
+    transform: scale(1.05);
+  }
+  .hero__image-pane { 
+    min-height: auto;
+    overflow: hidden;
+  }
   .hero__image-pane img {
     transition: transform 1.2s ease-out;
   }
@@ -126,5 +151,6 @@
   }
   .hero__text-pane {
     padding: var(--space-8) var(--space-7);
+    grid-column: 3;
   }
 }
