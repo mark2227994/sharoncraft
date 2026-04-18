@@ -64,8 +64,20 @@
 
   /* Layout */
   --max-width: 1440px;
-  --gutter: 16px;
+  --gutter: 0px;
   --nav-height: 60px;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --gutter: 12px;
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --gutter: 16px;
+  }
 }
 
 /* ---- Reset ---- */
