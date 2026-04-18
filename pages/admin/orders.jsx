@@ -242,100 +242,85 @@ export default function AdminOrdersPage() {
         </div>
       ) : (
         <>
-          <section className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Order Ref</th>
-                  <th>Customer</th>
-                  <th>Fulfillment</th>
-                  <th>WhatsApp</th>
-                  <th>Area</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Updated</th>
-                  <th style={{ textAlign: "right" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order) => {
-                  const statusMeta = getWaOrderStatusMeta(order.status);
-                  const fulfillmentMeta = getFulfillmentTypeMeta(order.fulfillmentType);
-                  return (
-                    <tr key={order.id}>
-                      <td style={{ whiteSpace: "nowrap" }}>{order.orderReference}</td>
-                      <td>
-                        <strong>{order.name}</strong>
-                        <div className="caption">{getSourceLabel(order)} - {formatDate(order.timestamp)}</div>
-                      </td>
-                      <td>
-                        <span className="caption" style={{ color: "var(--color-bark)", fontWeight: 600 }}>
-                          {fulfillmentMeta.label}
-                        </span>
-                      </td>
-                      <td>
+          <section className="orders-grid-wrap">
+            <div className="orders-grid-header">
+              <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#333" }}>
+                Showing {filteredOrders.length} orders
+              </h2>
+            </div>
+
+            <div className="orders-grid">
+              {filteredOrders.map((order) => {
+                const statusMeta = getWaOrderStatusMeta(order.status);
+                const fulfillmentMeta = getFulfillmentTypeMeta(order.fulfillmentType);
+                return (
+                  <article key={order.id} className="order-card">
+                    {/* Header Section */}
+                    <div className="order-card-header">
+                      <div>
+                        <p className="order-card-ref">{order.orderReference}</p>
+                        <h3 className="order-card-customer">{order.name}</h3>
+                      </div>
+                      <span className={`order-status-badge ${statusMeta.cls}`}>
+                        {statusMeta.label}
+                      </span>
+                    </div>
+
+                    {/* Details Section */}
+                    <div className="order-card-details">
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Phone</span>
                         <a
                           href={buildOrderWhatsAppHref(order)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="admin-link"
+                          className="order-detail-value order-whatsapp-link"
                         >
-                          {order.phone}
+                          💬 {order.phone}
                         </a>
-                      </td>
-                      <td>{order.area || "-"}</td>
-                      <td>{formatKES(order.total)}</td>
-                      <td>
-                        <span className={`admin-pill ${statusMeta.cls}`}>{statusMeta.label}</span>
-                      </td>
-                      <td>{formatDate(order.updatedAt)}</td>
-                      <td style={{ textAlign: "right" }}>
-                        <button
-                          type="button"
-                          className="admin-button admin-button--secondary"
-                          style={{ padding: "8px 12px", fontSize: "0.8rem" }}
-                          onClick={() => setSelectedId(order.id)}
-                        >
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </section>
-
-          <section className="admin-mobile-cards">
-            {filteredOrders.map((order) => {
-              const statusMeta = getWaOrderStatusMeta(order.status);
-              const fulfillmentMeta = getFulfillmentTypeMeta(order.fulfillmentType);
-              return (
-                <article key={order.id} className="admin-panel order-card-mobile">
-                  <div className="order-card-mobile__top">
-                    <div>
-                      <p className="overline">{order.orderReference}</p>
-                      <h2 className="heading-md">{order.name}</h2>
-                      <p className="body-sm">{order.area || getSourceLabel(order)}</p>
-                      <p className="caption" style={{ marginTop: "4px" }}>{fulfillmentMeta.label}</p>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Area</span>
+                        <span className="order-detail-value">{order.area || "—"}</span>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Type</span>
+                        <span className="order-detail-value">{fulfillmentMeta.label}</span>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Source</span>
+                        <span className="order-detail-value">{getSourceLabel(order)}</span>
+                      </div>
                     </div>
-                    <span className={`admin-pill ${statusMeta.cls}`}>{statusMeta.label}</span>
-                  </div>
-                  <p className="body-sm">{formatKES(order.total)}</p>
-                  <a href={buildOrderWhatsAppHref(order)} target="_blank" rel="noopener noreferrer" className="admin-link">
-                    Open WhatsApp
-                  </a>
-                  <button
-                    type="button"
-                    className="admin-button admin-button--secondary"
-                    style={{ marginTop: "var(--space-3)" }}
-                    onClick={() => setSelectedId(order.id)}
-                  >
-                    Manage Order
-                  </button>
-                </article>
-              );
-            })}
+
+                    {/* Total Section */}
+                    <div className="order-card-total">
+                      <span className="order-total-label">Total</span>
+                      <span className="order-total-value">{formatKES(order.total)}</span>
+                    </div>
+
+                    {/* Actions Section */}
+                    <div className="order-card-actions">
+                      <button
+                        type="button"
+                        className="order-card-btn order-card-btn--primary"
+                        onClick={() => setSelectedId(order.id)}
+                      >
+                        Manage
+                      </button>
+                      <a
+                        href={buildOrderWhatsAppHref(order)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="order-card-btn order-card-btn--secondary"
+                      >
+                        WhatsApp
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </section>
         </>
       )}
@@ -551,32 +536,269 @@ export default function AdminOrdersPage() {
       ) : null}
 
       <style jsx>{`
+        /* Grid Layout */
+        .orders-grid-wrap {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 12px;
+          padding: 1.5rem;
+          margin-top: 1.5rem;
+        }
+
+        .orders-grid-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          padding-bottom: 1rem;
+          border-bottom: 2px solid #f5f5f5;
+        }
+
+        .orders-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 1.25rem;
+        }
+
+        /* Order Card */
+        .order-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .order-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+          transform: translateY(-2px);
+        }
+
+        /* Header Section */
+        .order-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-card-ref {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0;
+        }
+
+        .order-card-customer {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0.25rem 0 0 0;
+        }
+
+        .order-status-badge {
+          display: inline-block;
+          font-size: 0.7rem;
+          font-weight: 700;
+          padding: 0.4rem 0.75rem;
+          border-radius: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          white-space: nowrap;
+        }
+
+        .order-status-badge.admin-pill-new {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .order-status-badge.admin-pill-seen {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .order-status-badge.admin-pill-confirmed {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .order-status-badge.admin-pill-paid {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .order-status-badge.admin-pill-dispatched {
+          background: #dbeafe;
+          color: #0c4a6e;
+        }
+
+        .order-status-badge.admin-pill-delivered {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .order-status-badge.admin-pill-cancelled {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        /* Details Section */
+        .order-card-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+          padding: 0.75rem 0;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-detail-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .order-detail-label {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .order-detail-value {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #333;
+        }
+
+        .order-whatsapp-link {
+          color: #25d366;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+
+        .order-whatsapp-link:hover {
+          color: #1ea952;
+        }
+
+        /* Total Section */
+        .order-card-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem;
+          background: #fffbf0;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+        }
+
+        .order-total-label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #999;
+          text-transform: uppercase;
+        }
+
+        .order-total-value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        /* Actions Section */
+        .order-card-actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: auto;
+        }
+
+        .order-card-btn {
+          flex: 1;
+          padding: 0.65rem 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          background: white;
+          color: #666;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-decoration: none;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .order-card-btn:hover {
+          border-color: #d4a574;
+          color: #d4a574;
+          background: #fffbf0;
+        }
+
+        .order-card-btn--primary {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          color: white;
+          border: none;
+        }
+
+        .order-card-btn--primary:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+        }
+
+        .order-card-btn--secondary {
+          background: white;
+          color: #25d366;
+          border-color: #d0f0c0;
+        }
+
+        .order-card-btn--secondary:hover {
+          background: #d0f0c0;
+          border-color: #a8e6a1;
+        }
+
+        /* Existing CSS */
         .orders-toolbar {
           display: grid;
           grid-template-columns: minmax(0, 1fr) 220px;
           gap: var(--space-3);
         }
+
         .order-card-mobile {
           padding: var(--space-4);
         }
+
         .order-card-mobile__top {
           display: flex;
           justify-content: space-between;
           gap: var(--space-3);
           margin-bottom: var(--space-3);
         }
+
         .order-drawer {
           overflow-y: auto;
           display: flex;
           flex-direction: column;
           gap: var(--space-4);
         }
+
         .order-drawer__header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           gap: var(--space-3);
         }
+
         .order-drawer__meta {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -586,19 +808,23 @@ export default function AdminOrdersPage() {
           border-radius: var(--radius-md);
           background: var(--bg-card-alt);
         }
+
         .order-drawer__meta p {
           margin-top: 4px;
         }
+
         .order-drawer__section {
           border-top: 1px solid var(--border-default);
           padding-top: var(--space-4);
         }
+
         .order-drawer__actions {
           display: flex;
           flex-wrap: wrap;
           gap: var(--space-2);
           margin-top: var(--space-3);
         }
+
         .order-drawer__items,
         .order-drawer__timeline {
           display: flex;
@@ -606,6 +832,7 @@ export default function AdminOrdersPage() {
           gap: var(--space-2);
           margin-top: var(--space-3);
         }
+
         .order-drawer__item {
           display: flex;
           justify-content: space-between;
@@ -616,6 +843,7 @@ export default function AdminOrdersPage() {
           background: var(--color-white);
           font-size: 0.875rem;
         }
+
         .order-step-btn {
           padding: 9px 14px;
           border-radius: var(--radius-md);
@@ -623,30 +851,51 @@ export default function AdminOrdersPage() {
           font-size: 0.8125rem;
           font-weight: 600;
         }
+
         .order-step-btn--new {
           background: var(--color-ochre);
         }
+
         .order-step-btn--seen,
         .order-step-btn--dispatch {
           background: var(--color-bark);
         }
+
         .order-step-btn--confirm,
         .order-step-btn--complete {
           background: var(--color-moss);
         }
+
         .order-step-btn--cancel,
         .order-step-btn--delete {
           background: var(--color-terracotta);
         }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+          .orders-grid {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          }
+        }
+
         @media (max-width: 767px) {
           .orders-toolbar,
           .order-drawer__meta {
             grid-template-columns: 1fr;
           }
+
+          .orders-grid {
+            grid-template-columns: 1fr;
+          }
+
           .order-drawer__header,
           .order-drawer__item,
           .order-card-mobile__top {
             flex-direction: column;
+          }
+
+          .order-card-details {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
