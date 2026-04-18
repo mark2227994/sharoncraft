@@ -19,7 +19,7 @@ export default function ProductCard({ product }) {
           decoding="async"
           className="product-card__image"
         />
-        {isSold ? <span className="product-card__badge product-card__badge--sold">Sold</span> : null}
+        {isSold ? <span className="product-card__badge product-card__badge--sold">Sold Out</span> : null}
         {isNew && !isSold ? <span className="product-card__badge product-card__badge--new">New</span> : null}
         {discount && !isSold ? (
           <span className="product-card__badge product-card__badge--discount">-{discount}%</span>
@@ -32,8 +32,8 @@ export default function ProductCard({ product }) {
             toggleWishlist(product);
           }}
           style={{
-            color: saved ? "var(--color-terracotta)" : "currentColor",
-            borderColor: saved ? "rgba(192,77,41,0.22)" : undefined,
+            color: saved ? "var(--color-accent)" : "currentColor",
+            borderColor: saved ? "rgba(107,69,19,0.22)" : undefined,
             background: saved ? "rgba(255,255,255,0.96)" : undefined,
           }}
         >
@@ -41,12 +41,23 @@ export default function ProductCard({ product }) {
         </button>
       </div>
       <div className="product-card__info">
-        {artisan ? <span className="product-card__artisan overline">{artisan}</span> : null}
+        {artisan ? (
+          <div className="product-card__artisan-info">
+            <span className="product-card__artisan overline">BY {artisan.toUpperCase()}</span>
+            <p className="product-card__certified" style={{ fontSize: "0.65rem", color: "var(--color-accent)" }}>
+              ✓ CERTIFIED ARTISAN
+            </p>
+          </div>
+        ) : null}
         <h3 className="product-card__name heading-sm">{name}</h3>
         <div className="product-card__pricing">
-          <span className="price">{isSold ? "Sold" : `KES ${price.toLocaleString()}`}</span>
+          <span className="price" style={{ fontFamily: "var(--font-price)", fontSize: "1.1rem", fontWeight: 600 }}>
+            {isSold ? "Sold Out" : `KES ${price.toLocaleString()}`}
+          </span>
           {originalPrice && !isSold ? (
-            <span className="price--original">KES {originalPrice.toLocaleString()}</span>
+            <span className="price--original" style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+              KES {originalPrice.toLocaleString()}
+            </span>
           ) : null}
         </div>
       </div>

@@ -1105,6 +1105,682 @@ export default function AdminDashboardPage() {
 
           .dashboard-section-header {
             flex-direction: column;
+            align-items: flex-startnear-gradient(135deg, #fff5e6 0%, #fffbf0 100%);
+          border: 1px solid #e8c4a0;
+          border-radius: 12px;
+          padding: 2rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 2rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .dashboard-finance-main {
+          flex: 1;
+        }
+
+        .dashboard-overline {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #d4a574;
+          margin: 0 0 0.5rem 0;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-profit-display {
+          margin: 1rem 0;
+        }
+
+        .dashboard-profit-value {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #d4a574;
+          margin: 0;
+        }
+
+        .dashboard-profit-label {
+          font-size: 0.875rem;
+          color: #999;
+          margin-top: 0.25rem;
+        }
+
+        .dashboard-helper-text {
+          font-size: 0.85rem;
+          color: #999;
+          margin: 0.5rem 0 0 0;
+        }
+
+        .dashboard-finance-quick-stats {
+          display: grid;
+          gap: 0.75rem;
+          min-width: 280px;
+        }
+
+        .dashboard-quick-stat {
+          background: white;
+          border: 1px solid #e8e8e8;
+          border-radius: 8px;
+          padding: 0.75rem 1rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .dashboard-quick-stat-icon {
+          font-size: 1.5rem;
+        }
+
+        .dashboard-quick-stat-label {
+          font-size: 0.75rem;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-quick-stat-value {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #d4a574;
+          margin-left: auto;
+        }
+
+        .dashboard-finance-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .dashboard-finance-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-finance-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-card-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-card-icon {
+          font-size: 1.5rem;
+        }
+
+        .dashboard-card-label {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #666;
+        }
+
+        .dashboard-card-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #d4a574;
+          margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card-subtext {
+          font-size: 0.75rem;
+          color: #999;
+        }
+
+        .dashboard-finance-form-section {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 10px;
+          padding: 1.5rem;
+        }
+
+        .dashboard-form-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 1rem 0;
+        }
+
+        .dashboard-form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .dashboard-form-field {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .dashboard-form-label {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.5rem;
+        }
+
+        .dashboard-form-input {
+          padding: 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          transition: border-color 0.3s ease;
+        }
+
+        .dashboard-form-input:focus {
+          outline: none;
+          border-color: #d4a574;
+          box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+        }
+
+        .dashboard-form-actions {
+          display: flex;
+          gap: 1rem;
+          align-items: center;
+        }
+
+        .dashboard-btn-primary {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-btn-primary:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        .dashboard-btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .dashboard-success-msg {
+          color: #059669;
+          font-size: 0.9rem;
+          margin: 0;
+        }
+
+        .dashboard-error-msg {
+          color: #d32f2f;
+          font-size: 0.9rem;
+          margin: 0;
+        }
+
+        /* Stats Grid */
+        .dashboard-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .dashboard-stat-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.5rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-stat-card:hover {
+          border-color: #d4a574;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-stat-card--warning {
+          border-color: #f59e0b;
+          background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+        }
+
+        .dashboard-stat-card--success {
+          border-color: #10b981;
+          background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+        }
+
+        .dashboard-stat-label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 0.75rem 0;
+        }
+
+        .dashboard-stat-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .dashboard-stat-terracotta {
+          color: #d4a574;
+        }
+
+        .dashboard-stat-delta {
+          font-size: 0.875rem;
+          color: #999;
+          margin: 0;
+        }
+
+        /* Orders Grid */
+        .dashboard-orders-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-order-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-order-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dashboard-order-date {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #999;
+        }
+
+        .dashboard-order-status {
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 0.35rem 0.75rem;
+          border-radius: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-order-status--new,
+        .dashboard-order-status--seen {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .dashboard-order-status--confirmed,
+        .dashboard-order-status--paid {
+          background: #dbeafe;
+          color: #1e40af;
+        }
+
+        .dashboard-order-status--dispatched {
+          background: #bfdbfe;
+          color: #1e3a8a;
+        }
+
+        .dashboard-order-status--delivered {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-order-status--pending {
+          background: #f3f4f6;
+          color: #6b7280;
+        }
+
+        .dashboard-order-body {
+          margin-bottom: 1rem;
+        }
+
+        .dashboard-order-customer {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .dashboard-order-phone {
+          color: #25d366;
+          text-decoration: none;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+
+        .dashboard-order-phone:hover {
+          color: #1ea952;
+        }
+
+        .dashboard-order-footer {
+          text-align: right;
+        }
+
+        .dashboard-order-amount {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        /* Custom Orders Grid */
+        .dashboard-custom-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-custom-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-custom-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-custom-header {
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-custom-status {
+          display: inline-block;
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          background: #f0f0f0;
+          color: #666;
+        }
+
+        .dashboard-custom-status--quoted {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .dashboard-custom-status--waiting_deposit {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .dashboard-custom-status--deposit_received {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .dashboard-custom-status--in_production {
+          background: #fcd34d;
+          color: #78350f;
+        }
+
+        .dashboard-custom-status--ready {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .dashboard-custom-status--balance_received {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-custom-name {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0.5rem 0;
+        }
+
+        .dashboard-custom-customer {
+          font-size: 0.85rem;
+          color: #666;
+          margin: 0.25rem 0;
+        }
+
+        .dashboard-custom-qty {
+          font-size: 0.8rem;
+          color: #999;
+          margin: 0.5rem 0;
+        }
+
+        .dashboard-custom-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding-top: 0.75rem;
+          border-top: 1px solid #f0f0f0;
+          margin-top: 0.75rem;
+        }
+
+        .dashboard-custom-amount {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        .dashboard-custom-profit {
+          font-size: 0.75rem;
+          color: #999;
+        }
+
+        /* M-Pesa Grid */
+        .dashboard-mpesa-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-mpesa-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-mpesa-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-mpesa-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-mpesa-id {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #999;
+        }
+
+        .dashboard-mpesa-status {
+          display: inline-block;
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-mpesa-status--completed {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-mpesa-status--pending {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .dashboard-mpesa-status--failed {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .dashboard-mpesa-body {
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-mpesa-product {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 0.25rem 0;
+        }
+
+        .dashboard-mpesa-buyer {
+          font-size: 0.8rem;
+          color: #666;
+          margin: 0;
+        }
+
+        .dashboard-mpesa-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+          padding: 0.75rem 0;
+          border-top: 1px solid #f0f0f0;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dashboard-mpesa-amount {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        .dashboard-mpesa-via {
+          font-size: 0.65rem;
+          font-weight: 600;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          background: #f0f0f0;
+          color: #666;
+          text-transform: uppercase;
+        }
+
+        .dashboard-mpesa-via--mpesa {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-mpesa-via--card {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .dashboard-mpesa-date {
+          font-size: 0.75rem;
+          color: #999;
+          text-align: right;
+        }
+
+        /* Quick Actions */
+        .dashboard-quick-actions {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 12px;
+          padding: 2rem;
+          margin-top: 2rem;
+        }
+
+        .dashboard-actions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-action-btn {
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 1rem;
+          text-decoration: none;
+          text-align: center;
+          font-weight: 500;
+          color: #666;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .dashboard-action-btn:hover {
+          border-color: #d4a574;
+          color: #d4a574;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-action-btn--primary {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          color: white;
+          border: none;
+        }
+
+        .dashboard-action-btn--primary:hover {
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .dashboard-finance-hero {
+            flex-direction: column;
+          }
+
+          .dashboard-finance-quick-stats {
+            min-width: auto;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+          }
+
+          .dashboard-finance-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          }
+
+          .dashboard-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .dashboard-form-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-section-header {
+            flex-direction: column;
             align-items: flex-start;
           }
         }

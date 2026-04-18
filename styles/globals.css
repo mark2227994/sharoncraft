@@ -4,37 +4,46 @@
    ============================================================ */
 
 :root {
-  /* Brand Palette */
-  --color-terracotta:   #C04D29;
-  --color-terracotta-dark: #9E3D1F;
-  --color-terracotta-light: #D9744F;
-  --color-ochre:        #B87333;
-  --color-ochre-light:  #D4A05A;
-  --color-cream:        #F9F6EE;
-  --color-cream-dark:   #EDE8DE;
-  --color-ink:          #1C1209;
-  --color-bark:         #6B4C2A;
-  --color-linen:        #EDE8DE;
-  --color-moss:         #4A5240;
-  --color-white:        #FFFFFF;
+  /* Brand Palette - Professional African Artifacts */
+  --color-primary-dark:  #2C1810;    /* Deep African brown */
+  --color-primary:       #3A2B24;    /* Rich earth brown */
+  --color-accent-dark:   #6B4513;    /* Deep terracotta - authentic */
+  --color-accent:        #8B5A2B;    /* Medium brown - premium feel */
+  --color-accent-light:  #A0826D;    /* Light taupe */
+  --color-gold:          #D4AF37;    /* Gold - luxury accent */
+  --color-gold-light:    #E8D5B7;    /* Light gold */
+  --color-cream:         #F9F6F0;    /* Warm cream background */
+  --color-cream-dark:    #EDE8DE;    /* Slightly darker cream */
+  --color-ink:           #1C1209;    /* Deep ink - main text */
+  --color-bark:          #6B4C2A;    /* Muted brown */
+  --color-linen:         #EDE8DE;    /* Light border */
+  --color-moss:          #4A5240;    /* Muted green - secondary accent */
+  --color-white:         #FFFFFF;    /* Pure white */
+  
+  /* Legacy terracotta aliases (for smooth migration) */
+  --color-terracotta:    #8B5A2B;
+  --color-terracotta-dark: #6B4513;
+  --color-terracotta-light: #A0826D;
+  --color-ochre:         #8B5A2B;
+  --color-ochre-light:   #A0826D;
 
   /* Semantic aliases */
-  --bg-page:            var(--color-cream);
-  --bg-card:            var(--color-white);
-  --bg-card-alt:        var(--color-cream-dark);
-  --text-primary:       var(--color-ink);
-  --text-secondary:     var(--color-bark);
-  --text-muted:         #9C856A;
-  --border-default:     var(--color-linen);
-  --border-strong:      var(--color-bark);
-  --accent:             var(--color-terracotta);
-  --accent-hover:       var(--color-terracotta-dark);
-  --gold:               var(--color-ochre);
+  --bg-page:             var(--color-cream);
+  --bg-card:             var(--color-white);
+  --bg-card-alt:         var(--color-cream-dark);
+  --text-primary:        var(--color-ink);
+  --text-secondary:      var(--color-bark);
+  --text-muted:          #9C856A;
+  --border-default:      var(--color-linen);
+  --border-strong:       var(--color-bark);
+  --accent:              var(--color-accent);
+  --accent-hover:        var(--color-accent-dark);
+  --gold:                var(--color-gold);
 
-  /* Typography */
-  --font-display:       'Cormorant Garamond', Georgia, serif;
-  --font-body:          'DM Sans', sans-serif;
-  --font-price:         'Cormorant Garamond', Georgia, serif;
+  /* Typography - Professional serif + sans */
+  --font-display:        'Georgia', 'Cormorant Garamond', serif;
+  --font-body:           'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-price:          'Georgia', 'Cormorant Garamond', serif;
 
   /* Spacing scale */
   --space-1: 4px;

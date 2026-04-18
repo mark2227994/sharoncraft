@@ -76,6 +76,32 @@ export default function ShopPage({ products, categories, initialCategory, initia
     setCurrentPage(1);
   }, [activeCategory, activeJewelryType, showAvailableOnly, sortBy]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
+  // Calculate page range info
+  const firstItemNum = (currentPage - 1) * itemsPerPage + 1;
+  const lastItemNum = Math.min(currentPage * itemsPerPage, filteredProducts.length);
+  
+  // Smart page numbers (show ellipsis if too many pages)
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    if (totalPages <= maxPagesToShow) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    pages.push(1);
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    if (startPage > 2) pages.push('...');
+    for (let i = startPage; i <= endPage; i++) pages.push(i);
+    if (endPage < totalPages - 1) pages.push('...');
+    pages.push(totalPages);
+    return pages;
+  };
+
   function handleCategorySelect(nextCategory) {
     setActiveCategory(nextCategory);
     if (nextCategory !== "Jewellery") {
@@ -172,6 +198,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           <div className="shop-page__grid">
             <MasonryGrid products={paginatedProducts} />
 
+            {/* Item count and pagination info */}
+            <div className="shop-pagination__info">
+              <span className="pagination-range">Showing {firstItemNum}–{lastItemNum} of {filteredProducts.length} products</span>
+              <span className="pagination-page-info">Page {currentPage} of {totalPages}</span>
+            </div>
+
             {/* Mobile: Load More Button */}
             {isMobile && currentPage < totalPages && (
               <div className="shop-pagination shop-pagination--mobile">
@@ -179,7 +211,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                   className="shop-load-more"
                   onClick={() => setCurrentPage(p => p + 1)}
                 >
-                  Load More ({filteredProducts.length - currentPage * itemsPerPage} more)
+                  Load More ({filteredProducts.length - lastItemNum} remaining)
                 </button>
               </div>
             )}
@@ -197,14 +229,20 @@ export default function ShopPage({ products, categories, initialCategory, initia
                 </button>
 
                 <div className="shop-page-numbers">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-                    <button
-                      key={pageNum}
-                      className={`shop-page-num ${currentPage === pageNum ? 'shop-page-num--active' : ''}`}
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </button>
+                  {getPageNumbers().map((pageNum, idx) => (
+                    typeof pageNum === 'number' ? (
+                      <button
+                        key={pageNum}
+                        className={`shop-page-num ${currentPage === pageNum ? 'shop-page-num--active' : ''}`}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    ) : (
+                      <span key={`ellipsis-${idx}`} className="shop-page-ellipsis">
+                        {pageNum}
+                      </span>
+                    )
                   ))}
                 </div>
 
@@ -257,7 +295,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           right: 8px;
           width: 8px;
           height: 8px;
-          background: var(--color-terracotta);
+          background: var(--color-accent);
           border-radius: 50%;
         }
         .shop-page__subcategories {
@@ -288,12 +326,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page__sub-pill:hover {
-          border-color: var(--color-terracotta);
-          color: var(--color-terracotta);
+          border-color: var(--color-accent);
+          color: var(--color-accent);
         }
         .shop-page__sub-pill--active {
-          background: var(--color-terracotta);
-          border-color: var(--color-terracotta);
+          background: var(--color-accent);
+          border-color: var(--color-accent);
           color: var(--color-white);
         }
         .shop-page__count {
@@ -309,7 +347,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .shop-page__clear {
           background: none;
           border: none;
-          color: var(--color-terracotta);
+          color: var(--color-accent);
           font-size: var(--text-sm);
           cursor: pointer;
           text-decoration: underline;
@@ -339,6 +377,10 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-page__grid {
             width: 100%;
           }
+          .shop-pagination__info {
+            flex-direction: column;
+            gap: var(--space-2);
+          }
         }
 
         /* Pagination */
@@ -349,6 +391,19 @@ export default function ShopPage({ products, categories, initialCategory, initia
           align-items: center;
         }
 
+        /* Pagination info */
+        .shop-pagination__info {
+          margin-top: var(--space-5);
+          padding: var(--space-3) 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-top: 1px solid var(--border-light);
+          border-bottom: 1px solid var(--border-light);
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+        }
+
         /* Mobile: Load More Button */
         .shop-pagination--mobile {
           padding: var(--space-4) 0;
@@ -356,15 +411,15 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .shop-load-more {
           padding: 14px 32px;
           background: var(--color-white);
-          border: 2px solid var(--color-terracotta);
+          border: 2px solid var(--color-accent);
           border-radius: var(--radius-md);
-          color: var(--color-terracotta);
+          color: var(--color-accent);
           font-weight: 600;
           cursor: pointer;
           transition: all var(--transition-fast);
         }
         .shop-load-more:hover {
-          background: var(--color-terracotta);
+          background: var(--color-accent);
           color: var(--color-white);
         }
 
@@ -387,8 +442,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page-btn:hover:not(:disabled) {
-          border-color: var(--color-terracotta);
-          color: var(--color-terracotta);
+          border-color: var(--color-accent);
+          color: var(--color-accent);
         }
         .shop-page-btn:disabled {
           opacity: 0.5;
@@ -397,6 +452,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .shop-page-numbers {
           display: flex;
           gap: var(--space-1);
+          align-items: center;
         }
         .shop-page-num {
           width: 40px;
@@ -413,13 +469,22 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page-num:hover {
-          border-color: var(--color-terracotta);
-          color: var(--color-terracotta);
+          border-color: var(--color-accent);
+          color: var(--color-accent);
         }
         .shop-page-num--active {
-          background: var(--color-terracotta);
-          border-color: var(--color-terracotta);
+          background: var(--color-accent);
+          border-color: var(--color-accent);
           color: var(--color-white);
+        }
+        .shop-page-ellipsis {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-secondary);
+          font-size: var(--text-sm);
         }
       `}</style>
     </>

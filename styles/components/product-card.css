@@ -49,8 +49,8 @@
   text-transform: uppercase;
 }
 .product-card__badge--sold    { background: var(--color-ink); color: var(--color-cream); }
-.product-card__badge--new     { background: var(--color-moss); color: var(--color-white); }
-.product-card__badge--discount { background: var(--color-terracotta); color: var(--color-white); }
+.product-card__badge--new     { background: var(--color-accent); color: var(--color-white); }
+.product-card__badge--discount { background: var(--color-accent); color: var(--color-white); }
 .product-card__wishlist {
   position: absolute;
   top: 10px; right: 10px;
@@ -62,12 +62,13 @@
   opacity: 0;
   transform: scale(0.85);
   transition: opacity var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
+  border: 1px solid transparent;
 }
 .product-card:hover .product-card__wishlist {
   opacity: 1;
   transform: scale(1);
 }
-.product-card__wishlist:hover { color: var(--color-terracotta); }
+.product-card__wishlist:hover { color: var(--color-accent); }
 
 @media (hover: none) {
   .product-card__wishlist {
@@ -99,7 +100,29 @@
   flex-direction: column;
   gap: 3px;
 }
-.product-card__artisan { color: var(--color-ochre); }
+.product-card__artisan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+.product-card__artisan {
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+.product-card__certified {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--color-accent);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
 .product-card__name {
   font-size: 0.9375rem;
   color: var(--text-primary);

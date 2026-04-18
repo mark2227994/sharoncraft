@@ -15,8 +15,8 @@ import { useState } from "react";
 function CuratedSection({ bestSellers, newArrivals }) {
   const [activeTab, setActiveTab] = useState("best-sellers");
   const currentProducts = activeTab === "best-sellers" ? bestSellers : newArrivals;
-  const tabLabel = activeTab === "best-sellers" ? "Best Sellers" : "New This Week";
-  const tabKicker = activeTab === "best-sellers" ? "Customer favorites" : "Just arrived";
+  const tabLabel = activeTab === "best-sellers" ? "Most Loved" : "Latest Arrivals";
+  const tabKicker = activeTab === "best-sellers" ? "Customer's Top Picks" : "Recently Added";
 
   return (
     <section className="curated-section">
@@ -30,15 +30,15 @@ function CuratedSection({ bestSellers, newArrivals }) {
             className={`curated-tab ${activeTab === "best-sellers" ? "curated-tab--active" : ""}`}
             onClick={() => setActiveTab("best-sellers")}
           >
-            <span className="curated-tab-icon">⭐</span>
-            Best Sellers
+            <span className="curated-tab-icon">★</span>
+            Most Loved
           </button>
           <button
             className={`curated-tab ${activeTab === "new" ? "curated-tab--active" : ""}`}
             onClick={() => setActiveTab("new")}
           >
-            <span className="curated-tab-icon">🆕</span>
-            New This Week
+            <span className="curated-tab-icon">+</span>
+            Latest Arrivals
           </button>
         </div>
         <span className="section-heading__rule" aria-hidden="true" />
@@ -104,14 +104,14 @@ function CuratedSection({ bestSellers, newArrivals }) {
         }
 
         .curated-tab:hover {
-          background: rgba(212, 165, 116, 0.1);
-          color: var(--color-terracotta);
+          background: rgba(139, 90, 43, 0.1);
+          color: var(--color-accent);
         }
 
         .curated-tab--active {
-          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          background: linear-gradient(135deg, #8B5A2B 0%, #A0826D 100%);
           color: white;
-          box-shadow: 0 2px 8px rgba(212, 165, 116, 0.2);
+          box-shadow: 0 2px 8px rgba(139, 90, 43, 0.2);
         }
 
         .curated-tab-icon {
