@@ -24,6 +24,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const [sortBy, setSortBy] = useState("featured");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE_DESKTOP = 24;
+  const ITEMS_PER_PAGE_MOBILE = 12;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 900);
@@ -35,6 +38,19 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const isJewelleryView = activeCategory === "Jewellery";
 
   const hasActiveFilters = activeCategory !== "All" || activeJewelryType !== "all" || showAvailableOnly;
+
+  // Pagination
+  const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, activeJewelryType, showAvailableOnly, sortBy]);
 
   const filteredProducts = useMemo(() => {
     const next = products
@@ -154,7 +170,54 @@ export default function ShopPage({ products, categories, initialCategory, initia
           />
 
           <div className="shop-page__grid">
-            <MasonryGrid products={filteredProducts} />
+            <MasonryGrid products={paginatedProducts} />
+
+            {/* Mobile: Load More Button */}
+            {isMobile && currentPage < totalPages && (
+              <div className="shop-pagination shop-pagination--mobile">
+                <button
+                  className="shop-load-more"
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  Load More ({filteredProducts.length - currentPage * itemsPerPage} more)
+                </button>
+              </div>
+            )}
+
+            {/* Desktop: Numbered Pages */}
+            {!isMobile && totalPages > 1 && (
+              <div className="shop-pagination shop-pagination--desktop">
+                <button
+                  className="shop-page-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                >
+                  <Icon name="chevronR" size={16} style={{ transform: 'rotate(180deg)' }} />
+                  Previous
+                </button>
+
+                <div className="shop-page-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                    <button
+                      key={pageNum}
+                      className={`shop-page-num ${currentPage === pageNum ? 'shop-page-num--active' : ''}`}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  className="shop-page-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  Next
+                  <Icon name="chevronR" size={16} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -276,6 +339,87 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-page__grid {
             width: 100%;
           }
+        }
+
+        /* Pagination */
+        .shop-pagination {
+          margin-top: var(--space-6);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        /* Mobile: Load More Button */
+        .shop-pagination--mobile {
+          padding: var(--space-4) 0;
+        }
+        .shop-load-more {
+          padding: 14px 32px;
+          background: var(--color-white);
+          border: 2px solid var(--color-terracotta);
+          border-radius: var(--radius-md);
+          color: var(--color-terracotta);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-load-more:hover {
+          background: var(--color-terracotta);
+          color: var(--color-white);
+        }
+
+        /* Desktop: Numbered Pages */
+        .shop-pagination--desktop {
+          gap: var(--space-4);
+          padding: var(--space-5) 0;
+        }
+        .shop-page-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-2);
+          padding: 10px 16px;
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          color: var(--text-secondary);
+          font-size: var(--text-sm);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-page-btn:hover:not(:disabled) {
+          border-color: var(--color-terracotta);
+          color: var(--color-terracotta);
+        }
+        .shop-page-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .shop-page-numbers {
+          display: flex;
+          gap: var(--space-1);
+        }
+        .shop-page-num {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: var(--radius-md);
+          color: var(--text-secondary);
+          font-size: var(--text-sm);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-page-num:hover {
+          border-color: var(--color-terracotta);
+          color: var(--color-terracotta);
+        }
+        .shop-page-num--active {
+          background: var(--color-terracotta);
+          border-color: var(--color-terracotta);
+          color: var(--color-white);
         }
       `}</style>
     </>
