@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add lib/business-tools.js pages/admin/customers.jsx pages/admin/inventory.jsx pages/admin/designers.jsx pages/admin/expenses.jsx pages/admin/prices.jsx pages/admin/abandoned-carts.jsx pages/admin/newsletter.jsx pages/admin/seo.jsx pages/api/admin/customers.js pages/api/admin/inventory.js pages/api/admin/expenses.js pages/api/admin/seo.js components/admin/AdminLayout.jsx components/icons/index.jsx)",
+      "Bash(node \"/c/Users/USER/.codex/worktrees/3aac/bead VN2/google-calendar-mcp/build/index.js\")"
+    ]
+  }
+}
