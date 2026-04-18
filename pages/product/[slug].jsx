@@ -207,10 +207,15 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
 
         <section className="wear-it-with">
           <SectionTitle title={wearItWithTitle} />
-          <div className="wear-it-with__list">
-            {wearItWithProducts.map((item) => (
-              <Link key={item.id} href={`/product/${item.slug}`} className="wear-it-with__item" title={item.name}>
-                <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
+          <div className="wear-it-with__items">
+            {wearItWithProducts.map((item, index) => (
+              <Link key={item.id} href={`/product/${item.slug}`} className="wear-it-with__link" title={item.name}>
+                <span className="wear-it-with__icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                </span>
                 <span className="wear-it-with__name">{item.name}</span>
                 <span className="wear-it-with__price">KES {item.price.toLocaleString()}</span>
               </Link>
@@ -281,48 +286,43 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
           padding-top: var(--space-4);
           border-top: 1px solid var(--border-default);
         }
-        .wear-it-with__list {
+        .wear-it-with__items {
           display: flex;
-          gap: var(--space-4);
+          flex-wrap: wrap;
+          gap: var(--space-3);
           margin-top: var(--space-3);
-          overflow-x: auto;
-          padding-bottom: var(--space-2);
         }
-        .wear-it-with__item {
-          flex-shrink: 0;
-          width: 80px;
-          display: flex;
-          flex-direction: column;
+        .wear-it-with__link {
+          display: inline-flex;
           align-items: center;
-          text-decoration: none;
-          gap: 4px;
-        }
-        .wear-it-with__item img {
-          width: 64px;
-          height: 64px;
-          border-radius: var(--radius-sm);
-          object-fit: cover;
+          gap: 8px;
+          padding: 8px 12px;
+          background: var(--bg-elevated);
           border: 1px solid var(--border-default);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          border-radius: var(--radius-md);
+          text-decoration: none;
+          transition: all 0.2s ease;
         }
-        .wear-it-with__item:hover img {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .wear-it-with__link:hover {
+          border-color: var(--color-ochre);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .wear-it-with__icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--color-ochre);
         }
         .wear-it-with__name {
-          font-size: 11px;
+          font-size: 12px;
           color: var(--text-primary);
-          text-align: center;
-          line-height: 1.2;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
+          font-weight: 500;
         }
         .wear-it-with__price {
-          font-size: 10px;
+          font-size: 11px;
           color: var(--color-ochre);
-          font-weight: 500;
+          font-weight: 600;
         }
         @media (min-width: 960px) {
           .product-page__grid {
