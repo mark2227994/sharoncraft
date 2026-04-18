@@ -118,6 +118,13 @@ function normalizeArtisanEntry(entry, fallbackImage) {
   };
 }
 
+function withVersion(url, version) {
+  const safeUrl = compactText(url);
+  const safeVersion = compactText(version);
+  if (!safeUrl || !safeVersion) return safeUrl;
+  return `${safeUrl}${safeUrl.includes("?") ? "&" : "?"}v=${encodeURIComponent(safeVersion)}`;
+}
+
 function parseArtisanStories(value, fallbackImage) {
   const raw = compactText(value);
   if (!raw) return [];
@@ -144,10 +151,14 @@ function parseArtisanStories(value, fallbackImage) {
 
 export function buildFeaturedArtisans(siteImages = {}) {
   const fallbackImage = compactText(siteImages.artisanPortrait) || "/media/site/placeholder.svg";
+  const contentVersion = compactText(siteImages.siteContentUpdatedAt);
   const fromSiteContent = parseArtisanStories(siteImages.artisanStories, fallbackImage);
 
   if (fromSiteContent.length > 0) {
-    return fromSiteContent;
+    return fromSiteContent.map((artisan) => ({
+      ...artisan,
+      image: withVersion(artisan.image, contentVersion),
+    }));
   }
 
   return featuredArtisans
@@ -160,5 +171,9 @@ export function buildFeaturedArtisans(siteImages = {}) {
         fallbackImage,
       ),
     )
+    .map((artisan) => ({
+      ...artisan,
+      image: withVersion(artisan.image, contentVersion),
+    }))
     .filter(Boolean);
 }
