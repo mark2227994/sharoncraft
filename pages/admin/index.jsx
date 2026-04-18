@@ -85,368 +85,1027 @@ export default function AdminDashboardPage() {
         </Link>
       }
     >
-      <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
-        Product Overview
-      </p>
-
       {finance ? (
-        <section className="admin-panel admin-finance-panel" style={{ marginBottom: "var(--space-6)" }}>
-          <div className="admin-finance-panel__hero">
-            <div>
-              <p className="overline" style={{ color: "var(--color-ochre)", marginBottom: "8px" }}>
-                Weekly Profit
-              </p>
-              <p className="caption">{finance.weekLabel}</p>
-              <p className="admin-finance-panel__profit">{formatKES(finance.netProfit)}</p>
-              <p className="body-sm" style={{ color: "var(--text-secondary)" }}>
-                Net Profit = Money In - Money Out
-              </p>
+        <section className="dashboard-finance-section" style={{ marginBottom: "var(--space-6)" }}>
+          <div className="dashboard-finance-hero">
+            <div className="dashboard-finance-main">
+              <p className="dashboard-overline">📊 Weekly Performance</p>
+              <h2 className="dashboard-section-title">{finance.weekLabel}</h2>
+              <div className="dashboard-profit-display">
+                <div className="dashboard-profit-value">{formatKES(finance.netProfit)}</div>
+                <div className="dashboard-profit-label">Net Profit</div>
+              </div>
+              <p className="dashboard-helper-text">Money In − Money Out</p>
             </div>
-            <div className="admin-finance-panel__money-grid">
-              <div className="admin-finance-mini">
-                <span className="admin-finance-mini__label">Money In</span>
-                <strong>{formatKES(finance.moneyIn)}</strong>
+            <div className="dashboard-finance-quick-stats">
+              <div className="dashboard-quick-stat">
+                <span className="dashboard-quick-stat-icon">💰</span>
+                <span className="dashboard-quick-stat-label">Money In</span>
+                <strong className="dashboard-quick-stat-value">{formatKES(finance.moneyIn)}</strong>
               </div>
-              <div className="admin-finance-mini">
-                <span className="admin-finance-mini__label">Money Out</span>
-                <strong>{formatKES(finance.moneyOut)}</strong>
+              <div className="dashboard-quick-stat">
+                <span className="dashboard-quick-stat-icon">📤</span>
+                <span className="dashboard-quick-stat-label">Money Out</span>
+                <strong className="dashboard-quick-stat-value">{formatKES(finance.moneyOut)}</strong>
               </div>
-              <div className="admin-finance-mini">
-                <span className="admin-finance-mini__label">Active Custom Orders</span>
-                <strong>{finance.activeCustomOrders || 0}</strong>
+              <div className="dashboard-quick-stat">
+                <span className="dashboard-quick-stat-icon">🎯</span>
+                <span className="dashboard-quick-stat-label">Active Orders</span>
+                <strong className="dashboard-quick-stat-value">{finance.activeCustomOrders || 0}</strong>
               </div>
             </div>
           </div>
 
-          <div className="admin-stats-grid" style={{ marginBottom: "var(--space-5)" }}>
-            <article className="admin-stat-card">
-              <p className="admin-stat-card__label">Sales</p>
-              <p className="admin-stat-card__value">{formatKES(finance.moneyIn)}</p>
-              <p className="admin-stat-card__delta">WA + M-Pesa received this week</p>
-            </article>
-            <article className="admin-stat-card">
-              <p className="admin-stat-card__label">Stripe Fees</p>
-              <p className="admin-stat-card__value">{formatKES(finance.stripeFees)}</p>
-              <p className="admin-stat-card__delta">Enter your total this week</p>
-            </article>
-            <article className="admin-stat-card">
-              <p className="admin-stat-card__label">Material Costs</p>
-              <p className="admin-stat-card__value">{formatKES(finance.materialCosts)}</p>
-              <p className="admin-stat-card__delta">Beads, clasps, packaging, and supplies</p>
-            </article>
-            <article className="admin-stat-card">
-              <p className="admin-stat-card__label">Shipping</p>
-              <p className="admin-stat-card__value">{formatKES(finance.shippingCosts)}</p>
-              <p className="admin-stat-card__delta">Your actual outgoing delivery cost</p>
-            </article>
-            <article className="admin-stat-card">
-              <p className="admin-stat-card__label">Custom Order Profit</p>
-              <p className="admin-stat-card__value">{formatKES(finance.customExpectedProfit)}</p>
-              <p className="admin-stat-card__delta">Expected profit across tracked custom orders</p>
-            </article>
+          <div className="dashboard-finance-grid">
+            <div className="dashboard-finance-card">
+              <div className="dashboard-card-header">
+                <span className="dashboard-card-icon">💳</span>
+                <span className="dashboard-card-label">Sales</span>
+              </div>
+              <div className="dashboard-card-value">{formatKES(finance.moneyIn)}</div>
+              <div className="dashboard-card-subtext">WA + M-Pesa received this week</div>
+            </div>
+            <div className="dashboard-finance-card">
+              <div className="dashboard-card-header">
+                <span className="dashboard-card-icon">💳</span>
+                <span className="dashboard-card-label">Stripe Fees</span>
+              </div>
+              <div className="dashboard-card-value">{formatKES(finance.stripeFees)}</div>
+              <div className="dashboard-card-subtext">Payment processing costs</div>
+            </div>
+            <div className="dashboard-finance-card">
+              <div className="dashboard-card-header">
+                <span className="dashboard-card-icon">📦</span>
+                <span className="dashboard-card-label">Material Costs</span>
+              </div>
+              <div className="dashboard-card-value">{formatKES(finance.materialCosts)}</div>
+              <div className="dashboard-card-subtext">Beads, clasps, packaging</div>
+            </div>
+            <div className="dashboard-finance-card">
+              <div className="dashboard-card-header">
+                <span className="dashboard-card-icon">🚚</span>
+                <span className="dashboard-card-label">Shipping</span>
+              </div>
+              <div className="dashboard-card-value">{formatKES(finance.shippingCosts)}</div>
+              <div className="dashboard-card-subtext">Delivery costs</div>
+            </div>
+            <div className="dashboard-finance-card">
+              <div className="dashboard-card-header">
+                <span className="dashboard-card-icon">✨</span>
+                <span className="dashboard-card-label">Custom Profit</span>
+              </div>
+              <div className="dashboard-card-value">{formatKES(finance.customExpectedProfit)}</div>
+              <div className="dashboard-card-subtext">Expected from custom orders</div>
+            </div>
           </div>
 
-          <form className="admin-finance-form" onSubmit={saveWeeklyCosts}>
-            <label className="admin-field">
-              <span>Stripe fees</span>
-              <input
-                type="number"
-                min="0"
-                className="admin-input"
-                value={costForm.stripeFees}
-                onChange={(event) => setCostForm((current) => ({ ...current, stripeFees: event.target.value }))}
-              />
-            </label>
-            <label className="admin-field">
-              <span>Material costs</span>
-              <input
-                type="number"
-                min="0"
-                className="admin-input"
-                value={costForm.materialCosts}
-                onChange={(event) => setCostForm((current) => ({ ...current, materialCosts: event.target.value }))}
-              />
-            </label>
-            <label className="admin-field">
-              <span>Shipping</span>
-              <input
-                type="number"
-                min="0"
-                className="admin-input"
-                value={costForm.shippingCosts}
-                onChange={(event) => setCostForm((current) => ({ ...current, shippingCosts: event.target.value }))}
-              />
-            </label>
-            <div className="admin-finance-form__actions">
-              <button type="submit" className="admin-button" disabled={savingFinance}>
-                {savingFinance ? "Saving..." : "Save weekly costs"}
-              </button>
-              {financeMessage ? <p className="admin-note">{financeMessage}</p> : null}
-              {financeError ? <p className="admin-form-error">{financeError}</p> : null}
-            </div>
-          </form>
+          <div className="dashboard-finance-form-section">
+            <h3 className="dashboard-form-title">📝 Update Weekly Costs</h3>
+            <form className="dashboard-finance-form" onSubmit={saveWeeklyCosts}>
+              <div className="dashboard-form-grid">
+                <label className="dashboard-form-field">
+                  <span className="dashboard-form-label">Stripe Fees</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="dashboard-form-input"
+                    value={costForm.stripeFees}
+                    onChange={(event) => setCostForm((current) => ({ ...current, stripeFees: event.target.value }))}
+                  />
+                </label>
+                <label className="dashboard-form-field">
+                  <span className="dashboard-form-label">Material Costs</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="dashboard-form-input"
+                    value={costForm.materialCosts}
+                    onChange={(event) => setCostForm((current) => ({ ...current, materialCosts: event.target.value }))}
+                  />
+                </label>
+                <label className="dashboard-form-field">
+                  <span className="dashboard-form-label">Shipping</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="dashboard-form-input"
+                    value={costForm.shippingCosts}
+                    onChange={(event) => setCostForm((current) => ({ ...current, shippingCosts: event.target.value }))}
+                  />
+                </label>
+              </div>
+              <div className="dashboard-form-actions">
+                <button type="submit" className="dashboard-btn-primary" disabled={savingFinance}>
+                  {savingFinance ? "Saving..." : "Save Weekly Costs"}
+                </button>
+                {financeMessage ? <p className="dashboard-success-msg">{financeMessage}</p> : null}
+                {financeError ? <p className="dashboard-error-msg">{financeError}</p> : null}
+              </div>
+            </form>
+          </div>
         </section>
       ) : null}
 
-      <section className="admin-stats-grid" style={{ marginBottom: "var(--space-6)" }}>
-        {stats.map((stat) => (
-          <article key={stat.label} className="admin-stat-card">
-            <p className="admin-stat-card__label">{stat.label}</p>
-            <p className={`admin-stat-card__value ${stat.terracotta ? "admin-stat-card__value--terracotta" : ""}`}>
-              {typeof stat.value === "number" && stat.label.includes("Revenue") ? formatKES(stat.value) : stat.value}
-            </p>
-            <p className="admin-stat-card__delta">{stat.delta}</p>
-          </article>
-        ))}
+      <section className="dashboard-section">
+        <div className="dashboard-section-header">
+          <h2 className="dashboard-section-title">📈 Product Overview</h2>
+          <p className="dashboard-section-subtitle">Catalog performance and inventory status</p>
+        </div>
+        <div className="dashboard-stats-grid">
+          {stats.map((stat) => (
+            <article key={stat.label} className="dashboard-stat-card">
+              <p className="dashboard-stat-label">{stat.label}</p>
+              <p className={`dashboard-stat-value ${stat.terracotta ? "dashboard-stat-terracotta" : ""}`}>
+                {typeof stat.value === "number" && stat.label.includes("Revenue") ? formatKES(stat.value) : stat.value}
+              </p>
+              <p className="dashboard-stat-delta">{stat.delta}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
-        WhatsApp Orders
-        <Link href="/admin/orders" style={{ color: "var(--color-terracotta)", marginLeft: 8, fontWeight: 600 }}>
-          View all
-        </Link>
-      </p>
-      <section className="admin-stats-grid" style={{ marginBottom: "var(--space-6)" }}>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Total WA Orders</p>
-          <p className="admin-stat-card__value">{waOrders.length}</p>
-          <p className="admin-stat-card__delta">All time</p>
-        </article>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Needs Follow-up</p>
-          <p className="admin-stat-card__value" style={waPending > 0 ? { color: "#f59e0b" } : {}}>
-            {waPending}
-          </p>
-          <p className="admin-stat-card__delta">Need follow-up</p>
-        </article>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">Delivered</p>
-          <p className="admin-stat-card__value">{waCompleted}</p>
-          <p className="admin-stat-card__delta">Completed customer orders</p>
-        </article>
-        <article className="admin-stat-card">
-          <p className="admin-stat-card__label">WA Revenue</p>
-          <p className="admin-stat-card__value admin-stat-card__value--terracotta">{formatKES(waRevenue)}</p>
-          <p className="admin-stat-card__delta">From paid and delivered orders</p>
-        </article>
+      <section className="dashboard-section">
+        <div className="dashboard-section-header">
+          <h2 className="dashboard-section-title">💬 WhatsApp Orders</h2>
+          <Link href="/admin/orders" className="dashboard-view-all-link">View all →</Link>
+        </div>
+        <div className="dashboard-stats-grid">
+          <article className="dashboard-stat-card">
+            <p className="dashboard-stat-label">Total Orders</p>
+            <p className="dashboard-stat-value">{waOrders.length}</p>
+            <p className="dashboard-stat-delta">All time</p>
+          </article>
+          <article className="dashboard-stat-card dashboard-stat-card--warning">
+            <p className="dashboard-stat-label">Needs Follow-up</p>
+            <p className="dashboard-stat-value">{waPending}</p>
+            <p className="dashboard-stat-delta">Pending action</p>
+          </article>
+          <article className="dashboard-stat-card">
+            <p className="dashboard-stat-label">Delivered</p>
+            <p className="dashboard-stat-value">{waCompleted}</p>
+            <p className="dashboard-stat-delta">Completed</p>
+          </article>
+          <article className="dashboard-stat-card dashboard-stat-card--success">
+            <p className="dashboard-stat-label">WA Revenue</p>
+            <p className="dashboard-stat-value">{formatKES(waRevenue)}</p>
+            <p className="dashboard-stat-delta">Paid & delivered</p>
+          </article>
+        </div>
       </section>
 
       {waOrders.length > 0 ? (
         <>
-          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
-            Recent WhatsApp Orders
-          </p>
-          <section className="admin-table-wrap" style={{ marginBottom: "var(--space-6)" }}>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Customer</th>
-                  <th>Phone</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {waOrders.slice(0, 8).map((order) => (
-                  <tr key={order.id}>
-                    <td>{new Date(order.timestamp).toLocaleDateString("en-KE")}</td>
-                    <td>{order.name}</td>
-                    <td>
-                      <a
-                        href={`https://wa.me/254${order.phone?.replace(/^0/, "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#25d366", fontWeight: 600 }}
-                      >
-                        WhatsApp: {order.phone}
-                      </a>
-                    </td>
-                    <td>{formatKES(order.total)}</td>
-                    <td>
-                      <span className={`admin-pill ${order.statusClass || "admin-pill--pending"}`}>
-                        {order.statusLabel || order.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <section className="dashboard-section">
+            <div className="dashboard-section-header">
+              <h2 className="dashboard-section-title">📦 Recent WhatsApp Orders</h2>
+              <Link href="/admin/orders" className="dashboard-view-all-link">View all →</Link>
+            </div>
+            <div className="dashboard-orders-grid">
+              {waOrders.slice(0, 8).map((order) => (
+                <div key={order.id} className="dashboard-order-card">
+                  <div className="dashboard-order-header">
+                    <div className="dashboard-order-date">{new Date(order.timestamp).toLocaleDateString("en-KE")}</div>
+                    <span className={`dashboard-order-status dashboard-order-status--${order.statusClass || "pending"}`}>
+                      {order.statusLabel || order.status}
+                    </span>
+                  </div>
+                  <div className="dashboard-order-body">
+                    <h4 className="dashboard-order-customer">{order.name}</h4>
+                    <a
+                      href={`https://wa.me/254${order.phone?.replace(/^0/, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="dashboard-order-phone"
+                    >
+                      💬 {order.phone}
+                    </a>
+                  </div>
+                  <div className="dashboard-order-footer">
+                    <span className="dashboard-order-amount">{formatKES(order.total)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         </>
       ) : null}
 
       {customOrders.length > 0 ? (
         <>
-          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
-            Custom Production Orders
-            <Link href="/admin/custom-orders" style={{ color: "var(--color-terracotta)", marginLeft: 8, fontWeight: 600 }}>
-              View all
-            </Link>
-          </p>
-          <section className="admin-table-wrap" style={{ marginBottom: "var(--space-6)" }}>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Customer</th>
-                  <th>Client Total</th>
-                  <th>Expected Profit</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customOrders.slice(0, 6).map((order) => (
-                  <tr key={order.id}>
-                    <td>
-                      {order.orderName}
-                      <div className="admin-note">Qty {order.quantity}</div>
-                    </td>
-                    <td>{order.customerName}</td>
-                    <td>{formatKES(order.clientTotal)}</td>
-                    <td>{formatKES(order.expectedProfit)}</td>
-                    <td>
-                      <span className={`admin-pill ${order.statusClass}`}>{order.statusLabel}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <section className="dashboard-section">
+            <div className="dashboard-section-header">
+              <h2 className="dashboard-section-title">✨ Custom Orders</h2>
+              <Link href="/admin/custom-orders" className="dashboard-view-all-link">View all →</Link>
+            </div>
+            <div className="dashboard-custom-grid">
+              {customOrders.slice(0, 6).map((order) => (
+                <div key={order.id} className="dashboard-custom-card">
+                  <div className="dashboard-custom-header">
+                    <span className={`dashboard-custom-status dashboard-custom-status--${order.statusClass}`}>{order.statusLabel}</span>
+                  </div>
+                  <h4 className="dashboard-custom-name">{order.orderName}</h4>
+                  <p className="dashboard-custom-customer">{order.customerName}</p>
+                  <div className="dashboard-custom-qty">Qty: {order.quantity}</div>
+                  <div className="dashboard-custom-footer">
+                    <div className="dashboard-custom-amount">{formatKES(order.clientTotal)}</div>
+                    <div className="dashboard-custom-profit">{formatKES(order.expectedProfit)} profit</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         </>
       ) : null}
 
       {orders.length > 0 ? (
         <>
-          <p className="overline" style={{ marginBottom: "var(--space-2)" }}>
-            M-Pesa Orders
-          </p>
-          <section className="admin-table-wrap">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Order #</th>
-                  <th>Item</th>
-                  <th>Buyer Name</th>
-                  <th>Amount (KES)</th>
-                  <th>Via</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr key={order.id}>
-                    <td>{order.id}</td>
-                    <td>{order.product_name}</td>
-                    <td>{order.buyer_name}</td>
-                    <td>{formatKES(order.amount_kes)}</td>
-                    <td>
-                      <span className={`admin-pill ${order.via === "M-Pesa" ? "admin-pill--mpesa" : "admin-pill--card"}`}>
-                        {order.via}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`admin-pill ${
-                          order.status === "Completed"
-                            ? "admin-pill--completed"
-                            : order.status === "Pending"
-                              ? "admin-pill--pending"
-                              : "admin-pill--failed"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td>{formatShortDate(order.date)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <section className="dashboard-section">
+            <div className="dashboard-section-header">
+              <h2 className="dashboard-section-title">💳 M-Pesa Orders</h2>
+            </div>
+            <div className="dashboard-mpesa-grid">
+              {orders.slice(0, 12).map((order) => (
+                <div key={order.id} className="dashboard-mpesa-card">
+                  <div className="dashboard-mpesa-header">
+                    <span className="dashboard-mpesa-id">#{order.id}</span>
+                    <span className={`dashboard-mpesa-status dashboard-mpesa-status--${order.status?.toLowerCase()}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="dashboard-mpesa-body">
+                    <p className="dashboard-mpesa-product">{order.product_name}</p>
+                    <p className="dashboard-mpesa-buyer">{order.buyer_name}</p>
+                  </div>
+                  <div className="dashboard-mpesa-footer">
+                    <span className="dashboard-mpesa-amount">{formatKES(order.amount_kes)}</span>
+                    <span className={`dashboard-mpesa-via dashboard-mpesa-via--${order.via?.toLowerCase().replace("-", "")}`}>{order.via}</span>
+                  </div>
+                  <div className="dashboard-mpesa-date">{formatShortDate(order.date)}</div>
+                </div>
+              ))}
+            </div>
           </section>
         </>
       ) : null}
 
-      <section className="admin-quick-actions" style={{ marginTop: "var(--space-5)" }}>
-        <Link href="/admin/products/new" className="admin-button">
-          Add New Product
-        </Link>
-        <Link href="/admin/orders" className="admin-button admin-button--secondary">
-          View WA Orders
-        </Link>
-        <Link href="/admin/custom-orders" className="admin-button admin-button--secondary">
-          Open Custom Tracker
-        </Link>
-        <Link href="/admin/marketing" className="admin-button admin-button--secondary">
-          Open Marketing Studio
-        </Link>
-        <Link href="/admin/offers" className="admin-button admin-button--secondary">
-          Manage Offers
-        </Link>
-        <Link href="/admin/images" className="admin-button admin-button--secondary">
-          Open Image Manager
-        </Link>
-        <Link href="/admin/site-images" className="admin-button admin-button--secondary">
-          Edit Site Content
-        </Link>
-        <Link href="/admin/health" className="admin-button admin-button--secondary">
-          Storage Health
-        </Link>
+      <section className="dashboard-quick-actions">
+        <h2 className="dashboard-section-title">⚡ Quick Actions</h2>
+        <div className="dashboard-actions-grid">
+          <Link href="/admin/products/new" className="dashboard-action-btn dashboard-action-btn--primary">
+            ➕ Add Product
+          </Link>
+          <Link href="/admin/orders" className="dashboard-action-btn">
+            📋 View Orders
+          </Link>
+          <Link href="/admin/custom-orders" className="dashboard-action-btn">
+            ✨ Custom Tracker
+          </Link>
+          <Link href="/admin/marketing" className="dashboard-action-btn">
+            📢 Marketing
+          </Link>
+          <Link href="/admin/offers" className="dashboard-action-btn">
+            🎁 Offers
+          </Link>
+          <Link href="/admin/images" className="dashboard-action-btn">
+            🖼️ Images
+          </Link>
+          <Link href="/admin/site-images" className="dashboard-action-btn">
+            🎨 Site Content
+          </Link>
+          <Link href="/admin/health" className="dashboard-action-btn">
+            🏥 Storage Health
+          </Link>
+        </div>
       </section>
 
       <style jsx>{`
-        .admin-finance-panel__hero {
+        /* Dashboard Sections */
+        .dashboard-section {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 12px;
+          padding: 2rem;
+          margin-bottom: 2rem;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-section-header {
           display: flex;
           justify-content: space-between;
-          gap: var(--space-5);
+          align-items: center;
+          margin-bottom: 1.5rem;
+          padding-bottom: 1rem;
+          border-bottom: 2px solid #f5f5f5;
+        }
+
+        .dashboard-section-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
+        }
+
+        .dashboard-section-subtitle {
+          font-size: 0.875rem;
+          color: #999;
+          margin: 0;
+        }
+
+        .dashboard-view-all-link {
+          color: #d4a574;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 0.9rem;
+          transition: color 0.3s ease;
+        }
+
+        .dashboard-view-all-link:hover {
+          color: #e8c4a0;
+        }
+
+        /* Finance Section */
+        .dashboard-finance-section {
+          margin-bottom: 2rem;
+        }
+
+        .dashboard-finance-hero {
+          background: linear-gradient(135deg, #fff5e6 0%, #fffbf0 100%);
+          border: 1px solid #e8c4a0;
+          border-radius: 12px;
+          padding: 2rem;
+          display: flex;
+          justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: var(--space-5);
+          gap: 2rem;
+          margin-bottom: 1.5rem;
         }
-        .admin-finance-panel__profit {
-          font-family: var(--font-display);
-          font-size: clamp(2.5rem, 6vw, 4.5rem);
-          line-height: 1;
-          color: var(--color-terracotta);
-          margin: 12px 0;
+
+        .dashboard-finance-main {
+          flex: 1;
         }
-        .admin-finance-panel__money-grid {
-          display: grid;
-          gap: var(--space-3);
-          min-width: 240px;
-        }
-        .admin-finance-mini {
-          padding: var(--space-4);
-          background: var(--color-white);
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-md);
-          display: grid;
-          gap: 6px;
-        }
-        .admin-finance-mini__label {
-          font-size: 0.75rem;
+
+        .dashboard-overline {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #d4a574;
+          margin: 0 0 0.5rem 0;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: var(--text-muted);
+          letter-spacing: 0.5px;
         }
-        .admin-finance-form {
+
+        .dashboard-profit-display {
+          margin: 1rem 0;
+        }
+
+        .dashboard-profit-value {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #d4a574;
+          margin: 0;
+        }
+
+        .dashboard-profit-label {
+          font-size: 0.875rem;
+          color: #999;
+          margin-top: 0.25rem;
+        }
+
+        .dashboard-helper-text {
+          font-size: 0.85rem;
+          color: #999;
+          margin: 0.5rem 0 0 0;
+        }
+
+        .dashboard-finance-quick-stats {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: var(--space-4);
-          align-items: end;
+          gap: 0.75rem;
+          min-width: 280px;
         }
-        .admin-finance-form__actions {
+
+        .dashboard-quick-stat {
+          background: white;
+          border: 1px solid #e8e8e8;
+          border-radius: 8px;
+          padding: 0.75rem 1rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .dashboard-quick-stat-icon {
+          font-size: 1.5rem;
+        }
+
+        .dashboard-quick-stat-label {
+          font-size: 0.75rem;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-quick-stat-value {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #d4a574;
+          margin-left: auto;
+        }
+
+        .dashboard-finance-grid {
           display: grid;
-          gap: 8px;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
         }
-        @media (max-width: 900px) {
-          .admin-finance-panel__hero,
-          .admin-finance-form {
-            grid-template-columns: 1fr;
-            display: grid;
+
+        .dashboard-finance-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-finance-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-card-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-card-icon {
+          font-size: 1.5rem;
+        }
+
+        .dashboard-card-label {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #666;
+        }
+
+        .dashboard-card-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #d4a574;
+          margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card-subtext {
+          font-size: 0.75rem;
+          color: #999;
+        }
+
+        .dashboard-finance-form-section {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 10px;
+          padding: 1.5rem;
+        }
+
+        .dashboard-form-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 1rem 0;
+        }
+
+        .dashboard-form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .dashboard-form-field {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .dashboard-form-label {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.5rem;
+        }
+
+        .dashboard-form-input {
+          padding: 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          transition: border-color 0.3s ease;
+        }
+
+        .dashboard-form-input:focus {
+          outline: none;
+          border-color: #d4a574;
+          box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+        }
+
+        .dashboard-form-actions {
+          display: flex;
+          gap: 1rem;
+          align-items: center;
+        }
+
+        .dashboard-btn-primary {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-btn-primary:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        .dashboard-btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .dashboard-success-msg {
+          color: #059669;
+          font-size: 0.9rem;
+          margin: 0;
+        }
+
+        .dashboard-error-msg {
+          color: #d32f2f;
+          font-size: 0.9rem;
+          margin: 0;
+        }
+
+        /* Stats Grid */
+        .dashboard-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .dashboard-stat-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.5rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-stat-card:hover {
+          border-color: #d4a574;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-stat-card--warning {
+          border-color: #f59e0b;
+          background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+        }
+
+        .dashboard-stat-card--success {
+          border-color: #10b981;
+          background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+        }
+
+        .dashboard-stat-label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 0.75rem 0;
+        }
+
+        .dashboard-stat-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .dashboard-stat-terracotta {
+          color: #d4a574;
+        }
+
+        .dashboard-stat-delta {
+          font-size: 0.875rem;
+          color: #999;
+          margin: 0;
+        }
+
+        /* Orders Grid */
+        .dashboard-orders-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-order-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-order-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dashboard-order-date {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #999;
+        }
+
+        .dashboard-order-status {
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 0.35rem 0.75rem;
+          border-radius: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-order-status--new,
+        .dashboard-order-status--seen {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .dashboard-order-status--confirmed,
+        .dashboard-order-status--paid {
+          background: #dbeafe;
+          color: #1e40af;
+        }
+
+        .dashboard-order-status--dispatched {
+          background: #bfdbfe;
+          color: #1e3a8a;
+        }
+
+        .dashboard-order-status--delivered {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-order-status--pending {
+          background: #f3f4f6;
+          color: #6b7280;
+        }
+
+        .dashboard-order-body {
+          margin-bottom: 1rem;
+        }
+
+        .dashboard-order-customer {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .dashboard-order-phone {
+          color: #25d366;
+          text-decoration: none;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+
+        .dashboard-order-phone:hover {
+          color: #1ea952;
+        }
+
+        .dashboard-order-footer {
+          text-align: right;
+        }
+
+        .dashboard-order-amount {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        /* Custom Orders Grid */
+        .dashboard-custom-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-custom-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-custom-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-custom-header {
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-custom-status {
+          display: inline-block;
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          background: #f0f0f0;
+          color: #666;
+        }
+
+        .dashboard-custom-status--quoted {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .dashboard-custom-status--waiting_deposit {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .dashboard-custom-status--deposit_received {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .dashboard-custom-status--in_production {
+          background: #fcd34d;
+          color: #78350f;
+        }
+
+        .dashboard-custom-status--ready {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .dashboard-custom-status--balance_received {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-custom-name {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0.5rem 0;
+        }
+
+        .dashboard-custom-customer {
+          font-size: 0.85rem;
+          color: #666;
+          margin: 0.25rem 0;
+        }
+
+        .dashboard-custom-qty {
+          font-size: 0.8rem;
+          color: #999;
+          margin: 0.5rem 0;
+        }
+
+        .dashboard-custom-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding-top: 0.75rem;
+          border-top: 1px solid #f0f0f0;
+          margin-top: 0.75rem;
+        }
+
+        .dashboard-custom-amount {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        .dashboard-custom-profit {
+          font-size: 0.75rem;
+          color: #999;
+        }
+
+        /* M-Pesa Grid */
+        .dashboard-mpesa-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-mpesa-card {
+          background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          padding: 1.25rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-mpesa-card:hover {
+          border-color: #d4a574;
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-mpesa-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-mpesa-id {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #999;
+        }
+
+        .dashboard-mpesa-status {
+          display: inline-block;
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-mpesa-status--completed {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-mpesa-status--pending {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .dashboard-mpesa-status--failed {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .dashboard-mpesa-body {
+          margin-bottom: 0.75rem;
+        }
+
+        .dashboard-mpesa-product {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 0.25rem 0;
+        }
+
+        .dashboard-mpesa-buyer {
+          font-size: 0.8rem;
+          color: #666;
+          margin: 0;
+        }
+
+        .dashboard-mpesa-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+          padding: 0.75rem 0;
+          border-top: 1px solid #f0f0f0;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dashboard-mpesa-amount {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #d4a574;
+        }
+
+        .dashboard-mpesa-via {
+          font-size: 0.65rem;
+          font-weight: 600;
+          padding: 0.3rem 0.6rem;
+          border-radius: 4px;
+          background: #f0f0f0;
+          color: #666;
+          text-transform: uppercase;
+        }
+
+        .dashboard-mpesa-via--mpesa {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .dashboard-mpesa-via--card {
+          background: #bfdbfe;
+          color: #1e40af;
+        }
+
+        .dashboard-mpesa-date {
+          font-size: 0.75rem;
+          color: #999;
+          text-align: right;
+        }
+
+        /* Quick Actions */
+        .dashboard-quick-actions {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 12px;
+          padding: 2rem;
+          margin-top: 2rem;
+        }
+
+        .dashboard-actions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 1rem;
+        }
+
+        .dashboard-action-btn {
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 1rem;
+          text-decoration: none;
+          text-align: center;
+          font-weight: 500;
+          color: #666;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .dashboard-action-btn:hover {
+          border-color: #d4a574;
+          color: #d4a574;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.15);
+        }
+
+        .dashboard-action-btn--primary {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          color: white;
+          border: none;
+        }
+
+        .dashboard-action-btn--primary:hover {
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .dashboard-finance-hero {
+            flex-direction: column;
           }
-          .admin-finance-panel__money-grid {
-            min-width: 0;
+
+          .dashboard-finance-quick-stats {
+            min-width: auto;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+          }
+
+          .dashboard-finance-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          }
+
+          .dashboard-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .dashboard-form-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-section-header {
+            flex-direction: column;
+            align-items: flex-start;
           }
         }
       `}</style>
