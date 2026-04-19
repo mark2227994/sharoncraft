@@ -563,7 +563,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           color: var(--text-secondary);
         }
         .shop-breadcrumb a {
-          color: var(--color-accent);
+          color: #222;
           text-decoration: none;
           transition: color var(--transition-fast);
         }
@@ -601,7 +601,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           display: inline-flex;
           gap: 4px;
           padding: 4px;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
         }
@@ -633,7 +633,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           align-items: center;
           gap: var(--space-2);
           padding: 12px 16px;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
           cursor: pointer;
@@ -669,7 +669,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           padding: 8px 16px;
           border: 1px solid var(--border-default);
           border-radius: var(--radius-pill);
-          background: var(--color-white);
+          background: #f9f9f9;
           color: var(--text-secondary);
           font-size: var(--text-sm);
           font-weight: 500;
@@ -678,12 +678,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page__sub-pill:hover {
-          border-color: var(--color-accent);
-          color: var(--color-accent);
+          border-color: #222;
+          color: #222;
         }
         .shop-page__sub-pill--active {
           background: var(--color-accent);
-          border-color: var(--color-accent);
+          border-color: #222;
           color: var(--color-white);
         }
 
@@ -701,7 +701,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .shop-page__clear {
           background: none;
           border: none;
-          color: var(--color-accent);
+          color: #222;
           font-size: var(--text-sm);
           cursor: pointer;
           text-decoration: underline;
@@ -769,7 +769,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-products__list .product-card:hover {
-          border-color: var(--color-accent);
+          border-color: #222;
           box-shadow: 0 4px 12px rgba(139, 90, 43, 0.1);
         }
         .shop-products__list .product-card__image-wrap {
@@ -786,7 +786,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .product-card__category {
           font-size: var(--text-xs);
           font-weight: 600;
-          color: var(--color-accent);
+          color: #222;
           text-transform: uppercase;
           margin: 0;
         }
@@ -854,10 +854,10 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .shop-load-more {
           padding: 14px 32px;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 2px solid var(--color-accent);
           border-radius: var(--radius-md);
-          color: var(--color-accent);
+          color: #222;
           font-weight: 600;
           cursor: pointer;
           transition: all var(--transition-fast);
@@ -877,7 +877,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           align-items: center;
           gap: var(--space-2);
           padding: 10px 16px;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
           color: var(--text-secondary);
@@ -886,8 +886,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page-btn:hover:not(:disabled) {
-          border-color: var(--color-accent);
-          color: var(--color-accent);
+          border-color: #222;
+          color: #222;
         }
         .shop-page-btn:disabled {
           opacity: 0.5;
@@ -904,7 +904,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           display: flex;
           align-items: center;
           justify-content: center;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 1px solid var(--border-default);
           border-radius: var(--radius-md);
           color: var(--text-secondary);
@@ -913,12 +913,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page-num:hover {
-          border-color: var(--color-accent);
-          color: var(--color-accent);
+          border-color: #222;
+          color: #222;
         }
         .shop-page-num--active {
           background: var(--color-accent);
-          border-color: var(--color-accent);
+          border-color: #222;
           color: var(--color-white);
         }
         .shop-page-ellipsis {
@@ -1003,7 +1003,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .shop-page__sort-select {
           padding: 8px 12px;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 1px solid var(--border-default);
           border-radius: 6px;
           color: var(--text-primary);
@@ -1013,11 +1013,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page__sort-select:hover {
-          border-color: var(--color-accent);
+          border-color: #222;
         }
         .shop-page__sort-select:focus {
           outline: none;
-          border-color: var(--color-accent);
+          border-color: #222;
           box-shadow: 0 0 0 3px rgba(192, 77, 41, 0.1);
         }
 
@@ -1126,9 +1126,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .no-results-suggestions {
           text-align: left;
           display: inline-block;
-          background: var(--color-white);
+          background: #f9f9f9;
           padding: var(--space-3);
-          border-radius: 8px;
+          border-radius: 6px;
           margin: var(--space-3) 0;
         }
         .no-results-suggestions p {
@@ -1147,7 +1147,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .no-results-suggestions li:before {
           content: "✓ ";
-          color: var(--color-accent);
+          color: #222;
           font-weight: 600;
           margin-right: 6px;
         }
@@ -1164,8 +1164,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .no-results-btn:hover {
           background: #bf5835;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(192, 77, 41, 0.25);
+          
+          
         }
 
         /* NEW: Product Card Enhancements */
@@ -1189,18 +1189,18 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .product-card__image-wrap {
           position: relative;
           overflow: hidden;
-          border-radius: 8px;
-          background: var(--color-white);
+          border-radius: 6px;
+          background: #f9f9f9;
           aspect-ratio: 1;
         }
         .product-card__image-wrap img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform var(--transition-base);
+          transition: opacity 0.2s ease;
         }
         .product-card__image-wrap:hover img {
-          transform: scale(1.05);
+          opacity: 0.95;
         }
         .product-card__badge {
           position: absolute;
@@ -1236,9 +1236,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
           opacity: 1;
         }
         .product-card__wishlist:hover {
-          background: var(--color-white);
+          background: #f9f9f9;
           color: #e74c3c;
-          transform: scale(1.1);
+          ;
         }
         .product-card__wishlist.active {
           opacity: 1;
@@ -1250,7 +1250,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           left: 0;
           right: 0;
           padding: 10px;
-          background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+          background: rgba(0, 0, 0, 0.75);
           color: var(--color-white);
           border: none;
           font-weight: 600;
@@ -1264,7 +1264,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           opacity: 1;
         }
         .product-card__quick-view-btn:hover {
-          background: linear-gradient(180deg, transparent 0%, rgba(192, 77, 41, 0.9) 100%);
+          background: rgba(0, 0, 0, 0.9);
         }
         .product-card__link {
           text-decoration: none;
@@ -1306,7 +1306,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .product-card__price {
           font-weight: 700;
           font-size: var(--text-base);
-          color: var(--color-accent);
+          color: #222;
         }
         .product-card__stock {
           font-size: var(--text-xs);
@@ -1332,7 +1332,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           to { opacity: 1; }
         }
         .quick-view-modal__content {
-          background: var(--color-white);
+          background: #f9f9f9;
           border-radius: 12px;
           max-width: 600px;
           width: 100%;
@@ -1378,7 +1378,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .quick-view-modal__image-section img {
           width: 100%;
           height: auto;
-          border-radius: 8px;
+          border-radius: 6px;
           object-fit: cover;
         }
         .quick-view-modal__thumbnails {
@@ -1391,14 +1391,14 @@ export default function ShopPage({ products, categories, initialCategory, initia
           height: 60px;
           border: 2px solid var(--border-light);
           border-radius: 6px;
-          background: var(--color-white);
+          background: #f9f9f9;
           cursor: pointer;
           overflow: hidden;
           flex-shrink: 0;
           transition: all var(--transition-fast);
         }
         .quick-view-modal__thumbnail:hover {
-          border-color: var(--color-accent);
+          border-color: #222;
         }
         .quick-view-modal__thumbnail img {
           width: 100%;
@@ -1429,7 +1429,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           gap: var(--space-2);
           font-size: 1.25rem;
           font-weight: 700;
-          color: var(--color-accent);
+          color: #222;
         }
         .quick-view-modal__stock {
           font-size: var(--text-sm);
@@ -1463,7 +1463,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .quick-view-modal__btn-primary:hover {
           box-shadow: 0 4px 12px rgba(192, 77, 41, 0.3);
-          transform: translateY(-2px);
+          
         }
         .quick-view-modal__btn-secondary {
           display: flex;
@@ -1471,7 +1471,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           justify-content: center;
           gap: var(--space-2);
           padding: 12px 20px;
-          background: var(--color-white);
+          background: #f9f9f9;
           color: var(--text-primary);
           border: 2px solid var(--border-light);
           border-radius: 6px;
@@ -1480,8 +1480,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .quick-view-modal__btn-secondary:hover {
-          border-color: var(--color-accent);
-          color: var(--color-accent);
+          border-color: #222;
+          color: #222;
         }
         .quick-view-modal__btn-secondary.active {
           background: rgba(231, 76, 60, 0.1);
@@ -1523,7 +1523,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .shop-page__sort-select {
           padding: 8px 12px;
-          background: var(--color-white);
+          background: #f9f9f9;
           border: 1px solid var(--border-default);
           border-radius: 6px;
           color: var(--text-primary);
@@ -1533,11 +1533,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .shop-page__sort-select:hover {
-          border-color: var(--color-accent);
+          border-color: #222;
         }
         .shop-page__sort-select:focus {
           outline: none;
-          border-color: var(--color-accent);
+          border-color: #222;
           box-shadow: 0 0 0 3px rgba(192, 77, 41, 0.1);
         }
 
@@ -1646,9 +1646,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .no-results-suggestions {
           text-align: left;
           display: inline-block;
-          background: var(--color-white);
+          background: #f9f9f9;
           padding: var(--space-3);
-          border-radius: 8px;
+          border-radius: 6px;
           margin: var(--space-3) 0;
         }
         .no-results-suggestions p {
@@ -1667,7 +1667,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .no-results-suggestions li:before {
           content: "✓ ";
-          color: var(--color-accent);
+          color: #222;
           font-weight: 600;
           margin-right: 6px;
         }
@@ -1684,8 +1684,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .no-results-btn:hover {
           background: #bf5835;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(192, 77, 41, 0.25);
+          
+          
         }
 
         /* NEW: Product Card Enhancements */
@@ -1709,18 +1709,18 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .product-card__image-wrap {
           position: relative;
           overflow: hidden;
-          border-radius: 8px;
-          background: var(--color-white);
+          border-radius: 6px;
+          background: #f9f9f9;
           aspect-ratio: 1;
         }
         .product-card__image-wrap img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform var(--transition-base);
+          transition: opacity 0.2s ease;
         }
         .product-card__image-wrap:hover img {
-          transform: scale(1.05);
+          opacity: 0.95;
         }
         .product-card__badge {
           position: absolute;
@@ -1756,9 +1756,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
           opacity: 1;
         }
         .product-card__wishlist:hover {
-          background: var(--color-white);
+          background: #f9f9f9;
           color: #e74c3c;
-          transform: scale(1.1);
+          ;
         }
         .product-card__wishlist.active {
           opacity: 1;
@@ -1770,7 +1770,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           left: 0;
           right: 0;
           padding: 10px;
-          background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+          background: rgba(0, 0, 0, 0.75);
           color: var(--color-white);
           border: none;
           font-weight: 600;
@@ -1784,7 +1784,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           opacity: 1;
         }
         .product-card__quick-view-btn:hover {
-          background: linear-gradient(180deg, transparent 0%, rgba(192, 77, 41, 0.9) 100%);
+          background: rgba(0, 0, 0, 0.9);
         }
         .product-card__link {
           text-decoration: none;
@@ -1826,7 +1826,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .product-card__price {
           font-weight: 700;
           font-size: var(--text-base);
-          color: var(--color-accent);
+          color: #222;
         }
         .product-card__stock {
           font-size: var(--text-xs);
@@ -1852,7 +1852,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           to { opacity: 1; }
         }
         .quick-view-modal__content {
-          background: var(--color-white);
+          background: #f9f9f9;
           border-radius: 12px;
           max-width: 600px;
           width: 100%;
@@ -1898,7 +1898,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .quick-view-modal__image-section img {
           width: 100%;
           height: auto;
-          border-radius: 8px;
+          border-radius: 6px;
           object-fit: cover;
         }
         .quick-view-modal__thumbnails {
@@ -1911,14 +1911,14 @@ export default function ShopPage({ products, categories, initialCategory, initia
           height: 60px;
           border: 2px solid var(--border-light);
           border-radius: 6px;
-          background: var(--color-white);
+          background: #f9f9f9;
           cursor: pointer;
           overflow: hidden;
           flex-shrink: 0;
           transition: all var(--transition-fast);
         }
         .quick-view-modal__thumbnail:hover {
-          border-color: var(--color-accent);
+          border-color: #222;
         }
         .quick-view-modal__thumbnail img {
           width: 100%;
@@ -1949,7 +1949,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           gap: var(--space-2);
           font-size: 1.25rem;
           font-weight: 700;
-          color: var(--color-accent);
+          color: #222;
         }
         .quick-view-modal__stock {
           font-size: var(--text-sm);
@@ -1983,7 +1983,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .quick-view-modal__btn-primary:hover {
           box-shadow: 0 4px 12px rgba(192, 77, 41, 0.3);
-          transform: translateY(-2px);
+          
         }
         .quick-view-modal__btn-secondary {
           display: flex;
@@ -1991,7 +1991,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           justify-content: center;
           gap: var(--space-2);
           padding: 12px 20px;
-          background: var(--color-white);
+          background: #f9f9f9;
           color: var(--text-primary);
           border: 2px solid var(--border-light);
           border-radius: 6px;
@@ -2000,8 +2000,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
           transition: all var(--transition-fast);
         }
         .quick-view-modal__btn-secondary:hover {
-          border-color: var(--color-accent);
-          color: var(--color-accent);
+          border-color: #222;
+          color: #222;
         }
         .quick-view-modal__btn-secondary.active {
           background: rgba(231, 76, 60, 0.1);
@@ -2044,3 +2044,5 @@ export async function getServerSideProps({ query }) {
 
   return { props: { products, categories, initialCategory, initialJewelryType: requestedJewelryType } };
 }
+
+
