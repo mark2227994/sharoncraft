@@ -33,6 +33,8 @@ const paths = {
   box:       "M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12",
   dollar:    "M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
   mail:      "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6",
+  home:      "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22v-6h6v6",
+  "shopping-bag": "M6 2L4 6v14a2 2 0 002 2h12a2 2 0 002-2V6l-2-4zM9 2v4M15 2v4",
 };
 
 export default function Icon({ name, size = 24, color = "currentColor", strokeWidth = 1.5, className = "" }) {

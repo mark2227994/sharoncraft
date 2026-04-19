@@ -11,6 +11,7 @@ import "../styles/components/footer.css";
 import "../styles/components/admin.css";
 import "../styles/components/cart-drawer.css";
 import CartDrawer from "../components/CartDrawer";
+import MobileBottomNav from "../components/MobileBottomNav";
 import { CartProvider } from "../lib/cart-context";
 
 export default function SharonCraftApp({ Component, pageProps }) {
@@ -31,6 +32,7 @@ export default function SharonCraftApp({ Component, pageProps }) {
       <CartProvider>
         <Component {...pageProps} />
         <CartDrawer />
+        <MobileBottomNav />
       </CartProvider>
     </QueryClientProvider>
   );
