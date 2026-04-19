@@ -178,7 +178,7 @@ export default function Footer({ siteContent }) {
 
       <style jsx>{`
         .footer {
-          background: #1a1a1a;
+          background: #0f0f0f;
           color: #f9f6ee;
           padding: var(--space-7) var(--gutter) var(--space-5);
           margin-top: var(--space-8);

@@ -51,7 +51,7 @@ export default function MobileBottomNav() {
           bottom: 0;
           left: 0;
           right: 0;
-          background: #1a1a1a;
+          background: #0f0f0f;
           border-top: 1px solid rgba(249, 246, 238, 0.1);
           z-index: 40;
         }
@@ -120,7 +120,7 @@ export default function MobileBottomNav() {
           justify-content: center;
           font-size: 0.65rem;
           font-weight: 700;
-          border: 2px solid #1a1a1a;
+          border: 2px solid #0f0f0f;
         }
 
         .mobile-bottom-nav__label {
