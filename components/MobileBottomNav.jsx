@@ -23,7 +23,10 @@ export default function MobileBottomNav() {
   };
 
   useEffect(() => {
-    const activeIndex = navItems.findIndex((item) => isActive(item.href + item.label));
+    const activeIndex = navItems.findIndex((item) => {
+      if (item.href === "/") return router.pathname === "/";
+      return router.pathname.startsWith(item.href);
+    });
     if (activeIndex !== -1) {
       setIndicatorPosition((activeIndex / navItems.length) * 100);
     }
@@ -40,6 +43,8 @@ export default function MobileBottomNav() {
               className={`mobile-bottom-nav__link ${
                 isActive(item.href) ? "mobile-bottom-nav__link--active" : ""
               }`}
+              aria-label={item.label}
+              title={item.label}
               aria-current={isActive(item.href) ? "page" : undefined}
             >
               <span className="mobile-bottom-nav__icon-wrapper">
@@ -48,7 +53,6 @@ export default function MobileBottomNav() {
                   <span className="mobile-bottom-nav__badge">{item.badge}</span>
                 )}
               </span>
-              <span className="mobile-bottom-nav__label">{item.label}</span>
             </Link>
           </li>
         ))}
@@ -82,7 +86,7 @@ export default function MobileBottomNav() {
           list-style: none;
           margin: 0;
           padding: 0;
-          height: 70px;
+          height: 60px;
           align-items: center;
           justify-content: space-around;
         }
@@ -104,13 +108,10 @@ export default function MobileBottomNav() {
           height: 100%;
           color: #2a2a2a;
           text-decoration: none;
-          font-size: 0.75rem;
-          gap: 4px;
           transition: all 0.3s ease;
           position: relative;
-          font-weight: 500;
-          letter-spacing: 0.02em;
           opacity: 0.7;
+          cursor: pointer;
         }
 
         .mobile-bottom-nav__link:active {
@@ -122,10 +123,6 @@ export default function MobileBottomNav() {
           opacity: 1;
         }
 
-        .mobile-bottom-nav__link--active .mobile-bottom-nav__icon-wrapper {
-          transform: scale(1.15);
-        }
-
         .mobile-bottom-nav__icon-wrapper {
           position: relative;
           display: inline-flex;
@@ -134,8 +131,12 @@ export default function MobileBottomNav() {
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        .mobile-bottom-nav__link--active .mobile-bottom-nav__icon-wrapper {
+          transform: scale(1.2);
+        }
+
         .mobile-bottom-nav__link:hover .mobile-bottom-nav__icon-wrapper {
-          transform: scale(1.1);
+          transform: scale(1.15);
         }
 
         .mobile-bottom-nav__badge {
@@ -167,10 +168,6 @@ export default function MobileBottomNav() {
           }
         }
 
-        .mobile-bottom-nav__label {
-          line-height: 1;
-        }
-
         /* Show on mobile only */
         @media (max-width: 768px) {
           .mobile-bottom-nav {
@@ -178,14 +175,14 @@ export default function MobileBottomNav() {
           }
 
           body {
-            padding-bottom: 70px;
+            padding-bottom: 60px;
           }
         }
 
         /* Add padding to footer on mobile to account for bottom nav */
         @media (max-width: 768px) {
           :global(.footer) {
-            margin-bottom: 70px;
+            margin-bottom: 60px;
           }
         }
       `}</style>
