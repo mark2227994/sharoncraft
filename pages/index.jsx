@@ -8,6 +8,8 @@ import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
 import TrustBadges from "../components/TrustBadges";
 import Testimonials from "../components/Testimonials";
+import CtaSection from "../components/CtaSection";
+import NewsletterSignup from "../components/NewsletterSignup";
 import Icon from "../components/icons";
 import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
@@ -380,6 +382,10 @@ export default function HomePage({
         </section>
 
         <Testimonials />
+
+        <CtaSection />
+
+        <NewsletterSignup />
       </main>
 
       <Footer siteContent={siteContent} />
