@@ -11,25 +11,29 @@ const navItems = [
   { href: "/admin/products", label: "Products", icon: "package" },
   { href: "/admin/orders", label: "Orders", icon: "package" },
   
-  // TIER 2: STORYTELLING (NEW - Artisan-First)
+  // TIER 2: STORYTELLING (Artisan-First)
   { section: "Storytelling", tier: 2 },
   { href: "/admin/hero-slideshow", label: "Hero Slideshow", icon: "edit" },
   { href: "/admin/artisans", label: "Artisans", icon: "heart" },
   { href: "/admin/testimonials", label: "Testimonials", icon: "star" },
   { href: "/admin/homepage-content", label: "Homepage Content", icon: "edit" },
   
-  // TIER 3: CUSTOMERS & CUSTOM ORDERS
-  { section: "Customers", tier: 3 },
+  // TIER 3: IMPACT & ANALYTICS
+  { section: "Impact", tier: 3 },
+  { href: "/admin/artisan-impact", label: "Artisan Impact", icon: "chart" },
+  
+  // TIER 4: CUSTOMERS & CUSTOM ORDERS
+  { section: "Customers", tier: 4 },
   { href: "/admin/custom-orders", label: "Custom Orders", icon: "edit" },
   { href: "/admin/customers", label: "Customers", icon: "users" },
   
-  // TIER 4: OPERATIONS
-  { section: "Operations", tier: 4 },
+  // TIER 5: OPERATIONS
+  { section: "Operations", tier: 5 },
   { href: "/admin/inventory", label: "Inventory", icon: "box" },
   { href: "/admin/expenses", label: "Expenses", icon: "dollar" },
   
-  // TIER 5: TOOLS & SETTINGS
-  { section: "Tools", tier: 5 },
+  // TIER 6: TOOLS & SETTINGS
+  { section: "Tools", tier: 6 },
   { href: "/admin/prices", label: "Prices", icon: "tag" },
   { href: "/admin/site-images", label: "Site Images", icon: "eye" },
   { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
