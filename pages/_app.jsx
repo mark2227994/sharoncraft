@@ -12,6 +12,8 @@ import "../styles/components/admin.css";
 import "../styles/components/cart-drawer.css";
 import CartDrawer from "../components/CartDrawer";
 import MobileBottomNav from "../components/MobileBottomNav";
+import WhatsAppFab from "../components/WhatsAppFab";
+import StickyMiniCart from "../components/StickyMiniCart";
 import { CartProvider } from "../lib/cart-context";
 
 export default function SharonCraftApp({ Component, pageProps }) {
@@ -32,6 +34,8 @@ export default function SharonCraftApp({ Component, pageProps }) {
       <CartProvider>
         <Component {...pageProps} />
         <CartDrawer />
+        <StickyMiniCart />
+        <WhatsAppFab />
         <MobileBottomNav />
       </CartProvider>
     </QueryClientProvider>
