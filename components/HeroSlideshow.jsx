@@ -4,6 +4,23 @@ import Link from "next/link";
 export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [loadedSlides, setLoadedSlides] = useState([]);
+
+  // Fetch slides from API on mount
+  useEffect(() => {
+    async function fetchSlides() {
+      try {
+        const response = await fetch("/api/admin/hero-slides");
+        const data = await response.json();
+        if (data.slides && data.slides.length > 0) {
+          setLoadedSlides(data.slides);
+        }
+      } catch (error) {
+        console.error("Error fetching slides:", error);
+      }
+    }
+    fetchSlides();
+  }, []);
 
   // Default slides if none provided
   const defaultSlides = [
@@ -106,7 +123,7 @@ export default function HeroSlideshow({ slides = [] }) {
     },
   ];
 
-  const slidesData = slides.length > 0 ? slides : defaultSlides;
+  const slidesData = loadedSlides.length > 0 ? loadedSlides : (slides.length > 0 ? slides : defaultSlides);
   const currentSlideData = slidesData[currentSlide];
 
   // Auto-advance slides
