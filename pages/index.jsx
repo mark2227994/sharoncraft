@@ -11,6 +11,8 @@ import Testimonials from "../components/Testimonials";
 import CtaSection from "../components/CtaSection";
 import NewsletterSignup from "../components/NewsletterSignup";
 import MobileProductShowcase from "../components/MobileProductShowcase";
+import PromotionBanner from "../components/PromotionBanner";
+import ArticleCarousel from "../components/ArticleCarousel";
 import Icon from "../components/icons";
 import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
@@ -197,6 +199,8 @@ export default function HomePage({
       <Nav />
       <HeroSlideshow />
 
+      <PromotionBanner />
+
       <MobileProductShowcase products={featuredProducts?.slice(0, 3) || []} />
 
       <section className="custom-orders-banner" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-6) auto', padding: 'var(--space-6) var(--gutter)' }}>
@@ -379,6 +383,8 @@ export default function HomePage({
         </section>
 
         <Testimonials />
+
+        <ArticleCarousel />
 
         <CtaSection />
 

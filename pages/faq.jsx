@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
@@ -6,154 +6,73 @@ import Link from "next/link";
 
 export default function FAQPage() {
   const [expandedItem, setExpandedItem] = useState(null);
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const sections = [
-    {
-      title: "Ordering & Shopping",
-      items: [
-        {
-          q: "How do I place an order?",
-          a: "Browse our shop, add items to your cart, and proceed to checkout. You'll fill in your delivery details and confirm the order through WhatsApp.",
-        },
-        {
-          q: "What payment methods do you accept?",
-          a: "We accept M-Pesa, bank transfers, and cash on delivery (Nairobi only). Payment options are shown at checkout.",
-        },
-        {
-          q: "Can I pay on delivery?",
-          a: "Yes, cash on delivery is available for Nairobi orders. Other areas require payment before delivery.",
-        },
-      ],
-    },
-    {
-      title: "Shipping & Delivery",
-      items: [
-        {
-          q: "How much is shipping?",
-          a: "Nairobi: KES 300 | Rest of Kenya: KES 600. Shipping costs are calculated at checkout.",
-        },
-        {
-          q: "How long does delivery take?",
-          a: "Nairobi: 2-3 business days | Rest of Kenya: 3-5 business days. Rush delivery available upon request.",
-        },
-        {
-          q: "Do you deliver countrywide?",
-          a: "Yes! We deliver across Kenya. Choose your location at checkout and shipping cost will update automatically.",
-        },
-        {
-          q: "Can I change my delivery address?",
-          a: "Yes, contact us on WhatsApp before we dispatch. Once shipped, address changes may incur additional fees.",
-        },
-      ],
-    },
-    {
-      title: "Custom Orders",
-      items: [
-        {
-          q: "How do custom orders work?",
-          a: (
-            <>
-              Custom orders let you design your own piece. Here's the process:
-              <br />
-              1. <strong>Request</strong> - Fill out the custom order form
-              <br />
-              2. <strong>Quote</strong> - We send pricing (usually KES 2,000-10,000)
-              <br />
-              3. <strong>Confirm</strong> - Pay 50% deposit
-              <br />
-              4. <strong>Create</strong> - We make your piece (5-10 business days)
-              <br />
-              5. <strong>Deliver</strong> - Pay final 50% + shipping
-            </>
-          ),
-        },
-        {
-          q: "How much do custom orders cost?",
-          a: "Custom order prices depend on design complexity, materials, and quantity. Typical range: KES 2,000-10,000 per piece. We send a detailed quote after you submit your request.",
-        },
-        {
-          q: "How long does a custom order take?",
-          a: "Most custom orders take 5-10 business days after you confirm the design. Bulk orders may take longer.",
-        },
-        {
-          q: "Can I order in bulk?",
-          a: "Yes! We love bulk orders. For quantities over 50 pieces, we offer special pricing. Contact us on WhatsApp to discuss.",
-        },
-      ],
-    },
-    {
-      title: "Products & Quality",
-      items: [
-        {
-          q: "Are all items handmade?",
-          a: "Yes, every piece is handmade by our skilled artisans in Nairobi. No factory production.",
-        },
-        {
-          q: "How do I know the product quality?",
-          a: "Each product page shows detailed photos, artisan name, and materials used. Our customer reviews also reflect quality. All items come with our satisfaction guarantee.",
-        },
-        {
-          q: "What materials do you use?",
-          a: "We use high-quality beads, metals, and natural materials. Each product page lists specific materials.",
-        },
-        {
-          q: "Do prices include VAT?",
-          a: "Prices shown are inclusive of VAT. No additional taxes at checkout.",
-        },
-      ],
-    },
-    {
-      title: "Returns & Exchanges",
-      items: [
-        {
-          q: "What's your return policy?",
-          a: "We offer returns within 7 days if the item is unworn and in original condition. Shipping costs are non-refundable.",
-        },
-        {
-          q: "How do I return an item?",
-          a: "Contact us on WhatsApp with your order details and reason for return. We'll provide shipping instructions.",
-        },
-        {
-          q: "What if my item arrives damaged?",
-          a: "Contact us immediately on WhatsApp with photos. We'll either replace it free or refund the product cost.",
-        },
-      ],
-    },
-    {
-      title: "Account & Orders",
-      items: [
-        {
-          q: "Do I need to create an account?",
-          a: "You can shop without an account. Creating one lets you track orders and save favorites.",
-        },
-        {
-          q: "How do I track my order?",
-          a: "After checkout, Sharon will send you WhatsApp updates with tracking information and delivery date.",
-        },
-        {
-          q: "Can I modify my order?",
-          a: "Contact us on WhatsApp immediately after ordering. Changes are possible before production starts.",
-        },
-      ],
-    },
-    {
-      title: "About SharonCraft",
-      items: [
-        {
-          q: "Who makes SharonCraft products?",
-          a: "We work with 5-10 skilled artisans in Nairobi. Each product shows the artisan's name who created it.",
-        },
-        {
-          q: "Is SharonCraft ethical?",
-          a: "Yes. We pay fair wages, support local artisans, and use sustainable materials wherever possible.",
-        },
-        {
-          q: "Can I visit the shop?",
-          a: "Yes! We have a physical shop in Nairobi. Contact us on WhatsApp for address and opening hours.",
-        },
-      ],
-    },
-  ];
+  useEffect(() => {
+    fetchFAQs();
+  }, []);
+
+  async function fetchFAQs() {
+    try {
+      const res = await fetch("/api/admin/faqs");
+      const data = await res.json();
+      
+      // Group FAQs by category
+      const grouped = {};
+      if (Array.isArray(data)) {
+        data.forEach(faq => {
+          if (!grouped[faq.category]) {
+            grouped[faq.category] = [];
+          }
+          grouped[faq.category].push({
+            q: faq.question,
+            a: faq.answer,
+            keywords: faq.keywords,
+            views: faq.views || 0
+          });
+        });
+      }
+      
+      const sections = Object.entries(grouped).map(([title, items]) => ({
+        title,
+        items
+      }));
+      
+      setFaqs(sections);
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch FAQs:", err);
+      setError(err.message);
+      setLoading(false);
+      // Fallback to empty FAQs
+      setFaqs([]);
+    }
+  }
+
+  if (loading) {
+    return (
+      <>
+        <SeoHead
+          title="FAQ - Frequently Asked Questions"
+          description="Find answers to common questions about SharonCraft orders, shipping, custom designs, and more."
+          path="/faq"
+        />
+        <Nav />
+        <main className="faq-page">
+          <div className="faq-header">
+            <p className="overline">Help & Support</p>
+            <h1 className="display-lg">Frequently Asked Questions</h1>
+          </div>
+          <p style={{ textAlign: 'center', padding: '2rem' }}>Loading FAQs...</p>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  const sections = faqs.length > 0 ? faqs : [];
 
   return (
     <>

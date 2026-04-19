@@ -10,6 +10,8 @@ export default function Nav() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
+  const [navItems, setNavItems] = useState(primaryNavLinks);
+  const [mobileItems, setMobileItems] = useState(mobileNavLinks);
   const { count, wishlistCount, openCart } = useCart();
 
   useEffect(() => {
@@ -21,7 +23,21 @@ export default function Nav() {
 
   useEffect(() => {
     checkSession();
+    fetchNavigation();
   }, []);
+
+  async function fetchNavigation() {
+    try {
+      const res = await fetch("/api/admin/navigation");
+      const data = await res.json();
+      if (data.header && Array.isArray(data.header)) {
+        setNavItems(data.header.map(h => ({ href: h.url, label: h.label })));
+        setMobileItems(data.header.map(h => ({ href: h.url, label: h.label })));
+      }
+    } catch (e) {
+      // Keep default nav items
+    }
+  }
 
   async function checkSession() {
     try {
@@ -76,7 +92,7 @@ export default function Nav() {
 
         <nav aria-label="Primary" className="nav__desktop-nav">
           <ul className="nav__links">
-            {primaryNavLinks.map((link) => (
+            {navItems.map((link) => (
               <li key={link.label}>
                 <Link href={link.href} className="nav__link">
                   {link.label}
@@ -131,7 +147,7 @@ export default function Nav() {
             </button>
             <nav>
               <ul className="side-drawer__nav-links">
-                {mobileNavLinks.map((link) => (
+                {mobileItems.map((link) => (
                   <li key={link.label}>
                     <Link href={link.href} className="side-drawer__nav-link" onClick={() => setIsOpen(false)}>
                       {link.label}
