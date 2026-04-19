@@ -2,7 +2,7 @@ import ArtisanTimeline from "../components/ArtisanTimeline";
 import ArtisanStories from "../components/ArtisanStories";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
-import HeroBanner from "../components/HeroBanner";
+import HeroSlideshow from "../components/HeroSlideshow";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
@@ -195,13 +195,7 @@ export default function HomePage({
         path="/"
       />
       <Nav />
-      <HeroBanner
-        heroImage={siteContent.heroImage}
-        heroImageAlt="Kenyan artisan wearing richly beaded adornment"
-        title={siteContent.heroTitle}
-        subtitle={siteContent.heroSubtitle}
-        trustLine={siteContent.deliveryNote}
-      />
+      <HeroSlideshow />
 
       <MobileProductShowcase products={featuredProducts?.slice(0, 3) || []} />
 
