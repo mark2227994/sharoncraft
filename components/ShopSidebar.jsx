@@ -56,38 +56,57 @@ export default function ShopSidebar({
               <button
                 className={`shop-sidebar__layout-btn ${gridView === "2-col" ? "shop-sidebar__layout-btn--active" : ""}`}
                 onClick={() => onGridViewChange("2-col")}
-                title="2 columns"
+                title="2 Columns"
                 aria-label="Display 2 columns"
               >
-                <span className="layout-icon">⊟ ⊟</span>
-                <span className="layout-label">2</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span className="layout-tooltip">2 Columns</span>
               </button>
               <button
                 className={`shop-sidebar__layout-btn ${gridView === "3-col" ? "shop-sidebar__layout-btn--active" : ""}`}
                 onClick={() => onGridViewChange("3-col")}
-                title="3 columns"
+                title="3 Columns"
                 aria-label="Display 3 columns"
               >
-                <span className="layout-icon">⊟ ⊟ ⊟</span>
-                <span className="layout-label">3</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span className="layout-tooltip">3 Columns</span>
               </button>
               <button
                 className={`shop-sidebar__layout-btn ${gridView === "4-col" ? "shop-sidebar__layout-btn--active" : ""}`}
                 onClick={() => onGridViewChange("4-col")}
-                title="4 columns"
+                title="4 Columns"
                 aria-label="Display 4 columns"
               >
-                <span className="layout-icon">⊟ ⊟ ⊟ ⊟</span>
-                <span className="layout-label">4</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span className="layout-tooltip">4 Columns</span>
               </button>
               <button
                 className={`shop-sidebar__layout-btn ${gridView === "5-col" ? "shop-sidebar__layout-btn--active" : ""}`}
                 onClick={() => onGridViewChange("5-col")}
-                title="5 columns"
+                title="5 Columns"
                 aria-label="Display 5 columns"
               >
-                <span className="layout-icon">⊟ ⊟ ⊟ ⊟ ⊟</span>
-                <span className="layout-label">5</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="3" cy="12" r="2"></circle>
+                  <circle cx="8" cy="12" r="2"></circle>
+                  <circle cx="13" cy="12" r="2"></circle>
+                  <circle cx="18" cy="12" r="2"></circle>
+                  <circle cx="21" cy="12" r="2"></circle>
+                </svg>
+                <span className="layout-tooltip">5 Columns</span>
               </button>
             </div>
           </div>
@@ -470,42 +489,56 @@ export default function ShopSidebar({
         }
         .shop-sidebar__layout-btn {
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 4px;
-          padding: 10px 8px;
-          background: var(--color-white);
-          border: 2px solid var(--border-default);
+          padding: 8px;
+          background: transparent;
+          border: 1px solid transparent;
           border-radius: var(--radius-md);
           cursor: pointer;
           transition: all 0.2s ease;
-          font-size: var(--text-xs);
-          font-weight: 600;
           color: var(--text-secondary);
-          aspect-ratio: 1;
+          position: relative;
+          line-height: 1;
+          width: 40px;
+          height: 40px;
+        }
+        .shop-sidebar__layout-btn svg {
+          width: 18px;
+          height: 18px;
+          stroke-linecap: round;
+          stroke-linejoin: round;
         }
         .shop-sidebar__layout-btn:hover {
-          border-color: var(--color-terracotta);
-          background: rgba(192, 77, 41, 0.03);
+          background: rgba(192, 77, 41, 0.08);
+          border-color: rgba(192, 77, 41, 0.2);
+          color: var(--color-accent);
         }
         .shop-sidebar__layout-btn--active {
           background: linear-gradient(135deg, #C04D29 0%, #D4A574 100%);
           color: var(--color-white);
           border-color: #C04D29;
-          box-shadow: 0 2px 8px rgba(192, 77, 41, 0.25);
+          box-shadow: 0 2px 8px rgba(192, 77, 41, 0.3);
         }
-        .layout-icon {
-          font-size: 12px;
-          line-height: 1;
-          letter-spacing: 1px;
-          opacity: 0.8;
+        .layout-tooltip {
+          position: absolute;
+          bottom: -28px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.85);
+          color: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 600;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 100;
         }
-        .layout-label {
-          font-size: 10px;
-          font-weight: 700;
-          text-transform: uppercase;
-          opacity: 0.9;
+        .shop-sidebar__layout-btn:hover .layout-tooltip {
+          opacity: 1;
         }
         
         @media (max-width: 899px) {
@@ -514,7 +547,16 @@ export default function ShopSidebar({
             gap: 6px;
           }
           .shop-sidebar__layout-btn {
-            padding: 8px 6px;
+            width: 36px;
+            height: 36px;
+            padding: 6px;
+          }
+          .shop-sidebar__layout-btn svg {
+            width: 16px;
+            height: 16px;
+          }
+          .layout-tooltip {
+            bottom: -24px;
             font-size: 10px;
           }
         }
