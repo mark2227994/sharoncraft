@@ -50,10 +50,7 @@ export default function CartDrawer() {
 
       <aside className="cart-drawer__panel">
         <header className="cart-drawer__header">
-          <div>
-            <p className="overline">Your Cart</p>
-            <h2 className="heading-md">Selected Pieces</h2>
-          </div>
+          <h2>Cart ({count})</h2>
           <button type="button" className="cart-drawer__close" onClick={closeCart} aria-label="Close cart">
             <Icon name="close" size={18} />
           </button>
@@ -73,26 +70,18 @@ export default function CartDrawer() {
                 <article key={item.id} className="cart-drawer__item">
                   <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="cart-drawer__image" />
                   <div className="cart-drawer__meta">
-                    {item.artisan ? <p className="overline">{item.artisan}</p> : null}
+                    {item.category && <p className="cart-drawer__category">{item.category}</p>}
                     <Link href={`/product/${item.slug}`} className="cart-drawer__name" onClick={closeCart}>
                       {item.name}
                     </Link>
-                    <p className="price">{formatKES(item.price)}</p>
-                  </div>
-                  <div className="cart-drawer__controls">
-                    <div className="cart-drawer__qty" aria-label={`Quantity for ${item.name}`}>
-                      <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease quantity for ${item.name}`}>
-                        -
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase quantity for ${item.name}`}>
-                        +
-                      </button>
+                    <div className="cart-drawer__inline">
+                      <span className="cart-drawer__qty-simple">×{item.quantity}</span>
+                      <span className="cart-drawer__price">{formatKES(item.price * item.quantity)}</span>
                     </div>
-                    <button type="button" className="cart-drawer__remove" onClick={() => removeItem(item.id)}>
-                      Remove
-                    </button>
                   </div>
+                  <button type="button" className="cart-drawer__remove" onClick={() => removeItem(item.id)}>
+                    ✕
+                  </button>
                 </article>
               ))}
             </div>
@@ -111,41 +100,37 @@ export default function CartDrawer() {
                     aria-label={option.label}
                     aria-checked={deliveryMethod === key}
                     role="radio"
-                    title={option.label}
                   >
-                    <Icon name={option.icon} size={18} />
-                    <span className="cart-drawer__delivery-price">{formatKES(option.fee)}</span>
-                    {!option.available ? <span className="cart-drawer__delivery-soon">Soon</span> : null}
+                    <Icon name={option.icon} size={16} />
+                    <span>{formatKES(option.fee)}</span>
                   </button>
                 ))}
               </div>
-              <div className="cart-drawer__summary-row">
-                <span>Items</span>
-                <strong>{count}</strong>
+              
+              <div className="cart-drawer__summary">
+                <div className="cart-drawer__summary-row">
+                  <span>Subtotal</span>
+                  <strong>{formatKES(subtotal)}</strong>
+                </div>
+                <div className="cart-drawer__summary-row">
+                  <span>Delivery</span>
+                  <strong>{formatKES(delivery)}</strong>
+                </div>
+                <div className="cart-drawer__summary-row cart-drawer__summary-total">
+                  <span>Total</span>
+                  <strong>{formatKES(estimatedTotal)}</strong>
+                </div>
               </div>
-              <div className="cart-drawer__summary-row">
-                <span>Subtotal</span>
-                <strong>{formatKES(subtotal)}</strong>
-              </div>
-              <div className="cart-drawer__summary-row">
-                <span>Delivery</span>
-                <strong>{formatKES(delivery)}</strong>
-              </div>
-              <div className="cart-drawer__summary-row">
-                <span>Estimated total</span>
-                <strong>{formatKES(estimatedTotal)}</strong>
-              </div>
-              <p className="cart-drawer__note">
-                Home delivery is active for now via Bolt, Uber, or your delivery agent.
-              </p>
+
               <div className="cart-drawer__actions">
                 <Link href="/checkout" className="cart-drawer__checkout" onClick={closeCart}>
-                  Proceed to Checkout
-                </Link>
-                <Link href="/cart" className="cart-drawer__view-cart" onClick={closeCart}>
-                  View Full Cart
+                  Checkout
                 </Link>
               </div>
+              
+              <Link href="/cart" className="cart-drawer__view-full" onClick={closeCart}>
+                View Full Cart
+              </Link>
             </footer>
           </>
         )}
