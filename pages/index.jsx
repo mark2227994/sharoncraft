@@ -204,20 +204,31 @@ export default function HomePage({
 
       <QuickStatsBar />
 
+      {/* Collections - Moved up for visual impact */}
+      <section id="about-gallery" className="collections-section">
+        <SectionHeading title="Shop by Category" kicker="Browse collections" />
+        <div className="collections-grid">
+          {collectionCards.map((collection) => (
+            <a key={collection.title} href={collection.href} className="collection-card">
+              <img src={collection.image} alt={collection.title} className="collection-card__image" loading="lazy" decoding="async" />
+              <span className="collection-card__overlay" />
+              {collection.itemCount && <span className="collection-card__badge">{collection.itemCount} items</span>}
+              <span className="collection-card__title display-md">{collection.title}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <MobileProductShowcase products={featuredProducts?.slice(0, 3) || []} />
 
+      {/* Custom Orders - Simplified */}
       <section className="custom-orders-banner" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-6) auto', padding: 'var(--space-6) var(--gutter)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 'var(--space-6)', alignItems: 'center' }}>
           <div>
             <h3 className="display-sm">Design With Us</h3>
             <p style={{ marginTop: 'var(--space-2)', color: 'var(--text-secondary)', fontSize: '16px' }}>
-              Custom pieces made to your vision
+              Custom pieces made to your exact vision. Premium materials, fast delivery.
             </p>
-            <ul style={{ listStyle: 'none', padding: 0, marginTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '15px' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ color: 'var(--color-terracotta)' }}>✓</span> Fully customizable</li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ color: 'var(--color-terracotta)' }}>✓</span> Premium materials</li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ color: 'var(--color-terracotta)' }}>✓</span> 5–10 day delivery</li>
-            </ul>
           </div>
           <div style={{ textAlign: 'center' }}>
             <a href="/custom-order" className="custom-order-btn">Start Design</a>
@@ -225,20 +236,12 @@ export default function HomePage({
         </div>
       </section>
 
-      <section className="trust-bar" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-4) var(--gutter)' }}>
-        {trustItems.map((item) => (
-          <div key={item.label} className="trust-bar__item">
-            <Icon name={item.icon} size={20} />
-            <span>{item.label}</span>
-          </div>
-        ))}
-      </section>
-
-      <section className="payment-methods-section" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-6) var(--gutter)' }}>
+      {/* Simplified Payment Methods */}
+      <section className="payment-methods-section" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-4) var(--gutter)' }}>
         <div className="payment-methods-content">
-          <div>
+          <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
             <p className="overline">Flexible Payment</p>
-            <h3 className="display-sm" style={{ margin: 'var(--space-1) 0 var(--space-2)' }}>We Accept Multiple Payment Methods</h3>
+            <h3 className="display-sm" style={{ margin: 'var(--space-1) 0' }}>Multiple Payment Methods</h3>
           </div>
           <div className="payment-methods-grid">
             <div className="payment-method">
@@ -252,7 +255,6 @@ export default function HomePage({
             <div className="payment-method">
               <div className="payment-method__icon"><Icon name="truck" size={24} /></div>
               <span>Cash on Delivery</span>
-              <span className="payment-method__note">(Nairobi)</span>
             </div>
             <div className="payment-method">
               <div className="payment-method__icon"><Icon name="mpesa" size={24} /></div>
@@ -262,59 +264,31 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Trust Signals Section */}
-      <section className="trust-signals" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-8) var(--gutter)' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-          <p className="overline">Trusted</p>
-          <h2 className="display-md" style={{ marginTop: 'var(--space-1)' }}>Why SharonCraft</h2>
+      {/* Trust Signals - Simplified, icons only */}
+      <section className="trust-signals" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-6) var(--gutter)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
+          <h2 className="display-md">Why SharonCraft</h2>
         </div>
 
         <div className="trust-grid">
           <div className="trust-item">
             <div className="trust-icon"><Icon name="check" size={32} /></div>
             <h4>Verified Artisans</h4>
-            <p>Direct from Kenyan makers</p>
           </div>
           <div className="trust-item">
             <div className="trust-icon"><Icon name="truck" size={32} /></div>
-            <h4>Fast & Tracked</h4>
-            <p>Next-day Nairobi delivery</p>
+            <h4>Fast Delivery</h4>
           </div>
           <div className="trust-item">
             <div className="trust-icon"><Icon name="star" size={32} /></div>
-            <h4>Guaranteed Quality</h4>
-            <p>30-day returns, always</p>
+            <h4>Quality Guaranteed</h4>
           </div>
           <div className="trust-item">
             <div className="trust-icon"><Icon name="heart" size={32} /></div>
             <h4>Fair Trade</h4>
-            <p>Artisans paid directly</p>
-          </div>
-        </div>
-
-        <div className="testimonials">
-          <h3 style={{ textAlign: 'center', marginBottom: 'var(--space-4)', fontSize: '18px', fontWeight: 600 }}>Loved</h3>
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="stars">★★★★★</div>
-              <p>"Stunning craftsmanship. Arrived quickly."</p>
-              <div className="testimonial-author">— Sarah K.</div>
-            </div>
-            <div className="testimonial-card">
-              <div className="stars">★★★★★</div>
-              <p>"Custom orders exceeded expectations. Will buy again."</p>
-              <div className="testimonial-author">— James M.</div>
-            </div>
-            <div className="testimonial-card">
-              <div className="stars">★★★★★</div>
-              <p>"Beautiful, unique pieces. Supporting Kenyan artisans."</p>
-              <div className="testimonial-author">— Amina H.</div>
-            </div>
           </div>
         </div>
       </section>
-
-      <CategoryStrip categories={categories} activeCategory="All" />
 
       <main>
         <CuratedSection 
@@ -322,52 +296,34 @@ export default function HomePage({
           newArrivals={recentProducts}
         />
 
-        <section id="about-gallery" className="collections-section">
-          <SectionHeading title="Shop by Category" kicker="Browse collections" />
-          <div className="collections-grid">
-            {collectionCards.map((collection) => (
-              <a key={collection.title} href={collection.href} className="collection-card">
-                <img src={collection.image} alt={collection.title} className="collection-card__image" loading="lazy" decoding="async" />
-                <span className="collection-card__overlay" />
-                {collection.itemCount && <span className="collection-card__badge">{collection.itemCount} items</span>}
-                <span className="collection-card__title display-md">{collection.title}</span>
-              </a>
-            ))}
-          </div>
-        </section>
-
         <section className="how-it-made-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
-            <p className="overline">Our Process</p>
-            <h2 className="display-md" style={{ marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>How It's Made</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
-              Every SharonCraft piece follows a meticulous handcraft process that ensures quality, authenticity, and love in each design.
-            </p>
+            <h2 className="display-md">How It's Made</h2>
           </div>
 
           <div className="how-it-made-grid">
             <div className="how-it-made-step">
               <div className="how-it-made-number">1</div>
               <h3 className="how-it-made-title">Sourced</h3>
-              <p className="how-it-made-description">Ethical materials from Kenyan suppliers. Premium quality beads carefully selected for durability and color.</p>
+              <p className="how-it-made-description">Premium Kenyan materials</p>
             </div>
 
             <div className="how-it-made-step">
               <div className="how-it-made-number">2</div>
               <h3 className="how-it-made-title">Designed</h3>
-              <p className="how-it-made-description">Master artisans hand-sketch each piece. Every design is custom-reviewed for balance, proportion, and cultural authenticity.</p>
+              <p className="how-it-made-description">Master artisan sketches</p>
             </div>
 
             <div className="how-it-made-step">
               <div className="how-it-made-number">3</div>
               <h3 className="how-it-made-title">Crafted</h3>
-              <p className="how-it-made-description">Traditional beadwork techniques perfected over years. Each piece takes 40+ hours of dedicated handwork and attention.</p>
+              <p className="how-it-made-description">40+ hours handwork</p>
             </div>
 
             <div className="how-it-made-step">
               <div className="how-it-made-number">4</div>
               <h3 className="how-it-made-title">Verified</h3>
-              <p className="how-it-made-description">Quality checked & authenticated. Every piece is inspected, packaged with care, and shipped with a certificate of authenticity.</p>
+              <p className="how-it-made-description">Quality authenticated</p>
             </div>
           </div>
         </section>
@@ -376,11 +332,7 @@ export default function HomePage({
 
         <section className="artisan-stories-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-            <p className="overline">Craft Philosophy</p>
-            <h2 className="display-md" style={{ marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>Our Artisans: Stories from the Workshop</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '650px', margin: '0 auto' }}>
-              Meet the master craftspeople who bring SharonCraft to life. Each brings their unique vision, heritage, and soul to every handcrafted piece.
-            </p>
+            <h2 className="display-md">Our Artisans</h2>
           </div>
           <ArtisanStories artisans={artisans} />
         </section>
