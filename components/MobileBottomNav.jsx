@@ -2,10 +2,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCart } from "../lib/cart-context";
 import Icon from "./icons";
+import { useState, useEffect } from "react";
 
 export default function MobileBottomNav() {
   const router = useRouter();
   const { count } = useCart();
+  const [indicatorPosition, setIndicatorPosition] = useState(0);
 
   const navItems = [
     { href: "/", label: "Home", icon: "home" },
@@ -20,8 +22,16 @@ export default function MobileBottomNav() {
     return router.pathname.startsWith(href);
   };
 
+  useEffect(() => {
+    const activeIndex = navItems.findIndex((item) => isActive(item.href + item.label));
+    if (activeIndex !== -1) {
+      setIndicatorPosition((activeIndex / navItems.length) * 100);
+    }
+  }, [router.pathname]);
+
   return (
     <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+      <div className="mobile-bottom-nav__indicator" style={{ left: `${indicatorPosition}%` }} />
       <ul className="mobile-bottom-nav__list">
         {navItems.map((item) => (
           <li key={item.href + item.label} className="mobile-bottom-nav__item">
@@ -51,9 +61,20 @@ export default function MobileBottomNav() {
           bottom: 0;
           left: 0;
           right: 0;
-          background: #0f0f0f;
-          border-top: 1px solid rgba(249, 246, 238, 0.1);
+          background: #f9f6ee;
+          border-top: 2px solid #C04D29;
           z-index: 40;
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .mobile-bottom-nav__indicator {
+          position: absolute;
+          bottom: 0;
+          height: 3px;
+          width: 20%;
+          background: #C04D29;
+          transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          border-radius: 3px 3px 0 0;
         }
 
         .mobile-bottom-nav__list {
@@ -81,7 +102,7 @@ export default function MobileBottomNav() {
           justify-content: center;
           width: 100%;
           height: 100%;
-          color: rgba(249, 246, 238, 0.7);
+          color: #2a2a2a;
           text-decoration: none;
           font-size: 0.75rem;
           gap: 4px;
@@ -89,14 +110,20 @@ export default function MobileBottomNav() {
           position: relative;
           font-weight: 500;
           letter-spacing: 0.02em;
+          opacity: 0.7;
         }
 
         .mobile-bottom-nav__link:active {
-          background: rgba(192, 77, 41, 0.1);
+          background: rgba(192, 77, 41, 0.08);
         }
 
         .mobile-bottom-nav__link--active {
           color: #C04D29;
+          opacity: 1;
+        }
+
+        .mobile-bottom-nav__link--active .mobile-bottom-nav__icon-wrapper {
+          transform: scale(1.15);
         }
 
         .mobile-bottom-nav__icon-wrapper {
@@ -104,6 +131,11 @@ export default function MobileBottomNav() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .mobile-bottom-nav__link:hover .mobile-bottom-nav__icon-wrapper {
+          transform: scale(1.1);
         }
 
         .mobile-bottom-nav__badge {
@@ -120,7 +152,19 @@ export default function MobileBottomNav() {
           justify-content: center;
           font-size: 0.65rem;
           font-weight: 700;
-          border: 2px solid #0f0f0f;
+          border: 2px solid #f9f6ee;
+          animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes badge-pop {
+          0% {
+            transform: scale(0.5);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
 
         .mobile-bottom-nav__label {
