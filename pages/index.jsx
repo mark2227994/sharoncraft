@@ -203,7 +203,7 @@ export default function HomePage({
         trustLine={siteContent.deliveryNote}
       />
 
-      <MobileProductShowcase products={bestSellers?.slice(0, 3) || []} />
+      <MobileProductShowcase products={featuredProducts?.slice(0, 3) || []} />
 
       <section className="custom-orders-banner" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-6) auto', padding: 'var(--space-6) var(--gutter)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 'var(--space-6)', alignItems: 'center' }}>
