@@ -1,4 +1,5 @@
 import ArtisanTimeline from "../components/ArtisanTimeline";
+import ArtisanStories from "../components/ArtisanStories";
 import BrandStory from "../components/BrandStory";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
@@ -366,18 +367,15 @@ export default function HomePage({
 
         <BrandStory />
 
-        <section className="featured-artisans-showcase" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)', background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, rgba(212, 165, 116, 0.02) 100%)', borderRadius: '12px', border: '1px solid rgba(212, 165, 116, 0.2)' }}>
+        <section className="artisan-stories-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-            <p className="overline">Meet the Makers</p>
-            <h2 className="display-md" style={{ marginTop: 'var(--space-1)' }}>The Artisans Behind SharonCraft</h2>
-            <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-2)', maxWidth: '600px', margin: 'var(--space-2) auto 0', fontSize: '16px' }}>
-              Master craftspeople with years of traditional beadwork expertise
+            <p className="overline">Craft Philosophy</p>
+            <h2 className="display-md" style={{ marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>Our Artisans: Stories from the Workshop</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '650px', margin: '0 auto' }}>
+              Meet the master craftspeople who bring SharonCraft to life. Each brings their unique vision, heritage, and soul to every handcrafted piece.
             </p>
           </div>
-          <ArtisanTimeline artisans={artisans} />
-          <div style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
-            <a href="/artisans" className="artisan-link">Meet All Artisans →</a>
-          </div>
+          <ArtisanStories artisans={artisans} />
         </section>
       </main>
 
