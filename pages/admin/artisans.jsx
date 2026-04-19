@@ -7,6 +7,12 @@ const DEFAULT_ARTISAN = {
   craft: "",
   image: "",
   story: "",
+  quote: "",
+  yearsExperience: "",
+  specialties: "",
+  whatsapp: "",
+  featured: false,
+  mediaGallery: [],
   href: "",
 };
 
@@ -18,6 +24,12 @@ const DEFAULT_ARTISANS = [
     craft: "Jewellery",
     image: "",
     story: "Nafula creates beadwork with a balanced, ceremonial feel.",
+    quote: "Every bead must feel like it belongs to the hand that wears it.",
+    yearsExperience: "15+",
+    specialties: "Ceremonial beadwork, bold color",
+    whatsapp: "",
+    featured: true,
+    mediaGallery: [],
     href: "/shop?category=Jewellery",
   },
   {
@@ -27,6 +39,12 @@ const DEFAULT_ARTISANS = [
     craft: "Earrings",
     image: "",
     story: "Achieng focuses on lighter jewellery meant to move well with the body.",
+    quote: "Lighter jewelry meant to move well with the body.",
+    yearsExperience: "12+",
+    specialties: "Earrings, playful elegance",
+    whatsapp: "",
+    featured: false,
+    mediaGallery: [],
     href: "/shop?category=Jewellery&jewelryType=earring",
   },
   {
@@ -36,6 +54,12 @@ const DEFAULT_ARTISANS = [
     craft: "Necklaces",
     image: "",
     story: "Muthoni's necklace work leans toward bold centerpieces and bridal styling.",
+    quote: "I never want a piece to look repeated, only remembered.",
+    yearsExperience: "18+",
+    specialties: "Home decor, bold pieces",
+    whatsapp: "",
+    featured: false,
+    mediaGallery: [],
     href: "/shop?category=Jewellery&jewelryType=necklace",
   },
 ];
@@ -48,6 +72,12 @@ function normalizeArtisanEntry(entry, index) {
     craft: String(entry?.craft || "").trim(),
     image: String(entry?.image || "").trim(),
     story: String(entry?.story || "").trim(),
+    quote: String(entry?.quote || "").trim(),
+    yearsExperience: String(entry?.yearsExperience || "").trim(),
+    specialties: String(entry?.specialties || "").trim(),
+    whatsapp: String(entry?.whatsapp || "").trim(),
+    featured: Boolean(entry?.featured),
+    mediaGallery: Array.isArray(entry?.mediaGallery) ? entry.mediaGallery : [],
     href: String(entry?.href || "").trim(),
   };
 }
@@ -76,6 +106,12 @@ function toPersistedArtisans(artisans) {
     craft: artisan.craft,
     image: artisan.image,
     story: artisan.story,
+    quote: artisan.quote,
+    yearsExperience: artisan.yearsExperience,
+    specialties: artisan.specialties,
+    whatsapp: artisan.whatsapp,
+    featured: artisan.featured,
+    mediaGallery: artisan.mediaGallery,
     href: artisan.href,
   }));
 }
