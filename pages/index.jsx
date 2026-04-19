@@ -1,6 +1,5 @@
 import ArtisanTimeline from "../components/ArtisanTimeline";
 import ArtisanStories from "../components/ArtisanStories";
-import BrandStory from "../components/BrandStory";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import HeroBanner from "../components/HeroBanner";
@@ -364,8 +363,6 @@ export default function HomePage({
             </div>
           </div>
         </section>
-
-        <BrandStory />
 
         <section className="artisan-stories-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
