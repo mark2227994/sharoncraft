@@ -75,19 +75,18 @@ export default function Nav() {
           <span className="nav__brand-name">SharonCraft</span>
         </Link>
 
-        {/* Search Bar */}
-        <form className="nav__search-form" onSubmit={handleSearch} style={{ display: searchActive ? "flex" : "none" }}>
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="nav__search-input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-          />
-          <button type="submit" className="nav__search-btn" aria-label="Search">
-            <Icon name="search" size={18} />
-          </button>
+        {/* Search Bar - Prominent on Desktop */}
+        <form className="nav__search-form" onSubmit={handleSearch}>
+          <div className="nav__search-wrapper">
+            <Icon name="search" size={18} className="nav__search-icon" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="nav__search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </form>
 
         <nav aria-label="Primary" className="nav__desktop-nav">
@@ -103,24 +102,19 @@ export default function Nav() {
         </nav>
 
         <div className="nav__actions">
-          <Link href={user ? "/account" : "/login"} className="nav__icon-btn" aria-label={user ? "My account" : "Login"}>
+          <Link href={user ? "/account" : "/login"} className="nav__action-btn nav__account-btn" aria-label={user ? "My account" : "Login"}>
             <Icon name="user" size={18} />
+            <span className="nav__btn-label">{user ? "ACCOUNT" : "LOGIN"}</span>
           </Link>
-          <Link href="/wishlist" className="nav__icon-btn" aria-label="View wishlist">
+          <Link href="/wishlist" className="nav__action-btn nav__wishlist-btn" aria-label="View wishlist">
             <Icon name="heart" size={18} />
-            {wishlistCount > 0 ? <span className="cart-badge">{wishlistCount}</span> : null}
+            <span className="nav__btn-label">WISHLIST</span>
+            {wishlistCount > 0 ? <span className="nav__badge nav__wishlist-badge">{wishlistCount}</span> : null}
           </Link>
-          <button type="button" className="nav__icon-btn" aria-label="View cart" onClick={openCart}>
+          <button type="button" className="nav__action-btn nav__cart-btn" aria-label="View cart" onClick={openCart}>
             <Icon name="cart" size={18} />
-            {count > 0 ? <span className="cart-badge">{count}</span> : null}
-          </button>
-          <button
-            type="button"
-            className="nav__icon-btn"
-            onClick={() => setSearchActive(!searchActive)}
-            aria-label="Search products"
-          >
-            <Icon name="search" size={18} />
+            <span className="nav__btn-label">CART</span>
+            {count > 0 ? <span className="nav__badge nav__cart-badge">{count}</span> : null}
           </button>
           <button
             type="button"

@@ -13,6 +13,7 @@ import NewsletterSignup from "../components/NewsletterSignup";
 import MobileProductShowcase from "../components/MobileProductShowcase";
 import PromotionBanner from "../components/PromotionBanner";
 import ArticleCarousel from "../components/ArticleCarousel";
+import QuickStatsBar from "../components/QuickStatsBar";
 import Icon from "../components/icons";
 import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
@@ -201,6 +202,8 @@ export default function HomePage({
 
       <PromotionBanner />
 
+      <QuickStatsBar />
+
       <MobileProductShowcase products={featuredProducts?.slice(0, 3) || []} />
 
       <section className="custom-orders-banner" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-6) auto', padding: 'var(--space-6) var(--gutter)' }}>
@@ -382,9 +385,9 @@ export default function HomePage({
           <ArtisanStories artisans={artisans} />
         </section>
 
-        <Testimonials />
-
         <ArticleCarousel />
+
+        <Testimonials />
 
         <CtaSection />
 
