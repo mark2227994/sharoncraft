@@ -25,9 +25,21 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [gridView, setGridView] = useState("masonry"); // "masonry" | "4-col" | "2-col" | "list"
+  const [gridView, setGridView] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('shopGridView') || '4-col';
+    }
+    return '4-col';
+  });
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+
+  // Persist grid view to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('shopGridView', gridView);
+    }
+  }, [gridView]);
   const ITEMS_PER_PAGE_DESKTOP = 24;
   const ITEMS_PER_PAGE_MOBILE = 12;
 
@@ -191,36 +203,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
                 </select>
               </div>
             )}
-            <div className="grid-toggle">
-              <button
-                title="Masonry view"
-                className={`grid-toggle__btn ${gridView === "masonry" ? "active" : ""}`}
-                onClick={() => setGridView("masonry")}
-              >
-                ≡
-              </button>
-              <button
-                title="4-column grid"
-                className={`grid-toggle__btn ${gridView === "4-col" ? "active" : ""}`}
-                onClick={() => setGridView("4-col")}
-              >
-                ⊞⊞
-              </button>
-              <button
-                title="2-column grid"
-                className={`grid-toggle__btn ${gridView === "2-col" ? "active" : ""}`}
-                onClick={() => setGridView("2-col")}
-              >
-                ⊞
-              </button>
-              <button
-                title="List view"
-                className={`grid-toggle__btn ${gridView === "list" ? "active" : ""}`}
-                onClick={() => setGridView("list")}
-              >
-                ☰
-              </button>
-            </div>
             {isMobile && (
               <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
                 <Icon name="filter" size={18} />
@@ -335,6 +317,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
             onSortChange={setSortBy}
             showAvailableOnly={showAvailableOnly}
             onShowAvailableChange={setShowAvailableOnly}
+            gridView={gridView}
+            onGridViewChange={setGridView}
             isMobile={isMobile}
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
@@ -744,10 +728,22 @@ export default function ShopPage({ products, categories, initialCategory, initia
           gap: var(--space-4);
           margin-bottom: var(--space-6);
         }
+        .shop-products__3-col {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: var(--space-4);
+          margin-bottom: var(--space-6);
+        }
         .shop-products__2-col {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: var(--space-4);
+          margin-bottom: var(--space-6);
+        }
+        .shop-products__5-col {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: var(--space-3);
           margin-bottom: var(--space-6);
         }
         .shop-products__list {
@@ -940,6 +936,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-products__4-col {
             grid-template-columns: repeat(3, 1fr);
           }
+          .shop-products__5-col {
+            grid-template-columns: repeat(4, 1fr);
+          }
         }
         @media (max-width: 899px) {
           .shop-page__header {
@@ -964,6 +963,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-products__4-col {
             grid-template-columns: repeat(2, 1fr);
           }
+          .shop-products__5-col {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .shop-products__3-col {
+            grid-template-columns: repeat(2, 1fr);
+          }
           .shop-products__2-col {
             grid-template-columns: 1fr;
           }
@@ -973,6 +978,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-products__list .product-card__image-wrap {
             width: 100%;
             height: 200px;
+          }
+        }
+        @media (max-width: 599px) {
+          .shop-products__5-col,
+          .shop-products__4-col,
+          .shop-products__3-col {
+            grid-template-columns: 1fr;
           }
         }
 

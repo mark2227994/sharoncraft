@@ -9,6 +9,8 @@ export default function ShopSidebar({
   onSortChange,
   showAvailableOnly,
   onShowAvailableChange,
+  gridView,
+  onGridViewChange,
   isMobile,
   isOpen,
   onClose
@@ -48,6 +50,48 @@ export default function ShopSidebar({
       {/* Desktop sidebar - always rendered, hidden on mobile */}
       <aside className="shop-sidebar__desktop">
         <div className="shop-sidebar">
+          <div className="shop-sidebar__section">
+            <h3 className="shop-sidebar__title">View</h3>
+            <div className="shop-sidebar__layout-options">
+              <button
+                className={`shop-sidebar__layout-btn ${gridView === "2-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                onClick={() => onGridViewChange("2-col")}
+                title="2 columns"
+                aria-label="Display 2 columns"
+              >
+                <span className="layout-icon">⊟ ⊟</span>
+                <span className="layout-label">2</span>
+              </button>
+              <button
+                className={`shop-sidebar__layout-btn ${gridView === "3-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                onClick={() => onGridViewChange("3-col")}
+                title="3 columns"
+                aria-label="Display 3 columns"
+              >
+                <span className="layout-icon">⊟ ⊟ ⊟</span>
+                <span className="layout-label">3</span>
+              </button>
+              <button
+                className={`shop-sidebar__layout-btn ${gridView === "4-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                onClick={() => onGridViewChange("4-col")}
+                title="4 columns"
+                aria-label="Display 4 columns"
+              >
+                <span className="layout-icon">⊟ ⊟ ⊟ ⊟</span>
+                <span className="layout-label">4</span>
+              </button>
+              <button
+                className={`shop-sidebar__layout-btn ${gridView === "5-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                onClick={() => onGridViewChange("5-col")}
+                title="5 columns"
+                aria-label="Display 5 columns"
+              >
+                <span className="layout-icon">⊟ ⊟ ⊟ ⊟ ⊟</span>
+                <span className="layout-label">5</span>
+              </button>
+            </div>
+          </div>
+
           <div className="shop-sidebar__section">
             <h3 className="shop-sidebar__title">Sort By</h3>
             <select
@@ -129,6 +173,48 @@ export default function ShopSidebar({
             </div>
             <div className="shop-sidebar__drawer-content">
               <div className="shop-sidebar">
+                <div className="shop-sidebar__section">
+                  <h3 className="shop-sidebar__title">View</h3>
+                  <div className="shop-sidebar__layout-options">
+                    <button
+                      className={`shop-sidebar__layout-btn ${gridView === "2-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                      onClick={() => onGridViewChange("2-col")}
+                      title="2 columns"
+                      aria-label="Display 2 columns"
+                    >
+                      <span className="layout-icon">⊟ ⊟</span>
+                      <span className="layout-label">2</span>
+                    </button>
+                    <button
+                      className={`shop-sidebar__layout-btn ${gridView === "3-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                      onClick={() => onGridViewChange("3-col")}
+                      title="3 columns"
+                      aria-label="Display 3 columns"
+                    >
+                      <span className="layout-icon">⊟ ⊟ ⊟</span>
+                      <span className="layout-label">3</span>
+                    </button>
+                    <button
+                      className={`shop-sidebar__layout-btn ${gridView === "4-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                      onClick={() => onGridViewChange("4-col")}
+                      title="4 columns"
+                      aria-label="Display 4 columns"
+                    >
+                      <span className="layout-icon">⊟ ⊟ ⊟ ⊟</span>
+                      <span className="layout-label">4</span>
+                    </button>
+                    <button
+                      className={`shop-sidebar__layout-btn ${gridView === "5-col" ? "shop-sidebar__layout-btn--active" : ""}`}
+                      onClick={() => onGridViewChange("5-col")}
+                      title="5 columns"
+                      aria-label="Display 5 columns"
+                    >
+                      <span className="layout-icon">⊟ ⊟ ⊟ ⊟ ⊟</span>
+                      <span className="layout-label">5</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div className="shop-sidebar__section">
                   <h3 className="shop-sidebar__title">Sort By</h3>
                   <select
@@ -373,6 +459,64 @@ export default function ShopSidebar({
           padding: var(--space-4);
           overflow-y: auto;
           max-height: calc(85vh - 60px);
+        }
+
+        /* Layout Options Styles - Professional Ecommerce */
+        .shop-sidebar__layout-options {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+          margin-bottom: var(--space-2);
+        }
+        .shop-sidebar__layout-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          padding: 10px 8px;
+          background: var(--color-white);
+          border: 2px solid var(--border-default);
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: var(--text-xs);
+          font-weight: 600;
+          color: var(--text-secondary);
+          aspect-ratio: 1;
+        }
+        .shop-sidebar__layout-btn:hover {
+          border-color: var(--color-terracotta);
+          background: rgba(192, 77, 41, 0.03);
+        }
+        .shop-sidebar__layout-btn--active {
+          background: linear-gradient(135deg, #C04D29 0%, #D4A574 100%);
+          color: var(--color-white);
+          border-color: #C04D29;
+          box-shadow: 0 2px 8px rgba(192, 77, 41, 0.25);
+        }
+        .layout-icon {
+          font-size: 12px;
+          line-height: 1;
+          letter-spacing: 1px;
+          opacity: 0.8;
+        }
+        .layout-label {
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          opacity: 0.9;
+        }
+        
+        @media (max-width: 899px) {
+          .shop-sidebar__layout-options {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+          }
+          .shop-sidebar__layout-btn {
+            padding: 8px 6px;
+            font-size: 10px;
+          }
         }
       `}</style>
     </>
