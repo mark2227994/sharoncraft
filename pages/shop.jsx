@@ -26,8 +26,18 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [gridView, setGridView] = useState("masonry"); // "masonry" | "4-col" | "2-col" | "list"
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [wishlist, setWishlist] = useState([]);
   const ITEMS_PER_PAGE_DESKTOP = 24;
   const ITEMS_PER_PAGE_MOBILE = 12;
+
+  const sortOptions = [
+    { value: "featured", label: "Featured" },
+    { value: "recent", label: "Newest Arrivals" },
+    { value: "best-sellers", label: "Best Sellers" },
+    { value: "price-asc", label: "Price: Low to High" },
+    { value: "price-desc", label: "Price: High to Low" },
+  ];
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 900);
@@ -35,6 +45,24 @@ export default function ShopPage({ products, categories, initialCategory, initia
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  const toggleWishlist = (productId) => {
+    setWishlist(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
+  };
+
+  const getProductBadge = (product) => {
+    if (product.badge === "Best Seller") return { text: "BEST SELLER", color: "#C04D29" };
+    if (product.badge === "New" || product.newArrival) return { text: "NEW", color: "#1ABC9C" };
+    if (product.badge?.includes("Limited")) return { text: "LIMITED", color: "#D4A574" };
+    return null;
+  };
+
+  const getStockStatus = (product) => {
+    if (product.isSold) return { text: "SOLD OUT", color: "#e74c3c" };
+    if (!product.stock || product.stock === 0) return { text: "OUT OF STOCK", color: "#e74c3c" };
+    if (product.stock < 3) return { text: `ONLY ${product.stock} LEFT`, color: "#f39c12" };
+    return { text: "IN STOCK", color: "#1ABC9C" };
+  };
 
   const isJewelleryView = activeCategory === "Jewellery";
 
@@ -50,7 +78,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
       })
       .filter((product) => (showAvailableOnly ? !product.isSold && product.stock > 0 : true));
 
-    if (sortBy === "recent") return next.slice().sort((left, right) => Number(right.recent) - Number(left.recent));
+    if (sortBy === "recent") return next.slice().sort((left, right) => Number(right.newArrival) - Number(left.newArrival));
+    if (sortBy === "best-sellers") return next.slice().sort((left, right) => Number(right.badge === "Best Seller") - Number(left.badge === "Best Seller"));
     if (sortBy === "price-asc") return next.slice().sort((left, right) => left.price - right.price);
     if (sortBy === "price-desc") return next.slice().sort((left, right) => right.price - left.price);
     return next.slice().sort((left, right) => {
@@ -145,40 +174,53 @@ export default function ShopPage({ products, categories, initialCategory, initia
           <div className="shop-page__header-left">
             <p className="overline">Kenyan Artisan Gallery</p>
             <h1 className="display-lg">Shop the collection</h1>
+            <p className="shop-page__count-text">{filteredProducts.length} handmade pieces found</p>
           </div>
           <div className="shop-page__header-actions">
             {!isMobile && (
-              <div className="grid-toggle">
-                <button
-                  title="Masonry view"
-                  className={`grid-toggle__btn ${gridView === "masonry" ? "active" : ""}`}
-                  onClick={() => setGridView("masonry")}
+              <div className="shop-page__sort-container">
+                <label className="shop-page__sort-label">Sort By:</label>
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="shop-page__sort-select"
                 >
-                  ≡
-                </button>
-                <button
-                  title="4-column grid"
-                  className={`grid-toggle__btn ${gridView === "4-col" ? "active" : ""}`}
-                  onClick={() => setGridView("4-col")}
-                >
-                  ⊞⊞
-                </button>
-                <button
-                  title="2-column grid"
-                  className={`grid-toggle__btn ${gridView === "2-col" ? "active" : ""}`}
-                  onClick={() => setGridView("2-col")}
-                >
-                  ⊞
-                </button>
-                <button
-                  title="List view"
-                  className={`grid-toggle__btn ${gridView === "list" ? "active" : ""}`}
-                  onClick={() => setGridView("list")}
-                >
-                  ☰
-                </button>
+                  {sortOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
             )}
+            <div className="grid-toggle">
+              <button
+                title="Masonry view"
+                className={`grid-toggle__btn ${gridView === "masonry" ? "active" : ""}`}
+                onClick={() => setGridView("masonry")}
+              >
+                ≡
+              </button>
+              <button
+                title="4-column grid"
+                className={`grid-toggle__btn ${gridView === "4-col" ? "active" : ""}`}
+                onClick={() => setGridView("4-col")}
+              >
+                ⊞⊞
+              </button>
+              <button
+                title="2-column grid"
+                className={`grid-toggle__btn ${gridView === "2-col" ? "active" : ""}`}
+                onClick={() => setGridView("2-col")}
+              >
+                ⊞
+              </button>
+              <button
+                title="List view"
+                className={`grid-toggle__btn ${gridView === "list" ? "active" : ""}`}
+                onClick={() => setGridView("list")}
+              >
+                ☰
+              </button>
+            </div>
             {isMobile && (
               <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
                 <Icon name="filter" size={18} />
@@ -188,6 +230,55 @@ export default function ShopPage({ products, categories, initialCategory, initia
             )}
           </div>
         </div>
+
+        {/* Active Filters Display */}
+        {hasActiveFilters && (
+          <div className="shop-page__active-filters">
+            <div className="shop-page__active-filters-content">
+              <span className="shop-page__filters-label">Active Filters:</span>
+              <div className="shop-page__filter-pills">
+                {activeCategory !== "All" && (
+                  <div className="filter-pill">
+                    <span>{activeCategory}</span>
+                    <button 
+                      onClick={() => { setActiveCategory("All"); setCurrentPage(1); }}
+                      aria-label={`Remove ${activeCategory} filter`}
+                    >✕</button>
+                  </div>
+                )}
+                {isJewelleryView && activeJewelryType !== "all" && (
+                  <div className="filter-pill">
+                    <span>{getJewelryTypeLabel(activeJewelryType)}</span>
+                    <button 
+                      onClick={() => { setActiveJewelryType("all"); setCurrentPage(1); }}
+                      aria-label={`Remove jewelry type filter`}
+                    >✕</button>
+                  </div>
+                )}
+                {showAvailableOnly && (
+                  <div className="filter-pill">
+                    <span>In Stock Only</span>
+                    <button 
+                      onClick={() => { setShowAvailableOnly(false); setCurrentPage(1); }}
+                      aria-label="Remove stock filter"
+                    >✕</button>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setActiveCategory("All");
+                  setActiveJewelryType("all");
+                  setShowAvailableOnly(false);
+                  setCurrentPage(1);
+                }}
+                className="shop-page__clear-all"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Jewellery subcategories - horizontal scroll */}
         {activeCategory === "Jewellery" && (
@@ -250,33 +341,113 @@ export default function ShopPage({ products, categories, initialCategory, initia
           />
 
           <div className="shop-page__grid" data-grid-view={gridView}>
-            {gridView === "masonry" && <MasonryGrid products={paginatedProducts} />}
-            {gridView !== "masonry" && (
-              <div className={`shop-products__${gridView}`}>
-                {paginatedProducts.map((product) => (
-                  <a href={`/product/${product.slug}`} key={product.id} className="product-card-link">
-                    <div className="product-card">
-                      <div className="product-card__image-wrap">
-                        <img src={product.image} alt={product.name} className="product-card__image" />
-                        {product.badge && <span className="product-card__badge">{product.badge}</span>}
-                      </div>
-                      <div className="product-card__info">
-                        {gridView === "list" && <p className="product-card__category">{product.category}</p>}
-                        <h3 className="product-card__title">{product.name}</h3>
-                        {gridView === "list" && product.description && (
-                          <p className="product-card__description">{product.description.substring(0, 100)}...</p>
-                        )}
-                        <div className="product-card__footer">
-                          <span className="product-card__price">KES {product.price.toLocaleString()}</span>
-                          {gridView === "list" && (
-                            <button className="product-card__quick-btn">View Details</button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                ))}
+            {paginatedProducts.length === 0 ? (
+              <div className="shop-page__no-results">
+                <div className="no-results-icon">🔍</div>
+                <h3>No products found</h3>
+                <p>We couldn't find items matching these filters.</p>
+                <div className="no-results-suggestions">
+                  <p>Try:</p>
+                  <ul>
+                    <li>Adjusting your filters</li>
+                    <li>Browsing all categories</li>
+                    <li>Checking spelling in search</li>
+                  </ul>
+                </div>
+                <button 
+                  onClick={() => { setActiveCategory("All"); setActiveJewelryType("all"); setShowAvailableOnly(false); setCurrentPage(1); }}
+                  className="no-results-btn"
+                >
+                  Clear Filters & Browse All
+                </button>
               </div>
+            ) : (
+              <>
+                {gridView === "masonry" && (
+                  <div className="masonry-wrapper">
+                    {paginatedProducts.map((product) => {
+                      const badge = getProductBadge(product);
+                      const isWishlisted = wishlist.includes(product.id);
+                      return (
+                        <div key={product.id} className="masonry-item">
+                          <div className="product-card-with-actions">
+                            <div className="product-card__image-wrap">
+                              <img src={product.image} alt={product.name} className="product-card__image" />
+                              {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
+                              <button 
+                                className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
+                                onClick={() => toggleWishlist(product.id)}
+                                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                              >
+                                <Icon name="heart" size={20} />
+                              </button>
+                              <button 
+                                className="product-card__quick-view-btn"
+                                onClick={() => setQuickViewProduct(product)}
+                              >
+                                Quick View
+                              </button>
+                            </div>
+                            <a href={`/product/${product.slug}`} className="product-card__link">
+                              <h3 className="product-card__title">{product.name}</h3>
+                            </a>
+                            <div className="product-card__meta">
+                              <span className="product-card__price">KES {product.price.toLocaleString()}</span>
+                              <span className="product-card__stock" style={{ color: getStockStatus(product).color }}>
+                                {getStockStatus(product).text}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {gridView !== "masonry" && (
+                  <div className={`shop-products__${gridView}`}>
+                    {paginatedProducts.map((product) => {
+                      const badge = getProductBadge(product);
+                      const isWishlisted = wishlist.includes(product.id);
+                      return (
+                        <div key={product.id} className="product-card-grid-item">
+                          <div className="product-card-with-actions">
+                            <div className="product-card__image-wrap">
+                              <img src={product.image} alt={product.name} className="product-card__image" />
+                              {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
+                              <button 
+                                className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
+                                onClick={() => toggleWishlist(product.id)}
+                                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                              >
+                                <Icon name="heart" size={20} />
+                              </button>
+                              <button 
+                                className="product-card__quick-view-btn"
+                                onClick={() => setQuickViewProduct(product)}
+                              >
+                                Quick View
+                              </button>
+                            </div>
+                            <a href={`/product/${product.slug}`} className="product-card__link">
+                              {gridView === "list" && <p className="product-card__category">{product.category}</p>}
+                              <h3 className="product-card__title">{product.name}</h3>
+                              {gridView === "list" && product.shortDescription && (
+                                <p className="product-card__description">{product.shortDescription}</p>
+                              )}
+                            </a>
+                            <div className="product-card__meta">
+                              <span className="product-card__price">KES {product.price.toLocaleString()}</span>
+                              <span className="product-card__stock" style={{ color: getStockStatus(product).color }}>
+                                {getStockStatus(product).text}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
 
             {/* Item count and pagination info */}
@@ -340,6 +511,58 @@ export default function ShopPage({ products, categories, initialCategory, initia
           </div>
         </div>
       </main>
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <div className="quick-view-modal" onClick={() => setQuickViewProduct(null)}>
+          <div className="quick-view-modal__content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="quick-view-modal__close"
+              onClick={() => setQuickViewProduct(null)}
+              aria-label="Close quick view"
+            >
+              ✕
+            </button>
+            <div className="quick-view-modal__image-section">
+              <img src={quickViewProduct.image} alt={quickViewProduct.name} />
+              <div className="quick-view-modal__thumbnails">
+                {quickViewProduct.images?.map((img, idx) => (
+                  <button 
+                    key={idx} 
+                    className="quick-view-modal__thumbnail"
+                    onClick={() => {}}
+                  >
+                    <img src={img} alt={`${quickViewProduct.name} ${idx + 1}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="quick-view-modal__info">
+              <h2>{quickViewProduct.name}</h2>
+              <p className="quick-view-modal__category">{quickViewProduct.category}</p>
+              <div className="quick-view-modal__price">
+                <span>KES {quickViewProduct.price.toLocaleString()}</span>
+                <span className="quick-view-modal__stock" style={{ color: getStockStatus(quickViewProduct).color }}>
+                  {getStockStatus(quickViewProduct).text}
+                </span>
+              </div>
+              <p className="quick-view-modal__description">{quickViewProduct.shortDescription || quickViewProduct.description?.substring(0, 150)}</p>
+              <div className="quick-view-modal__actions">
+                <a href={`/product/${quickViewProduct.slug}`} className="quick-view-modal__btn-primary">
+                  View Full Details
+                </a>
+                <button 
+                  className={`quick-view-modal__btn-secondary ${wishlist.includes(quickViewProduct.id) ? "active" : ""}`}
+                  onClick={() => toggleWishlist(quickViewProduct.id)}
+                >
+                  <Icon name="heart" size={18} />
+                  Add to Wishlist
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
 
@@ -750,6 +973,1046 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-products__list .product-card__image-wrap {
             width: 100%;
             height: 200px;
+          }
+        }
+
+        /* NEW: Sort Dropdown in Header */
+        .shop-page__sort-container {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+        .shop-page__sort-label {
+          font-size: var(--text-sm);
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .shop-page__sort-select {
+          padding: 8px 12px;
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: 6px;
+          color: var(--text-primary);
+          font-size: var(--text-sm);
+          font-weight: 500;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-page__sort-select:hover {
+          border-color: var(--color-accent);
+        }
+        .shop-page__sort-select:focus {
+          outline: none;
+          border-color: var(--color-accent);
+          box-shadow: 0 0 0 3px rgba(192, 77, 41, 0.1);
+        }
+
+        /* NEW: Count text in header */
+        .shop-page__count-text {
+          margin: 0;
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+
+        /* NEW: Active Filters Display */
+        .shop-page__active-filters {
+          background: rgba(192, 77, 41, 0.05);
+          border-top: 1px solid rgba(192, 77, 41, 0.1);
+          border-bottom: 1px solid rgba(192, 77, 41, 0.1);
+          padding: var(--space-3) var(--gutter);
+          margin: var(--space-3) 0;
+        }
+        .shop-page__active-filters-content {
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: var(--space-3);
+        }
+        .shop-page__filters-label {
+          font-size: var(--text-sm);
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .shop-page__filter-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+          align-items: center;
+        }
+        .filter-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          background: linear-gradient(135deg, #C04D29 0%, #D4A574 100%);
+          color: var(--color-white);
+          border-radius: 20px;
+          font-size: var(--text-sm);
+          font-weight: 500;
+        }
+        .filter-pill button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          background: rgba(255, 255, 255, 0.3);
+          border: none;
+          border-radius: 50%;
+          color: var(--color-white);
+          font-size: 12px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .filter-pill button:hover {
+          background: rgba(255, 255, 255, 0.6);
+        }
+        .shop-page__clear-all {
+          background: none;
+          border: 1px solid #C04D29;
+          color: #C04D29;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: var(--text-sm);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-page__clear-all:hover {
+          background: rgba(192, 77, 41, 0.1);
+        }
+
+        /* NEW: No Results State */
+        .shop-page__no-results {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: var(--space-8) var(--space-4);
+          background: rgba(0, 0, 0, 0.02);
+          border-radius: 12px;
+          border: 2px dashed var(--border-light);
+        }
+        .no-results-icon {
+          font-size: 4rem;
+          margin-bottom: var(--space-3);
+        }
+        .shop-page__no-results h3 {
+          font-size: 1.5rem;
+          margin: 0 0 var(--space-2) 0;
+          color: var(--text-primary);
+        }
+        .shop-page__no-results p {
+          color: var(--text-secondary);
+          margin: 0 0 var(--space-3) 0;
+        }
+        .no-results-suggestions {
+          text-align: left;
+          display: inline-block;
+          background: var(--color-white);
+          padding: var(--space-3);
+          border-radius: 8px;
+          margin: var(--space-3) 0;
+        }
+        .no-results-suggestions p {
+          margin: 0 0 var(--space-2) 0;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        .no-results-suggestions ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .no-results-suggestions li {
+          padding: 4px 0;
+          color: var(--text-secondary);
+        }
+        .no-results-suggestions li:before {
+          content: "✓ ";
+          color: var(--color-accent);
+          font-weight: 600;
+          margin-right: 6px;
+        }
+        .no-results-btn {
+          margin-top: var(--space-3);
+          padding: 12px 28px;
+          background: var(--color-accent);
+          color: var(--color-white);
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .no-results-btn:hover {
+          background: #bf5835;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(192, 77, 41, 0.25);
+        }
+
+        /* NEW: Product Card Enhancements */
+        .masonry-wrapper {
+          column-count: auto;
+          column-width: minmax(200px, 1fr);
+          gap: var(--space-4);
+        }
+        .masonry-item {
+          break-inside: avoid;
+          margin-bottom: var(--space-4);
+        }
+        .product-card-with-actions {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+        .product-card-grid-item {
+          display: flex;
+        }
+        .product-card__image-wrap {
+          position: relative;
+          overflow: hidden;
+          border-radius: 8px;
+          background: var(--color-white);
+          aspect-ratio: 1;
+        }
+        .product-card__image-wrap img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-base);
+        }
+        .product-card__image-wrap:hover img {
+          transform: scale(1.05);
+        }
+        .product-card__badge {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          padding: 4px 10px;
+          color: var(--color-white);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          border-radius: 4px;
+          z-index: 2;
+        }
+        .product-card__wishlist {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          border-radius: 50%;
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          z-index: 3;
+          opacity: 0;
+        }
+        .product-card__image-wrap:hover .product-card__wishlist {
+          opacity: 1;
+        }
+        .product-card__wishlist:hover {
+          background: var(--color-white);
+          color: #e74c3c;
+          transform: scale(1.1);
+        }
+        .product-card__wishlist.active {
+          opacity: 1;
+          color: #e74c3c;
+        }
+        .product-card__quick-view-btn {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 10px;
+          background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+          color: var(--color-white);
+          border: none;
+          font-weight: 600;
+          font-size: var(--text-sm);
+          cursor: pointer;
+          transition: all var(--transition-base);
+          opacity: 0;
+          z-index: 2;
+        }
+        .product-card__image-wrap:hover .product-card__quick-view-btn {
+          opacity: 1;
+        }
+        .product-card__quick-view-btn:hover {
+          background: linear-gradient(180deg, transparent 0%, rgba(192, 77, 41, 0.9) 100%);
+        }
+        .product-card__link {
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          padding: var(--space-3) 0;
+          color: inherit;
+        }
+        .product-card__title {
+          font-size: var(--text-base);
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 var(--space-1) 0;
+          line-height: 1.4;
+        }
+        .product-card__category {
+          font-size: var(--text-xs);
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 var(--space-1) 0;
+        }
+        .product-card__description {
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          margin: 0;
+          line-height: 1.5;
+        }
+        .product-card__meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: var(--space-2);
+          padding-top: var(--space-2);
+          border-top: 1px solid var(--border-light);
+          font-size: var(--text-sm);
+        }
+        .product-card__price {
+          font-weight: 700;
+          font-size: var(--text-base);
+          color: var(--color-accent);
+        }
+        .product-card__stock {
+          font-size: var(--text-xs);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        /* NEW: Quick View Modal */
+        .quick-view-modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 5000;
+          padding: var(--space-4);
+          animation: fadeIn 300ms ease;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .quick-view-modal__content {
+          background: var(--color-white);
+          border-radius: 12px;
+          max-width: 600px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--space-4);
+          padding: var(--space-4);
+          position: relative;
+          animation: slideUp 300ms ease;
+        }
+        @keyframes slideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .quick-view-modal__close {
+          position: absolute;
+          top: var(--space-3);
+          right: var(--space-3);
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.1);
+          border: none;
+          border-radius: 50%;
+          color: var(--text-primary);
+          font-size: 20px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          z-index: 1;
+        }
+        .quick-view-modal__close:hover {
+          background: rgba(0, 0, 0, 0.2);
+        }
+        .quick-view-modal__image-section {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+        }
+        .quick-view-modal__image-section img {
+          width: 100%;
+          height: auto;
+          border-radius: 8px;
+          object-fit: cover;
+        }
+        .quick-view-modal__thumbnails {
+          display: flex;
+          gap: var(--space-2);
+          overflow-x: auto;
+        }
+        .quick-view-modal__thumbnail {
+          width: 60px;
+          height: 60px;
+          border: 2px solid var(--border-light);
+          border-radius: 6px;
+          background: var(--color-white);
+          cursor: pointer;
+          overflow: hidden;
+          flex-shrink: 0;
+          transition: all var(--transition-fast);
+        }
+        .quick-view-modal__thumbnail:hover {
+          border-color: var(--color-accent);
+        }
+        .quick-view-modal__thumbnail img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .quick-view-modal__info {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+        }
+        .quick-view-modal__info h2 {
+          margin: 0;
+          font-size: 1.5rem;
+          color: var(--text-primary);
+          line-height: 1.3;
+        }
+        .quick-view-modal__category {
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0;
+        }
+        .quick-view-modal__price {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--color-accent);
+        }
+        .quick-view-modal__stock {
+          font-size: var(--text-sm);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .quick-view-modal__description {
+          font-size: var(--text-base);
+          color: var(--text-secondary);
+          line-height: 1.6;
+          margin: var(--space-2) 0;
+        }
+        .quick-view-modal__actions {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+          margin-top: var(--space-4);
+        }
+        .quick-view-modal__btn-primary {
+          padding: 12px 20px;
+          background: linear-gradient(135deg, #C04D29 0%, #bf5835 100%);
+          color: var(--color-white);
+          text-decoration: none;
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          text-align: center;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .quick-view-modal__btn-primary:hover {
+          box-shadow: 0 4px 12px rgba(192, 77, 41, 0.3);
+          transform: translateY(-2px);
+        }
+        .quick-view-modal__btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-2);
+          padding: 12px 20px;
+          background: var(--color-white);
+          color: var(--text-primary);
+          border: 2px solid var(--border-light);
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .quick-view-modal__btn-secondary:hover {
+          border-color: var(--color-accent);
+          color: var(--color-accent);
+        }
+        .quick-view-modal__btn-secondary.active {
+          background: rgba(231, 76, 60, 0.1);
+          border-color: #e74c3c;
+          color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+          .quick-view-modal__content {
+            grid-template-columns: 1fr;
+            max-height: 95vh;
+            padding: var(--space-3);
+          }
+          .shop-page__header-actions {
+            flex-wrap: wrap;
+            width: 100%;
+          }
+          .shop-page__sort-container {
+            width: 100%;
+          }
+          .shop-page__sort-select {
+            flex: 1;
+            min-width: 150px;
+          }
+        }
+
+        /* NEW: Sort Dropdown in Header */
+        .shop-page__sort-container {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+        }
+        .shop-page__sort-label {
+          font-size: var(--text-sm);
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .shop-page__sort-select {
+          padding: 8px 12px;
+          background: var(--color-white);
+          border: 1px solid var(--border-default);
+          border-radius: 6px;
+          color: var(--text-primary);
+          font-size: var(--text-sm);
+          font-weight: 500;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-page__sort-select:hover {
+          border-color: var(--color-accent);
+        }
+        .shop-page__sort-select:focus {
+          outline: none;
+          border-color: var(--color-accent);
+          box-shadow: 0 0 0 3px rgba(192, 77, 41, 0.1);
+        }
+
+        /* NEW: Count text in header */
+        .shop-page__count-text {
+          margin: 0;
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+
+        /* NEW: Active Filters Display */
+        .shop-page__active-filters {
+          background: rgba(192, 77, 41, 0.05);
+          border-top: 1px solid rgba(192, 77, 41, 0.1);
+          border-bottom: 1px solid rgba(192, 77, 41, 0.1);
+          padding: var(--space-3) var(--gutter);
+          margin: var(--space-3) 0;
+        }
+        .shop-page__active-filters-content {
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: var(--space-3);
+        }
+        .shop-page__filters-label {
+          font-size: var(--text-sm);
+          font-weight: 600;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .shop-page__filter-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+          align-items: center;
+        }
+        .filter-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          background: linear-gradient(135deg, #C04D29 0%, #D4A574 100%);
+          color: var(--color-white);
+          border-radius: 20px;
+          font-size: var(--text-sm);
+          font-weight: 500;
+        }
+        .filter-pill button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          background: rgba(255, 255, 255, 0.3);
+          border: none;
+          border-radius: 50%;
+          color: var(--color-white);
+          font-size: 12px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .filter-pill button:hover {
+          background: rgba(255, 255, 255, 0.6);
+        }
+        .shop-page__clear-all {
+          background: none;
+          border: 1px solid #C04D29;
+          color: #C04D29;
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: var(--text-sm);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .shop-page__clear-all:hover {
+          background: rgba(192, 77, 41, 0.1);
+        }
+
+        /* NEW: No Results State */
+        .shop-page__no-results {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: var(--space-8) var(--space-4);
+          background: rgba(0, 0, 0, 0.02);
+          border-radius: 12px;
+          border: 2px dashed var(--border-light);
+        }
+        .no-results-icon {
+          font-size: 4rem;
+          margin-bottom: var(--space-3);
+        }
+        .shop-page__no-results h3 {
+          font-size: 1.5rem;
+          margin: 0 0 var(--space-2) 0;
+          color: var(--text-primary);
+        }
+        .shop-page__no-results p {
+          color: var(--text-secondary);
+          margin: 0 0 var(--space-3) 0;
+        }
+        .no-results-suggestions {
+          text-align: left;
+          display: inline-block;
+          background: var(--color-white);
+          padding: var(--space-3);
+          border-radius: 8px;
+          margin: var(--space-3) 0;
+        }
+        .no-results-suggestions p {
+          margin: 0 0 var(--space-2) 0;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        .no-results-suggestions ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .no-results-suggestions li {
+          padding: 4px 0;
+          color: var(--text-secondary);
+        }
+        .no-results-suggestions li:before {
+          content: "✓ ";
+          color: var(--color-accent);
+          font-weight: 600;
+          margin-right: 6px;
+        }
+        .no-results-btn {
+          margin-top: var(--space-3);
+          padding: 12px 28px;
+          background: var(--color-accent);
+          color: var(--color-white);
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .no-results-btn:hover {
+          background: #bf5835;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(192, 77, 41, 0.25);
+        }
+
+        /* NEW: Product Card Enhancements */
+        .masonry-wrapper {
+          column-count: auto;
+          column-width: minmax(200px, 1fr);
+          gap: var(--space-4);
+        }
+        .masonry-item {
+          break-inside: avoid;
+          margin-bottom: var(--space-4);
+        }
+        .product-card-with-actions {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+        .product-card-grid-item {
+          display: flex;
+        }
+        .product-card__image-wrap {
+          position: relative;
+          overflow: hidden;
+          border-radius: 8px;
+          background: var(--color-white);
+          aspect-ratio: 1;
+        }
+        .product-card__image-wrap img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-base);
+        }
+        .product-card__image-wrap:hover img {
+          transform: scale(1.05);
+        }
+        .product-card__badge {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          padding: 4px 10px;
+          color: var(--color-white);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          border-radius: 4px;
+          z-index: 2;
+        }
+        .product-card__wishlist {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          border-radius: 50%;
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          z-index: 3;
+          opacity: 0;
+        }
+        .product-card__image-wrap:hover .product-card__wishlist {
+          opacity: 1;
+        }
+        .product-card__wishlist:hover {
+          background: var(--color-white);
+          color: #e74c3c;
+          transform: scale(1.1);
+        }
+        .product-card__wishlist.active {
+          opacity: 1;
+          color: #e74c3c;
+        }
+        .product-card__quick-view-btn {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 10px;
+          background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+          color: var(--color-white);
+          border: none;
+          font-weight: 600;
+          font-size: var(--text-sm);
+          cursor: pointer;
+          transition: all var(--transition-base);
+          opacity: 0;
+          z-index: 2;
+        }
+        .product-card__image-wrap:hover .product-card__quick-view-btn {
+          opacity: 1;
+        }
+        .product-card__quick-view-btn:hover {
+          background: linear-gradient(180deg, transparent 0%, rgba(192, 77, 41, 0.9) 100%);
+        }
+        .product-card__link {
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          padding: var(--space-3) 0;
+          color: inherit;
+        }
+        .product-card__title {
+          font-size: var(--text-base);
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 var(--space-1) 0;
+          line-height: 1.4;
+        }
+        .product-card__category {
+          font-size: var(--text-xs);
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 var(--space-1) 0;
+        }
+        .product-card__description {
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          margin: 0;
+          line-height: 1.5;
+        }
+        .product-card__meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: var(--space-2);
+          padding-top: var(--space-2);
+          border-top: 1px solid var(--border-light);
+          font-size: var(--text-sm);
+        }
+        .product-card__price {
+          font-weight: 700;
+          font-size: var(--text-base);
+          color: var(--color-accent);
+        }
+        .product-card__stock {
+          font-size: var(--text-xs);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        /* NEW: Quick View Modal */
+        .quick-view-modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 5000;
+          padding: var(--space-4);
+          animation: fadeIn 300ms ease;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .quick-view-modal__content {
+          background: var(--color-white);
+          border-radius: 12px;
+          max-width: 600px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--space-4);
+          padding: var(--space-4);
+          position: relative;
+          animation: slideUp 300ms ease;
+        }
+        @keyframes slideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .quick-view-modal__close {
+          position: absolute;
+          top: var(--space-3);
+          right: var(--space-3);
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.1);
+          border: none;
+          border-radius: 50%;
+          color: var(--text-primary);
+          font-size: 20px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          z-index: 1;
+        }
+        .quick-view-modal__close:hover {
+          background: rgba(0, 0, 0, 0.2);
+        }
+        .quick-view-modal__image-section {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+        }
+        .quick-view-modal__image-section img {
+          width: 100%;
+          height: auto;
+          border-radius: 8px;
+          object-fit: cover;
+        }
+        .quick-view-modal__thumbnails {
+          display: flex;
+          gap: var(--space-2);
+          overflow-x: auto;
+        }
+        .quick-view-modal__thumbnail {
+          width: 60px;
+          height: 60px;
+          border: 2px solid var(--border-light);
+          border-radius: 6px;
+          background: var(--color-white);
+          cursor: pointer;
+          overflow: hidden;
+          flex-shrink: 0;
+          transition: all var(--transition-fast);
+        }
+        .quick-view-modal__thumbnail:hover {
+          border-color: var(--color-accent);
+        }
+        .quick-view-modal__thumbnail img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .quick-view-modal__info {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+        }
+        .quick-view-modal__info h2 {
+          margin: 0;
+          font-size: 1.5rem;
+          color: var(--text-primary);
+          line-height: 1.3;
+        }
+        .quick-view-modal__category {
+          font-size: var(--text-sm);
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0;
+        }
+        .quick-view-modal__price {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--color-accent);
+        }
+        .quick-view-modal__stock {
+          font-size: var(--text-sm);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .quick-view-modal__description {
+          font-size: var(--text-base);
+          color: var(--text-secondary);
+          line-height: 1.6;
+          margin: var(--space-2) 0;
+        }
+        .quick-view-modal__actions {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-2);
+          margin-top: var(--space-4);
+        }
+        .quick-view-modal__btn-primary {
+          padding: 12px 20px;
+          background: linear-gradient(135deg, #C04D29 0%, #bf5835 100%);
+          color: var(--color-white);
+          text-decoration: none;
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          text-align: center;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .quick-view-modal__btn-primary:hover {
+          box-shadow: 0 4px 12px rgba(192, 77, 41, 0.3);
+          transform: translateY(-2px);
+        }
+        .quick-view-modal__btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-2);
+          padding: 12px 20px;
+          background: var(--color-white);
+          color: var(--text-primary);
+          border: 2px solid var(--border-light);
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+        .quick-view-modal__btn-secondary:hover {
+          border-color: var(--color-accent);
+          color: var(--color-accent);
+        }
+        .quick-view-modal__btn-secondary.active {
+          background: rgba(231, 76, 60, 0.1);
+          border-color: #e74c3c;
+          color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+          .quick-view-modal__content {
+            grid-template-columns: 1fr;
+            max-height: 95vh;
+            padding: var(--space-3);
+          }
+          .shop-page__header-actions {
+            flex-wrap: wrap;
+            width: 100%;
+          }
+          .shop-page__sort-container {
+            width: 100%;
+          }
+          .shop-page__sort-select {
+            flex: 1;
+            min-width: 150px;
           }
         }
       `}</style>
