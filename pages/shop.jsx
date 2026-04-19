@@ -31,7 +31,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
     }
     return '4-col';
   });
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [wishlist, setWishlist] = useState([]);
 
   // Persist grid view to localStorage
@@ -352,6 +351,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                     {paginatedProducts.map((product) => {
                       const badge = getProductBadge(product);
                       const isWishlisted = wishlist.includes(product.id);
+                      const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null;
                       return (
                         <div key={product.id} className="masonry-item">
                           <div className="product-card-with-actions">
@@ -359,36 +359,33 @@ export default function ShopPage({ products, categories, initialCategory, initia
                               <img src={product.image} alt={product.name} className="product-card__image" />
                               {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
                               <button 
+                                className="product-card__add-to-cart"
+                                onClick={() => {
+                                  // Add to cart logic here
+                                }}
+                                aria-label="Add to cart"
+                              >
+                                <Icon name="cart" size={18} />
+                              </button>
+                              <button 
                                 className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
                                 onClick={() => toggleWishlist(product.id)}
                                 aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                               >
                                 <Icon name="heart" size={20} />
                               </button>
-                              <button 
-                                className="product-card__quick-view-btn"
-                                onClick={() => setQuickViewProduct(product)}
-                              >
-                                Quick View
-                              </button>
                             </div>
-                            <button 
-                              className="product-card__add-to-cart-btn"
-                              onClick={() => {
-                                // Add to cart logic here
-                              }}
-                            >
-                              Add to Cart
-                            </button>
                             <a href={`/product/${product.slug}`} className="product-card__link">
-                              <h3 className="product-card__title">{product.name}</h3>
+                              <div className="product-card__info">
+                                {product.artisan && <span className="product-card__artisan">By {product.artisan}</span>}
+                                <h3 className="product-card__name">{product.name}</h3>
+                                <div className="product-card__pricing">
+                                  <span className="product-card__price">KES {product.price.toLocaleString()}</span>
+                                  {product.originalPrice && <span className="product-card__original-price">KES {product.originalPrice.toLocaleString()}</span>}
+                                  {discount && <span className="product-card__discount">-{discount}%</span>}
+                                </div>
+                              </div>
                             </a>
-                            <div className="product-card__meta">
-                              <span className="product-card__price">KES {product.price.toLocaleString()}</span>
-                              <span className="product-card__stock" style={{ color: getStockStatus(product).color }}>
-                                {getStockStatus(product).text}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       );
@@ -400,6 +397,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                     {paginatedProducts.map((product) => {
                       const badge = getProductBadge(product);
                       const isWishlisted = wishlist.includes(product.id);
+                      const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null;
                       return (
                         <div key={product.id} className="product-card-grid-item">
                           <div className="product-card-with-actions">
@@ -407,40 +405,33 @@ export default function ShopPage({ products, categories, initialCategory, initia
                               <img src={product.image} alt={product.name} className="product-card__image" />
                               {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
                               <button 
+                                className="product-card__add-to-cart"
+                                onClick={() => {
+                                  // Add to cart logic here
+                                }}
+                                aria-label="Add to cart"
+                              >
+                                <Icon name="cart" size={18} />
+                              </button>
+                              <button 
                                 className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
                                 onClick={() => toggleWishlist(product.id)}
                                 aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                               >
                                 <Icon name="heart" size={20} />
                               </button>
-                              <button 
-                                className="product-card__quick-view-btn"
-                                onClick={() => setQuickViewProduct(product)}
-                              >
-                                Quick View
-                              </button>
                             </div>
-                            <button 
-                              className="product-card__add-to-cart-btn"
-                              onClick={() => {
-                                // Add to cart logic here
-                              }}
-                            >
-                              Add to Cart
-                            </button>
                             <a href={`/product/${product.slug}`} className="product-card__link">
-                              {gridView === "list" && <p className="product-card__category">{product.category}</p>}
-                              <h3 className="product-card__title">{product.name}</h3>
-                              {gridView === "list" && product.shortDescription && (
-                                <p className="product-card__description">{product.shortDescription}</p>
-                              )}
+                              <div className="product-card__info">
+                                {product.artisan && <span className="product-card__artisan">By {product.artisan}</span>}
+                                <h3 className="product-card__name">{product.name}</h3>
+                                <div className="product-card__pricing">
+                                  <span className="product-card__price">KES {product.price.toLocaleString()}</span>
+                                  {product.originalPrice && <span className="product-card__original-price">KES {product.originalPrice.toLocaleString()}</span>}
+                                  {discount && <span className="product-card__discount">-{discount}%</span>}
+                                </div>
+                              </div>
                             </a>
-                            <div className="product-card__meta">
-                              <span className="product-card__price">KES {product.price.toLocaleString()}</span>
-                              <span className="product-card__stock" style={{ color: getStockStatus(product).color }}>
-                                {getStockStatus(product).text}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       );
@@ -494,57 +485,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
         </div>
       </main>
 
-      {/* Quick View Modal */}
-      {quickViewProduct && (
-        <div className="quick-view-modal" onClick={() => setQuickViewProduct(null)}>
-          <div className="quick-view-modal__content" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className="quick-view-modal__close"
-              onClick={() => setQuickViewProduct(null)}
-              aria-label="Close quick view"
-            >
-              ✕
-            </button>
-            <div className="quick-view-modal__image-section">
-              <img src={quickViewProduct.image} alt={quickViewProduct.name} />
-              <div className="quick-view-modal__thumbnails">
-                {quickViewProduct.images?.map((img, idx) => (
-                  <button 
-                    key={idx} 
-                    className="quick-view-modal__thumbnail"
-                    onClick={() => {}}
-                  >
-                    <img src={img} alt={`${quickViewProduct.name} ${idx + 1}`} />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="quick-view-modal__info">
-              <h2>{quickViewProduct.name}</h2>
-              <p className="quick-view-modal__category">{quickViewProduct.category}</p>
-              <div className="quick-view-modal__price">
-                <span>KES {quickViewProduct.price.toLocaleString()}</span>
-                <span className="quick-view-modal__stock" style={{ color: getStockStatus(quickViewProduct).color }}>
-                  {getStockStatus(quickViewProduct).text}
-                </span>
-              </div>
-              <p className="quick-view-modal__description">{quickViewProduct.shortDescription || quickViewProduct.description?.substring(0, 150)}</p>
-              <div className="quick-view-modal__actions">
-                <a href={`/product/${quickViewProduct.slug}`} className="quick-view-modal__btn-primary">
-                  View Full Details
-                </a>
-                <button 
-                  className={`quick-view-modal__btn-secondary ${wishlist.includes(quickViewProduct.id) ? "active" : ""}`}
-                  onClick={() => toggleWishlist(quickViewProduct.id)}
-                >
-                  <Icon name="heart" size={18} />
-                  Add to Wishlist
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       <Footer />
 
