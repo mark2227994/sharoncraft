@@ -1,0 +1,46 @@
+<svg width="400" height="100" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Logo Monogram (Left) -->
+  <g transform="translate(10, 10)">
+    <!-- Outer Circle -->
+    <circle cx="40" cy="40" r="38" stroke="#D4A574" stroke-width="1.5" fill="none"/>
+    
+    <!-- Inner Circle -->
+    <circle cx="40" cy="40" r="32" stroke="#D4A574" stroke-width="1" fill="none"/>
+    
+    <!-- Beaded Accents -->
+    <circle cx="40" cy="10" r="2.5" fill="#D4A574"/>
+    <circle cx="70" cy="40" r="2.5" fill="#D4A574"/>
+    <circle cx="40" cy="70" r="2.5" fill="#D4A574"/>
+    <circle cx="10" cy="40" r="2.5" fill="#D4A574"/>
+    <circle cx="22" cy="22" r="2.5" fill="#C49464"/>
+    <circle cx="58" cy="58" r="2.5" fill="#C49464"/>
+    
+    <!-- S Pattern -->
+    <polygon points="28,25 32,25 30,29" fill="#D4A574" opacity="0.9"/>
+    <polygon points="26,37 30,37 28,41" fill="#D4A574" opacity="0.9"/>
+    <polygon points="28,51 32,51 30,55" fill="#D4A574" opacity="0.9"/>
+    <path d="M 30 29 Q 27 39 30 51" stroke="#C49464" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    
+    <!-- C Pattern -->
+    <polygon points="52,25 48,25 50,29" fill="#D4A574" opacity="0.9"/>
+    <polygon points="54,37 50,37 52,41" fill="#D4A574" opacity="0.9"/>
+    <polygon points="52,51 48,51 50,55" fill="#D4A574" opacity="0.9"/>
+    <path d="M 50 29 Q 53 39 50 51" stroke="#C49464" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    
+    <!-- Center Bead -->
+    <circle cx="40" cy="40" r="4" fill="#C49464"/>
+    <circle cx="40" cy="40" r="2.5" fill="#D4A574"/>
+    
+    <!-- Diamond Accents -->
+    <polygon points="40,32 44,36 40,40 36,36" fill="#1ABC9C" opacity="0.6"/>
+  </g>
+  
+  <!-- Text (Right) -->
+  <g>
+    <!-- "SharonCraft" Text -->
+    <text x="110" y="55" font-family="Georgia, serif" font-size="42" font-weight="700" fill="#2C2C2C" letter-spacing="-0.5">SharonCraft</text>
+    
+    <!-- "Handmade Beadwork" Subtext -->
+    <text x="110" y="75" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#D4A574" letter-spacing="1.2" text-transform="uppercase">Handmade Kenyan Beadwork</text>
+  </g>
+</svg>
