@@ -89,14 +89,14 @@ export default function MobileProductShowcase({ products = [] }) {
           <Link href={`/product/${currentProduct.id}`}>
             <a className="mobile-showcase__button">
               <span>View Product</span>
-              <Icon name="arrow-right" size={18} />
+              <Icon name="arrowR" size={18} />
             </a>
           </Link>
 
           {/* Quick Stats */}
           <div className="mobile-showcase__stats">
             <div className="mobile-showcase__stat">
-              <Icon name="check-circle" size={16} />
+              <Icon name="check" size={16} />
               <span>Handcrafted</span>
             </div>
             <div className="mobile-showcase__stat">

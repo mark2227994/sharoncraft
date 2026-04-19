@@ -87,7 +87,7 @@ export default function NewsletterSignup() {
                 ) : (
                   <>
                     <span>Subscribe</span>
-                    <Icon name="arrow-right" size={20} />
+                    <Icon name="arrowR" size={20} />
                   </>
                 )}
               </button>
