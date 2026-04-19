@@ -4,22 +4,25 @@
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #ddd;
-  transition: box-shadow 200ms ease, border-color 200ms ease;
+  border: 1px solid #eee;
+  transition: box-shadow 250ms ease, border-color 250ms ease, transform 250ms ease;
   height: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
 }
 .product-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border-color: #999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #ddd;
+  transform: translateY(-2px);
 }
 .product-card:active {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 .product-card__image-wrap {
   position: relative;
   overflow: hidden;
-  background: #f9f9f9;
+  background: #fafafa;
   width: 100%;
   aspect-ratio: 1 / 1;
   flex-shrink: 0;
@@ -30,10 +33,10 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  transition: transform 300ms ease;
+  transition: transform 350ms cubic-bezier(0.23, 1, 0.320, 1);
 }
 .product-card:hover .product-card__image {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 .product-card__badge {
   position: absolute;
@@ -55,18 +58,19 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   display: flex; align-items: center; justify-content: center;
-  color: #666;
-  opacity: 0.7;
-  transition: opacity 200ms ease, color 200ms ease, background 200ms ease;
-  border: 1px solid #ddd;
+  color: #999;
+  opacity: 1;
+  transition: all 200ms ease;
+  border: 1px solid #eee;
   cursor: pointer;
+  z-index: 10;
 }
 .product-card:hover .product-card__wishlist {
-  opacity: 1;
   background: #fff;
-  border-color: #999;
+  border-color: #ddd;
+  color: #666;
 }
-.product-card__wishlist:hover { color: #C04D29; }
+.product-card__wishlist:hover { color: #C04D29; background: #fff; border-color: #C04D29; }
 
 /* Add to Cart Icon - Left side like wishlist */
 .product-card__add-to-cart {
@@ -76,18 +80,19 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   display: flex; align-items: center; justify-content: center;
-  color: #666;
-  opacity: 0.7;
-  transition: opacity 200ms ease, color 200ms ease, background 200ms ease;
-  border: 1px solid #ddd;
+  color: #999;
+  opacity: 1;
+  transition: all 200ms ease;
+  border: 1px solid #eee;
   cursor: pointer;
+  z-index: 11;
 }
 .product-card:hover .product-card__add-to-cart {
-  opacity: 1;
   background: #fff;
-  border-color: #999;
+  border-color: #ddd;
+  color: #666;
 }
-.product-card__add-to-cart:hover { color: #111; }
+.product-card__add-to-cart:hover { color: #111; background: #fff; border-color: #111; }
 
 @media (hover: none) {
   .product-card__wishlist {

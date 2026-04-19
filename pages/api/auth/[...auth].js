@@ -29,6 +29,15 @@ export default async function handler(req, res) {
     }
   }
 
+  if (req.method === "POST") {
+    if (action === "password-reset") {
+      return handlePasswordResetRequest(req, res);
+    }
+    if (action === "password-reset-confirm") {
+      return handlePasswordResetConfirm(req, res);
+    }
+  }
+
   return res.status(404).json({ error: "Not found" });
 }
 
@@ -149,15 +158,60 @@ async function handleLogout(req, res) {
   }
 }
 
+async function handlePasswordResetRequest(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email required" });
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`,
+    });
+
+    if (error) {
+      // Don't leak whether email exists
+      console.error("Password reset error:", error);
+    }
+
+    // Always return success for security
+    return res.status(200).json({
+      message: "If an account exists with that email, a reset link has been sent",
+    });
+  } catch (error) {
+    console.error("Password reset request error:", error);
+    return res.status(500).json({ error: "Password reset failed" });
+  }
+}
+
+async function handlePasswordResetConfirm(req, res) {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token and password required" });
+    }
+
+    const { error } = await supabase.auth.updateUser(
+      { password },
+      { token }
+    );
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Password reset confirm error:", error);
+    return res.status(500).json({ error: "Password reset failed" });
+  }
+}
+
 async function handleSession(req, res) {
   try {
-    // Parse cookie from headers (same method as admin auth)
-    const cookieHeader = req.headers.cookie || "";
-    const tokenPair = cookieHeader
-      .split(";")
-      .map((item) => item.trim())
-      .find((item) => item.startsWith(`${COOKIE_NAME}=`));
-    const token = tokenPair ? decodeURIComponent(tokenPair.split("=")[1] || "") : "";
+    const token = req.cookies[COOKIE_NAME];
 
     if (!token) {
       return res.status(200).json({ user: null });
@@ -173,10 +227,12 @@ async function handleSession(req, res) {
       user: {
         id: user.id,
         email: user.email,
+        email_confirmed_at: user.email_confirmed_at,
         name: user.user_metadata?.name,
       },
     });
   } catch (error) {
+    console.error("Session error:", error);
     return res.status(200).json({ user: null });
   }
 }

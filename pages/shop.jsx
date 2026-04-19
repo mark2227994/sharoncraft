@@ -354,13 +354,20 @@ export default function ShopPage({ products, categories, initialCategory, initia
                       const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null;
                       return (
                         <div key={product.id} className="masonry-item">
-                          <div className="product-card-with-actions">
+                          <div 
+                            className="product-card-with-actions"
+                            onClick={() => window.location.href = `/product/${product.slug}`}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/product/${product.slug}`)}
+                          >
                             <div className="product-card__image-wrap">
                               <img src={product.image} alt={product.name} className="product-card__image" />
                               {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
                               <button 
                                 className="product-card__add-to-cart"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   // Add to cart logic here
                                 }}
                                 aria-label="Add to cart"
@@ -369,13 +376,16 @@ export default function ShopPage({ products, categories, initialCategory, initia
                               </button>
                               <button 
                                 className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
-                                onClick={() => toggleWishlist(product.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleWishlist(product.id);
+                                }}
                                 aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                               >
                                 <Icon name="heart" size={20} />
                               </button>
                             </div>
-                            <a href={`/product/${product.slug}`} className="product-card__link">
+                            <div className="product-card__link">
                               <div className="product-card__info">
                                 {product.artisan && <span className="product-card__artisan">By {product.artisan}</span>}
                                 <h3 className="product-card__name">{product.name}</h3>
@@ -385,7 +395,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                                   {discount && <span className="product-card__discount">-{discount}%</span>}
                                 </div>
                               </div>
-                            </a>
+                            </div>
                           </div>
                         </div>
                       );
@@ -400,13 +410,20 @@ export default function ShopPage({ products, categories, initialCategory, initia
                       const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null;
                       return (
                         <div key={product.id} className="product-card-grid-item">
-                          <div className="product-card-with-actions">
+                          <div 
+                            className="product-card-with-actions"
+                            onClick={() => window.location.href = `/product/${product.slug}`}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/product/${product.slug}`)}
+                          >
                             <div className="product-card__image-wrap">
                               <img src={product.image} alt={product.name} className="product-card__image" />
                               {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
                               <button 
                                 className="product-card__add-to-cart"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   // Add to cart logic here
                                 }}
                                 aria-label="Add to cart"
@@ -415,7 +432,10 @@ export default function ShopPage({ products, categories, initialCategory, initia
                               </button>
                               <button 
                                 className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
-                                onClick={() => toggleWishlist(product.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleWishlist(product.id);
+                                }}
                                 aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                               >
                                 <Icon name="heart" size={20} />

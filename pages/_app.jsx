@@ -10,6 +10,7 @@ import "../styles/components/filters.css";
 import "../styles/components/footer.css";
 import "../styles/components/admin.css";
 import "../styles/components/cart-drawer.css";
+import "../styles/account-page.css";
 import CartDrawer from "../components/CartDrawer";
 import MobileBottomNav from "../components/MobileBottomNav";
 import WhatsAppFab from "../components/WhatsAppFab";
