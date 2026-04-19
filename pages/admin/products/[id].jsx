@@ -27,6 +27,7 @@ const defaults = {
   slug: "",
   name: "",
   artisan: "",
+  artisanId: "",
   artisanLocation: "",
   yearsOfPractice: 5,
   materialsStr: "",
@@ -81,6 +82,7 @@ function toFormValues(product) {
     slug: product.slug,
     name: product.name,
     artisan: product.artisan,
+    artisanId: product.artisanId ?? "",
     artisanLocation: product.artisanLocation ?? "",
     yearsOfPractice: product.yearsOfPractice ?? 0,
     materialsStr: Array.isArray(product.materials) ? product.materials.join(", ") : "",
@@ -108,6 +110,7 @@ export default function AdminProductEditorPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [saveError, setSaveError] = useState("");
+  const [artisans, setArtisans] = useState([]);
   const rawId = router.query.id;
   const id = typeof rawId === "string" ? rawId : null;
   const isNew = id === "new";
@@ -140,6 +143,25 @@ export default function AdminProductEditorPage() {
       reset(toFormValues(existing));
     }
   }, [router.isReady, id, isNew, products, existing, reset]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch("/api/admin/artisans-list", { credentials: "same-origin" });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled && data.artisans) {
+          setArtisans(data.artisans);
+        }
+      } catch (_error) {
+        // keep artisans empty if loading fails
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const nameValue = watch("name");
   const categoryValue = watch("category") || "Jewellery";
@@ -215,6 +237,7 @@ export default function AdminProductEditorPage() {
       slug: values.slug.trim(),
       name: values.name.trim(),
       artisan: values.artisan.trim(),
+      artisanId: values.artisanId.trim(),
       artisanLocation: values.artisanLocation.trim(),
       yearsOfPractice: Number(values.yearsOfPractice) || 0,
       materials,
@@ -330,7 +353,17 @@ export default function AdminProductEditorPage() {
             <div className="admin-grid-2">
               <label className="admin-field">
                 <span className="admin-note">Artisan</span>
-                <input className="admin-input" {...register("artisan", { required: true })} />
+                <select className="admin-select" {...register("artisanId")}>
+                  <option value="">-- Select an artisan --</option>
+                  {artisans.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({a.location})
+                    </option>
+                  ))}
+                </select>
+                <p className="caption" style={{ marginTop: "4px", opacity: 0.7 }}>
+                  Link to the artisan database. If not listed, add the artisan in the Artisans admin.
+                </p>
               </label>
               <label className="admin-field">
                 <span className="admin-note">County / location</span>

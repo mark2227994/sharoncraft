@@ -109,6 +109,7 @@ function MediaPathHelper({ uploadFolder, suggestedFolder }) {
 export default function AdminNewProductPage() {
   const router = useRouter();
   const [catalogProducts, setCatalogProducts] = useState([]);
+  const [artisans, setArtisans] = useState([]);
   const { register, handleSubmit, setValue, watch, getValues } = useForm({
     defaultValues: {
       category: "Jewellery",
@@ -162,6 +163,19 @@ export default function AdminNewProductPage() {
         }
       } catch (_error) {
         // keep the picker empty if loading fails
+      }
+    })();
+
+    (async () => {
+      try {
+        const response = await fetch("/api/admin/artisans-list", { credentials: "same-origin" });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled && data.artisans) {
+          setArtisans(data.artisans);
+        }
+      } catch (_error) {
+        // keep artisans empty if loading fails
       }
     })();
 
@@ -329,7 +343,17 @@ export default function AdminNewProductPage() {
             </label>
             <label className="admin-field">
               <span>Artisan</span>
-              <input className="admin-input" {...register("artisan", { required: true })} />
+              <select className="admin-select" {...register("artisanId")}>
+                <option value="">-- Select an artisan --</option>
+                {artisans.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({a.location})
+                  </option>
+                ))}
+              </select>
+              <p className="caption" style={{ marginTop: "4px", opacity: 0.7 }}>
+                Link this product to its maker. If not listed, add the artisan in the Artisans admin.
+              </p>
             </label>
             <label className="admin-field">
               <span>Artisan Location</span>
