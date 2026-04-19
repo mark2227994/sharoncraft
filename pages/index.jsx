@@ -6,6 +6,8 @@ import HeroBanner from "../components/HeroBanner";
 import MasonryGrid from "../components/MasonryGrid";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
+import TrustBadges from "../components/TrustBadges";
+import Testimonials from "../components/Testimonials";
 import Icon from "../components/icons";
 import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
@@ -364,6 +366,8 @@ export default function HomePage({
           </div>
         </section>
 
+        <TrustBadges />
+
         <section className="artisan-stories-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
             <p className="overline">Craft Philosophy</p>
@@ -374,6 +378,8 @@ export default function HomePage({
           </div>
           <ArtisanStories artisans={artisans} />
         </section>
+
+        <Testimonials />
       </main>
 
       <Footer siteContent={siteContent} />
