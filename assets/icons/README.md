@@ -9,13 +9,21 @@ Use this folder for small reusable website graphics such as:
 
 Prefer SVG for icons so they stay sharp and lightweight.
 
-## Logo Files
+## Official Logo Assets
+
+- `sharoncraft-logo-mark.svg`
+  Primary geometric "S" logo mark. Used in navigation bar, favicons, and icon contexts. 64x64px viewBox, transparent background. Color: #C04D29 (terracotta).
+
+- `sharoncraft-header-lockup.svg`
+  Full horizontal brand lockup combining logo mark + "SharonCraft" wordmark in Georgia serif typography. Use for hero sections, social media headers, and full-width branding contexts.
+
+## Legacy Logo Files
 
 - `sharoncraft-monogram.svg`
-  Heritage-inspired SC monogram with Maasai geometric patterns. Primary logo used in navigation and branding. Features layered beadwork design with terracotta, gold, and teal accents. Works at any size.
+  Earlier SC monogram with Maasai geometric patterns. Kept for reference.
 
 - `sharoncraft-lockup.svg`
-  Horizontal logo lockup combining the monogram with "SharonCraft" wordmark and subtext. Use for full-width headers, social media, and print materials.
+  Earlier full lockup design. Kept for reference.
 
 ## Decorative Assets
 

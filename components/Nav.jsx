@@ -48,14 +48,15 @@ export default function Nav() {
       </div>
 
       <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>
-        <Link href="/" className="nav__logo" aria-label="SharonCraft home">
+        <Link href="/" className="nav__logo-lockup" aria-label="SharonCraft home">
           <img
-            src="/assets/icons/sharoncraft-monogram.svg"
-            alt="SharonCraft"
-            className="nav__logo-image"
+            src="/assets/icons/sharoncraft-logo-mark.svg"
+            alt="SharonCraft Logo"
+            className="nav__logo-mark"
             loading="eager"
             decoding="async"
           />
+          <span className="nav__brand-name">SharonCraft</span>
         </Link>
 
         {/* Search Bar */}

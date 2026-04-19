@@ -74,18 +74,37 @@
   -webkit-backdrop-filter: blur(12px);
   background: rgba(249, 246, 238, 0.85);
 }
-.nav__logo {
+.nav__logo-lockup {
   display: inline-flex;
   align-items: center;
-  max-width: min(210px, 44vw);
+  gap: var(--space-3);
+  max-width: min(280px, 50vw);
   flex-shrink: 0;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
 }
-.nav__logo-image {
+.nav__logo-lockup:hover {
+  opacity: 0.85;
+}
+.nav__logo-mark {
   display: block;
-  width: 100%;
-  height: auto;
+  width: 40px;
+  height: 40px;
   max-height: 42px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+.nav__brand-name {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.nav__logo-lockup:hover .nav__brand-name {
+  color: var(--color-accent);
 }
 
 /* Desktop Navigation */
@@ -170,11 +189,16 @@
   .nav__hamburger { display: none; }
 }
 @media (max-width: 767px) {
-  .nav__logo {
-    max-width: min(172px, 48vw);
+  .nav__logo-lockup {
+    max-width: min(220px, 52vw);
+    gap: var(--space-2);
   }
-  .nav__logo-image {
-    max-height: 34px;
+  .nav__logo-mark {
+    width: 32px;
+    height: 32px;
+  }
+  .nav__brand-name {
+    font-size: 1.1rem;
   }
   .nav__search { display: none; }
 }
