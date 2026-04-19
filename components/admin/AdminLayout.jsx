@@ -22,18 +22,33 @@ const navItems = [
   { section: "Impact", tier: 3 },
   { href: "/admin/artisan-impact", label: "Artisan Impact", icon: "chart" },
   
-  // TIER 4: CUSTOMERS & CUSTOM ORDERS
-  { section: "Customers", tier: 4 },
+  // TIER 4: CONTENT MANAGEMENT
+  { section: "Content", tier: 4 },
+  { href: "/admin/page-content", label: "Page Content", icon: "edit" },
+  { href: "/admin/articles", label: "Articles", icon: "edit" },
+  { href: "/admin/faq", label: "FAQ", icon: "help" },
+  { href: "/admin/homepage-sections", label: "Homepage Sections", icon: "edit" },
+  { href: "/admin/promotions", label: "Promotions", icon: "star" },
+  { href: "/admin/navigation", label: "Navigation", icon: "link" },
+  
+  // TIER 5: CUSTOMERS & CUSTOM ORDERS
+  { section: "Customers", tier: 5 },
   { href: "/admin/custom-orders", label: "Custom Orders", icon: "edit" },
   { href: "/admin/customers", label: "Customers", icon: "users" },
   
-  // TIER 5: OPERATIONS
-  { section: "Operations", tier: 5 },
+  // TIER 6: WEBSITE SETTINGS
+  { section: "Website", tier: 6 },
+  { href: "/admin/site-metadata", label: "Site Metadata", icon: "settings" },
+  { href: "/admin/email-templates", label: "Email Templates", icon: "envelope" },
+  { href: "/admin/footer-content", label: "Footer", icon: "link" },
+  
+  // TIER 7: OPERATIONS
+  { section: "Operations", tier: 7 },
   { href: "/admin/inventory", label: "Inventory", icon: "box" },
   { href: "/admin/expenses", label: "Expenses", icon: "dollar" },
   
-  // TIER 6: TOOLS & SETTINGS
-  { section: "Tools", tier: 6 },
+  // TIER 8: TOOLS & INTEGRATIONS
+  { section: "Tools", tier: 8 },
   { href: "/admin/prices", label: "Prices", icon: "tag" },
   { href: "/admin/site-images", label: "Site Images", icon: "eye" },
   { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
