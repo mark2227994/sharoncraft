@@ -50,7 +50,7 @@ export default function Nav() {
       <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>
         <Link href="/" className="nav__logo-lockup" aria-label="SharonCraft home">
           <img
-            src="/assets/icons/sharoncraft-logo-mark.svg"
+            src="/apple-touch-icon.png"
             alt="SharonCraft Logo"
             className="nav__logo-mark"
             loading="eager"
