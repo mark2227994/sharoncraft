@@ -63,8 +63,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
   };
 
   const getProductBadge = (product) => {
-    if (product.badge === "Best Seller") return { text: "BEST SELLER", color: "#C04D29" };
-    if (product.badge === "New" || product.newArrival) return { text: "NEW", color: "#1ABC9C" };
+    if (product.badge === "Best Seller") return { text: "BEST SELLER", color: "#111" };
+    if (product.badge === "New" || product.newArrival) return { text: "NEW", color: "#D4A574" };
     if (product.badge?.includes("Limited")) return { text: "LIMITED", color: "#D4A574" };
     return null;
   };
@@ -72,7 +72,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const getStockStatus = (product) => {
     if (product.isSold) return { text: "SOLD OUT", color: "#e74c3c" };
     if (!product.stock || product.stock === 0) return { text: "OUT OF STOCK", color: "#e74c3c" };
-    if (product.stock < 3) return { text: `ONLY ${product.stock} LEFT`, color: "#f39c12" };
+    if (product.stock < 3) return { text: "LOW STOCK", color: "#f39c12" };
     return { text: "IN STOCK", color: "#1ABC9C" };
   };
 
@@ -287,7 +287,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
         {/* Product count */}
         <div className="shop-page__count">
-          <span>{filteredProducts.length} products</span>
+          <span className="shop-count-text">{filteredProducts.length} products available</span>
           {hasActiveFilters && (
             <button
               onClick={() => {
@@ -372,6 +372,14 @@ export default function ShopPage({ products, categories, initialCategory, initia
                                 Quick View
                               </button>
                             </div>
+                            <button 
+                              className="product-card__add-to-cart-btn"
+                              onClick={() => {
+                                // Add to cart logic here
+                              }}
+                            >
+                              Add to Cart
+                            </button>
                             <a href={`/product/${product.slug}`} className="product-card__link">
                               <h3 className="product-card__title">{product.name}</h3>
                             </a>
@@ -412,6 +420,14 @@ export default function ShopPage({ products, categories, initialCategory, initia
                                 Quick View
                               </button>
                             </div>
+                            <button 
+                              className="product-card__add-to-cart-btn"
+                              onClick={() => {
+                                // Add to cart logic here
+                              }}
+                            >
+                              Add to Cart
+                            </button>
                             <a href={`/product/${product.slug}`} className="product-card__link">
                               {gridView === "list" && <p className="product-card__category">{product.category}</p>}
                               <h3 className="product-card__title">{product.name}</h3>
@@ -434,25 +450,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
               </>
             )}
 
-            {/* Item count and pagination info */}
-            <div className="shop-pagination__info">
-              <span className="pagination-range">Showing {firstItemNum}–{lastItemNum} of {filteredProducts.length} products</span>
-              <span className="pagination-page-info">Page {currentPage} of {totalPages}</span>
-            </div>
-
-            {/* Mobile: Load More Button */}
-            {isMobile && currentPage < totalPages && (
-              <div className="shop-pagination shop-pagination--mobile">
-                <button
-                  className="shop-load-more"
-                  onClick={() => setCurrentPage(p => p + 1)}
-                >
-                  Load More ({filteredProducts.length - lastItemNum} remaining)
-                </button>
-              </div>
-            )}
-
-            {/* Desktop: Numbered Pages */}
+            {/* Pagination */}
             {!isMobile && totalPages > 1 && (
               <div className="shop-pagination shop-pagination--desktop">
                 <button
