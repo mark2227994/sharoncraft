@@ -11,64 +11,62 @@ export default function HeroBanner({
 }) {
   return (
     <section className="hero">
-      <div className="hero__container">
-        {/* LEFT SIDE: IMAGE */}
-        <div className="hero__image-side">
-          <div className="hero__image-wrapper">
-            <img 
-              src={heroImage} 
-              alt={heroImageAlt} 
-              loading="eager" 
-              decoding="async"
-              className="hero__image"
-            />
-            <div className="hero__image-overlay" />
+      {/* FULL-WIDTH CONTENT TOP */}
+      <div className="hero__content-section">
+        <div className="hero__content-wrapper">
+          <p className="hero__overline">Handcrafted Heritage</p>
+          
+          <h1 className="hero__title">{title}</h1>
+          
+          <p className="hero__subtitle">{subtitle}</p>
+
+          {/* Key Benefits */}
+          <div className="hero__benefits">
+            <div className="hero__benefit-item">
+              <span className="hero__benefit-icon">✓</span>
+              <span>100% Handmade</span>
+            </div>
+            <div className="hero__benefit-item">
+              <span className="hero__benefit-icon">✓</span>
+              <span>Artisan Direct</span>
+            </div>
+            <div className="hero__benefit-item">
+              <span className="hero__benefit-icon">✓</span>
+              <span>Limited Edition</span>
+            </div>
           </div>
+
+          {/* CTAs */}
+          <div className="hero__cta-group">
+            <Link href="/shop">
+              <a className="hero__cta hero__cta--primary">
+                Shop Now
+                <span>→</span>
+              </a>
+            </Link>
+            <Link href="/about">
+              <a className="hero__cta hero__cta--secondary">
+                Learn Our Story
+              </a>
+            </Link>
+          </div>
+
+          {/* Trust Line */}
+          <p className="hero__trust-line">{trustLine}</p>
         </div>
+      </div>
 
-        {/* RIGHT SIDE: TEXT & CTA */}
-        <div className="hero__content-side">
-          <div className="hero__content">
-            <p className="hero__overline">Handcrafted Heritage</p>
-            
-            <h1 className="hero__title">{title}</h1>
-            
-            <p className="hero__subtitle">{subtitle}</p>
-
-            {/* Key Benefits */}
-            <div className="hero__benefits">
-              <div className="hero__benefit-item">
-                <span className="hero__benefit-icon">✓</span>
-                <span>100% Handmade</span>
-              </div>
-              <div className="hero__benefit-item">
-                <span className="hero__benefit-icon">✓</span>
-                <span>Artisan Direct</span>
-              </div>
-              <div className="hero__benefit-item">
-                <span className="hero__benefit-icon">✓</span>
-                <span>Limited Edition</span>
-              </div>
-            </div>
-
-            {/* CTAs */}
-            <div className="hero__cta-group">
-              <Link href="/shop">
-                <a className="hero__cta hero__cta--primary">
-                  Shop Now
-                  <span>→</span>
-                </a>
-              </Link>
-              <Link href="/about">
-                <a className="hero__cta hero__cta--secondary">
-                  Learn Our Story
-                </a>
-              </Link>
-            </div>
-
-            {/* Trust Line */}
-            <p className="hero__trust-line">{trustLine}</p>
-          </div>
+      {/* FULL-WIDTH IMAGE BELOW */}
+      <div className="hero__image-section">
+        <div className="hero__image-wrapper">
+          <img 
+            src={heroImage} 
+            alt={heroImageAlt} 
+            loading="eager" 
+            decoding="async"
+            className="hero__image"
+          />
+          <div className="hero__image-fade" />
         </div>
       </div>
 
@@ -79,62 +77,17 @@ export default function HeroBanner({
           background: white;
         }
 
-        .hero__container {
-          display: grid;
-          grid-template-columns: 60% 40%;
-          min-height: 600px;
-          max-width: 1400px;
+        /* ========== CONTENT SECTION (TOP) ========== */
+        .hero__content-section {
+          width: 100%;
+          background: white;
+          padding: 80px var(--gutter) 100px;
+        }
+
+        .hero__content-wrapper {
+          max-width: 900px;
           margin: 0 auto;
-        }
-
-        /* LEFT SIDE: IMAGE */
-        .hero__image-side {
-          position: relative;
-          overflow: hidden;
-          background: #f9f6ee;
-        }
-
-        .hero__image-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-        }
-
-        .hero__image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .hero__image-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(
-            135deg,
-            rgba(0, 0, 0, 0.1) 0%,
-            rgba(0, 0, 0, 0) 50%
-          );
-          pointer-events: none;
-        }
-
-        /* RIGHT SIDE: CONTENT */
-        .hero__content-side {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #C04D29 0%, #B83D1F 100%);
-          color: white;
-          padding: var(--space-6);
-        }
-
-        .hero__content {
-          max-width: 100%;
-          animation: slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+          animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .hero__overline {
@@ -142,52 +95,57 @@ export default function HeroBanner({
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.15em;
-          margin: 0 0 var(--space-2) 0;
-          opacity: 0.85;
+          margin: 0 0 var(--space-3) 0;
+          opacity: 0.6;
+          color: #C04D29;
         }
 
         .hero__title {
-          font-size: 2.5rem;
+          font-size: 3.5rem;
           font-weight: 700;
-          margin: 0 0 var(--space-3) 0;
-          line-height: 1.2;
-          color: white;
+          margin: 0 0 var(--space-4) 0;
+          line-height: 1.15;
+          color: #0f0f0f;
           font-family: Georgia, serif;
         }
 
         .hero__subtitle {
-          font-size: 1.125rem;
+          font-size: 1.25rem;
           line-height: 1.6;
-          margin: 0 0 var(--space-5) 0;
-          opacity: 0.95;
-          max-width: 90%;
+          margin: 0 0 var(--space-6) 0;
+          color: #333;
+          max-width: 700px;
+          font-weight: 400;
         }
 
         /* Benefits List */
         .hero__benefits {
           display: flex;
           flex-direction: column;
-          gap: var(--space-2);
-          margin-bottom: var(--space-5);
+          gap: var(--space-3);
+          margin-bottom: var(--space-6);
         }
 
         .hero__benefit-item {
           display: flex;
           align-items: center;
           gap: var(--space-2);
-          font-size: 0.9375rem;
+          font-size: 1rem;
           font-weight: 500;
+          color: #0f0f0f;
         }
 
         .hero__benefit-icon {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 24px;
-          height: 24px;
+          width: 28px;
+          height: 28px;
+          min-width: 28px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.2);
-          font-size: 14px;
+          background: #C04D29;
+          color: white;
+          font-size: 16px;
           font-weight: 700;
         }
 
@@ -195,17 +153,17 @@ export default function HeroBanner({
         .hero__cta-group {
           display: flex;
           gap: var(--space-3);
-          margin-bottom: var(--space-5);
+          margin-bottom: var(--space-6);
         }
 
         .hero__cta {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 14px 28px;
+          padding: 14px 32px;
           border-radius: 6px;
           font-weight: 600;
-          font-size: 0.9375rem;
+          font-size: 0.95rem;
           text-decoration: none;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -215,24 +173,26 @@ export default function HeroBanner({
         }
 
         .hero__cta--primary {
-          background: white;
-          color: #C04D29;
-          border-color: white;
+          background: #C04D29;
+          color: white;
+          border-color: #C04D29;
         }
 
         .hero__cta--primary:hover {
+          background: #B83D1F;
+          border-color: #B83D1F;
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 8px 24px rgba(192, 77, 41, 0.25);
         }
 
         .hero__cta--secondary {
           background: transparent;
-          color: white;
-          border-color: white;
+          color: #C04D29;
+          border-color: #C04D29;
         }
 
         .hero__cta--secondary:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(192, 77, 41, 0.08);
           transform: translateY(-2px);
         }
 
@@ -241,87 +201,143 @@ export default function HeroBanner({
         }
 
         .hero__cta:hover span {
-          transform: translateX(2px);
+          transform: translateX(3px);
         }
 
         /* Trust Line */
         .hero__trust-line {
-          font-size: 0.8125rem;
-          opacity: 0.8;
+          font-size: 0.85rem;
+          opacity: 0.7;
           margin: 0;
-          line-height: 1.5;
-          max-width: 85%;
+          line-height: 1.6;
+          max-width: 600px;
+          color: #333;
+        }
+
+        /* ========== IMAGE SECTION (BOTTOM) ========== */
+        .hero__image-section {
+          width: 100%;
+          background: #f9f6ee;
+          overflow: hidden;
+          min-height: 500px;
+        }
+
+        .hero__image-wrapper {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          min-height: 500px;
+          overflow: hidden;
+        }
+
+        .hero__image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          animation: zoomIn 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hero__image-fade {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.1) 100%
+          );
+          pointer-events: none;
         }
 
         /* Animations */
-        @keyframes slideInRight {
+        @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateX(40px);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes zoomIn {
+          from {
+            opacity: 0;
+            transform: scale(1.05);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
           }
         }
 
         /* TABLET */
         @media (max-width: 1024px) {
-          .hero__container {
-            grid-template-columns: 55% 45%;
-            min-height: 500px;
+          .hero__content-section {
+            padding: 60px var(--gutter) 80px;
+          }
+
+          .hero__content-wrapper {
+            max-width: 700px;
           }
 
           .hero__title {
-            font-size: 2rem;
+            font-size: 2.8rem;
           }
 
           .hero__subtitle {
-            font-size: 1rem;
+            font-size: 1.1rem;
           }
 
-          .hero__content-side {
-            padding: var(--space-5);
+          .hero__image-section {
+            min-height: 400px;
+          }
+
+          .hero__image-wrapper {
+            min-height: 400px;
           }
         }
 
         /* MOBILE */
         @media (max-width: 768px) {
-          .hero__container {
-            grid-template-columns: 1fr;
-            min-height: 650px;
+          .hero__content-section {
+            padding: 50px var(--gutter) 60px;
           }
 
-          .hero__image-side {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 45%;
-            z-index: 0;
-          }
-
-          .hero__content-side {
-            position: relative;
-            z-index: 1;
-            min-height: 55%;
-            margin-top: auto;
-            padding: var(--space-5) var(--gutter);
-            border-radius: 20px 20px 0 0;
+          .hero__content-wrapper {
+            max-width: 100%;
           }
 
           .hero__title {
-            font-size: 1.75rem;
-            margin-bottom: var(--space-2);
+            font-size: 2rem;
+            margin-bottom: var(--space-3);
           }
 
           .hero__subtitle {
+            font-size: 1rem;
+            margin-bottom: var(--space-5);
+          }
+
+          .hero__overline {
+            margin-bottom: var(--space-2);
+          }
+
+          .hero__benefits {
+            gap: var(--space-2);
+            margin-bottom: var(--space-5);
+          }
+
+          .hero__benefit-item {
             font-size: 0.95rem;
-            margin-bottom: var(--space-4);
           }
 
           .hero__cta-group {
             flex-direction: column;
+            margin-bottom: var(--space-5);
           }
 
           .hero__cta {
@@ -330,27 +346,40 @@ export default function HeroBanner({
             padding: 12px 20px;
           }
 
-          .hero__benefits {
-            margin-bottom: var(--space-4);
+          .hero__trust-line {
+            font-size: 0.8rem;
           }
 
-          .hero__trust-line {
-            font-size: 0.75rem;
+          .hero__image-section {
+            min-height: 350px;
+          }
+
+          .hero__image-wrapper {
+            min-height: 350px;
           }
         }
 
         @media (max-width: 480px) {
-          .hero__container {
-            min-height: 700px;
+          .hero__content-section {
+            padding: 40px var(--gutter) 50px;
           }
 
           .hero__title {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
+            line-height: 1.2;
           }
 
-          .hero__content-side {
-            min-height: 60%;
-            padding: var(--space-4) var(--gutter);
+          .hero__subtitle {
+            font-size: 0.95rem;
+            margin-bottom: var(--space-4);
+          }
+
+          .hero__image-section {
+            min-height: 300px;
+          }
+
+          .hero__image-wrapper {
+            min-height: 300px;
           }
         }
       `}</style>
