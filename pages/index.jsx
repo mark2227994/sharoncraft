@@ -1,4 +1,5 @@
 import ArtisanTimeline from "../components/ArtisanTimeline";
+import ArtisanStories from "../components/ArtisanStories";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import HeroBanner from "../components/HeroBanner";
@@ -361,6 +362,17 @@ export default function HomePage({
               <p className="how-it-made-description">Quality checked & authenticated. Every piece is inspected, packaged with care, and shipped with a certificate of authenticity.</p>
             </div>
           </div>
+        </section>
+
+        <section className="artisan-stories-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+            <p className="overline">Craft Philosophy</p>
+            <h2 className="display-md" style={{ marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>Our Artisans: Stories from the Workshop</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '650px', margin: '0 auto' }}>
+              Meet the master craftspeople who bring SharonCraft to life. Each brings their unique vision, heritage, and soul to every handcrafted piece.
+            </p>
+          </div>
+          <ArtisanStories artisans={artisans} />
         </section>
 
         <section className="featured-artisans-showcase" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)', background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, rgba(212, 165, 116, 0.02) 100%)', borderRadius: '12px', border: '1px solid rgba(212, 165, 116, 0.2)' }}>
