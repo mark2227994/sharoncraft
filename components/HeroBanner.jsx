@@ -81,11 +81,12 @@ export default function HeroBanner({
         .hero__content-section {
           width: 100%;
           background: white;
-          padding: 80px var(--gutter) 100px;
+          padding: 100px var(--gutter) 120px;
         }
 
         .hero__content-wrapper {
-          max-width: 900px;
+          width: 100%;
+          max-width: 1400px;
           margin: 0 auto;
           animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -101,20 +102,20 @@ export default function HeroBanner({
         }
 
         .hero__title {
-          font-size: 3.5rem;
+          font-size: 4rem;
           font-weight: 700;
-          margin: 0 0 var(--space-4) 0;
-          line-height: 1.15;
+          margin: 0 0 var(--space-5) 0;
+          line-height: 1.1;
           color: #0f0f0f;
           font-family: Georgia, serif;
         }
 
         .hero__subtitle {
-          font-size: 1.25rem;
-          line-height: 1.6;
-          margin: 0 0 var(--space-6) 0;
+          font-size: 1.375rem;
+          line-height: 1.7;
+          margin: 0 0 var(--space-7) 0;
           color: #333;
-          max-width: 700px;
+          max-width: 100%;
           font-weight: 400;
         }
 
@@ -122,15 +123,15 @@ export default function HeroBanner({
         .hero__benefits {
           display: flex;
           flex-direction: column;
-          gap: var(--space-3);
-          margin-bottom: var(--space-6);
+          gap: var(--space-4);
+          margin-bottom: var(--space-8);
         }
 
         .hero__benefit-item {
           display: flex;
           align-items: center;
-          gap: var(--space-2);
-          font-size: 1rem;
+          gap: var(--space-3);
+          font-size: 1.0625rem;
           font-weight: 500;
           color: #0f0f0f;
         }
@@ -152,18 +153,18 @@ export default function HeroBanner({
         /* CTAs */
         .hero__cta-group {
           display: flex;
-          gap: var(--space-3);
-          margin-bottom: var(--space-6);
+          gap: var(--space-4);
+          margin-bottom: var(--space-8);
         }
 
         .hero__cta {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 14px 32px;
+          padding: 16px 40px;
           border-radius: 6px;
           font-weight: 600;
-          font-size: 0.95rem;
+          font-size: 1rem;
           text-decoration: none;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -206,10 +207,10 @@ export default function HeroBanner({
 
         /* Trust Line */
         .hero__trust-line {
-          font-size: 0.85rem;
+          font-size: 0.9375rem;
           opacity: 0.7;
           margin: 0;
-          line-height: 1.6;
+          line-height: 1.8;
           max-width: 600px;
           color: #333;
         }
@@ -219,14 +220,14 @@ export default function HeroBanner({
           width: 100%;
           background: #f9f6ee;
           overflow: hidden;
-          min-height: 500px;
+          min-height: 600px;
         }
 
         .hero__image-wrapper {
           position: relative;
           width: 100%;
           height: 100%;
-          min-height: 500px;
+          min-height: 600px;
           overflow: hidden;
         }
 
@@ -278,34 +279,34 @@ export default function HeroBanner({
         /* TABLET */
         @media (max-width: 1024px) {
           .hero__content-section {
-            padding: 60px var(--gutter) 80px;
+            padding: 70px var(--gutter) 90px;
           }
 
           .hero__content-wrapper {
-            max-width: 700px;
+            max-width: 1200px;
           }
 
           .hero__title {
-            font-size: 2.8rem;
+            font-size: 3.2rem;
           }
 
           .hero__subtitle {
-            font-size: 1.1rem;
+            font-size: 1.1875rem;
           }
 
           .hero__image-section {
-            min-height: 400px;
+            min-height: 450px;
           }
 
           .hero__image-wrapper {
-            min-height: 400px;
+            min-height: 450px;
           }
         }
 
         /* MOBILE */
         @media (max-width: 768px) {
           .hero__content-section {
-            padding: 50px var(--gutter) 60px;
+            padding: 60px var(--gutter) 70px;
           }
 
           .hero__content-wrapper {
@@ -313,8 +314,60 @@ export default function HeroBanner({
           }
 
           .hero__title {
-            font-size: 2rem;
+            font-size: 2.25rem;
+            margin-bottom: var(--space-4);
+          }
+
+          .hero__subtitle {
+            font-size: 1.0625rem;
+            margin-bottom: var(--space-6);
+          }
+
+          .hero__overline {
             margin-bottom: var(--space-3);
+          }
+
+          .hero__benefits {
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+          }
+
+          .hero__benefit-item {
+            font-size: 1rem;
+          }
+
+          .hero__cta-group {
+            flex-direction: column;
+            margin-bottom: var(--space-6);
+          }
+
+          .hero__cta {
+            width: 100%;
+            justify-content: center;
+            padding: 14px 20px;
+          }
+
+          .hero__trust-line {
+            font-size: 0.875rem;
+          }
+
+          .hero__image-section {
+            min-height: 400px;
+          }
+
+          .hero__image-wrapper {
+            min-height: 400px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero__content-section {
+            padding: 50px var(--gutter) 60px;
+          }
+
+          .hero__title {
+            font-size: 2rem;
+            line-height: 1.2;
           }
 
           .hero__subtitle {
@@ -322,64 +375,12 @@ export default function HeroBanner({
             margin-bottom: var(--space-5);
           }
 
-          .hero__overline {
-            margin-bottom: var(--space-2);
-          }
-
-          .hero__benefits {
-            gap: var(--space-2);
-            margin-bottom: var(--space-5);
-          }
-
-          .hero__benefit-item {
-            font-size: 0.95rem;
-          }
-
-          .hero__cta-group {
-            flex-direction: column;
-            margin-bottom: var(--space-5);
-          }
-
-          .hero__cta {
-            width: 100%;
-            justify-content: center;
-            padding: 12px 20px;
-          }
-
-          .hero__trust-line {
-            font-size: 0.8rem;
-          }
-
           .hero__image-section {
             min-height: 350px;
           }
 
           .hero__image-wrapper {
             min-height: 350px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero__content-section {
-            padding: 40px var(--gutter) 50px;
-          }
-
-          .hero__title {
-            font-size: 1.75rem;
-            line-height: 1.2;
-          }
-
-          .hero__subtitle {
-            font-size: 0.95rem;
-            margin-bottom: var(--space-4);
-          }
-
-          .hero__image-section {
-            min-height: 300px;
-          }
-
-          .hero__image-wrapper {
-            min-height: 300px;
           }
         }
       `}</style>
