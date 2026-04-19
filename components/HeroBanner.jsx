@@ -3,70 +3,85 @@ import Link from "next/link";
 export default function HeroBanner({
   heroImage,
   heroImageAlt = "Kenyan artisan craft",
-  heroDetailImage = null,
-  title = "Made by 47 Kenyan Artisans",
-  subtitle = "No machines. No shortcuts. Just dedication.",
-  trustLine = "40+ hours per piece | Ethically sourced | Direct from workshops",
-  whatsappNumber = "254112222572",
+  title = "47",
+  subtitle = "Kenyan Artisans",
+  description = "Made by Kenyan Artisans",
+  details = "No shortcuts. Just hands. Just heart.",
+  trustLine = "40+ hours per piece | Ethically made",
 }) {
   return (
     <section className="hero">
-      {/* FULL-WIDTH CONTENT TOP */}
-      <div className="hero__content-section">
-        <div className="hero__content-wrapper">
-          <p className="hero__overline">Handcrafted Heritage</p>
-          
-          <h1 className="hero__title">{title}</h1>
-          
-          <p className="hero__subtitle">{subtitle}</p>
-
-          {/* Key Benefits */}
-          <div className="hero__benefits">
-            <div className="hero__benefit-item">
-              <span className="hero__benefit-icon">✓</span>
-              <span>100% Handmade</span>
-            </div>
-            <div className="hero__benefit-item">
-              <span className="hero__benefit-icon">✓</span>
-              <span>Artisan Direct</span>
-            </div>
-            <div className="hero__benefit-item">
-              <span className="hero__benefit-icon">✓</span>
-              <span>Limited Edition</span>
-            </div>
+      <div className="hero__background" />
+      
+      <div className="hero__container">
+        {/* LEFT COLUMN: TEXT */}
+        <div className="hero__left">
+          <div className="hero__content">
+            <div className="hero__number">{title}</div>
+            <h1 className="hero__subtitle">{subtitle}</h1>
+            
+            <div className="hero__divider" />
+            
+            <p className="hero__details">{details}</p>
           </div>
 
-          {/* CTAs */}
-          <div className="hero__cta-group">
-            <Link href="/shop">
-              <a className="hero__cta hero__cta--primary">
-                Shop Now
-                <span>→</span>
-              </a>
-            </Link>
-            <Link href="/about">
-              <a className="hero__cta hero__cta--secondary">
-                Learn Our Story
-              </a>
-            </Link>
+          {/* BOTTOM BADGES */}
+          <div className="hero__badges">
+            <div className="hero__badge">
+              <span className="hero__badge-check">✓</span>
+              <span>Handcrafted</span>
+            </div>
+            <div className="hero__badge">
+              <span className="hero__badge-check">✓</span>
+              <span>Direct</span>
+            </div>
+            <div className="hero__badge">
+              <span className="hero__badge-check">✓</span>
+              <span>Limited</span>
+            </div>
           </div>
-
-          {/* Trust Line */}
-          <p className="hero__trust-line">{trustLine}</p>
         </div>
-      </div>
 
-      {/* FULL-WIDTH IMAGE BELOW */}
-      <div className="hero__image-section">
-        <div className="hero__image-wrapper">
-          <img 
-            src={heroImage} 
-            alt={heroImageAlt} 
-            loading="eager" 
-            decoding="async"
-            className="hero__image"
-          />
-          <div className="hero__image-fade" />
+        {/* RIGHT COLUMN: TERRACOTTA BLOCK WITH CTA */}
+        <div className="hero__right">
+          <div className="hero__block">
+            <p className="hero__block-label">Made By</p>
+            <h2 className="hero__block-title">Kenyan Artisans</h2>
+            
+            <p className="hero__block-text">
+              No shortcuts.<br />
+              Just hands.<br />
+              Just heart.
+            </p>
+
+            <div className="hero__cta-group">
+              <Link href="/shop">
+                <a className="hero__cta hero__cta--primary">
+                  Discover Now
+                </a>
+              </Link>
+              <Link href="/about">
+                <a className="hero__cta hero__cta--secondary">
+                  Our Story
+                </a>
+              </Link>
+            </div>
+
+            <div className="hero__block-footer">
+              <p className="hero__trust-line">{trustLine}</p>
+            </div>
+          </div>
+
+          {/* BACKGROUND IMAGE */}
+          <div className="hero__block-image">
+            <img 
+              src={heroImage} 
+              alt={heroImageAlt}
+              className="hero__image"
+              loading="eager"
+            />
+            <div className="hero__image-overlay" />
+          </div>
         </div>
       </div>
 
@@ -75,96 +90,195 @@ export default function HeroBanner({
           position: relative;
           width: 100%;
           background: white;
+          overflow: hidden;
+          min-height: 700px;
         }
 
-        /* ========== CONTENT SECTION (TOP) ========== */
-        .hero__content-section {
-          width: 100%;
-          background: white;
-          padding: 100px var(--gutter) 120px;
+        /* Textured background pattern */
+        .hero__background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(192, 77, 41, 0.03) 2px,
+            rgba(192, 77, 41, 0.03) 4px
+          );
+          pointer-events: none;
+          z-index: 0;
         }
 
-        .hero__content-wrapper {
-          width: 100%;
+        .hero__container {
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
           max-width: 1400px;
           margin: 0 auto;
+          min-height: 700px;
+          height: 100%;
+        }
+
+        /* ========== LEFT COLUMN ========== */
+        .hero__left {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 100px var(--gutter);
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(249, 246, 238, 0.98)
+          );
+        }
+
+        .hero__content {
           animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .hero__overline {
-          font-size: 11px;
+        /* Large number "47" */
+        .hero__number {
+          font-size: 7rem;
           font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          margin: 0 0 var(--space-3) 0;
-          opacity: 0.6;
+          line-height: 0.9;
+          margin: 0 0 var(--space-2) 0;
           color: #C04D29;
+          font-family: Georgia, serif;
+          letter-spacing: -2px;
         }
 
-        .hero__title {
-          font-size: 4rem;
+        /* "Kenyan Artisans" */
+        .hero__subtitle {
+          font-size: 2.25rem;
           font-weight: 700;
-          margin: 0 0 var(--space-5) 0;
+          margin: 0 0 var(--space-4) 0;
           line-height: 1.1;
           color: #0f0f0f;
           font-family: Georgia, serif;
+          text-transform: none;
         }
 
-        .hero__subtitle {
-          font-size: 1.375rem;
-          line-height: 1.7;
-          margin: 0 0 var(--space-7) 0;
+        .hero__divider {
+          width: 60px;
+          height: 3px;
+          background: #D4A574;
+          margin: var(--space-4) 0;
+        }
+
+        /* "No shortcuts..." */
+        .hero__details {
+          font-size: 1.25rem;
+          line-height: 1.8;
           color: #333;
-          max-width: 100%;
+          margin: 0;
+          font-style: italic;
           font-weight: 400;
+          font-family: Georgia, serif;
+          max-width: 400px;
         }
 
-        /* Benefits List */
-        .hero__benefits {
+        /* BADGES AT BOTTOM */
+        .hero__badges {
           display: flex;
-          flex-direction: column;
-          gap: var(--space-4);
-          margin-bottom: var(--space-8);
+          gap: var(--space-3);
+          margin-top: auto;
+          padding-top: var(--space-6);
+          border-top: 1px solid rgba(192, 77, 41, 0.1);
         }
 
-        .hero__benefit-item {
+        .hero__badge {
           display: flex;
           align-items: center;
-          gap: var(--space-3);
-          font-size: 1.0625rem;
-          font-weight: 500;
-          color: #0f0f0f;
+          gap: var(--space-1);
+          padding: 8px 12px;
+          background: rgba(212, 165, 116, 0.15);
+          border-radius: 4px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #C04D29;
         }
 
-        .hero__benefit-icon {
+        .hero__badge-check {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 28px;
-          height: 28px;
-          min-width: 28px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
-          background: #C04D29;
+          background: #D4A574;
           color: white;
-          font-size: 16px;
+          font-size: 12px;
           font-weight: 700;
         }
 
-        /* CTAs */
+        /* ========== RIGHT COLUMN ========== */
+        .hero__right {
+          position: relative;
+          background: #C04D29;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Terracotta block with content */
+        .hero__block {
+          position: relative;
+          z-index: 2;
+          background: #C04D29;
+          padding: 60px;
+          max-width: 500px;
+          width: 100%;
+          animation: slideInRight 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hero__block-label {
+          font-size: 0.9rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: rgba(255, 255, 255, 0.7);
+          margin: 0 0 var(--space-2) 0;
+        }
+
+        .hero__block-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: white;
+          margin: 0 0 var(--space-4) 0;
+          line-height: 1.1;
+          font-family: Georgia, serif;
+        }
+
+        .hero__block-text {
+          font-size: 1.1rem;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.95);
+          margin: 0 0 var(--space-5) 0;
+          font-style: italic;
+          font-weight: 400;
+        }
+
+        /* CTA Group */
         .hero__cta-group {
           display: flex;
-          gap: var(--space-4);
-          margin-bottom: var(--space-8);
+          flex-direction: column;
+          gap: var(--space-3);
+          margin-bottom: var(--space-5);
         }
 
         .hero__cta {
-          display: inline-flex;
+          display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 16px 40px;
-          border-radius: 6px;
+          justify-content: center;
+          padding: 14px 28px;
+          border-radius: 4px;
           font-weight: 600;
-          font-size: 1rem;
+          font-size: 0.95rem;
           text-decoration: none;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -174,83 +288,70 @@ export default function HeroBanner({
         }
 
         .hero__cta--primary {
-          background: #C04D29;
-          color: white;
-          border-color: #C04D29;
+          background: white;
+          color: #C04D29;
+          border-color: white;
         }
 
         .hero__cta--primary:hover {
-          background: #B83D1F;
-          border-color: #B83D1F;
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(192, 77, 41, 0.25);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
         }
 
         .hero__cta--secondary {
           background: transparent;
-          color: #C04D29;
-          border-color: #C04D29;
+          color: white;
+          border-color: white;
         }
 
         .hero__cta--secondary:hover {
-          background: rgba(192, 77, 41, 0.08);
+          background: rgba(255, 255, 255, 0.1);
           transform: translateY(-2px);
         }
 
-        .hero__cta span {
-          transition: transform 0.3s ease;
+        /* Block footer */
+        .hero__block-footer {
+          padding-top: var(--space-4);
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .hero__cta:hover span {
-          transform: translateX(3px);
-        }
-
-        /* Trust Line */
         .hero__trust-line {
-          font-size: 0.9375rem;
-          opacity: 0.7;
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.75);
           margin: 0;
-          line-height: 1.8;
-          max-width: 600px;
-          color: #333;
+          line-height: 1.6;
         }
 
-        /* ========== IMAGE SECTION (BOTTOM) ========== */
-        .hero__image-section {
-          width: 100%;
-          background: #f9f6ee;
+        /* BACKGROUND IMAGE (behind block) */
+        .hero__block-image {
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
           overflow: hidden;
-          min-height: 600px;
-        }
-
-        .hero__image-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          min-height: 600px;
-          overflow: hidden;
+          opacity: 0.15;
+          z-index: 1;
         }
 
         .hero__image {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          display: block;
-          animation: zoomIn 1s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .hero__image-fade {
+        .hero__image-overlay {
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
           background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0) 0%,
-            rgba(0, 0, 0, 0.1) 100%
+            90deg,
+            rgba(192, 77, 41, 1) 0%,
+            rgba(192, 77, 41, 0.8) 50%,
+            rgba(192, 77, 41, 0) 100%
           );
-          pointer-events: none;
         }
 
         /* Animations */
@@ -265,122 +366,242 @@ export default function HeroBanner({
           }
         }
 
-        @keyframes zoomIn {
+        @keyframes slideInRight {
           from {
             opacity: 0;
-            transform: scale(1.05);
+            transform: translateX(40px);
           }
           to {
             opacity: 1;
-            transform: scale(1);
+            transform: translateX(0);
           }
         }
 
         /* TABLET */
         @media (max-width: 1024px) {
-          .hero__content-section {
-            padding: 70px var(--gutter) 90px;
+          .hero__container {
+            grid-template-columns: 1fr;
+            min-height: auto;
           }
 
-          .hero__content-wrapper {
-            max-width: 1200px;
+          .hero__left {
+            padding: 80px var(--gutter);
+            min-height: 500px;
           }
 
-          .hero__title {
-            font-size: 3.2rem;
+          .hero__right {
+            min-height: 500px;
+          }
+
+          .hero__number {
+            font-size: 5rem;
           }
 
           .hero__subtitle {
-            font-size: 1.1875rem;
+            font-size: 2rem;
           }
 
-          .hero__image-section {
-            min-height: 450px;
+          .hero__block {
+            padding: 50px;
+            max-width: 100%;
           }
 
-          .hero__image-wrapper {
-            min-height: 450px;
+          .hero__block-title {
+            font-size: 2rem;
           }
         }
 
         /* MOBILE */
         @media (max-width: 768px) {
-          .hero__content-section {
-            padding: 60px var(--gutter) 70px;
+          .hero {
+            min-height: auto;
           }
 
-          .hero__content-wrapper {
-            max-width: 100%;
+          .hero__container {
+            grid-template-columns: 1fr;
           }
 
-          .hero__title {
-            font-size: 2.25rem;
-            margin-bottom: var(--space-4);
+          .hero__left {
+            padding: 60px var(--gutter);
+            min-height: auto;
+          }
+
+          .hero__number {
+            font-size: 4rem;
+            margin-bottom: var(--space-1);
           }
 
           .hero__subtitle {
-            font-size: 1.0625rem;
-            margin-bottom: var(--space-6);
-          }
-
-          .hero__overline {
+            font-size: 1.75rem;
             margin-bottom: var(--space-3);
           }
 
-          .hero__benefits {
-            gap: var(--space-3);
-            margin-bottom: var(--space-6);
-          }
-
-          .hero__benefit-item {
+          .hero__details {
             font-size: 1rem;
           }
 
-          .hero__cta-group {
-            flex-direction: column;
-            margin-bottom: var(--space-6);
+          .hero__divider {
+            margin: var(--space-3) 0;
           }
 
-          .hero__cta {
-            width: 100%;
-            justify-content: center;
-            padding: 14px 20px;
+          .hero__right {
+            min-height: 450px;
           }
 
-          .hero__trust-line {
-            font-size: 0.875rem;
+          .hero__block {
+            padding: 40px;
           }
 
-          .hero__image-section {
-            min-height: 400px;
+          .hero__block-title {
+            font-size: 1.75rem;
           }
 
-          .hero__image-wrapper {
-            min-height: 400px;
+          .hero__block-text {
+            font-size: 1rem;
+          }
+
+          .hero__badges {
+            flex-wrap: wrap;
+            gap: var(--space-2);
+          }
+
+          .hero__badge {
+            font-size: 0.8rem;
+            padding: 6px 10px;
           }
         }
 
         @media (max-width: 480px) {
-          .hero__content-section {
-            padding: 50px var(--gutter) 60px;
+          .hero__left {
+            padding: 50px var(--gutter);
           }
 
-          .hero__title {
-            font-size: 2rem;
-            line-height: 1.2;
+          .hero__number {
+            font-size: 3.5rem;
           }
 
           .hero__subtitle {
+            font-size: 1.5rem;
+          }
+
+          .hero__block {
+            padding: 30px;
+          }
+
+          .hero__block-title {
+            font-size: 1.5rem;
+          }
+
+          .hero__cta-group {
+            gap: var(--space-2);
+          }
+
+          .hero__cta {
+            padding: 12px 20px;
+            font-size: 0.875rem
+
+          .hero__subtitle {
+            font-size: 2rem;
+          }
+
+          .hero__block {
+            padding: 50px;
+            max-width: 100%;
+          }
+
+          .hero__block-title {
+            font-size: 2rem;
+          }
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+          .hero {
+            min-height: auto;
+          }
+
+          .hero__container {
+            grid-template-columns: 1fr;
+          }
+
+          .hero__left {
+            padding: 60px var(--gutter);
+            min-height: auto;
+          }
+
+          .hero__number {
+            font-size: 4rem;
+            margin-bottom: var(--space-1);
+          }
+
+          .hero__subtitle {
+            font-size: 1.75rem;
+            margin-bottom: var(--space-3);
+          }
+
+          .hero__details {
             font-size: 1rem;
-            margin-bottom: var(--space-5);
           }
 
-          .hero__image-section {
-            min-height: 350px;
+          .hero__divider {
+            margin: var(--space-3) 0;
           }
 
-          .hero__image-wrapper {
-            min-height: 350px;
+          .hero__right {
+            min-height: 450px;
+          }
+
+          .hero__block {
+            padding: 40px;
+          }
+
+          .hero__block-title {
+            font-size: 1.75rem;
+          }
+
+          .hero__block-text {
+            font-size: 1rem;
+          }
+
+          .hero__badges {
+            flex-wrap: wrap;
+            gap: var(--space-2);
+          }
+
+          .hero__badge {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero__left {
+            padding: 50px var(--gutter);
+          }
+
+          .hero__number {
+            font-size: 3.5rem;
+          }
+
+          .hero__subtitle {
+            font-size: 1.5rem;
+          }
+
+          .hero__block {
+            padding: 30px;
+          }
+
+          .hero__block-title {
+            font-size: 1.5rem;
+          }
+
+          .hero__cta-group {
+            gap: var(--space-2);
+          }
+
+          .hero__cta {
+            padding: 12px 20px;
+            font-size: 0.875rem;
           }
         }
       `}</style>
