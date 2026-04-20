@@ -4,13 +4,18 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import SeoHead from "../../components/SeoHead";
 
 export default function SocialMediaManagerPage() {
-  const [activeTab, setActiveTab] = useState("templates");
+  const [activeTab, setActiveTab] = useState("products");
   const [templates, setTemplates] = useState([]);
   const [library, setLibrary] = useState([]);
   const [calendar, setCalendar] = useState([]);
+  const [liveProducts, setLiveProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [generatedCaptions, setGeneratedCaptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [tone, setTone] = useState("Kenyan Cultural Heritage");
 
   // Template data
   const defaultTemplates = [
@@ -71,6 +76,102 @@ export default function SocialMediaManagerPage() {
     }
   }
 
+  async function loadProducts() {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/admin/social-media/products", {
+        credentials: "same-origin",
+      });
+      const data = await response.json();
+      setLiveProducts(data.products || []);
+      if (data.total === 0) {
+        setError("No published products found. Add products first!");
+      }
+    } catch (err) {
+      console.error("Error loading products:", err);
+      setError("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function generateCaptionsForProducts() {
+    if (selectedProducts.length === 0) {
+      setError("Select at least one product");
+      return;
+    }
+
+    setGenerating(true);
+    setError("");
+    setGeneratedCaptions([]);
+
+    try {
+      const captions = [];
+      
+      for (const productId of selectedProducts) {
+        const product = liveProducts.find((p) => p.id === productId);
+        if (!product) continue;
+
+        const response = await fetch("/api/admin/generate-social-caption", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            productName: product.name,
+            description: product.description,
+            price: product.price,
+            materials: product.materials,
+            category: product.category,
+          }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          captions.push({
+            productId,
+            productName: product.name,
+            caption: data.caption,
+          });
+        }
+      }
+
+      setGeneratedCaptions(captions);
+      setMessage(`✓ Generated ${captions.length} captions!`);
+    } catch (err) {
+      setError(err.message || "Failed to generate captions");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  function toggleProductSelection(productId) {
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  }
+
+  function selectAllByCategory(category) {
+    const categoryProducts = liveProducts
+      .filter((p) => p.category === category)
+      .map((p) => p.id);
+    
+    const allSelected = categoryProducts.every((id) =>
+      selectedProducts.includes(id)
+    );
+
+    if (allSelected) {
+      setSelectedProducts((prev) =>
+        prev.filter((id) => !categoryProducts.includes(id))
+      );
+    } else {
+      setSelectedProducts((prev) => [
+        ...new Set([...prev, ...categoryProducts]),
+      ]);
+    }
+  }
+
   async function saveCaption(caption) {
     try {
       const response = await fetch("/api/admin/social-media/library", {
@@ -118,6 +219,7 @@ export default function SocialMediaManagerPage() {
   useEffect(() => {
     if (activeTab === "library") loadLibrary();
     else if (activeTab === "calendar") loadCalendar();
+    else if (activeTab === "products") loadProducts();
   }, [activeTab]);
 
   return (
@@ -386,6 +488,12 @@ export default function SocialMediaManagerPage() {
           {/* Tabs */}
           <div className="social-tabs">
             <button
+              className={`social-tab ${activeTab === "products" ? "active" : ""}`}
+              onClick={() => setActiveTab("products")}
+            >
+              📦 Your Products
+            </button>
+            <button
               className={`social-tab ${activeTab === "templates" ? "active" : ""}`}
               onClick={() => setActiveTab("templates")}
             >
@@ -404,18 +512,238 @@ export default function SocialMediaManagerPage() {
               📅 Calendar
             </button>
             <button
-              className={`social-tab ${activeTab === "bulk" ? "active" : ""}`}
-              onClick={() => setActiveTab("bulk")}
-            >
-              🚀 Bulk Generate
-            </button>
-            <button
               className={`social-tab ${activeTab === "guidelines" ? "active" : ""}`}
               onClick={() => setActiveTab("guidelines")}
             >
               ✨ Brand Guide
             </button>
           </div>
+
+          {/* PRODUCTS TAB */}
+          {activeTab === "products" && (
+            <div>
+              <p style={{ color: "#666", marginBottom: "24px" }}>
+                Select your live products and generate Instagram captions in bulk. 
+                {liveProducts.length === 0 && " (No published products yet - add them in Products page first)"}
+              </p>
+
+              {liveProducts.length > 0 && (
+                <>
+                  <div style={{ marginBottom: "20px", display: "flex", gap: "12px", alignItems: "center" }}>
+                    <select
+                      value={tone}
+                      onChange={(e) => setTone(e.target.value)}
+                      style={{
+                        padding: "10px 12px",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <option>Kenyan Cultural Heritage</option>
+                      <option>Modern & Minimalist</option>
+                      <option>Luxury Handmade</option>
+                      <option>Community-Focused</option>
+                    </select>
+                    <button
+                      onClick={generateCaptionsForProducts}
+                      disabled={selectedProducts.length === 0 || generating}
+                      style={{
+                        padding: "10px 20px",
+                        background: selectedProducts.length === 0 ? "#ccc" : "#673AB7",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: selectedProducts.length === 0 ? "not-allowed" : "pointer",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {generating ? "🔄 Generating..." : `✨ Generate (${selectedProducts.length})`}
+                    </button>
+                  </div>
+
+                  {/* Products by Category */}
+                  {Object.entries(
+                    liveProducts.reduce((acc, product) => {
+                      if (!acc[product.category]) acc[product.category] = [];
+                      acc[product.category].push(product);
+                      return acc;
+                    }, {})
+                  ).map(([category, products]) => (
+                    <div key={category} style={{ marginBottom: "24px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: "12px",
+                          paddingBottom: "8px",
+                          borderBottom: "2px solid #eee",
+                        }}
+                      >
+                        <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "600" }}>
+                          {category} ({products.length})
+                        </h3>
+                        <button
+                          onClick={() => selectAllByCategory(category)}
+                          style={{
+                            padding: "6px 12px",
+                            background: products.every((p) =>
+                              selectedProducts.includes(p.id)
+                            )
+                              ? "#C04D29"
+                              : "#f5f5f5",
+                            color: products.every((p) =>
+                              selectedProducts.includes(p.id)
+                            )
+                              ? "white"
+                              : "#333",
+                            border:
+                              products.every((p) =>
+                                selectedProducts.includes(p.id)
+                              ) === false
+                                ? "1px solid #ddd"
+                                : "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {products.every((p) =>
+                            selectedProducts.includes(p.id)
+                          )
+                            ? "✓ All Selected"
+                            : "Select All"}
+                        </button>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill, minmax(300px, 1fr))",
+                          gap: "12px",
+                        }}
+                      >
+                        {products.map((product) => (
+                          <div
+                            key={product.id}
+                            onClick={() => toggleProductSelection(product.id)}
+                            style={{
+                              padding: "12px",
+                              border: selectedProducts.includes(product.id)
+                                ? "2px solid #C04D29"
+                                : "1px solid #ddd",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              background: selectedProducts.includes(
+                                product.id
+                              )
+                                ? "#fff5f0"
+                                : "white",
+                              transition: "all 0.2s",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "12px",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedProducts.includes(
+                                  product.id
+                                )}
+                                onChange={() => {}}
+                                style={{
+                                  marginTop: "4px",
+                                  cursor: "pointer",
+                                  width: "18px",
+                                  height: "18px",
+                                }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <p
+                                  style={{
+                                    margin: "0 0 4px 0",
+                                    fontWeight: "600",
+                                    fontSize: "14px",
+                                    color: "#333",
+                                  }}
+                                >
+                                  {product.name}
+                                </p>
+                                <p
+                                  style={{
+                                    margin: "0 0 8px 0",
+                                    fontSize: "13px",
+                                    color: "#666",
+                                  }}
+                                >
+                                  KES {product.price?.toLocaleString()}
+                                </p>
+                                {product.materials && (
+                                  <p
+                                    style={{
+                                      margin: 0,
+                                      fontSize: "12px",
+                                      color: "#999",
+                                      fontStyle: "italic",
+                                    }}
+                                  >
+                                    {product.materials}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Generated Captions */}
+              {generatedCaptions.length > 0 && (
+                <div style={{ marginTop: "32px" }}>
+                  <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "16px" }}>
+                    ✨ Generated Captions
+                  </h3>
+                  <div className="social-grid">
+                    {generatedCaptions.map((item, index) => (
+                      <div key={index} className="social-card">
+                        <h3>{item.productName}</h3>
+                        <div className="social-card-text">{item.caption}</div>
+                        <div className="social-card-actions">
+                          <button
+                            className="social-btn social-btn-primary"
+                            onClick={() => {
+                              navigator.clipboard.writeText(item.caption);
+                              setMessage("✓ Copied!");
+                              setTimeout(() => setMessage(""), 1500);
+                            }}
+                          >
+                            📋 Copy
+                          </button>
+                          <button
+                            className="social-btn social-btn-secondary"
+                            onClick={() => saveCaption({ ...item, template: item.caption })}
+                          >
+                            💾 Save
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* TEMPLATES TAB */}
           {activeTab === "templates" && (
@@ -528,52 +856,6 @@ export default function SocialMediaManagerPage() {
                   </tbody>
                 </table>
               )}
-            </div>
-          )}
-
-          {/* BULK GENERATE TAB */}
-          {activeTab === "bulk" && (
-            <div>
-              <p style={{ color: "#666", marginBottom: "24px" }}>
-                Generate captions for multiple products at once.
-              </p>
-              <div className="social-form">
-                <div className="social-form-group">
-                  <label>Select Products</label>
-                  <select multiple style={{ minHeight: "150px" }}>
-                    <option>All Earrings (5)</option>
-                    <option>All Necklaces (3)</option>
-                    <option>All Bracelets (4)</option>
-                    <option>All Home Decor (2)</option>
-                  </select>
-                  <div className="social-hint">Hold Ctrl/Cmd to select multiple</div>
-                </div>
-
-                <div className="social-form-group">
-                  <label>Tone</label>
-                  <select>
-                    <option>Kenyan Cultural Heritage</option>
-                    <option>Modern & Minimalist</option>
-                    <option>Luxury Handmade</option>
-                    <option>Community-Focused</option>
-                  </select>
-                </div>
-
-                <button
-                  style={{
-                    padding: "12px 20px",
-                    background: "#673AB7",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "14px",
-                  }}
-                >
-                  🚀 Generate Captions
-                </button>
-              </div>
             </div>
           )}
 
