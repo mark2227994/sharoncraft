@@ -63,14 +63,18 @@ async function loadImageInput(url) {
 
   const contentType = response.headers.get("content-type") || "image/jpeg";
   const buffer = await response.arrayBuffer();
-  const bytes = Array.from(new Uint8Array(buffer));
+  const base64 = Buffer.from(buffer).toString("base64");
 
-  return { contentType, bytes };
+  return { contentType, base64 };
 }
 
 async function describeImage(visionModel, imageInput, index) {
   const result = await runCloudflareAiModel(visionModel, {
-    image: imageInput.bytes,
+    image: [
+      {
+        url: `data:${imageInput.contentType};base64,${imageInput.base64}`,
+      },
+    ],
     prompt:
       `Describe this handcrafted product photo for an e-commerce merchandiser. ` +
       `Focus on the item type, materials, colors, silhouette, texture, and whether it looks like a close-up, styled shot, or detail shot. ` +
@@ -78,7 +82,7 @@ async function describeImage(visionModel, imageInput, index) {
     max_tokens: 220,
   });
 
-  return String(result?.description || "").trim();
+  return String(result?.response || result?.description || "").trim();
 }
 
 function buildPrompt(body, imageSummaries) {
@@ -228,10 +232,19 @@ export default async function handler(req, res) {
 
   try {
     const imageUrls = uniqueImageUrls(req, req.body);
-    const imageInputs = await Promise.all(imageUrls.map((url) => loadImageInput(url)));
-    const imageSummaries = await Promise.all(
-      imageInputs.map((imageInput, index) => describeImage(visionModel, imageInput, index)),
-    );
+    let imageSummaries = [];
+
+    if (imageUrls.length > 0) {
+      try {
+        const imageInputs = await Promise.all(imageUrls.map((url) => loadImageInput(url)));
+        imageSummaries = await Promise.all(
+          imageInputs.map((imageInput, index) => describeImage(visionModel, imageInput, index)),
+        );
+      } catch (imageError) {
+        console.warn("Could not load/process images:", imageError.message);
+        // Continue without images - use fallback description
+      }
+    }
 
     const prompt = buildPrompt(req.body, imageSummaries);
     const result = await runCloudflareAiModel(textModel, {
