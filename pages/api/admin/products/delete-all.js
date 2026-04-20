@@ -1,5 +1,7 @@
 import { isAuthorizedRequest } from "../../../../lib/admin-auth";
-import { readProducts, writeProducts } from "../../../../lib/store";
+import { writeProducts } from "../../../../lib/store";
+import fs from "fs/promises";
+import path from "path";
 
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
@@ -12,8 +14,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Clear all products by writing empty array
+    // Delete all products from Supabase
     await writeProducts([]);
+    
+    // Also clear the local JSON file so fallback doesn't restore old data
+    const root = process.cwd();
+    const jsonPath = path.join(root, "data", "store", "products.json");
+    await fs.writeFile(jsonPath, "[]", "utf8");
+    
     return res.status(200).json({ ok: true, message: "All products deleted successfully" });
   } catch (error) {
     console.error("Error deleting all products:", error);
