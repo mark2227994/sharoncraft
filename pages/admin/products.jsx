@@ -164,9 +164,30 @@ export default function AdminProductsPage({ initialProducts }) {
     <AdminLayout
       title="Products"
       action={
-        <Link href="/admin/products/new" className="admin-button">
-          Add Product
-        </Link>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={handleDeleteAll}
+            disabled={working || products.length === 0}
+            style={{
+              backgroundColor: "#dc2626",
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              fontWeight: "600",
+              cursor: working || products.length === 0 ? "not-allowed" : "pointer",
+              opacity: working || products.length === 0 ? 0.5 : 1,
+              fontSize: "14px",
+              whiteSpace: 'nowrap'
+            }}
+            title="Delete all products - requires confirmation"
+          >
+            {working ? "Deleting..." : `🗑️ Delete All`}
+          </button>
+          <Link href="/admin/products/new" className="admin-button">
+            Add Product
+          </Link>
+        </div>
       }
     >
       <section className="admin-stats-grid" style={{ marginBottom: "var(--space-5)" }}>
@@ -246,31 +267,6 @@ export default function AdminProductsPage({ initialProducts }) {
           >
             {working ? "Applying..." : "Apply"}
           </button>
-        </div>
-
-        {/* Quick Delete All Button */}
-        <div style={{ marginTop: "var(--space-3)", paddingTop: "var(--space-3)", borderTop: "1px solid #ddd" }}>
-          <button
-            type="button"
-            onClick={handleDeleteAll}
-            disabled={working || products.length === 0}
-            style={{
-              backgroundColor: "#dc2626",
-              color: "white",
-              padding: "10px 16px",
-              border: "none",
-              borderRadius: "4px",
-              fontWeight: "600",
-              cursor: working || products.length === 0 ? "not-allowed" : "pointer",
-              opacity: working || products.length === 0 ? 0.5 : 1,
-              fontSize: "14px"
-            }}
-          >
-            {working ? "Deleting..." : `🗑️ Delete All ${products.length} Products`}
-          </button>
-          <p style={{ fontSize: "12px", color: "#64748b", margin: "8px 0 0 0" }}>
-            ⚠️ Warning: This will delete ALL products. Cannot be undone.
-          </p>
         </div>
       </section>
 
