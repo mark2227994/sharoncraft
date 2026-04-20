@@ -2,6 +2,8 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import DashboardAlerts from "../../components/admin/DashboardAlerts";
+import ImportHistoryPanel from "../../components/admin/ImportHistoryPanel";
 import Icon from "../../components/icons";
 import { formatKES, formatShortDate } from "../../lib/formatters";
 
@@ -86,6 +88,10 @@ export default function AdminDashboardPage() {
         </Link>
       }
     >
+      <DashboardAlerts />
+      
+      <ImportHistoryPanel />
+
       {finance ? (
         <section className="dashboard-finance-section" style={{ marginBottom: "var(--space-6)" }}>
           <div className="dashboard-finance-hero">

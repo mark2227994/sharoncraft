@@ -3,11 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import Link from "next/link";
 import AdminLayout from "../../../components/admin/AdminLayout";
+import ArtisanFilter from "../../../components/admin/ArtisanFilter";
+import BatchEditModal from "../../../components/admin/BatchEditModal";
 import { formatKES } from "../../../lib/formatters";
 import { getJewelryTypeLabel } from "../../../lib/products";
 
 export default function AdminProductsPage() {
   const [deleting, setDeleting] = useState(null);
+  const [selectedArtisan, setSelectedArtisan] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showBatchEdit, setShowBatchEdit] = useState(false);
 
   const { data: products, isLoading, isError } = useQuery({
     queryKey: ["admin-products"],
@@ -39,6 +44,27 @@ export default function AdminProductsPage() {
     }
   }
 
+  function toggleSelect(id) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function selectAll() {
+    if (selectedIds.length === products?.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(products?.map((p) => p.id) || []);
+    }
+  }
+
+  function handleBatchEditSaved() {
+    setSelectedIds([]);
+    setShowBatchEdit(false);
+    // Refetch products
+    window.location.reload();
+  }
+
   return (
     <>
       <Head>
@@ -47,9 +73,14 @@ export default function AdminProductsPage() {
       <AdminLayout
         title="Stock"
         action={
-          <Link href="/admin/products/new" className="admin-button">
-            New piece
-          </Link>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <Link href="/admin/products/import" className="admin-button admin-button--secondary">
+              📥 Bulk Import
+            </Link>
+            <Link href="/admin/products/new" className="admin-button">
+              New piece
+            </Link>
+          </div>
         }
       >
         {isLoading ? <p className="admin-note">Loading...</p> : null}
@@ -57,10 +88,35 @@ export default function AdminProductsPage() {
 
         {!isLoading && products ? (
           <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", gap: "16px", flexWrap: "wrap" }}>
+              <ArtisanFilter
+                products={products}
+                onFilterChange={setSelectedArtisan}
+              />
+              {selectedIds.length > 0 && (
+                <button
+                  type="button"
+                  className="admin-button"
+                  onClick={() => setShowBatchEdit(true)}
+                  style={{ background: "#673AB7" }}
+                >
+                  ✏️ Edit {selectedIds.length}
+                </button>
+              )}
+            </div>
+
             <div className="admin-table-wrap admin-panel">
               <table className="admin-table">
                 <thead>
                   <tr>
+                    <th style={{ width: "40px" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.length === products.length && products.length > 0}
+                        onChange={selectAll}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </th>
                     <th>Piece</th>
                     <th>Artisan</th>
                     <th>Price</th>
@@ -69,8 +125,18 @@ export default function AdminProductsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product) => (
+                  {products
+                    .filter((p) => !selectedArtisan || p.artisan === selectedArtisan)
+                    .map((product) => (
                     <tr key={product.id}>
+                      <td style={{ width: "40px" }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(product.id)}
+                          onChange={() => toggleSelect(product.id)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </td>
                       <td>
                         <div>
                           <div>{product.name}</div>
@@ -162,6 +228,15 @@ export default function AdminProductsPage() {
                 </div>
               ))}
             </div>
+
+            {showBatchEdit && (
+              <BatchEditModal
+                selectedIds={selectedIds}
+                products={products}
+                onClose={() => setShowBatchEdit(false)}
+                onSave={handleBatchEditSaved}
+              />
+            )}
           </>
         ) : null}
       </AdminLayout>

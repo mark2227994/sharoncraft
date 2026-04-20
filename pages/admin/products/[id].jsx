@@ -7,7 +7,9 @@ import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
+import PricingSuggester from "../../../components/admin/PricingSuggester";
 import WearItWithPicker from "../../../components/admin/WearItWithPicker";
+import { validateProductForSave } from "../../../lib/product-validation";
 import { categoryOptions } from "../../../data/site";
 import {
   fulfillmentTypeOptions,
@@ -273,6 +275,13 @@ export default function AdminProductEditorPage() {
       },
     };
 
+    // Validate product completeness
+    const validation = validateProductForSave(payload);
+    if (!validation.valid) {
+      setSaveError(`❌ ${validation.message}`);
+      return;
+    }
+
     const response = await fetch("/api/admin/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -459,6 +468,17 @@ export default function AdminProductEditorPage() {
               </label>
             </div>
 
+            <PricingSuggester 
+              name={watch("name")}
+              description={watch("description")}
+              materials={watch("materials")}
+              jewelryType={watch("jewelryType")}
+              category={watch("category")}
+              onApplyPrice={(price) => {
+                setValue("price", price);
+              }}
+            />
+
             <div className="admin-panel" style={{ padding: "var(--space-4)", marginBottom: "var(--space-4)" }}>
               <p className="overline" style={{ marginBottom: "8px" }}>
                 Suggested project folder
@@ -545,6 +565,30 @@ export default function AdminProductEditorPage() {
             </div>
 
             <div className="admin-quick-actions">
+              <button 
+                type="button" 
+                className="admin-button admin-button--secondary"
+                onClick={async () => {
+                  if (!confirm(`Duplicate "${product?.name}"? A copy will be created.`)) return;
+                  try {
+                    const res = await fetch("/api/admin/duplicate-product", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "same-origin",
+                      body: JSON.stringify({ productId: product.id }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error);
+                    alert(data.message);
+                    // Refetch products list
+                    queryClient.invalidateQueries({ queryKey: ["products"] });
+                  } catch (err) {
+                    alert(`Error: ${err.message}`);
+                  }
+                }}
+              >
+                📋 Duplicate
+              </button>
               <button type="submit" className="admin-button">
                 Save piece
               </button>

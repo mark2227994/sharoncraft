@@ -4,7 +4,9 @@ import { useForm } from "react-hook-form";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import LocalImageUpload from "../../../components/admin/LocalImageUpload";
 import ProductAIAssistant from "../../../components/admin/ProductAIAssistant";
+import PricingSuggester from "../../../components/admin/PricingSuggester";
 import WearItWithPicker from "../../../components/admin/WearItWithPicker";
+import { validateProductForSave } from "../../../lib/product-validation";
 import { categoryOptions } from "../../../data/site";
 import { formatKES } from "../../../lib/formatters";
 import {
@@ -259,6 +261,13 @@ export default function AdminNewProductPage() {
         behindScenesPhoto: values.stylingImage || values.detailImage || values.image,
       },
     };
+
+    // Validate product completeness
+    const validation = validateProductForSave(payload);
+    if (!validation.valid) {
+      setSubmitError(`❌ ${validation.message}`);
+      return;
+    }
 
     const response = await fetch("/api/admin/products", {
       method: "POST",
@@ -650,6 +659,17 @@ export default function AdminNewProductPage() {
                 />
               </label>
             </div>
+
+            <PricingSuggester 
+              name={watch("name")}
+              description={watch("description")}
+              materials={watch("materials")}
+              jewelryType={watch("jewelryType")}
+              category={watch("category")}
+              onApplyPrice={(price) => {
+                setValue("price", price);
+              }}
+            />
           </div>
 
           {/* Step 5: Advanced */}

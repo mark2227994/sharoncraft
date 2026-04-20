@@ -66,23 +66,57 @@ const TEXT_FIELDS = [
 
 export default function AdminSiteImagesPage() {
   const [form, setForm] = useState(null);
+  const [liveContent, setLiveContent] = useState(null);
+  const [loadingLive, setLoadingLive] = useState(false);
+  const [liveError, setLiveError] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [persistence, setPersistence] = useState(null);
+  const [showLiveComparison, setShowLiveComparison] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Load admin form data
       const response = await fetch("/api/admin/site-images", { credentials: "same-origin" });
       if (!response.ok) return;
       const data = await response.json();
       if (!cancelled) setForm(data);
+
+      // Load live site content
+      setLoadingLive(true);
+      const liveResponse = await fetch("/api/admin/site-images-live", { credentials: "same-origin" });
+      if (liveResponse.ok) {
+        const liveData = await liveResponse.json();
+        if (!cancelled) setLiveContent(liveData.liveContent);
+      } else {
+        if (!cancelled) setLiveError("Could not load live site content");
+      }
+      setLoadingLive(false);
     })();
     return () => {
       cancelled = true;
     };
   }, []);
+
+  function getDiffFields() {
+    if (!form || !liveContent) return [];
+    const diffs = [];
+    const allKeys = new Set([...Object.keys(form), ...Object.keys(liveContent)]);
+    for (const key of allKeys) {
+      if (form[key] !== liveContent[key]) {
+        diffs.push(key);
+      }
+    }
+    return diffs;
+  }
+
+  function pullFromLive() {
+    if (!liveContent) return;
+    setForm(liveContent);
+    setMessage("✓ Pulled from live site. Review changes and click 'Save all changes' to confirm.");
+  }
 
   function set(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -132,7 +166,137 @@ export default function AdminSiteImagesPage() {
         {!form ? (
           <p className="admin-note">Loading...</p>
         ) : (
-          <form className="site-content-form" onSubmit={onSubmit}>
+          <>
+            {/* Live Site Comparison Bar */}
+            {liveContent && getDiffFields().length > 0 && (
+              <div className="live-comparison-bar">
+                <div className="live-comparison-content">
+                  <p className="live-comparison-title">🔴 {getDiffFields().length} field(s) differ from live site</p>
+                  <p className="live-comparison-fields">
+                    Changed: {getDiffFields().map((k) => {
+                      const field = [...IMAGE_FIELDS, ...TEXT_FIELDS].find((f) => f.key === k);
+                      return field ? field.label : k;
+                    }).join(", ")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="admin-button admin-button--secondary"
+                  onClick={pullFromLive}
+                >
+                  ↓ Pull from live
+                </button>
+              </div>
+            )}
+
+            {loadingLive && (
+              <p className="admin-note">Loading live site content...</p>
+            )}
+
+            {liveError && (
+              <p className="admin-form-error">{liveError}</p>
+            )}
+
+            {liveContent && getDiffFields().length === 0 && (
+              <p className="admin-note" style={{ backgroundColor: "#dcfce7", borderColor: "#86efac" }}>
+                ✓ Admin version matches live site
+              </p>
+            )}
+
+            {/* Live Site Image Gallery */}
+            {liveContent && (
+              <section className="site-content-section">
+                <h2 className="site-content-section-title">🌐 Live Website Images</h2>
+                <p className="admin-note" style={{ marginBottom: "1rem" }}>
+                  Here's what's currently published on your live website. Red border = different from admin version.
+                </p>
+                <div className="live-gallery">
+                  {IMAGE_FIELDS.map((field) => {
+                    const liveValue = liveContent[field.key];
+                    const adminValue = form[field.key];
+                    const isDifferent = liveValue !== adminValue;
+                    return (
+                      <div
+                        key={field.key}
+                        className={`live-gallery-item ${isDifferent ? "live-gallery-item--different" : ""}`}
+                      >
+                        <p className="live-gallery-label">
+                          {field.label}
+                          {isDifferent && <span className="live-gallery-badge">CHANGED</span>}
+                        </p>
+                        {liveValue ? (
+                          <div className="live-image-container">
+                            <img
+                              src={liveValue}
+                              alt={field.label}
+                              onError={(e) => {
+                                e.target.parentElement.innerHTML =
+                                  '<p style="color: #999; padding: 1rem; text-align: center;">Image not found</p>';
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="live-image-empty">No image</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Side-by-side Image Comparisons for Changed Fields */}
+            {liveContent && getDiffFields().length > 0 && (
+              <section className="site-content-section">
+                <h2 className="site-content-section-title">🔄 Image Comparisons (Admin vs Live)</h2>
+                <div className="comparison-grid">
+                  {getDiffFields()
+                    .filter((key) => IMAGE_FIELDS.find((f) => f.key === key))
+                    .map((key) => {
+                      const field = IMAGE_FIELDS.find((f) => f.key === key);
+                      const adminValue = form[key];
+                      const liveValue = liveContent[key];
+                      return (
+                        <div key={key} className="comparison-block">
+                          <p className="comparison-title">{field.label}</p>
+                          <div className="comparison-images">
+                            <div className="comparison-image-column">
+                              <p className="comparison-label admin">Admin Version</p>
+                              {adminValue ? (
+                                <img
+                                  src={adminValue}
+                                  alt="Admin"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className="comparison-empty">No image</div>
+                              )}
+                            </div>
+                            <div className="comparison-image-column">
+                              <p className="comparison-label live">Live Version</p>
+                              {liveValue ? (
+                                <img
+                                  src={liveValue}
+                                  alt="Live"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className="comparison-empty">No image</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </section>
+            )}
+
+            <form className="site-content-form" onSubmit={onSubmit}>
             <section className="site-content-section">
               <h2 className="site-content-section-title">📷 Photos</h2>
               <div className="site-content-fields">
@@ -226,6 +390,36 @@ export default function AdminSiteImagesPage() {
             {error ? <p className="admin-form-error" style={{ marginTop: "var(--space-3)" }}>{error}</p> : null}
 
             <style jsx>{`
+              .live-comparison-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+              }
+
+              .live-comparison-content {
+                flex: 1;
+              }
+
+              .live-comparison-title {
+                margin: 0;
+                font-weight: 600;
+                color: #991b1b;
+                font-size: 0.95rem;
+              }
+
+              .live-comparison-fields {
+                margin: 0.5rem 0 0 0;
+                font-size: 0.85rem;
+                color: #7f1d1d;
+                font-style: italic;
+              }
+
               .site-content-form {
                 display: flex;
                 flex-direction: column;
@@ -315,9 +509,152 @@ export default function AdminSiteImagesPage() {
                 cursor: not-allowed;
               }
 
+              /* Live Gallery Styles */
+              .live-gallery {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1rem;
+              }
+
+              .live-gallery-item {
+                background: white;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+              }
+
+              .live-gallery-item--different {
+                border-color: #ef4444;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+              }
+
+              .live-gallery-label {
+                margin: 0;
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #333;
+                background: #f9f9f9;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              }
+
+              .live-gallery-badge {
+                display: inline-block;
+                background: #ef4444;
+                color: white;
+                font-size: 0.7rem;
+                padding: 0.3rem 0.6rem;
+                border-radius: 4px;
+                font-weight: 700;
+              }
+
+              .live-image-container {
+                width: 100%;
+                height: 200px;
+                overflow: hidden;
+                background: #f5f5f5;
+              }
+
+              .live-image-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              }
+
+              .live-image-empty {
+                width: 100%;
+                height: 200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f5f5f5;
+                color: #999;
+                font-size: 0.9rem;
+              }
+
+              /* Comparison Grid Styles */
+              .comparison-grid {
+                display: grid;
+                gap: 2rem;
+                margin-top: 1rem;
+              }
+
+              .comparison-block {
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 1rem;
+              }
+
+              .comparison-title {
+                margin: 0 0 1rem 0;
+                font-weight: 600;
+                color: #333;
+                font-size: 0.95rem;
+              }
+
+              .comparison-images {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+              }
+
+              .comparison-image-column {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+              }
+
+              .comparison-label {
+                margin: 0;
+                font-size: 0.8rem;
+                font-weight: 600;
+                padding: 0.5rem 0.75rem;
+                border-radius: 4px;
+              }
+
+              .comparison-label.admin {
+                background: #dbeafe;
+                color: #1e40af;
+              }
+
+              .comparison-label.live {
+                background: #dcfce7;
+                color: #166534;
+              }
+
+              .comparison-image-column img {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 6px;
+                border: 1px solid #e0e0e0;
+              }
+
+              .comparison-empty {
+                width: 100%;
+                height: 200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f5f5f5;
+                color: #999;
+                font-size: 0.9rem;
+                border-radius: 6px;
+              }
+
               @media (max-width: 1200px) {
                 .site-content-section {
                   padding: 1.25rem;
+                }
+
+                .comparison-images {
+                  grid-template-columns: 1fr;
                 }
               }
 
@@ -329,9 +666,23 @@ export default function AdminSiteImagesPage() {
                 .site-content-section {
                   padding: 1rem;
                 }
+
+                .live-comparison-bar {
+                  flex-direction: column;
+                  align-items: flex-start;
+                }
+
+                .live-gallery {
+                  grid-template-columns: 1fr;
+                }
+
+                .comparison-images {
+                  grid-template-columns: 1fr;
+                }
               }
             `}</style>
-          </form>
+            </form>
+          </>
         )}
       </AdminLayout>
     </>
