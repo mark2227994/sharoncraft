@@ -99,20 +99,23 @@ export default function ProductDetailPage({ product, wearItWithProducts, wearItW
   const handleWhatsApp = () => {
     const artisanInfo = product.artisan ? ` by ${product.artisan}` : '';
     const materials = product.story?.materials?.length ? ` | ${product.story.materials.slice(0, 2).join(', ')}` : '';
-    const scarcity = product.stock && product.stock < 3 ? ' ⚠️ Limited stock!' : ' ✓ In stock';
+    const scarcity = product.stock && product.stock < 3 ? ' (Limited stock available)' : ' (In stock)';
     const variant = selectedVariant ? ` | ${selectedVariant}` : '';
     
     const lines = [
-      '👋 Hi SharonCraft!',
+      'Hello SharonCraft,',
       '',
-      `✨ *${product.name}*${artisanInfo}`,
-      `💰 KES ${product.price.toLocaleString()} x${quantity} = KES ${(product.price * quantity).toLocaleString()}`,
+      `I am interested in: ${product.name}${artisanInfo}`,
+      `Price: KES ${product.price.toLocaleString()} x ${quantity} = KES ${(product.price * quantity).toLocaleString()}`,
       `${materials}${scarcity}${variant}`,
       '',
-      `🚚 Nairobi: 24-48 hrs | Other areas: 3-5 days`,
-      `💳 M-Pesa, bank transfer, or on delivery`,
+      'Questions:',
+      '- Is this item still available?',
+      '- What is the current delivery timeline?',
+      '- Can I choose specific colors or customize this piece?',
+      '- What are the payment options?',
       '',
-      'Is this still available? Please confirm. Thanks! 🙏'
+      'Thank you!'
     ];
     const message = lines.join('\n');
     window.open(`https://wa.me/254112222572?text=${encodeURIComponent(message)}`, "_blank");

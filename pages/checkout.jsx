@@ -65,12 +65,12 @@ function buildWhatsAppMessage({
     lines.push("");
   }
   lines.push("PAYMENT OPTIONS:");
-  lines.push("✓ M-Pesa (till 254112222572)");
-  lines.push("✓ Bank transfer");
-  lines.push("✓ Cash on delivery (Nairobi)");
+  lines.push("- M-Pesa (till 254112222572)");
+  lines.push("- Bank transfer");
+  lines.push("- Cash on delivery (Nairobi)");
   lines.push("");
-  lines.push("Sharon will confirm within 2 hours");
-  lines.push("Thank you for ordering with SharonCraft!");
+  lines.push("Sharon will confirm your order details and payment instructions within 2 hours.");
+  lines.push("Thank you for your order with SharonCraft!");
   return lines.join("\n");
 }
 

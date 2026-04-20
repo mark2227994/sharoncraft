@@ -137,8 +137,8 @@ export default function DepositPaymentPage({ orderId }) {
             {/* Payment Status */}
             {paymentStatus === "pending-quote" && (
               <div className="status-box status-box--warning">
-                <p>⏳ <strong>Waiting for quote confirmation</strong></p>
-                <p>We'll send you the final price, deposit amount, and payment details on WhatsApp soon.</p>
+                <p><strong>Waiting for quote confirmation</strong></p>
+                <p>We are preparing your custom design quote. You will receive the final price, deposit amount, and payment instructions on WhatsApp shortly. This typically takes 1-2 hours.</p>
               </div>
             )}
 
@@ -157,16 +157,16 @@ export default function DepositPaymentPage({ orderId }) {
                       <strong className="amount">KES {depositAmount.toLocaleString()}</strong>
                     </div>
                     <p className="price-note">
-                      ✓ Deposit secures your order and covers materials + labor
+                      - Your deposit secures your custom order and covers materials and labor costs
                       <br />
-                      ✓ Remaining 50% due after production
+                      - The remaining 50% payment is due after we complete your piece and get your final approval
                     </p>
                   </div>
                 </div>
 
                 {/* M-Pesa Instructions */}
                 <div className="payment-section">
-                  <h2>💰 Pay with M-Pesa</h2>
+                  <h2>Pay with M-Pesa</h2>
                   <div className="mpesa-instructions">
                     <p className="instruction-title">Follow these steps:</p>
                     <ol className="instruction-list">
@@ -182,7 +182,7 @@ export default function DepositPaymentPage({ orderId }) {
 
                 {/* Submit Proof */}
                 <form onSubmit={handleSubmitProof} className="payment-proof-form">
-                  <h3>✓ Payment Submitted</h3>
+                  <h3>Payment Submitted</h3>
                   <p className="form-description">
                     Enter your M-Pesa payment reference number below, and we'll verify your payment.
                   </p>
@@ -215,15 +215,15 @@ export default function DepositPaymentPage({ orderId }) {
 
             {paymentStatus === "deposit-pending" && (
               <div className="status-box status-box--success">
-                <p>✓ <strong>Payment proof submitted</strong></p>
-                <p>Thank you! We'll verify your payment and send you a WhatsApp confirmation within 1 hour.</p>
+                <p><strong>Payment proof submitted</strong></p>
+                <p>Thank you for submitting your payment proof. We will verify your M-Pesa payment and send you a WhatsApp confirmation within 1 hour. Your production will start immediately after verification.</p>
               </div>
             )}
 
             {paymentStatus === "deposit-paid" && (
               <div className="status-box status-box--confirmed">
-                <p>✅ <strong>Payment confirmed!</strong></p>
-                <p>Your deposit has been received. Production will start now. Follow the progress on WhatsApp!</p>
+                <p><strong>Payment confirmed!</strong></p>
+                <p>Your deposit payment has been verified and received. Production has started on your custom piece. You will receive regular progress updates on WhatsApp with photos and timeline details.</p>
               </div>
             )}
 

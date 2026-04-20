@@ -2438,21 +2438,21 @@
     const intent = normalizeText(settings.intent) || "order";
     const productPath = product && product.id ? buildProductSharePath(product) : window.location.pathname;
     const productLink = absoluteUrl(productPath);
-    const inStock = product && !product.soldOut ? '✓ In stock' : '⚠️ Limited';
+    const inStock = product && !product.soldOut ? 'In stock' : 'Limited availability';
 
     if (intent === "custom") {
-      return `👋 Hi SharonCraft!\n\n🎨 I love *${productName}* by ${artisan}${materials ? ` (${materials})` : ''}.\n\nCan I customize the colors or create something similar?\n\n💡 What options do you have?\n\nProduct: ${productLink}`;
+      return `Hello SharonCraft,\n\nI love this piece: ${productName} by ${artisan}${materials ? ` (${materials})` : ''}.\n\nI would like to customize the colors or create something similar.\n\nWhat options do you have available?\n\nProduct: ${productLink}`;
     }
 
     if (intent === "gift") {
-      return `👋 Hi SharonCraft!\n\n🎁 I'm considering *${productName}* as a gift for someone special.\n\nQuestions:\n✓ Availability? ${inStock}\n✓ Delivery timeline?\n✓ Gift wrapping options?\n\n💰 ${productPrice}\n\nProduct: ${productLink}`;
+      return `Hello SharonCraft,\n\nI am interested in the ${productName} as a gift for someone special.\n\nQuestions:\n- Is it available? ${inStock}\n- What is the current delivery timeline?\n- Do you offer gift wrapping or gift messaging?\n\nPrice: ${productPrice}\n\nProduct: ${productLink}`;
     }
 
     if (intent === "share") {
-      return `🔗 Hey! Check this out from SharonCraft:\n\n✨ *${productName}* by ${artisan}\n💰 ${productPrice}\n${materials ? `🎨 ${materials}` : ''}\n\nView it: ${productLink}`;
+      return `Check this out from SharonCraft:\n\n${productName} by ${artisan}\nPrice: ${productPrice}\n${materials ? `Materials: ${materials}` : ''}\n\nView it: ${productLink}`;
     }
 
-    return `👋 Hi SharonCraft!\n\n✨ *${productName}* by ${artisan}\n💰 ${productPrice}${materials ? `\n🎨 ${materials}` : ''}\n${inStock}\n\n🚚 Nairobi: 24-48 hrs | Other: 3-5 days\n💳 M-Pesa, transfer, or on delivery\n\nPlease confirm availability & next steps. Thank you! 🙏\n\n${productLink}`;
+    return `Hello SharonCraft,\n\nI am interested in: ${productName} by ${artisan}\nPrice: ${productPrice}${materials ? `\nMaterials: ${materials}` : ''}\nStatus: ${inStock}\n\nDelivery:\n- Nairobi: 24-48 hours\n- Other areas: 3-5 days\n\nPayment options: M-Pesa, bank transfer, or cash on delivery\n\nCan you confirm availability and delivery details? Thank you.\n\n${productLink}`;
   }
 
   function waitForData() {
