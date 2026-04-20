@@ -7,6 +7,7 @@ const PRODUCT_COPY_FIELDS = [
   "slug",
   "category",
   "jewelryType",
+  "suggestedPrice",
   "shortDescription",
   "fullDescription",
   "materials",
@@ -108,7 +109,14 @@ function buildPrompt(body, imageSummaries) {
     "- Incorporate African words naturally (Uhuru=freedom, Malkia=queen, Twiga=giraffe, Kijani=green, etc).",
     "- Product titles should be culturally inspired, meaningful, and accessible (not luxury-priced language).",
     "- Descriptions should celebrate artisan heritage, handmade quality, and community pride—not mass-market selling.",
-    "- Price recommendations should be modest and accessible to African customers (KES 800-5000 range is appropriate).",
+    "- Price recommendations should match quality and type:",
+    "  * Earrings: KES 500-1500 (based on complexity and beadwork quality)",
+    "  * Necklaces: KES 2000-5000 (based on length, materials, and intricate beadwork)",
+    "  * Bracelets: KES 1000-5000 (based on size, beadwork detail, and materials)",
+    "  * Home Decor: KES 3000-8000 (based on size and handwork involved)",
+    "  * Gift Sets: KES 3000-10000 (bundle value based on included items)",
+    "  * Accessories/Bags: KES 2000-6000 (based on size and craftsmanship)",
+    "- Adjust pricing within these ranges based on image quality, beadwork complexity, and materials visible.",
     "- Keep shortDescription to 1-2 sentences.",
     "- Keep fullDescription to 2 short paragraphs max.",
     "- tags should be short shopper-facing phrases that reference culture and craft.",
@@ -134,6 +142,7 @@ function buildPrompt(body, imageSummaries) {
       : 'Because category is not "Jewellery", jewelryType must be an empty string.',
     `Return a single JSON object with exactly these keys: ${PRODUCT_COPY_FIELDS.join(", ")}.`,
     'Use arrays for "materials", "tags", and "photographyNotes".',
+    'When determining price: Look at the image quality and beadwork detail shown. Use the price ranges above for the jewelry type. Price higher within the range for intricate/quality work, lower for simpler pieces.',
     'If you are unsure, return an empty string or an empty array instead of adding explanation text.',
   ].join("\n");
 }
@@ -196,12 +205,20 @@ function normalizeSuggestions(raw, body) {
   const category = normalizeCategory(body?.category || raw?.category || "Jewellery");
   const jewelryType = category === "Jewellery" ? normalizeJewelryType(body?.jewelryType || raw?.jewelryType) : "";
   const slug = slugify(raw?.slug || suggestedName);
+  
+  // Parse suggested price - should be a number
+  let suggestedPrice = 0;
+  if (raw?.suggestedPrice) {
+    const priceVal = parseInt(String(raw.suggestedPrice).replace(/[^\d]/g, ""), 10);
+    suggestedPrice = isNaN(priceVal) ? 0 : priceVal;
+  }
 
   return {
     suggestedName,
     slug,
     category,
     jewelryType,
+    suggestedPrice,
     shortDescription: String(raw?.shortDescription || "").trim(),
     fullDescription: String(raw?.fullDescription || "").trim(),
     materials: Array.isArray(raw?.materials)

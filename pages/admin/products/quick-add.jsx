@@ -87,11 +87,12 @@ export default function QuickAddProductPage() {
       setForm({
         ...form,
         name: suggestions.suggestedName || form.name,
+        price: suggestions.suggestedPrice ? String(suggestions.suggestedPrice) : form.price,
         category: suggestions.category || form.category,
       });
       
-      setMessage("✓ AI suggestions applied!");
-      setTimeout(() => setMessage(""), 2000);
+      setMessage("✓ AI suggestions applied! Review price and adjust if needed.");
+      setTimeout(() => setMessage(""), 3000);
     } catch (err) {
       setError(err.message || "Could not generate with AI");
     } finally {

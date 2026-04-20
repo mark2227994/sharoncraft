@@ -143,9 +143,17 @@ export default function ProductAIAssistant({ values, onApply }) {
                 Tags: {formatList(result.suggestions.tags)}
               </p>
             </div>
-          </div>
 
-          <div className="admin-ai-result__copy">
+            <div className="admin-ai-result__card">
+              <p className="caption admin-media-helper__label">Suggested price</p>
+              <p className="body-sm">
+                <strong>KES {result.suggestions.suggestedPrice?.toLocaleString() || "Not determined"}</strong>
+              </p>
+              <p className="caption" style={{ marginTop: "6px", color: "#666" }}>
+                Adjust based on quality & materials
+              </p>
+            </div>
+
             <div className="admin-ai-result__card">
               <p className="caption admin-media-helper__label">Short description</p>
               <p className="body-sm">{result.suggestions.shortDescription || "No short description returned."}</p>
