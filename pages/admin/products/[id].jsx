@@ -142,9 +142,21 @@ export default function AdminProductEditorPage() {
       return;
     }
     if (products && existing) {
-      reset(toFormValues(existing));
+      reset(toFormValues(existing), { keepValues: false });
     }
-  }, [router.isReady, id, isNew, products, existing, reset]);
+  }, [router.isReady, id, isNew, products, reset]);
+
+  // Force clear stale form data when ID changes
+  useEffect(() => {
+    if (!router.isReady || !id) return;
+    // This runs after product data arrives, ensuring fresh values
+    if (products && id && !isNew) {
+      const product = products.find((p) => p.id === id);
+      if (product) {
+        reset(toFormValues(product), { keepValues: false });
+      }
+    }
+  }, [id, reset, products, isNew, router.isReady]);
 
   useEffect(() => {
     let cancelled = false;
