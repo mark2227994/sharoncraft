@@ -74,6 +74,9 @@ export default function AdminProductsPage() {
         title="Stock"
         action={
           <div style={{ display: "flex", gap: "8px" }}>
+            <Link href="/admin/products/quick-add" className="admin-button" style={{ background: "#4CAF50" }}>
+              ⚡ Quick Add
+            </Link>
             <Link href="/admin/products/import" className="admin-button admin-button--secondary">
               📥 Bulk Import
             </Link>
