@@ -43,21 +43,44 @@ export default function SeoHead({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={imageUrl} />
 
-      {/* JSON-LD Organization schema */}
+      {/* JSON-LD Organization + LocalBusiness schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Organization",
-            "url": "https://sharoncraft.com", // Replace with your actual domain
-            "logo": "https://sharoncraft.com/logo-og.png",
+            "@type": ["Organization", "LocalBusiness"],
             "name": "SharonCraft",
+            "description": "Handmade Kenyan jewelry, gifts, and home decor by local artisans",
+            "url": "https://www.sharoncraft.co.ke",
+            "logo": "https://www.sharoncraft.co.ke/logo-og.png",
+            "image": "https://www.sharoncraft.co.ke/logo-og.png",
+            "email": "support@sharoncraft.co.ke",
+            "telephone": "+254112222572",
+            "areaServed": "KE",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "KE",
+              "addressRegion": "Kenya",
+              "addressLocality": "Nairobi"
+            },
             "sameAs": [
-              "https://www.facebook.com/yourpage",
-              "https://www.instagram.com/yourprofile",
-              "https://twitter.com/yourhandle"
-            ]
+              "https://www.instagram.com/sharoncraft",
+              "https://www.facebook.com/sharoncraft",
+              "https://www.tiktok.com/@sharoncraft"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "Customer Service",
+              "availableLanguageId": "en",
+              "contactOption": "TollFree",
+              "url": "https://wa.me/254112222572"
+            },
+            "priceRange": "$",
+            "isBasedNear": {
+              "@type": "Place",
+              "name": "Nairobi, Kenya"
+            }
           })
         }}
       />
