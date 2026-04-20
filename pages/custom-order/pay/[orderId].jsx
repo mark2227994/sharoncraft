@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Footer from "../../components/Footer";
-import Nav from "../../components/Nav";
-import SeoHead from "../../components/SeoHead";
+import Footer from "../../../components/Footer";
+import Nav from "../../../components/Nav";
+import SeoHead from "../../../components/SeoHead";
 
 const MPESA_NUMBER = "0112222572";
 
