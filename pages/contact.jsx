@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
 
+const DEFAULT_CONTACT = {
+  email: "kelvinmark.services@gmail.com",
+  phone: "+254 112 222 572",
+  whatsapp: "254112222572",
+  address: "Nairobi, Kenya",
+  hours: "Mon-Sat, 9am-6pm EAT",
+};
+
 export default function ContactPage() {
   const router = useRouter();
+  const [contactInfo, setContactInfo] = useState(DEFAULT_CONTACT);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,6 +26,18 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Fetch contact info from API
+    fetch("/api/admin/page-content")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.contact) {
+          setContactInfo({ ...DEFAULT_CONTACT, ...data.contact });
+        }
+      })
+      .catch((err) => console.error("Failed to load contact info:", err));
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -112,8 +133,8 @@ export default function ContactPage() {
                   <p className="overline" style={{ marginBottom: "8px" }}>
                     Email
                   </p>
-                  <a href="mailto:kelvinmark.services@gmail.com" className="body-md" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
-                    kelvinmark.services@gmail.com
+                  <a href={`mailto:${contactInfo.email}`} className="body-md" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
+                    {contactInfo.email}
                   </a>
                 </div>
 
@@ -121,11 +142,11 @@ export default function ContactPage() {
                   <p className="overline" style={{ marginBottom: "8px" }}>
                     WhatsApp
                   </p>
-                  <a href="https://wa.me/254112222572?text=Hello%20SharonCraft%2C%20I%20have%20a%20question" className="body-md" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
-                    +254 112 222 572
+                  <a href={`https://wa.me/${contactInfo.whatsapp}?text=Hello%20SharonCraft%2C%20I%20have%20a%20question`} className="body-md" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
+                    {contactInfo.phone}
                   </a>
                   <p className="caption" style={{ marginTop: "4px", opacity: 0.7 }}>
-                    For fastest response, message us on WhatsApp during business hours: Mon-Sat, 9am-6pm EAT
+                    For fastest response, message us on WhatsApp during business hours: {contactInfo.hours}
                   </p>
                 </div>
 
@@ -133,14 +154,14 @@ export default function ContactPage() {
                   <p className="overline" style={{ marginBottom: "8px" }}>
                     Business Hours
                   </p>
-                  <p className="body-md">Monday - Saturday, 9:00 AM - 6:00 PM EAT</p>
+                  <p className="body-md">{contactInfo.hours}</p>
                 </div>
 
                 <div className="info-item">
                   <p className="overline" style={{ marginBottom: "8px" }}>
                     Location
                   </p>
-                  <p className="body-md">Nairobi, Kenya</p>
+                  <p className="body-md">{contactInfo.address}</p>
                 </div>
 
                 <div className="info-item" style={{ marginTop: "var(--space-6)" }}>

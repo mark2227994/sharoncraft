@@ -1,9 +1,28 @@
-import Head from "next/head";
+import { useEffect, useState } from "react";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
 
 export default function PrivacyPage() {
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/page-content")
+      .then((res) => res.json())
+      .then((data) => {
+        setContent(data.privacy);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load privacy:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (!content) return null;
+
   return (
     <>
       <SeoHead
@@ -16,104 +35,23 @@ export default function PrivacyPage() {
       <div className="legal-page">
         <div className="container">
           <h1 className="heading-xl" style={{ marginBottom: "var(--space-4)" }}>
-            Privacy Policy
+            {content.title}
           </h1>
           <p className="caption" style={{ opacity: 0.7, marginBottom: "var(--space-8)" }}>
-            Last updated: April 2026
+            Last updated: {new Date(content.lastUpdated).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </p>
 
           <div className="legal-content">
-            <section>
-              <h2 className="heading-md">1. Introduction</h2>
-              <p>
-                SharonCraft is committed to protecting your privacy. This Privacy Policy explains how we collect, use,
-                disclose, and safeguard your information when you visit our website.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">2. Information We Collect</h2>
-              <p>We may collect information about you in a variety of ways:</p>
-              <h3 style={{ marginTop: "var(--space-3)", marginBottom: "8px", fontWeight: 600 }}>Information You Provide Directly:</h3>
-              <ul>
-                <li>Name and email address</li>
-                <li>Phone number and delivery address</li>
-                <li>Payment information for M-Pesa transactions</li>
-                <li>Messages sent through our contact form</li>
-                <li>Information from custom order inquiries</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="heading-md">3. How We Use Your Information</h2>
-              <p>We use the information we collect to:</p>
-              <ul>
-                <li>Process your orders and send order confirmations</li>
-                <li>Deliver products to your specified address</li>
-                <li>Respond to inquiries and customer support requests</li>
-                <li>Send updates about your orders via WhatsApp</li>
-                <li>Improve our website and services</li>
-                <li>Prevent fraudulent transactions</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="heading-md">4. Sharing of Information</h2>
-              <p>
-                We do not sell, trade, or rent your personal information to third parties. However, we may share
-                information with:
-              </p>
-              <ul>
-                <li>Payment processors for M-Pesa transactions</li>
-                <li>Delivery partners to facilitate shipping</li>
-                <li>Our artisan partners when fulfilling custom orders</li>
-              </ul>
-              <p>These partners are contractually obligated to keep your information confidential.</p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">5. Data Security</h2>
-              <p>
-                We implement appropriate technical and organizational measures to protect your personal information
-                against unauthorized access, alteration, disclosure, or destruction.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">6. Cookies and Tracking</h2>
-              <p>
-                Our website may use cookies to enhance your browsing experience. Most web browsers automatically accept
-                cookies, but you can modify your browser settings to decline cookies if you prefer.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">7. Your Rights</h2>
-              <p>You have the right to:</p>
-              <ul>
-                <li>Access the personal information we hold about you</li>
-                <li>Request correction of inaccurate information</li>
-                <li>Request deletion of your information</li>
-                <li>Opt-out of marketing communications</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="heading-md">8. Contact Us</h2>
-              <p>
-                If you have questions about this Privacy Policy or our privacy practices, please contact us at{" "}
-                <a href="mailto:kelvinmark.services@gmail.com">kelvinmark.services@gmail.com</a> or via WhatsApp at +254
-                112 222 572.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">9. Changes to This Policy</h2>
-              <p>
-                SharonCraft may update this Privacy Policy from time to time. We will notify you of any changes by
-                posting the new policy on our website.
-              </p>
-            </section>
+            {content.sections?.map((section, idx) => (
+              <section key={idx}>
+                <h2 className="heading-md">{section.title}</h2>
+                <p>{section.content}</p>
+              </section>
+            ))}
           </div>
         </div>
       </div>

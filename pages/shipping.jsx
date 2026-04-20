@@ -1,9 +1,28 @@
-import Head from "next/head";
+import { useEffect, useState } from "react";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
 
 export default function ShippingReturnsPage() {
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/page-content")
+      .then((res) => res.json())
+      .then((data) => {
+        setContent(data.shipping);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load shipping:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (!content) return null;
+
   return (
     <>
       <SeoHead
@@ -16,124 +35,59 @@ export default function ShippingReturnsPage() {
       <div className="legal-page">
         <div className="container">
           <h1 className="heading-xl" style={{ marginBottom: "var(--space-4)" }}>
-            Shipping & Returns Policy
+            {content.title}
           </h1>
           <p className="caption" style={{ opacity: 0.7, marginBottom: "var(--space-8)" }}>
-            Last updated: April 2026
+            Last updated: {new Date(content.lastUpdated).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </p>
 
           <div className="legal-content">
             <section>
-              <h2 className="heading-md">Shipping Information</h2>
-              <p>
-                We are committed to delivering your handmade beadwork items safely and promptly. Below is information
-                about our shipping practices.
-              </p>
-            </section>
-
-            <section>
               <h2 className="heading-md">Domestic Shipping (Within Kenya)</h2>
-              <h3 style={{ marginTop: "var(--space-3)", marginBottom: "8px", fontWeight: 600 }}>Processing Time:</h3>
+              <h3 style={{ marginTop: "var(--space-3)", marginBottom: "8px", fontWeight: 600 }}>Shipping Rates:</h3>
               <ul>
-                <li>Ready-to-ship items: 1-2 business days</li>
-                <li>Custom orders: 2-4 weeks plus 1-2 business days for processing</li>
+                <li>Standard Delivery: KES {content.domestic?.standardRate} ({content.domestic?.standardDelivery})</li>
+                <li>Express Delivery: KES {content.domestic?.expressRate} ({content.domestic?.expressDelivery})</li>
+                <li>Free shipping on orders over KES {content.domestic?.freeShippingThreshold?.toLocaleString()}</li>
               </ul>
-
-              <h3 style={{ marginTop: "var(--space-4)", marginBottom: "8px", fontWeight: 600 }}>Shipping Rates:</h3>
-              <ul>
-                <li>Standard Delivery: KES 300 (3-5 business days)</li>
-                <li>Express Delivery: KES 500 (1-2 business days)</li>
-                <li>Free shipping on orders over KES 5,000</li>
-              </ul>
-
-              <h3 style={{ marginTop: "var(--space-4)", marginBottom: "8px", fontWeight: 600 }}>Delivery Areas:</h3>
-              <p>
-                We deliver to all locations within Nairobi and nationwide across Kenya. Rural areas may experience
-                longer delivery times due to distance.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">International Shipping</h2>
-              <p>
-                We currently ship to select countries. International orders are subject to customs duties and taxes.
-                Shipping costs will be calculated based on weight and destination. Please contact us at{" "}
-                <a href="mailto:kelvinmark.services@gmail.com">kelvinmark.services@gmail.com</a> for international
-                shipping inquiries.
-              </p>
             </section>
 
             <section>
               <h2 className="heading-md">Order Tracking</h2>
               <p>
-                Once your order is dispatched, you will receive a WhatsApp message with tracking details and delivery
-                timeline. You can also reach out via WhatsApp at +254 112 222 572 to check your order status at any time.
+                Once your order is dispatched, you will receive a WhatsApp message with tracking details. Visit{" "}
+                <a href="/track-order">/track-order</a> to check your order status anytime.
               </p>
             </section>
 
             <section>
               <h2 className="heading-md">Returns Policy</h2>
-              <p>
-                We want you to be completely satisfied with your SharonCraft purchase. If you are not satisfied, we
-                offer returns within 14 days of delivery.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">Conditions for Returns</h2>
-              <p>Items are eligible for return if they meet the following conditions:</p>
+              <p>We want you to be completely satisfied with your SharonCraft purchase.</p>
+              <h3 style={{ marginTop: "var(--space-3)", marginBottom: "8px", fontWeight: 600 }}>Return Window:</h3>
+              <p>{content.returns?.window} days from delivery</p>
+              
+              <h3 style={{ marginTop: "var(--space-4)", marginBottom: "8px", fontWeight: 600 }}>Conditions:</h3>
               <ul>
-                <li>Items must be returned within 14 days of delivery</li>
-                <li>Items must be in original condition with no signs of wear</li>
-                <li>Items must include all original packaging and documentation</li>
-                <li>Items must not be custom-made or personalized (unless there is a defect)</li>
+                {content.returns?.conditions?.map((cond, idx) => (
+                  <li key={idx}>{cond}</li>
+                ))}
               </ul>
-            </section>
 
-            <section>
-              <h2 className="heading-md">Return Process</h2>
-              <ol style={{ paddingLeft: "var(--space-4)" }}>
-                <li style={{ marginBottom: "8px" }}>
-                  Contact us via WhatsApp at +254 112 222 572 with photos of the item and reason for return
-                </li>
-                <li style={{ marginBottom: "8px" }}>We will review your request and provide return instructions</li>
-                <li style={{ marginBottom: "8px" }}>Ship the item back to us (return shipping cost is customer responsibility unless item is defective)</li>
-                <li style={{ marginBottom: "8px" }}>Once received and inspected, we will process your refund within 5-7 business days</li>
-              </ol>
-            </section>
-
-            <section>
-              <h2 className="heading-md">Defective Items</h2>
-              <p>
-                If you receive a defective or damaged item, please contact us immediately with photos. We will arrange
-                either a replacement or full refund. Return shipping for defective items is free.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">Custom Orders</h2>
-              <p>
-                Custom orders are generally non-returnable as they are made specifically to your specifications. However,
-                if there is a significant error on our part or the item is defective, we will work with you to find a
-                solution.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="heading-md">Refunds</h2>
-              <p>
-                Approved refunds will be processed back to your original payment method (M-Pesa account) within 5-7
-                business days. Please note that mobile network operators may take an additional 1-2 days to display the
-                refund in your account.
-              </p>
+              <h3 style={{ marginTop: "var(--space-4)", marginBottom: "8px", fontWeight: 600 }}>Refunds:</h3>
+              <p>Approved refunds: {content.returns?.refundTime}</p>
+              <p>{content.returns?.defectiveReturn}</p>
             </section>
 
             <section>
               <h2 className="heading-md">Questions?</h2>
               <p>
-                If you have any questions about our shipping or returns policy, please contact us at{" "}
-                <a href="mailto:kelvinmark.services@gmail.com">kelvinmark.services@gmail.com</a> or via WhatsApp at +254
-                112 222 572. We are available Mon-Sat, 9am-6pm EAT.
+                Email: <a href="mailto:kelvinmark.services@gmail.com">kelvinmark.services@gmail.com</a>
+                <br />
+                WhatsApp: +254 112 222 572
               </p>
             </section>
           </div>
