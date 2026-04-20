@@ -129,6 +129,37 @@ export default function AdminProductsPage({ initialProducts }) {
     });
   }
 
+  async function handleDeleteAll() {
+    if (!confirm("⚠️ DELETE ALL PRODUCTS? This cannot be undone! Type 'yes' to confirm.")) return;
+    
+    const confirmText = prompt("Type 'DELETE ALL' to confirm deletion of all products:");
+    if (confirmText !== "DELETE ALL") {
+      alert("Deletion cancelled.");
+      return;
+    }
+
+    setWorking(true);
+    try {
+      const response = await fetch("/api/admin/products/delete-all", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "Could not delete all products.");
+      }
+      
+      setProducts([]);
+      setSelectedIds([]);
+      alert("✅ All products deleted successfully!");
+    } catch (error) {
+      alert(error.message || "Could not delete all products.");
+    } finally {
+      setWorking(false);
+    }
+  }
+
   return (
     <AdminLayout
       title="Products"
@@ -215,6 +246,31 @@ export default function AdminProductsPage({ initialProducts }) {
           >
             {working ? "Applying..." : "Apply"}
           </button>
+        </div>
+
+        {/* Quick Delete All Button */}
+        <div style={{ marginTop: "var(--space-3)", paddingTop: "var(--space-3)", borderTop: "1px solid #ddd" }}>
+          <button
+            type="button"
+            onClick={handleDeleteAll}
+            disabled={working || products.length === 0}
+            style={{
+              backgroundColor: "#dc2626",
+              color: "white",
+              padding: "10px 16px",
+              border: "none",
+              borderRadius: "4px",
+              fontWeight: "600",
+              cursor: working || products.length === 0 ? "not-allowed" : "pointer",
+              opacity: working || products.length === 0 ? 0.5 : 1,
+              fontSize: "14px"
+            }}
+          >
+            {working ? "Deleting..." : `🗑️ Delete All ${products.length} Products`}
+          </button>
+          <p style={{ fontSize: "12px", color: "#64748b", margin: "8px 0 0 0" }}>
+            ⚠️ Warning: This will delete ALL products. Cannot be undone.
+          </p>
         </div>
       </section>
 
