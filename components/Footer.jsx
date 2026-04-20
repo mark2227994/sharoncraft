@@ -128,6 +128,7 @@ export default function Footer({ siteContent }) {
               <Link href="/shop?category=Home%20Decor" className="footer__link">Home Decor</Link>
               <Link href="/shop?category=Gift%20Sets" className="footer__link">Gift Sets</Link>
               <Link href="/custom-order" className="footer__link">Custom Design</Link>
+              <Link href="/track-order" className="footer__link">Track Order</Link>
             </div>
           </div>
 
@@ -137,6 +138,7 @@ export default function Footer({ siteContent }) {
             <div className="footer__links">
               <Link href="/about" className="footer__link">About Us</Link>
               <Link href="/#artisan-story" className="footer__link">Meet Our Artisans</Link>
+              <Link href="/account" className="footer__link">My Account</Link>
               <Link href="/faq" className="footer__link">FAQ</Link>
               <Link href="/shipping" className="footer__link">Shipping & Returns</Link>
               <Link href="/contact" className="footer__link">Contact Support</Link>
