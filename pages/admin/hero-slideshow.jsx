@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import LocalImageUpload from "../../components/admin/LocalImageUpload";
 
 const SLIDE_TYPES = [
   { value: "artisan", label: "Artisan Story" },
@@ -177,6 +178,24 @@ export default function AdminHeroSlideshowPage() {
                 placeholder="/media/site/homepage/image.jpg"
               />
             </label>
+
+            <LocalImageUpload
+              label="Upload Hero Image"
+              folder="site/homepage"
+              onUploaded={(path) => handleFormChange("image", path)}
+            />
+
+            {formData.image && (
+              <div style={{ marginTop: "var(--space-3)", padding: "var(--space-3)", background: "#f5f5f5", borderRadius: "6px" }}>
+                <p className="caption" style={{ marginBottom: "8px", fontWeight: 600 }}>Preview:</p>
+                <img
+                  src={formData.image}
+                  alt="Slide preview"
+                  style={{ maxHeight: "120px", maxWidth: "300px", borderRadius: "4px" }}
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
+              </div>
+            )}
 
             <label className="admin-field">
               <span>Title</span>
