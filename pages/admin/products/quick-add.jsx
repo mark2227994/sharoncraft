@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import SeoHead from "../../../components/SeoHead";
@@ -9,11 +9,95 @@ export default function QuickAddProductPage() {
     name: "",
     price: "",
     category: "Jewellery",
+    image: "",
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [savedId, setSavedId] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiStatus, setAiStatus] = useState({ loading: true, configured: false });
+  const fileInputRef = useRef(null);
+
+  // Check AI status on mount
+  useEffect(() => {
+    let ignore = false;
+    async function checkAI() {
+      try {
+        const response = await fetch("/api/admin/ai-status", {
+          credentials: "same-origin",
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!ignore) {
+          setAiStatus({
+            loading: false,
+            configured: Boolean(data?.configured),
+          });
+        }
+      } catch {
+        if (!ignore) {
+          setAiStatus({ loading: false, configured: false });
+        }
+      }
+    }
+    checkAI();
+    return () => { ignore = true; };
+  }, []);
+
+  async function handleImageSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setForm({ ...form, image: event.target?.result });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function handleAIGenerate() {
+    if (!form.image) {
+      setError("Please upload an image first");
+      return;
+    }
+
+    setAiLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/generate-product-copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          name: form.name || "Unknown Product",
+          category: form.category,
+          image: form.image,
+          notes: "Quick product generation from image",
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data?.error || "AI generation failed");
+      }
+
+      // Apply AI suggestions
+      const suggestions = data.suggestions || {};
+      setForm({
+        ...form,
+        name: suggestions.suggestedName || form.name,
+        category: suggestions.category || form.category,
+      });
+      
+      setMessage("✓ AI suggestions applied!");
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      setError(err.message || "Could not generate with AI");
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   async function handleSave(e) {
     e.preventDefault();
@@ -61,7 +145,7 @@ export default function QuickAddProductPage() {
       setMessage(`Product "${form.name}" added successfully!`);
       
       // Reset form
-      setForm({ name: "", price: "", category: "Jewellery" });
+      setForm({ name: "", price: "", category: "Jewellery", image: "" });
       
       // Clear message after 3 seconds
       setTimeout(() => setMessage(""), 3000);
@@ -273,7 +357,7 @@ export default function QuickAddProductPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setForm({ name: "", price: "", category: "Jewellery" });
+                        setForm({ name: "", price: "", category: "Jewellery", image: "" });
                         setMessage("");
                         setSavedId("");
                       }}
@@ -296,6 +380,82 @@ export default function QuickAddProductPage() {
 
             <form onSubmit={handleSave} className="quick-add-form">
               <div className="quick-add-field">
+                <label className="quick-add-label">Product Image (Optional)</label>
+                <div style={{
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "flex-start"
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      style={{ display: "none" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="quick-add-input"
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "12px",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        background: "white"
+                      }}
+                    >
+                      {form.image ? "✓ Image selected" : "📤 Choose image"}
+                    </button>
+                  </div>
+                  {form.image && aiStatus.configured && (
+                    <button
+                      type="button"
+                      onClick={handleAIGenerate}
+                      disabled={aiLoading}
+                      style={{
+                        padding: "12px 16px",
+                        background: "#673AB7",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: aiLoading ? "not-allowed" : "pointer",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                        whiteSpace: "nowrap",
+                        opacity: aiLoading ? 0.7 : 1
+                      }}
+                    >
+                      {aiLoading ? "🤖 Generating..." : "✨ AI Name"}
+                    </button>
+                  )}
+                </div>
+                {form.image && (
+                  <img
+                    src={form.image}
+                    alt="Preview"
+                    style={{
+                      marginTop: "12px",
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      borderRadius: "6px",
+                      border: "1px solid #ddd"
+                    }}
+                  />
+                )}
+                <div className="quick-add-hint">
+                  {aiStatus.loading 
+                    ? "Checking AI..." 
+                    : aiStatus.configured
+                      ? "Upload a photo to generate product name and category with AI"
+                      : "AI is not available in this environment"}
+                </div>
+              </div>
+
+              <div className="quick-add-field">
                 <label className="quick-add-label">Product Name *</label>
                 <input
                   type="text"
@@ -303,7 +463,7 @@ export default function QuickAddProductPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Maasai Beaded Bracelet"
-                  autoFocus
+                  autoFocus={!form.image}
                 />
                 <div className="quick-add-hint">What is this product called?</div>
               </div>
