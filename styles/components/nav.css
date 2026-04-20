@@ -68,7 +68,7 @@
   left: 0;
   right: 0;
   height: var(--nav-height);
-  background: #ffffff;
+  background: var(--color-cream);
   border-bottom: 1px solid var(--border-default);
   display: flex;
   align-items: center;
@@ -81,7 +81,7 @@
 .nav--scrolled {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 246, 238, 0.85);
 }
 .nav__logo-lockup {
   display: inline-flex;
