@@ -13,6 +13,7 @@ const navStructure = {
       { href: "/admin/products", label: "Products", icon: "package" },
       { href: "/admin/orders", label: "Orders", icon: "mail" },
       { href: "/admin/customers", label: "Customers", icon: "users" },
+      { href: "/admin/ai-message-review", label: "AI Messages", icon: "edit" },
     ],
   },
   secondary: [
