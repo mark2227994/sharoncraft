@@ -62,6 +62,7 @@ const navStructure = {
         { href: "/admin/site-images", label: "Site Images", icon: "eye" },
         { href: "/admin/mpesa", label: "M-Pesa", icon: "mpesa" },
         { href: "/admin/newsletter-subscribers", label: "Newsletter", icon: "envelope" },
+        { href: "/admin/cleanup", label: "Cleanup Tool", icon: "trash" },
       ],
     },
   ],
