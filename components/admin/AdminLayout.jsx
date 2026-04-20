@@ -30,6 +30,14 @@ const navStructure = {
       ],
     },
     {
+      key: "social",
+      label: "Social Media",
+      icon: "share",
+      items: [
+        { href: "/admin/social-media", label: "Social Media Manager", icon: "share" },
+      ],
+    },
+    {
       key: "analytics",
       label: "Analytics",
       icon: "chart",
