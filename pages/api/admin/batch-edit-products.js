@@ -1,4 +1,4 @@
-import { supabase } from "../../../lib/supabase-server";
+import { supabaseAdmin } from "../../../lib/supabase-server";
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export default async function handler(req, res) {
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     }
 
     // Update all products
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("products")
       .update(updatePayload)
       .in("id", productIds);
