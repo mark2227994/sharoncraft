@@ -143,15 +143,56 @@ export default function PageContentManager() {
               </>
             )}
 
-            {['privacy', 'terms', 'shipping'].includes(selectedPage) && (
+            {['privacy', 'terms'].includes(selectedPage) && (
               <>
                 <div className="form-group">
-                  <label>Title</label>
+                  <label>Page Title</label>
                   <input type="text" {...register('title')} className="admin-input" />
                 </div>
                 <div className="form-group">
-                  <label>Content</label>
-                  <textarea {...register('content')} rows={6} className="admin-input" placeholder="Enter content here..." />
+                  <label>Last Updated</label>
+                  <input type="date" {...register('lastUpdated')} className="admin-input" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label-full">Sections (JSON format)</label>
+                  <textarea
+                    {...register('sections')}
+                    rows={8}
+                    className="admin-input"
+                    placeholder={'[{"title": "Section Title", "content": "Section content"}]'}
+                  />
+                  <p className="form-helper">Format: {"[{\"title\": \"...\", \"content\": \"...\"}]"}</p>
+                </div>
+              </>
+            )}
+
+            {selectedPage === 'shipping' && (
+              <>
+                <div className="form-group">
+                  <label>Page Title</label>
+                  <input type="text" {...register('title')} className="admin-input" />
+                </div>
+                <div className="form-group">
+                  <label>Last Updated</label>
+                  <input type="date" {...register('lastUpdated')} className="admin-input" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label-full">Domestic Shipping (JSON)</label>
+                  <textarea
+                    {...register('domestic')}
+                    rows={4}
+                    className="admin-input"
+                    placeholder={'{"standardRate": 300, "expressRate": 500, "freeShippingThreshold": 5000}'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label-full">Returns Policy (JSON)</label>
+                  <textarea
+                    {...register('returns')}
+                    rows={4}
+                    className="admin-input"
+                    placeholder={'{"window": 14, "conditions": [...], "refundTime": "5-7 business days"}'}
+                  />
                 </div>
               </>
             )}
@@ -308,6 +349,23 @@ export default function PageContentManager() {
         .btn-primary:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        .form-label-full {
+          display: block;
+          font-weight: 500;
+          color: #333;
+          margin-bottom: 8px;
+        }
+
+        .form-helper {
+          font-size: 12px;
+          color: #666;
+          margin-top: 4px;
+          font-family: monospace;
+          background: #f5f5f5;
+          padding: 6px;
+          border-radius: 3px;
         }
 
         @media (max-width: 768px) {
