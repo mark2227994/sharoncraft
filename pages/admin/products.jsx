@@ -153,6 +153,8 @@ export default function AdminProductsPage({ initialProducts }) {
       setProducts([]);
       setSelectedIds([]);
       alert("✅ All products deleted successfully!");
+      // Reload page to clear any cached data
+      setTimeout(() => window.location.reload(), 500);
     } catch (error) {
       alert(error.message || "Could not delete all products.");
     } finally {
