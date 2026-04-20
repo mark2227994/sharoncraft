@@ -7,7 +7,7 @@ import SeoHead from "../components/SeoHead";
 
 const WHATSAPP_NUMBER = "254112222572";
 
-function buildCustomWhatsAppMessage({ orderReference, name, phone, designType, colors, occasion, budgetRange, neededBy, designBrief, referenceImage }) {
+function buildCustomWhatsAppMessage({ orderReference, name, email, phone, designType, colors, occasion, budgetRange, neededBy, designBrief, referenceImage }) {
   const lines = [
     "Hello SharonCraft.",
     "",
@@ -21,6 +21,7 @@ function buildCustomWhatsAppMessage({ orderReference, name, phone, designType, c
   }
 
   lines.push(`Name: ${name}`);
+  if (email) lines.push(`Email: ${email}`);
   lines.push(`Phone: ${phone}`);
   lines.push(`Design type: ${designType}`);
   if (colors) lines.push(`Preferred colors: ${colors}`);
@@ -220,6 +221,14 @@ export default function CustomOrderPage() {
                 <input className="admin-input" {...register("name", { required: "Name is required" })} />
                 {errors.name ? <span className="custom-order-page__error">{errors.name.message}</span> : null}
               </label>
+              <label className="custom-order-page__field">
+                <span>Email address *</span>
+                <input className="admin-input" type="email" {...register("email", { required: "Email is required" })} />
+                {errors.email ? <span className="custom-order-page__error">{errors.email.message}</span> : null}
+              </label>
+            </div>
+
+            <div className="custom-order-page__grid">
               <label className="custom-order-page__field">
                 <span>Phone / WhatsApp *</span>
                 <input className="admin-input" type="tel" {...register("phone", { required: "Phone is required" })} />

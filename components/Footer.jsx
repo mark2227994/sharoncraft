@@ -138,8 +138,8 @@ export default function Footer({ siteContent }) {
               <Link href="/about" className="footer__link">About Us</Link>
               <Link href="/#artisan-story" className="footer__link">Meet Our Artisans</Link>
               <Link href="/faq" className="footer__link">FAQ</Link>
-              <Link href="/about" className="footer__link">Shipping & Returns</Link>
-              <a href={formatPhoneHref(content.contactWhatsApp)} className="footer__link">Contact Support</a>
+              <Link href="/shipping" className="footer__link">Shipping & Returns</Link>
+              <Link href="/contact" className="footer__link">Contact Support</Link>
             </div>
           </div>
 
@@ -178,11 +178,11 @@ export default function Footer({ siteContent }) {
             <span>Made in Nairobi, Kenya</span>
           </div>
           <div className="footer__policies">
-            <Link href="/about" className="footer__policy-link">Privacy Policy</Link>
+            <Link href="/privacy" className="footer__policy-link">Privacy Policy</Link>
             <span className="footer__sep">•</span>
-            <Link href="/about" className="footer__policy-link">Terms of Service</Link>
+            <Link href="/terms" className="footer__policy-link">Terms of Service</Link>
             <span className="footer__sep">•</span>
-            <Link href="/about" className="footer__policy-link">Returns</Link>
+            <Link href="/shipping" className="footer__policy-link">Returns & Shipping</Link>
           </div>
         </div>
       </div>
