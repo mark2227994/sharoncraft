@@ -9,6 +9,7 @@ const navStructure = {
     alwaysExpanded: true,
     items: [
       { href: "/admin", label: "Dashboard", icon: "dashboard" },
+      { href: "/admin/follow-up-dashboard", label: "Follow-ups", icon: "mail" },
       { href: "/admin/products/new", label: "Add Product", icon: "plus" },
       { href: "/admin/products", label: "Products", icon: "package" },
       { href: "/admin/orders", label: "Orders", icon: "mail" },
