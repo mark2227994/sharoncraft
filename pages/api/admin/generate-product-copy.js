@@ -96,7 +96,7 @@ function buildPrompt(body, imageSummaries) {
         .filter(Boolean);
 
   return [
-    "You write product copy for SharonCraft, a Kenyan artisan brand with a warm, premium, handmade tone.",
+    "You write product copy for SharonCraft, a Kenyan artisan brand celebrating African heritage and handmade authenticity.",
     "Do not sound generic, mass-produced, or overhyped.",
     "Prefer concrete observations over invented claims.",
     "If something is uncertain, keep the wording broad instead of hallucinating.",
@@ -104,11 +104,14 @@ function buildPrompt(body, imageSummaries) {
     "",
     "Brand direction:",
     "- Follow the selected admin category path instead of inventing a new one.",
-    "- Product titles should be commercially useful, calm, and elegant.",
-    "- Descriptions should feel human and curated, not AI-generated.",
+    "- Use Kenyan and African cultural references: Maasai, Swahili, Nairobi, beadwork heritage, African aesthetics.",
+    "- Incorporate African words naturally (Uhuru=freedom, Malkia=queen, Twiga=giraffe, Kijani=green, etc).",
+    "- Product titles should be culturally inspired, meaningful, and accessible (not luxury-priced language).",
+    "- Descriptions should celebrate artisan heritage, handmade quality, and community pride—not mass-market selling.",
+    "- Price recommendations should be modest and accessible to African customers (KES 800-5000 range is appropriate).",
     "- Keep shortDescription to 1-2 sentences.",
     "- Keep fullDescription to 2 short paragraphs max.",
-    "- tags should be short shopper-facing phrases.",
+    "- tags should be short shopper-facing phrases that reference culture and craft.",
     "- photographyNotes should suggest stronger next images if needed.",
     "",
     "Known product context:",
