@@ -126,13 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
   function buildPrimaryMessage(product) {
     const artisan = product.artisan || 'SharonCraft';
     const materials = product.story?.materials?.length ? ` (${product.story.materials.slice(0, 2).join(', ')})` : '';
-    const inStock = product.soldOut ? '⚠️ Limited' : '✓ In stock';
-    return `👋 Hi! I'd like to order:\n\n✨ *${product.name}*${materials}\n💰 ${formatCurrency(product.price)}\n${inStock}\n\nIs it available? 🙏`;
+    const inStock = product.soldOut ? 'Limited availability' : 'In stock';
+    return `Hello SharonCraft,\n\nI would like to order the ${product.name}${materials}\n\nPrice: ${formatCurrency(product.price)}\nAvailability: ${inStock}\n\nIs this item currently available? Thank you.`;
   }
 
   function buildSecondaryMessage(product) {
     const artisan = product.artisan || 'SharonCraft';
-    return `👋 Hi SharonCraft!\n\n🎨 Can you tell me more about the *${product.name}*?\n\n✓ Care instructions\n✓ Customization options\n✓ Delivery timeline\n\nThanks! 💚`;
+    return `Hello SharonCraft,\n\nI would like to learn more about the ${product.name}.\n\nQuestions:\n- What are the care instructions for this piece?\n- Do you offer customization options (colors, sizing, etc.)?\n- What is the current delivery timeline?\n\nThank you!`;
   }
 
   function getBadges(product) {
