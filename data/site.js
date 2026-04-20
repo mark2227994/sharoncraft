@@ -36,6 +36,7 @@ export const primaryNavLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/shop#collections", label: "Collections" },
   { href: "/artisans", label: "Artisans" },
+  { href: "/journal", label: "Journal" },
   { href: "/about", label: "About" },
 ];
 
@@ -44,6 +45,7 @@ export const mobileNavLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/shop#collections", label: "Collections" },
   { href: "/artisans", label: "Artisans" },
+  { href: "/journal", label: "Journal" },
   { href: "/about", label: "About" },
   { href: "/wishlist", label: "Wishlist" },
   { href: "/cart", label: "Cart" },

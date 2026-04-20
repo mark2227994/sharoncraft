@@ -137,6 +137,7 @@ export default function Footer({ siteContent }) {
             <p className="footer__title">Support</p>
             <div className="footer__links">
               <Link href="/about" className="footer__link">About Us</Link>
+              <Link href="/journal" className="footer__link">Journal</Link>
               <Link href="/#artisan-story" className="footer__link">Meet Our Artisans</Link>
               <Link href="/account" className="footer__link">My Account</Link>
               <Link href="/faq" className="footer__link">FAQ</Link>
