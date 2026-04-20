@@ -39,6 +39,14 @@ const navStructure = {
       ],
     },
     {
+      key: "wellness",
+      label: "Health & Wellness",
+      icon: "heart",
+      items: [
+        { href: "/admin/wellness-tracker", label: "Wellness Tracker", icon: "heart" },
+      ],
+    },
+    {
       key: "content",
       label: "Content",
       icon: "edit",
