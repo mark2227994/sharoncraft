@@ -19,7 +19,9 @@ export default function AdminDashboard() {
 
   async function fetchDashboardData() {
     try {
-      const res = await fetch('/api/admin/orders');
+      const res = await fetch('/api/admin/orders', {
+        credentials: 'include'
+      });
       const data = await res.json();
       
       // Calculate today's sales
