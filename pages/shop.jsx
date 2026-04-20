@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import MasonryGrid from "../components/MasonryGrid";
+import ProductCard from "../components/ProductCard";
 import Nav from "../components/Nav";
 import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
@@ -31,7 +32,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
     }
     return '4-col';
   });
-  const [wishlist, setWishlist] = useState([]);
 
   // Persist grid view to localStorage
   useEffect(() => {
@@ -57,22 +57,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const toggleWishlist = (productId) => {
-    setWishlist(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
-  };
-
   const getProductBadge = (product) => {
     if (product.badge === "Best Seller") return { text: "BEST SELLER", color: "#111" };
     if (product.badge === "New" || product.newArrival) return { text: "NEW", color: "#D4A574" };
     if (product.badge?.includes("Limited")) return { text: "LIMITED", color: "#D4A574" };
     return null;
-  };
-
-  const getStockStatus = (product) => {
-    if (product.isSold) return { text: "SOLD OUT", color: "#e74c3c" };
-    if (!product.stock || product.stock === 0) return { text: "OUT OF STOCK", color: "#e74c3c" };
-    if (product.stock < 3) return { text: "LOW STOCK", color: "#f39c12" };
-    return { text: "IN STOCK", color: "#1ABC9C" };
   };
 
   const isJewelleryView = activeCategory === "Jewellery";
@@ -348,114 +337,20 @@ export default function ShopPage({ products, categories, initialCategory, initia
               <>
                 {gridView === "masonry" && (
                   <div className="masonry-wrapper">
-                    {paginatedProducts.map((product) => {
-                      const badge = getProductBadge(product);
-                      const isWishlisted = wishlist.includes(product.id);
-                      const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null;
-                      return (
-                        <div key={product.id} className="masonry-item">
-                          <div 
-                            className="product-card-with-actions"
-                            onClick={() => window.location.href = `/product/${product.slug}`}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/product/${product.slug}`)}
-                          >
-                            <div className="product-card__image-wrap">
-                              <img src={product.image} alt={product.name} className="product-card__image" />
-                              {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
-                              <button 
-                                className="product-card__add-to-cart"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Add to cart logic here
-                                }}
-                                aria-label="Add to cart"
-                              >
-                                <Icon name="cart" size={18} />
-                              </button>
-                              <button 
-                                className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleWishlist(product.id);
-                                }}
-                                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                              >
-                                <Icon name="heart" size={20} />
-                              </button>
-                            </div>
-                            <div className="product-card__link">
-                              <div className="product-card__info">
-                                {product.artisan && <span className="product-card__artisan">By {product.artisan}</span>}
-                                <h3 className="product-card__name">{product.name}</h3>
-                                <div className="product-card__pricing">
-                                  <span className="product-card__price">KES {product.price.toLocaleString()}</span>
-                                  {product.originalPrice && <span className="product-card__original-price">KES {product.originalPrice.toLocaleString()}</span>}
-                                  {discount && <span className="product-card__discount">-{discount}%</span>}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {paginatedProducts.map((product) => (
+                      <div key={product.id} className="masonry-item">
+                        <ProductCard product={product} />
+                      </div>
+                    ))}
                   </div>
                 )}
                 {gridView !== "masonry" && (
                   <div className={`shop-products__${gridView}`}>
-                    {paginatedProducts.map((product) => {
-                      const badge = getProductBadge(product);
-                      const isWishlisted = wishlist.includes(product.id);
-                      const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null;
-                      return (
-                        <div key={product.id} className="product-card-grid-item">
-                          <div 
-                            className="product-card-with-actions"
-                            onClick={() => window.location.href = `/product/${product.slug}`}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/product/${product.slug}`)}
-                          >
-                            <div className="product-card__image-wrap">
-                              <img src={product.image} alt={product.name} className="product-card__image" />
-                              {badge && <span className="product-card__badge" style={{ backgroundColor: badge.color }}>{badge.text}</span>}
-                              <button 
-                                className="product-card__add-to-cart"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Add to cart logic here
-                                }}
-                                aria-label="Add to cart"
-                              >
-                                <Icon name="cart" size={18} />
-                              </button>
-                              <button 
-                                className={`product-card__wishlist ${isWishlisted ? "active" : ""}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleWishlist(product.id);
-                                }}
-                                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                              >
-                                <Icon name="heart" size={20} />
-                              </button>
-                            </div>
-                            <a href={`/product/${product.slug}`} className="product-card__link">
-                              <div className="product-card__info">
-                                {product.artisan && <span className="product-card__artisan">By {product.artisan}</span>}
-                                <h3 className="product-card__name">{product.name}</h3>
-                                <div className="product-card__pricing">
-                                  <span className="product-card__price">KES {product.price.toLocaleString()}</span>
-                                  {product.originalPrice && <span className="product-card__original-price">KES {product.originalPrice.toLocaleString()}</span>}
-                                  {discount && <span className="product-card__discount">-{discount}%</span>}
-                                </div>
-                              </div>
-                            </a>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {paginatedProducts.map((product) => (
+                      <div key={product.id} className="product-card-grid-item">
+                        <ProductCard product={product} />
+                      </div>
+                    ))}
                   </div>
                 )}
               </>
