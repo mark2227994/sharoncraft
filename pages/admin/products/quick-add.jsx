@@ -3,6 +3,8 @@ import Link from "next/link";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import SeoHead from "../../../components/SeoHead";
 import { categoryOptions } from "../../../data/site";
+import { validateQuickAddForm, checkDuplicateProduct } from "../../../lib/product-validation";
+import { processImageFile, formatFileSize } from "../../../lib/image-optimization";
 
 export default function QuickAddProductPage() {
   const [form, setForm] = useState({
@@ -14,9 +16,12 @@ export default function QuickAddProductPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
   const [savedId, setSavedId] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState({ loading: true, configured: false });
+  const [imageInfo, setImageInfo] = useState({ original: 0, compressed: 0 });
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const fileInputRef = useRef(null);
 
   // Check AI status on mount
@@ -48,11 +53,19 @@ export default function QuickAddProductPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setForm({ ...form, image: event.target?.result });
-    };
-    reader.readAsDataURL(file);
+    setError("");
+    
+    try {
+      const result = await processImageFile(file);
+      setForm({ ...form, image: result.base64 });
+      setImageInfo({
+        original: result.originalSize,
+        compressed: result.compressedSize,
+        ratio: result.compressionRatio,
+      });
+    } catch (err) {
+      setError(err.message || "Failed to process image");
+    }
   }
 
   async function handleAIGenerate() {
@@ -103,24 +116,35 @@ export default function QuickAddProductPage() {
   async function handleSave(e) {
     e.preventDefault();
     
-    if (!form.name.trim()) {
-      setError("Product name is required");
-      return;
-    }
-    
-    if (!form.price || parseFloat(form.price) <= 0) {
-      setError("Valid price is required");
-      return;
-    }
-    
-    if (!form.category) {
-      setError("Category is required");
+    // Clear previous errors
+    setError("");
+    setMessage("");
+    setValidationErrors({});
+
+    // Validate form
+    const validation = validateQuickAddForm(form);
+    if (!validation.valid) {
+      setValidationErrors(validation.errors);
+      setError(Object.values(validation.errors)[0] || "Please fix the errors below");
       return;
     }
 
+    // Check for duplicates
+    setCheckingDuplicate(true);
+    try {
+      const isDuplicate = await checkDuplicateProduct(form.name);
+      if (isDuplicate) {
+        setError("A product with this name already exists");
+        setCheckingDuplicate(false);
+        return;
+      }
+    } catch (err) {
+      console.error("Error checking duplicate:", err);
+      // Continue anyway - duplicate check is not critical
+    }
+    setCheckingDuplicate(false);
+
     setSaving(true);
-    setError("");
-    setMessage("");
 
     try {
       const response = await fetch("/api/admin/products", {
@@ -143,10 +167,11 @@ export default function QuickAddProductPage() {
       const data = await response.json();
       const newProduct = data.products?.[0];
       setSavedId(newProduct?.id || "");
-      setMessage(`Product "${form.name}" added successfully!`);
+      setMessage(`✓ Product "${form.name}" added successfully!`);
       
       // Reset form
       setForm({ name: "", price: "", category: "Jewellery", image: "" });
+      setImageInfo({ original: 0, compressed: 0 });
       
       // Clear message after 3 seconds
       setTimeout(() => setMessage(""), 3000);
@@ -435,17 +460,25 @@ export default function QuickAddProductPage() {
                   )}
                 </div>
                 {form.image && (
-                  <img
-                    src={form.image}
-                    alt="Preview"
-                    style={{
-                      marginTop: "12px",
-                      maxWidth: "100%",
-                      maxHeight: "200px",
-                      borderRadius: "6px",
-                      border: "1px solid #ddd"
-                    }}
-                  />
+                  <div>
+                    <img
+                      src={form.image}
+                      alt="Preview"
+                      style={{
+                        marginTop: "12px",
+                        maxWidth: "100%",
+                        maxHeight: "200px",
+                        borderRadius: "6px",
+                        border: "1px solid #ddd"
+                      }}
+                    />
+                    {imageInfo.original > 0 && (
+                      <p className="quick-add-hint" style={{ marginTop: "8px", fontSize: "12px" }}>
+                        Original: {formatFileSize(imageInfo.original)} → Optimized: {formatFileSize(imageInfo.compressed)} 
+                        {imageInfo.ratio > 0 && ` (${imageInfo.ratio}% smaller)`}
+                      </p>
+                    )}
+                  </div>
                 )}
                 <div className="quick-add-hint">
                   {aiStatus.loading 
@@ -462,11 +495,22 @@ export default function QuickAddProductPage() {
                   type="text"
                   className="quick-add-input"
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, name: e.target.value });
+                    setValidationErrors({ ...validationErrors, name: "" });
+                  }}
                   placeholder="e.g. Maasai Beaded Bracelet"
                   autoFocus={!form.image}
+                  style={{
+                    borderColor: validationErrors.name ? "#f44336" : undefined,
+                  }}
                 />
-                <div className="quick-add-hint">What is this product called?</div>
+                {validationErrors.name && (
+                  <div className="quick-add-hint" style={{ color: "#f44336" }}>
+                    ✗ {validationErrors.name}
+                  </div>
+                )}
+                <div className="quick-add-hint">What is this product called? (3-120 characters)</div>
               </div>
 
               <div className="quick-add-field">
@@ -475,12 +519,23 @@ export default function QuickAddProductPage() {
                   type="number"
                   className="quick-add-input"
                   value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, price: e.target.value });
+                    setValidationErrors({ ...validationErrors, price: "" });
+                  }}
                   placeholder="e.g. 8500"
                   min="0"
                   step="100"
+                  style={{
+                    borderColor: validationErrors.price ? "#f44336" : undefined,
+                  }}
                 />
-                <div className="quick-add-hint">Selling price in Kenyan Shillings</div>
+                {validationErrors.price && (
+                  <div className="quick-add-hint" style={{ color: "#f44336" }}>
+                    ✗ {validationErrors.price}
+                  </div>
+                )}
+                <div className="quick-add-hint">Selling price in Kenyan Shillings (KES 50 - KES 500,000)</div>
               </div>
 
               <div className="quick-add-field">
@@ -503,9 +558,9 @@ export default function QuickAddProductPage() {
                 <button
                   type="submit"
                   className="quick-add-btn quick-add-btn-save"
-                  disabled={saving}
+                  disabled={saving || checkingDuplicate}
                 >
-                  {saving ? "Saving..." : "Save Product"}
+                  {checkingDuplicate ? "Checking..." : saving ? "Saving..." : "Save Product"}
                 </button>
                 <Link href="/admin/products" className="quick-add-btn quick-add-btn-cancel">
                   Cancel
