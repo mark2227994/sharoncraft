@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Head from "next/head";
 import Link from "next/link";
 import AdminLayout from "../../../components/admin/AdminLayout";
@@ -13,6 +13,7 @@ export default function AdminProductsPage() {
   const [selectedArtisan, setSelectedArtisan] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
   const [showBatchEdit, setShowBatchEdit] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: products, isLoading, isError } = useQuery({
     queryKey: ["admin-products"],
@@ -36,7 +37,7 @@ export default function AdminProductsPage() {
         alert(body.error || "Could not delete product.");
         return;
       }
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     } catch {
       alert("Network error. Could not delete product.");
     } finally {
@@ -61,8 +62,8 @@ export default function AdminProductsPage() {
   function handleBatchEditSaved() {
     setSelectedIds([]);
     setShowBatchEdit(false);
-    // Refetch products
-    window.location.reload();
+    // Refetch products from server
+    queryClient.invalidateQueries({ queryKey: ["admin-products"] });
   }
 
   return (
