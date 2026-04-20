@@ -7,6 +7,7 @@ export default function LocalImageUpload({
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [uploadedUrl, setUploadedUrl] = useState("");
 
   async function onChange(event) {
     const input = event.target;
@@ -14,6 +15,7 @@ export default function LocalImageUpload({
     if (!file) return;
 
     setError("");
+    setUploadedUrl("");
     setBusy(true);
 
     const body = new FormData();
@@ -38,6 +40,7 @@ export default function LocalImageUpload({
     }
 
     if (data.path) {
+      setUploadedUrl(data.path);
       onUploaded(data.path);
     }
   }
@@ -53,14 +56,32 @@ export default function LocalImageUpload({
         className="admin-input admin-input--file"
       />
       {busy ? (
-        <p className="admin-note" style={{ marginTop: "6px" }}>
-          Uploading...
+        <p className="admin-note" style={{ marginTop: "6px", color: "#2E7D32" }}>
+          ✓ Uploading...
         </p>
       ) : null}
       {error ? (
         <p className="admin-form-error" style={{ marginTop: "6px", marginBottom: 0 }}>
-          {error}
+          ❌ {error}
         </p>
+      ) : null}
+      {uploadedUrl && !busy ? (
+        <div style={{ marginTop: "8px" }}>
+          <img 
+            src={uploadedUrl} 
+            alt="Uploaded preview" 
+            style={{ 
+              maxWidth: "120px", 
+              maxHeight: "120px", 
+              borderRadius: "4px",
+              border: "2px solid #4CAF50",
+              padding: "4px"
+            }} 
+          />
+          <p className="admin-note" style={{ marginTop: "6px", color: "#2E7D32" }}>
+            ✓ Image uploaded successfully
+          </p>
+        </div>
       ) : null}
     </div>
   );
