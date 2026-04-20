@@ -11,11 +11,11 @@ const path = require('path');
 const ARTISANS = [
   {
     id: 1,
-    name: "Sharon Kipchoge",
+    name: "Sharon Ruth",
     location: "Nairobi, Kenya",
     craft: "Beaded Jewelry & Accessories",
     image: "",
-    story: "Sharon is the founder and lead artisan of SharonCraft. With over 12 years of experience in traditional Kenyan beadwork, she combines ancestral techniques with contemporary design. Every piece carries the spirit of Kenya's rich cultural heritage.",
+    story: "Sharon Ruth is the founder and lead artisan of SharonCraft. With over 12 years of experience in traditional Kenyan beadwork, she combines ancestral techniques with contemporary design. Every piece carries the spirit of Kenya's rich cultural heritage.",
     quote: "I create not just jewelry, but stories of our people.",
     yearsExperience: "12+",
     specialties: "Beaded earrings, necklaces, bracelets, custom designs",
@@ -26,11 +26,11 @@ const ARTISANS = [
   },
   {
     id: 2,
-    name: "Ken Ochieng",
+    name: "Ken Mutinda",
     location: "Nairobi, Kenya",
     craft: "Home Decor & Accessories",
     image: "",
-    story: "Ken specializes in transforming beads into functional art for the home. His expertise in geometric patterns and color combinations brings Kenyan design into modern living spaces. He believes that home decor should tell a story.",
+    story: "Ken Mutinda specializes in transforming beads into functional art for the home. His expertise in geometric patterns and color combinations brings Kenyan design into modern living spaces. He believes that home decor should tell a story.",
     quote: "Beads are not just ornaments; they are conversations with the past.",
     yearsExperience: "8+",
     specialties: "Home decor, beaded bags, geometric patterns",
