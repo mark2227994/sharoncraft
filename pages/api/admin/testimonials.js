@@ -62,15 +62,25 @@ function writeTestimonials(testimonials) {
 
 export default function handler(req, res) {
   if (req.method === "GET") {
-    const testimonials = readTestimonials();
-    return res.status(200).json({ testimonials });
+    try {
+      const testimonials = readTestimonials();
+      return res.status(200).json({ testimonials });
+    } catch (error) {
+      console.error("Testimonials GET error:", error);
+      return res.status(500).json({ error: "Could not read testimonials" });
+    }
   }
 
   if (req.method === "POST") {
     try {
       const { testimonials: newTestimonials } = req.body;
+      
+      if (!newTestimonials) {
+        return res.status(400).json({ error: "No testimonials provided" });
+      }
+      
       if (!Array.isArray(newTestimonials)) {
-        return res.status(400).json({ error: "Invalid testimonials format" });
+        return res.status(400).json({ error: "Testimonials must be an array" });
       }
 
       // Read existing testimonials and append new ones
@@ -78,10 +88,10 @@ export default function handler(req, res) {
       const combined = [...existing, ...newTestimonials];
       
       writeTestimonials(combined);
-      return res.status(200).json({ success: true, testimonials: combined });
+      return res.status(200).json({ success: true, count: combined.length });
     } catch (error) {
-      console.error("Testimonials API error:", error);
-      return res.status(500).json({ error: error.message });
+      console.error("Testimonials POST error:", error);
+      return res.status(500).json({ error: error.message || "Could not save testimonial" });
     }
   }
 

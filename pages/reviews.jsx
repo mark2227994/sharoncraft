@@ -61,9 +61,11 @@ export default function ReviewsPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Could not submit review");
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
       }
 
+      const result = await response.json();
       setSubmitted(true);
       setMessage("✓ Thank you! Your review has been submitted and is pending approval.");
       setFormData({
@@ -80,7 +82,7 @@ export default function ReviewsPage() {
       }, 4000);
     } catch (error) {
       setMessage("Error submitting review. Please try again.");
-      console.error("Submission error:", error);
+      console.error("Submission error:", error.message || error);
     } finally {
       setLoading(false);
     }
