@@ -80,14 +80,18 @@ export default function AdminHeroSlideshowPage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.error || "Could not save slides");
+        throw new Error(data?.error || `Save failed (${response.status})`);
       }
       setSlides(nextSlides);
-      setMessage("Slides saved successfully");
+      setMessage("✓ Slides saved successfully");
       setTimeout(() => setMessage(""), 3000);
+      return true;
     } catch (error) {
-      setMessage(String(error?.message || "Could not save slides"));
-      setTimeout(() => setMessage(""), 3500);
+      const errorMsg = error?.message || "Could not save slides";
+      setMessage(`❌ ${errorMsg}`);
+      console.error("Save error:", error);
+      setTimeout(() => setMessage(""), 5000);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -105,9 +109,13 @@ export default function AdminHeroSlideshowPage() {
     setShowForm(true);
   }
 
-  function handleSaveSlide() {
+  async function handleSaveSlide() {
     if (!formData.title) {
-      setMessage("Title is required");
+      setMessage("❌ Title is required");
+      return;
+    }
+    if (!formData.imageDesktop && !formData.imageMobile && !formData.image) {
+      setMessage("❌ At least one image is required (Desktop, Mobile, or Legacy)");
       return;
     }
 
@@ -118,9 +126,11 @@ export default function AdminHeroSlideshowPage() {
       nextSlides = [...slides, formData];
     }
 
-    saveSlides(nextSlides);
-    setShowForm(false);
-    setFormData(DEFAULT_SLIDE);
+    const success = await saveSlides(nextSlides);
+    if (success) {
+      setShowForm(false);
+      setFormData(DEFAULT_SLIDE);
+    }
   }
 
   function handleDeleteSlide(id) {

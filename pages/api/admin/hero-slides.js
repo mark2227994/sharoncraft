@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 const filePath = path.join(process.cwd(), "data", "hero-slides.json");
 
@@ -136,23 +137,52 @@ function writeSlides(slides) {
 }
 
 export default function handler(req, res) {
+  // Check authorization for all methods
+  if (req.method !== "GET" && !isAuthorizedRequest(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   if (req.method === "GET") {
-    const slides = readSlides();
-    return res.status(200).json({ slides });
+    try {
+      const slides = readSlides();
+      return res.status(200).json({ slides });
+    } catch (error) {
+      console.error("Error reading slides:", error);
+      return res.status(500).json({ error: "Could not read slides" });
+    }
   }
 
   if (req.method === "POST") {
     try {
       const { slides } = req.body;
       if (!Array.isArray(slides)) {
-        return res.status(400).json({ error: "Invalid slides format" });
+        return res.status(400).json({ error: "Invalid slides format: expected array" });
       }
+      if (slides.length === 0) {
+        return res.status(400).json({ error: "At least one slide is required" });
+      }
+      
+      // Validate each slide has required fields
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        if (!slide.id) {
+          return res.status(400).json({ error: `Slide ${i + 1}: missing id` });
+        }
+        if (!slide.title) {
+          return res.status(400).json({ error: `Slide ${i + 1}: missing title` });
+        }
+        if (!slide.type) {
+          return res.status(400).json({ error: `Slide ${i + 1}: missing type` });
+        }
+      }
+
       writeSlides(slides);
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ success: true, message: "Slides saved" });
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      console.error("Error saving slides:", error);
+      return res.status(500).json({ error: `Could not save slides: ${error.message}` });
     }
   }
 
-  res.status(405).json({ error: "Method not allowed" });
+  return res.status(405).json({ error: "Method not allowed" });
 }
