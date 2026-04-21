@@ -120,6 +120,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 ul { list-style: none; }
 input, select, textarea { font-family: inherit; }
 
+/* ---- Fixed nav offset: account for fixed header + announcement bar ---- */
+main, article, section:first-of-type {
+  margin-top: calc(30px + var(--nav-height));
+  scroll-margin-top: calc(30px + var(--nav-height));
+}
+
 /* ---- Focus ring — accessible, on-brand ---- */
 :focus-visible {
   outline: 2px solid var(--color-terracotta);
