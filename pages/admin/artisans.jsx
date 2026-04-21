@@ -16,43 +16,112 @@ const DEFAULT_ARTISAN = {
   href: "",
 };
 
-const STORY_TEMPLATES = [
-  {
-    value: "custom",
+const STORY_TEMPLATES = {
+  custom: {
     label: "Custom - Write your own",
     text: ""
   },
-  {
-    value: "heritage-general",
-    label: "Heritage Focus - General",
-    text: "[Name] draws from Kenyan beading traditions to create [craft] that celebrates authentic craftsmanship. Each piece is handmade with care, honoring heritage while bringing contemporary elegance to every detail."
+  jewellery_heritage: {
+    category: "Jewellery",
+    label: "Jewellery - Heritage General",
+    text: "[Name] draws from Kenyan beading traditions to create jewelry that celebrates authentic craftsmanship. Each piece is handmade with care, honoring heritage while bringing contemporary elegance to every detail."
   },
-  {
-    value: "heritage-ceremonial",
-    label: "Heritage Focus - Ceremonial",
-    text: "[Name] specializes in ceremonial beadwork that blends traditional Kenyan aesthetics with bold, balanced color. Each piece is crafted to celebrate significant moments and heritage."
+  jewellery_ceremonial: {
+    category: "Jewellery",
+    label: "Jewellery - Ceremonial Bold",
+    text: "[Name] specializes in ceremonial beadwork that blends traditional Kenyan aesthetics with bold, balanced color. Each piece is crafted to celebrate significant moments and cultural heritage."
   },
-  {
-    value: "heritage-playful",
-    label: "Heritage Focus - Playful",
-    text: "[Name] creates lighter jewelry designed to move well with the body. Drawing from Kenyan traditions, their work brings playful elegance and contemporary style to every handmade piece."
+  jewellery_playful: {
+    category: "Jewellery",
+    label: "Jewellery - Playful Elegance",
+    text: "[Name] creates jewelry designed to move well with the body. Drawing from Kenyan traditions, their work brings playful elegance and contemporary style to every handmade piece."
   },
-  {
-    value: "heritage-home",
-    label: "Heritage Focus - Home Decor",
-    text: "[Name] brings Kenyan beading traditions into home spaces, creating pieces that celebrate craftsmanship and cultural heritage. Each item is handmade to add warmth and character to any room."
+  jewellery_minimalist: {
+    category: "Jewellery",
+    label: "Jewellery - Minimalist",
+    text: "[Name] believes in the power of simplicity. Their jewelry celebrates clean lines and refined craftsmanship, honoring Kenyan beading heritage with a contemporary, understated approach."
   },
-  {
-    value: "philosophy",
-    label: "Philosophy-Driven",
-    text: "[Name] believes that every piece should tell a story and stand the test of time. Their approach focuses on [specialty], resulting in jewelry that feels both personal and timeless."
+  necklace_statement: {
+    category: "Necklaces",
+    label: "Necklaces - Statement Pieces",
+    text: "[Name] creates bold centerpiece necklaces that demand attention. Their work draws from Kenyan traditions while bringing dramatic flair and contemporary vision to each handmade piece."
   },
-  {
-    value: "specialist",
-    label: "Specialist Focus",
-    text: "[Name] specializes in [craft type] with an emphasis on [characteristic]. Each piece is crafted to [purpose], celebrating both traditional techniques and contemporary vision."
+  necklace_bridal: {
+    category: "Necklaces",
+    label: "Necklaces - Bridal",
+    text: "[Name] specializes in bridal necklaces that capture both tradition and elegance. Each piece is thoughtfully crafted to be the perfect complement for meaningful occasions and celebrations."
   },
-];
+  necklace_layerable: {
+    category: "Necklaces",
+    label: "Necklaces - Layerable",
+    text: "[Name] designs necklaces meant to layer and mix. Drawing from Kenyan beading traditions, their work offers flexibility and contemporary style for everyday wear."
+  },
+  bracelet_bold: {
+    category: "Bracelets",
+    label: "Bracelets - Bold & Balanced",
+    text: "[Name] creates bracelets that balance bold color with wearable elegance. Each piece is handmade with traditional Kenyan techniques, perfect for making a quiet statement."
+  },
+  bracelet_stacking: {
+    category: "Bracelets",
+    label: "Bracelets - Stackable",
+    text: "[Name] designs bracelets meant to be worn in multiples. Their work celebrates Kenyan beading heritage through pieces that stack beautifully and tell stories together."
+  },
+  bracelet_everyday: {
+    category: "Bracelets",
+    label: "Bracelets - Everyday",
+    text: "[Name] crafts bracelets designed for daily wear. Honoring traditional Kenyan techniques, their work brings timeless elegance to your everyday style."
+  },
+  earring_movement: {
+    category: "Earrings",
+    label: "Earrings - Movement",
+    text: "[Name] specializes in earrings that move with you. Their designs celebrate lightweight elegance and Kenyan beading heritage, perfect for those who love dynamic jewelry."
+  },
+  earring_statement: {
+    category: "Earrings",
+    label: "Earrings - Statement",
+    text: "[Name] creates statement earrings that frame the face beautifully. Drawing from Kenyan traditions, each pair is handcrafted with bold color and confident design."
+  },
+  earring_delicate: {
+    category: "Earrings",
+    label: "Earrings - Delicate",
+    text: "[Name] designs delicate earrings that bring subtle beauty to your look. Their work honors Kenyan beading traditions with refined craftsmanship and gentle elegance."
+  },
+  homedecor_wall: {
+    category: "Home Decor",
+    label: "Home Decor - Wall Art",
+    text: "[Name] brings Kenyan beading traditions into your home through thoughtfully designed wall pieces. Each creation celebrates cultural heritage while adding warmth and character to any space."
+  },
+  homedecor_functional: {
+    category: "Home Decor",
+    label: "Home Decor - Functional",
+    text: "[Name] creates functional home pieces that honor Kenyan craftsmanship. From decorative holders to woven accents, each item brings both beauty and purpose to your everyday life."
+  },
+  homedecor_accent: {
+    category: "Home Decor",
+    label: "Home Decor - Accent Pieces",
+    text: "[Name] designs accent pieces that become focal points in any room. Their work celebrates Kenyan beading and weaving traditions, bringing artisanal beauty to contemporary homes."
+  },
+  philosophy_story: {
+    category: "Philosophy",
+    label: "Philosophy - Story-Driven",
+    text: "[Name] believes every piece should tell a story and stand the test of time. Their approach focuses on meaningful craftsmanship, resulting in jewelry that feels both personal and timeless."
+  },
+  philosophy_timeless: {
+    category: "Philosophy",
+    label: "Philosophy - Timeless Quality",
+    text: "[Name] is committed to creating pieces meant to be treasured for generations. Each handmade item reflects thoughtful design and unwavering attention to quality craftsmanship."
+  },
+  specialist_color: {
+    category: "Specialist",
+    label: "Specialist - Master of Color",
+    text: "[Name] specializes in color combinations that celebrate Kenyan heritage and contemporary vision. Their expertise lies in creating harmonious, eye-catching pieces through bold, balanced design."
+  },
+  specialist_technique: {
+    category: "Specialist",
+    label: "Specialist - Master Craftsperson",
+    text: "[Name] is a master of [technique]. Their deep knowledge of traditional Kenyan methods brings exceptional skill to every piece, resulting in jewelry that shows generations of craftsmanship."
+  },
+};
 
 const DEFAULT_ARTISANS = [
   {
@@ -426,8 +495,9 @@ export default function AdminArtisansPage() {
               <select 
                 value={selectedTemplate} 
                 onChange={(e) => {
-                  const template = STORY_TEMPLATES.find(t => t.value === e.target.value);
-                  setSelectedTemplate(e.target.value);
+                  const templateKey = e.target.value;
+                  const template = STORY_TEMPLATES[templateKey];
+                  setSelectedTemplate(templateKey);
                   if (template && template.text) {
                     setFormData({...formData, story: template.text});
                   } else {
@@ -436,9 +506,63 @@ export default function AdminArtisansPage() {
                 }}
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 6, fontSize: 14, marginBottom: 12 }}
               >
-                {STORY_TEMPLATES.map(template => (
-                  <option key={template.value} value={template.value}>{template.label}</option>
-                ))}
+                <option value="custom">{STORY_TEMPLATES.custom.label}</option>
+                
+                <optgroup label="— Jewellery —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Jewellery")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
+                
+                <optgroup label="— Necklaces —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Necklaces")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
+                
+                <optgroup label="— Bracelets —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Bracelets")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
+                
+                <optgroup label="— Earrings —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Earrings")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
+                
+                <optgroup label="— Home Decor —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Home Decor")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
+                
+                <optgroup label="— Philosophy —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Philosophy")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
+                
+                <optgroup label="— Specialist —">
+                  {Object.entries(STORY_TEMPLATES)
+                    .filter(([_, t]) => t.category === "Specialist")
+                    .map(([key, template]) => (
+                      <option key={key} value={key}>{template.label}</option>
+                    ))}
+                </optgroup>
               </select>
               
               <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Story Text *</label>
