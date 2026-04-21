@@ -4,28 +4,25 @@
    ============================================================ */
 
 :root {
-  /* Brand Palette - Professional African Artifacts */
-  --color-primary-dark:  #2C1810;    /* Deep African brown */
-  --color-primary:       #3A2B24;    /* Rich earth brown */
-  --color-accent-dark:   #6B4513;    /* Deep terracotta - authentic */
-  --color-accent:        #8B5A2B;    /* Medium brown - premium feel */
-  --color-accent-light:  #A0826D;    /* Light taupe */
-  --color-gold:          #D4AF37;    /* Gold - luxury accent */
-  --color-gold-light:    #E8D5B7;    /* Light gold */
+  /* Brand Palette - Refined Luxury (3-color: cream, brown, terracotta) */
+  --color-primary-dark:  #2C1810;    /* Deep brown - text & emphasis */
+  --color-primary:       #2C1810;    /* Deep brown - primary text */
+  --color-accent:        #8B5A2B;    /* Warm terracotta - all accents */
+  --color-accent-dark:   #6B4513;    /* Darker terracotta - hover states */
+  --color-accent-light:  #D2B48C;    /* Tan - subtle support */
   --color-cream:         #F9F6F0;    /* Warm cream background */
   --color-cream-dark:    #EDE8DE;    /* Slightly darker cream */
-  --color-ink:           #1C1209;    /* Deep ink - main text */
-  --color-bark:          #6B4C2A;    /* Muted brown */
-  --color-linen:         #EDE8DE;    /* Light border */
-  --color-moss:          #4A5240;    /* Muted green - secondary accent */
+  --color-ink:           #2C1810;    /* Deep ink - main text */
+  --color-bark:          #2C1810;    /* Deep brown - secondary text */
+  --color-linen:         #D2B48C;    /* Tan - light borders */
   --color-white:         #FFFFFF;    /* Pure white */
   
-  /* Legacy terracotta aliases (for smooth migration) */
-  --color-terracotta:    #8B5A2B;
-  --color-terracotta-dark: #6B4513;
-  --color-terracotta-light: #A0826D;
-  --color-ochre:         #8B5A2B;
-  --color-ochre-light:   #A0826D;
+  /* Legacy aliases - mapped to refined palette */
+  --color-terracotta:    #8B5A2B;    /* Primary accent */
+  --color-terracotta-dark: #6B4513;  /* Accent hover */
+  --color-terracotta-light: #D2B48C; /* Accent support */
+  --color-gold:          #D2B48C;    /* Tan (no bright gold) */
+  --color-gold-light:    #EDE8DE;    /* Cream variant */
 
   /* Semantic aliases */
   --bg-page:             var(--color-cream);
@@ -33,12 +30,12 @@
   --bg-card-alt:         var(--color-cream-dark);
   --text-primary:        var(--color-ink);
   --text-secondary:      var(--color-bark);
-  --text-muted:          #9C856A;
-  --border-default:      var(--color-linen);
-  --border-strong:       var(--color-bark);
+  --text-muted:          #6B4C2A;    /* Muted brown */
+  --border-default:      #D2B48C;    /* Tan borders */
+  --border-strong:       #8B5A2B;    /* Terracotta borders */
   --accent:              var(--color-accent);
   --accent-hover:        var(--color-accent-dark);
-  --gold:                var(--color-gold);
+  --gold:                #D2B48C;    /* Tan (no gold) */
 
   /* Typography - Professional serif + sans */
   --font-display:        'Georgia', 'Cormorant Garamond', serif;
