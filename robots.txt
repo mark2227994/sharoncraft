@@ -1,13 +1,18 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 Disallow: /admin.html
 Disallow: /admin-mobile.html
+Disallow: /admin-new.html
+Disallow: /assistant-admin.html
+Disallow: /api/
 Disallow: /login.html
 Disallow: /account.html
 Disallow: /supabase-test.html
+Disallow: /archive/
 
 User-agent: OAI-SearchBot
-Allow: /
+Disallow: /
 
 User-agent: Bingbot
 Allow: /
