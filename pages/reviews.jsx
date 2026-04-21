@@ -67,7 +67,9 @@ export default function ReviewsPage() {
 
       const result = await response.json();
       setSubmitted(true);
-      setMessage("✓ Thank you! Your review has been submitted and is pending approval.");
+      setMessage(
+        "✨ Your words mean everything. Thank you for sharing your story and supporting the artisans behind every piece. We're honored to be part of your journey. 🙏"
+      );
       setFormData({
         name: "",
         location: "",
@@ -79,7 +81,7 @@ export default function ReviewsPage() {
       setTimeout(() => {
         setSubmitted(false);
         setMessage("");
-      }, 4000);
+      }, 6000);
     } catch (error) {
       setMessage("Error submitting review. Please try again.");
       console.error("Submission error:", error.message || error);
@@ -350,12 +352,31 @@ export default function ReviewsPage() {
           margin-bottom: var(--space-4);
           font-size: 0.95rem;
           line-height: 1.5;
+          animation: slideInDown 0.4s ease-out;
+        }
+
+        @keyframes slideInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .review-message--success {
-          background: #d4f4dd;
+          background: linear-gradient(135deg, #d4f4dd 0%, #e8f9ed 100%);
           color: #0b5d1f;
-          border: 1px solid #7fcc8f;
+          border: 2px solid #7fcc8f;
+          padding: 18px 20px;
+          font-size: 1rem;
+          font-weight: 500;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(127, 204, 143, 0.15);
+          text-align: center;
+          letter-spacing: 0.3px;
         }
 
         .review-message--error {
