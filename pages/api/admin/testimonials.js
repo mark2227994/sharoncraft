@@ -76,7 +76,6 @@ async function handlePost(req, res) {
             productId: t.productId || null,
             approved: false,
             submittedAt: t.submittedAt,
-            createdAt: new Date().toISOString(),
           }))
         )
         .select();
