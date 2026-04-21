@@ -53,10 +53,12 @@ function writeTestimonials(testimonials) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(filePath, JSON.stringify(testimonials, null, 2));
+    const jsonString = JSON.stringify(testimonials, null, 2);
+    fs.writeFileSync(filePath, jsonString);
+    console.log(`Successfully wrote ${testimonials.length} testimonials to ${filePath}`);
   } catch (error) {
-    console.error("Error writing testimonials:", error);
-    throw new Error("Could not save testimonials");
+    console.error("Error writing testimonials to", filePath, ":", error);
+    throw new Error("Could not save testimonials: " + error.message);
   }
 }
 
@@ -75,17 +77,24 @@ export default function handler(req, res) {
     try {
       const { testimonials: newTestimonials } = req.body;
       
+      console.log("Received POST request with testimonials:", JSON.stringify(newTestimonials));
+      
       if (!newTestimonials) {
+        console.log("Error: No testimonials provided");
         return res.status(400).json({ error: "No testimonials provided" });
       }
       
       if (!Array.isArray(newTestimonials)) {
+        console.log("Error: Testimonials is not an array:", typeof newTestimonials);
         return res.status(400).json({ error: "Testimonials must be an array" });
       }
 
       // Read existing testimonials and append new ones
       const existing = readTestimonials();
+      console.log("Existing testimonials count:", existing.length);
+      
       const combined = [...existing, ...newTestimonials];
+      console.log("Combined testimonials count:", combined.length);
       
       writeTestimonials(combined);
       return res.status(200).json({ success: true, count: combined.length });
