@@ -68,13 +68,19 @@ export default function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { testimonials } = req.body;
-      if (!Array.isArray(testimonials)) {
+      const { testimonials: newTestimonials } = req.body;
+      if (!Array.isArray(newTestimonials)) {
         return res.status(400).json({ error: "Invalid testimonials format" });
       }
-      writeTestimonials(testimonials);
-      return res.status(200).json({ success: true });
+
+      // Read existing testimonials and append new ones
+      const existing = readTestimonials();
+      const combined = [...existing, ...newTestimonials];
+      
+      writeTestimonials(combined);
+      return res.status(200).json({ success: true, testimonials: combined });
     } catch (error) {
+      console.error("Testimonials API error:", error);
       return res.status(500).json({ error: error.message });
     }
   }

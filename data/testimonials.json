@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "Amara K.",
+    "location": "USA",
+    "rating": 5,
+    "quote": "The beadwork is absolutely stunning. Each piece feels authentic and handcrafted. Worth every penny!",
+    "product": "Maasai Beaded Necklace",
+    "productId": "",
+    "approved": true,
+    "image": ""
+  },
+  {
+    "id": 2,
+    "name": "Sarah M.",
+    "location": "UK",
+    "rating": 5,
+    "quote": "Arrived perfectly packaged. The quality is incredible. Supporting artisans has never felt so good.",
+    "product": "Terracotta Home Decor Set",
+    "productId": "",
+    "approved": true,
+    "image": ""
+  },
+  {
+    "id": 3,
+    "name": "Zainab H.",
+    "location": "Canada",
+    "rating": 5,
+    "quote": "These pieces tell a story. Beautiful craftsmanship and fast shipping. Highly recommend!",
+    "product": "Beaded Earring Collection",
+    "productId": "",
+    "approved": true,
+    "image": ""
+  },
+  {
+    "id": 4,
+    "name": "Jennifer L.",
+    "location": "Australia",
+    "rating": 5,
+    "quote": "Every detail is perfect. This is my third purchase and I keep coming back for more.",
+    "product": "Gift Set Bundle",
+    "productId": "",
+    "approved": true,
+    "image": ""
+  }
+]
