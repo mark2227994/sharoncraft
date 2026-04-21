@@ -380,7 +380,14 @@ export default function AdminArtisansPage() {
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Story *</label>
-              <textarea value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} rows={4} style={{ width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 6, resize: "vertical" }} />
+              <textarea 
+                value={formData.story} 
+                onChange={e => setFormData({...formData, story: e.target.value})} 
+                rows={4} 
+                placeholder="E.g. '[Name] draws from Kenyan beading traditions to create [craft] that celebrates authentic craftsmanship. Each piece is handmade with [hours] of care, honoring heritage while bringing contemporary elegance to every detail.'"
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 6, resize: "vertical", fontSize: 14 }} 
+              />
+              <p style={{ fontSize: 12, color: "#999", marginTop: 4 }}>Keep it 1-2 sentences. Focus on their heritage, craft style, or philosophy.</p>
             </div>
 
             <div style={{ display: "flex", gap: 12 }}>
