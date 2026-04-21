@@ -11,7 +11,6 @@ import Testimonials from "../components/Testimonials";
 import CtaSection from "../components/CtaSection";
 import NewsletterSignup from "../components/NewsletterSignup";
 import MobileProductShowcase from "../components/MobileProductShowcase";
-import PromotionBanner from "../components/PromotionBanner";
 import ArticleCarousel from "../components/ArticleCarousel";
 import QuickStatsBar from "../components/QuickStatsBar";
 import Icon from "../components/icons";
@@ -199,8 +198,6 @@ export default function HomePage({
       />
       <Nav />
       <HeroSlideshow />
-
-      <PromotionBanner />
 
       <QuickStatsBar />
 
