@@ -335,7 +335,7 @@ export default function HeroSlideshow({ slides = [] }) {
           width: 100%;
           background: #000;
           overflow: hidden;
-          min-height: 600px;
+          min-height: 500px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -345,7 +345,7 @@ export default function HeroSlideshow({ slides = [] }) {
           position: relative;
           width: 100%;
           height: 100%;
-          min-height: 600px;
+          min-height: 500px;
         }
 
         /* ========== SLIDES ========== */
@@ -645,11 +645,11 @@ export default function HeroSlideshow({ slides = [] }) {
         /* ========== RESPONSIVE ========== */
         @media (max-width: 1024px) {
           .hero-slideshow {
-            min-height: 500px;
+            min-height: 420px;
           }
 
           .hero-slideshow__container {
-            min-height: 500px;
+            min-height: 420px;
           }
 
           .hero-slideshow__content {
@@ -667,11 +667,11 @@ export default function HeroSlideshow({ slides = [] }) {
 
         @media (max-width: 768px) {
           .hero-slideshow {
-            min-height: 450px;
+            min-height: 380px;
           }
 
           .hero-slideshow__container {
-            min-height: 450px;
+            min-height: 380px;
           }
 
           .hero-slideshow__content {
@@ -734,11 +734,11 @@ export default function HeroSlideshow({ slides = [] }) {
 
         @media (max-width: 480px) {
           .hero-slideshow {
-            min-height: 380px;
+            min-height: 320px;
           }
 
           .hero-slideshow__container {
-            min-height: 380px;
+            min-height: 320px;
           }
 
           .hero-slideshow__content {

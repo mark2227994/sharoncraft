@@ -91,7 +91,7 @@ export default function HeroBanner({
           width: 100%;
           background: white;
           overflow: hidden;
-          min-height: 700px;
+          min-height: 600px;
         }
 
         /* Textured background pattern */
@@ -119,7 +119,7 @@ export default function HeroBanner({
           grid-template-columns: 1fr 1fr;
           max-width: 1400px;
           margin: 0 auto;
-          min-height: 700px;
+          min-height: 600px;
           height: 100%;
         }
 
@@ -386,11 +386,11 @@ export default function HeroBanner({
 
           .hero__left {
             padding: 80px var(--gutter);
-            min-height: 500px;
+            min-height: 420px;
           }
 
           .hero__right {
-            min-height: 500px;
+            min-height: 420px;
           }
 
           .hero__number {
