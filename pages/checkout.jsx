@@ -43,16 +43,16 @@ function buildWhatsAppMessage({
   lines.push("═══════════════════");
   lines.push("ITEMS:");
   items.forEach((item, idx) => {
-    const lineTotal = (item.price * item.quantity).toLocaleString();
+    const lineTotal = (item.price * item.quantity).toLocaleString("en-KE");
     lines.push(`${idx + 1}. ${item.name}`);
-    lines.push(`   Qty: ${item.quantity} × KES ${item.price.toLocaleString()} = KES ${lineTotal}`);
+    lines.push(`   Qty: ${item.quantity} × KES ${item.price.toLocaleString("en-KE")} = KES ${lineTotal}`);
   });
   lines.push("");
   lines.push("═══════════════════");
-  lines.push(`SUBTOTAL:     KES ${subtotal.toLocaleString()}`);
-  lines.push(`DELIVERY:      KES ${deliveryFee.toLocaleString()} (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"})`);
+  lines.push(`SUBTOTAL:     KES ${subtotal.toLocaleString("en-KE")}`);
+  lines.push(`DELIVERY:      KES ${deliveryFee.toLocaleString("en-KE")} (${DELIVERY_OPTIONS[deliveryMethod]?.short || "Home"})`);
   lines.push(`━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`TOTAL:        KES ${total.toLocaleString()}`);
+  lines.push(`TOTAL:        KES ${total.toLocaleString("en-KE")}`);
   lines.push("═══════════════════");
   lines.push("");
   lines.push("DELIVERY DETAILS:");
