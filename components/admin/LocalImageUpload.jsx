@@ -24,24 +24,36 @@ export default function LocalImageUpload({
       body.append("folder", folder);
     }
 
-    const response = await fetch("/api/admin/upload", {
-      method: "POST",
-      body,
-      credentials: "same-origin",
-    });
+    try {
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body,
+        credentials: "same-origin",
+      });
 
-    setBusy(false);
-    input.value = "";
+      setBusy(false);
+      input.value = "";
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      setError(data.error || "Upload failed");
-      return;
-    }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const errorMsg = data.error || `Upload failed (${response.status})`;
+        setError(errorMsg);
+        console.error("Upload error:", errorMsg, data);
+        return;
+      }
 
-    if (data.path) {
-      setUploadedUrl(data.path);
-      onUploaded(data.path);
+      if (data.path) {
+        setUploadedUrl(data.path);
+        onUploaded(data.path);
+      } else {
+        setError("Upload succeeded but no path returned");
+      }
+    } catch (err) {
+      setBusy(false);
+      input.value = "";
+      const errorMsg = err?.message || "Network error during upload";
+      setError(errorMsg);
+      console.error("Upload exception:", err);
     }
   }
 

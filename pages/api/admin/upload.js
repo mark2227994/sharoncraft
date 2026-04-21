@@ -1,7 +1,6 @@
 import formidable from "formidable";
 import fs from "fs/promises";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export const config = {
@@ -11,11 +10,6 @@ export const config = {
 };
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
-
-const SUPABASE_URL = "https://vonzscriztdcdhobulhy.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_3CbiLXuCbqRGjKmBp7Ez3w_NV4HaLXa";
-const STORAGE_BUCKET = "product-images";
-const STORAGE_FOLDER = "catalog";
 
 function sanitizeFolderPath(value) {
   return String(value || "")
@@ -41,7 +35,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Parse the multipart form — /tmp is the only writable dir on Vercel
+  // Parse the multipart form
   const form = formidable({
     uploadDir: "/tmp",
     keepExtensions: true,
@@ -79,7 +73,7 @@ export default async function handler(req, res) {
     await fs.unlink(file.filepath).catch(() => {});
   }
 
-  // Build a clean storage path
+  // Build a clean path for public storage
   const originalName = file.originalFilename || "upload";
   const ext = path.extname(originalName) || ".webp";
   const baseName = path.basename(originalName, ext)
@@ -90,30 +84,23 @@ export default async function handler(req, res) {
   const fileName = `${baseName}-${Date.now()}${ext}`;
   const requestedFolder = Array.isArray(fields?.folder) ? fields.folder[0] : fields?.folder;
   const cleanFolder = sanitizeFolderPath(requestedFolder);
-  const storagePath = cleanFolder
-    ? `${STORAGE_FOLDER}/${cleanFolder}/${fileName}`
-    : `${STORAGE_FOLDER}/${fileName}`;
-
-  // Upload using Supabase JS client
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  const { data, error } = await supabase.storage
-    .from(STORAGE_BUCKET)
-    .upload(storagePath, fileBuffer, {
-      contentType: file.mimetype,
-      upsert: true,
-    });
-
-  if (error) {
-    return res.status(500).json({
-      error: `Supabase error: ${error.message || JSON.stringify(error)}`,
-    });
+  
+  // Save to public/uploads directory (locally accessible)
+  const publicDir = path.join(process.cwd(), "public", "uploads", cleanFolder);
+  try {
+    await fs.mkdir(publicDir, { recursive: true });
+  } catch (error) {
+    return res.status(500).json({ error: `Could not create directory: ${String(error.message || error)}` });
   }
 
-  // Get the public URL
-  const { data: urlData } = supabase.storage
-    .from(STORAGE_BUCKET)
-    .getPublicUrl(data.path);
+  const filePath = path.join(publicDir, fileName);
+  try {
+    await fs.writeFile(filePath, fileBuffer);
+  } catch (error) {
+    return res.status(500).json({ error: `Could not save file: ${String(error.message || error)}` });
+  }
 
-  return res.status(200).json({ path: urlData.publicUrl });
+  // Return public URL path
+  const publicPath = `/uploads/${cleanFolder}/${fileName}`.replace(/\/+/g, "/");
+  return res.status(200).json({ path: publicPath });
 }
