@@ -1,36 +1,75 @@
+import { useState, useEffect } from "react";
 import Icon from "./icons";
 
 export default function Testimonials() {
-  const testimonials = [
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fallback testimonials if API returns nothing
+  const fallbackTestimonials = [
     {
       name: "Amara K.",
       location: "USA",
       rating: 5,
-      text: "The beadwork is absolutely stunning. Each piece feels authentic and handcrafted. Worth every penny!",
+      quote: "The beadwork is absolutely stunning. Each piece feels authentic and handcrafted. Worth every penny!",
       product: "Maasai Beaded Necklace",
     },
     {
       name: "Sarah M.",
       location: "UK",
       rating: 5,
-      text: "Arrived perfectly packaged. The quality is incredible. Supporting artisans has never felt so good.",
+      quote: "Arrived perfectly packaged. The quality is incredible. Supporting artisans has never felt so good.",
       product: "Terracotta Home Decor Set",
     },
     {
       name: "Zainab H.",
       location: "Canada",
       rating: 5,
-      text: "These pieces tell a story. Beautiful craftsmanship and fast shipping. Highly recommend!",
+      quote: "These pieces tell a story. Beautiful craftsmanship and fast shipping. Highly recommend!",
       product: "Beaded Earring Collection",
     },
     {
       name: "Jennifer L.",
       location: "Australia",
       rating: 5,
-      text: "Every detail is perfect. This is my third purchase and I keep coming back for more.",
+      quote: "Every detail is perfect. This is my third purchase and I keep coming back for more.",
       product: "Gift Set Bundle",
     },
   ];
+
+  useEffect(() => {
+    async function fetchTestimonials() {
+      try {
+        const response = await fetch("/api/admin/testimonials");
+        const data = await response.json();
+        
+        // Get approved testimonials only
+        const approved = (data.testimonials || [])
+          .filter(t => t.approved)
+          .map(t => ({
+            ...t,
+            text: t.quote, // Use quote field for display
+          }))
+          .slice(0, 4); // Show max 4
+
+        // Use approved testimonials if available, otherwise use fallback
+        setTestimonials(approved.length > 0 ? approved : fallbackTestimonials);
+      } catch (error) {
+        console.error("Error fetching testimonials:", error);
+        setTestimonials(fallbackTestimonials);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTestimonials();
+  }, []);
+
+  // Calculate stats
+  const displayTestimonials = testimonials.slice(0, 4);
+  const avgRating = displayTestimonials.length > 0
+    ? (displayTestimonials.reduce((sum, t) => sum + (t.rating || 5), 0) / displayTestimonials.length).toFixed(1)
+    : 4.9;
 
   return (
     <section className="testimonials">
@@ -44,18 +83,18 @@ export default function Testimonials() {
         </div>
 
         <div className="testimonials__grid">
-          {testimonials.map((testimonial, idx) => (
+          {displayTestimonials.map((testimonial, idx) => (
             <div key={idx} className="testimonials__card">
               <div className="testimonials__header-info">
                 <div className="testimonials__stars">
-                  {[...Array(testimonial.rating)].map((_, i) => (
+                  {[...Array(testimonial.rating || 5)].map((_, i) => (
                     <Icon key={i} name="star" size={16} />
                   ))}
                 </div>
                 <p className="testimonials__product">{testimonial.product}</p>
               </div>
               
-              <p className="testimonials__text">"{testimonial.text}"</p>
+              <p className="testimonials__text">"{testimonial.text || testimonial.quote}"</p>
               
               <div className="testimonials__author">
                 <p className="testimonials__name">{testimonial.name}</p>
@@ -67,7 +106,7 @@ export default function Testimonials() {
 
         <div className="testimonials__stats">
           <div className="testimonials__stat">
-            <p className="testimonials__stat-number">4.9★</p>
+            <p className="testimonials__stat-number">{avgRating}★</p>
             <p className="testimonials__stat-label">Average Rating</p>
           </div>
           <div className="testimonials__stat">
