@@ -212,13 +212,13 @@ main > .section:not(:first-of-type),
 }
 
 .button-whatsapp {
-  background: #18895f;
+  background: #8B5A2B;
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(21, 143, 97, 0.14);
+  box-shadow: 0 4px 12px rgba(139, 90, 43, 0.2);
 }
 
 .button-whatsapp:hover {
-  background: #127551;
+  background: #6B4513;
 }
 
 .badge {

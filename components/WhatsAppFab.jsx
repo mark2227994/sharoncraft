@@ -39,14 +39,14 @@ export default function WhatsAppFab() {
           width: 56px;
           height: 56px;
           border-radius: 50%;
-          background: #25d366;
+          background: #8B5A2B;
           color: white;
           border: none;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+          box-shadow: 0 4px 12px rgba(139, 90, 43, 0.4);
           transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
           font-weight: 600;
           font-size: 12px;
@@ -56,7 +56,7 @@ export default function WhatsAppFab() {
 
         .whatsapp-fab:hover {
           transform: scale(1.1);
-          box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+          box-shadow: 0 6px 20px rgba(139, 90, 43, 0.5);
         }
 
         .whatsapp-fab:active {
