@@ -5,6 +5,17 @@ export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [loadedSlides, setLoadedSlides] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Fetch slides from API on mount
   useEffect(() => {
@@ -126,6 +137,14 @@ export default function HeroSlideshow({ slides = [] }) {
   const slidesData = loadedSlides.length > 0 ? loadedSlides : (slides.length > 0 ? slides : defaultSlides);
   const currentSlideData = slidesData[currentSlide];
 
+  // Helper: Get responsive image (fallback to image field for backwards compatibility)
+  const getSlideImage = (slide) => {
+    if (isMobile) {
+      return slide.imageMobile || slide.imageDesktop || slide.image;
+    }
+    return slide.imageDesktop || slide.image;
+  };
+
   // Auto-advance slides
   useEffect(() => {
     if (!isAutoPlay) return;
@@ -170,7 +189,7 @@ export default function HeroSlideshow({ slides = [] }) {
           >
             {/* Background Image */}
             <img
-              src={slide.image}
+              src={getSlideImage(slide)}
               alt={slide.title}
               className="hero-slideshow__image"
             />

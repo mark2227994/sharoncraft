@@ -16,6 +16,8 @@ const DEFAULT_SLIDE = {
   id: 1,
   type: "artisan",
   image: "/media/site/homepage/design.jpg",
+  imageDesktop: "/media/site/homepage/design.jpg",
+  imageMobile: "/media/site/homepage/design.jpg",
   title: "",
   subtitle: "",
   description: "",
@@ -169,7 +171,7 @@ export default function AdminHeroSlideshowPage() {
             </label>
 
             <label className="admin-field">
-              <span>Image URL</span>
+              <span>Image URL (Legacy - use Desktop/Mobile below)</span>
               <input
                 type="text"
                 className="admin-input"
@@ -179,19 +181,59 @@ export default function AdminHeroSlideshowPage() {
               />
             </label>
 
+            <label className="admin-field">
+              <span>Desktop Image (1400×1800px)</span>
+              <input
+                type="text"
+                className="admin-input"
+                value={formData.imageDesktop || ""}
+                onChange={(e) => handleFormChange("imageDesktop", e.target.value)}
+                placeholder="/media/site/homepage/image-desktop.webp"
+              />
+            </label>
+
             <LocalImageUpload
-              label="Upload Hero Image"
+              label="Upload Desktop Image"
               folder="site/homepage"
-              onUploaded={(path) => handleFormChange("image", path)}
+              onUploaded={(path) => handleFormChange("imageDesktop", path)}
             />
 
-            {formData.image && (
+            {formData.imageDesktop && (
               <div style={{ marginTop: "var(--space-3)", padding: "var(--space-3)", background: "#f5f5f5", borderRadius: "6px" }}>
-                <p className="caption" style={{ marginBottom: "8px", fontWeight: 600 }}>Preview:</p>
+                <p className="caption" style={{ marginBottom: "8px", fontWeight: 600 }}>Desktop Preview (1400×1800):</p>
                 <img
-                  src={formData.image}
-                  alt="Slide preview"
-                  style={{ maxHeight: "120px", maxWidth: "300px", borderRadius: "4px" }}
+                  src={formData.imageDesktop}
+                  alt="Desktop preview"
+                  style={{ maxHeight: "120px", maxWidth: "85px", borderRadius: "4px" }}
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
+              </div>
+            )}
+
+            <label className="admin-field">
+              <span>Mobile Image (1080×1440px)</span>
+              <input
+                type="text"
+                className="admin-input"
+                value={formData.imageMobile || ""}
+                onChange={(e) => handleFormChange("imageMobile", e.target.value)}
+                placeholder="/media/site/homepage/image-mobile.webp"
+              />
+            </label>
+
+            <LocalImageUpload
+              label="Upload Mobile Image"
+              folder="site/homepage"
+              onUploaded={(path) => handleFormChange("imageMobile", path)}
+            />
+
+            {formData.imageMobile && (
+              <div style={{ marginTop: "var(--space-3)", padding: "var(--space-3)", background: "#f5f5f5", borderRadius: "6px" }}>
+                <p className="caption" style={{ marginBottom: "8px", fontWeight: 600 }}>Mobile Preview (1080×1440):</p>
+                <img
+                  src={formData.imageMobile}
+                  alt="Mobile preview"
+                  style={{ maxHeight: "120px", maxWidth: "71px", borderRadius: "4px" }}
                   onError={(e) => { e.target.style.display = "none"; }}
                 />
               </div>
