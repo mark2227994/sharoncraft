@@ -118,6 +118,11 @@ export default function Testimonials() {
             <p className="testimonials__stat-label">Would Recommend</p>
           </div>
         </div>
+
+        <div className="testimonials__cta">
+          <p className="testimonials__cta-text">Have your own story to share?</p>
+          <a href="/reviews" className="testimonials__cta-btn">Leave a Review</a>
+        </div>
       </div>
 
       <style jsx>{`
@@ -246,6 +251,41 @@ export default function Testimonials() {
           font-size: 0.875rem;
           color: #666;
           margin: 0;
+        }
+
+        .testimonials__cta {
+          text-align: center;
+          margin-top: var(--space-8);
+          padding: var(--space-6);
+          background: white;
+          border-radius: 12px;
+          border: 2px solid #C04D29;
+        }
+
+        .testimonials__cta-text {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: #1a1a1a;
+          margin: 0 0 var(--space-3) 0;
+        }
+
+        .testimonials__cta-btn {
+          display: inline-block;
+          padding: 14px 32px;
+          background: linear-gradient(135deg, #C04D29 0%, #8B3A1F 100%);
+          color: white;
+          text-decoration: none;
+          border-radius: 6px;
+          font-weight: 700;
+          font-size: 0.95rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          transition: all 0.3s ease;
+        }
+
+        .testimonials__cta-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(192, 77, 41, 0.3);
         }
 
         @keyframes slideInCard {
