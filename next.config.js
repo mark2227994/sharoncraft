@@ -33,6 +33,7 @@ const nextConfig = {
       },
       { source: "/bridal-bead-sets-kenya.html", destination: "/shop?category=Bridal%20%26%20Occasion", permanent: true },
       { source: "/products/:slug.html", destination: "/product/:slug", permanent: true },
+      { source: "/product", destination: "/shop", permanent: true },
     ];
   },
 };

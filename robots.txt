@@ -10,6 +10,7 @@ Disallow: /login.html
 Disallow: /account.html
 Disallow: /supabase-test.html
 Disallow: /archive/
+Disallow: /product$
 
 User-agent: OAI-SearchBot
 Disallow: /
