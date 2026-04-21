@@ -169,10 +169,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
           )}
         </div>
 
-        {/* Mobile: Show Filter button, Desktop: Hide (sidebar instead) */}
+        {/* Compact Header: Title + Product Count + Sort (Desktop only) */}
         <div className="shop-page__header">
           <div className="shop-page__header-left">
-            <p className="overline">Kenyan Artisan Gallery</p>
             <h1 className="display-lg">Shop the collection</h1>
             <p className="shop-page__count-text">{filteredProducts.length} handmade pieces found</p>
           </div>
@@ -201,11 +200,10 @@ export default function ShopPage({ products, categories, initialCategory, initia
           </div>
         </div>
 
-        {/* Active Filters Display */}
+        {/* Compact Active Filters Bar */}
         {hasActiveFilters && (
           <div className="shop-page__active-filters">
             <div className="shop-page__active-filters-content">
-              <span className="shop-page__filters-label">Active Filters:</span>
               <div className="shop-page__filter-pills">
                 {activeCategory !== "All" && (
                   <div className="filter-pill">
@@ -244,51 +242,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
                 }}
                 className="shop-page__clear-all"
               >
-                Clear All Filters
+                Clear All
               </button>
             </div>
           </div>
         )}
 
-        {/* Jewellery subcategories - horizontal scroll */}
-        {activeCategory === "Jewellery" && (
-          <div className="shop-page__subcategories">
-            <button
-              type="button"
-              className={`shop-page__sub-pill ${activeJewelryType === "all" ? "shop-page__sub-pill--active" : ""}`}
-              onClick={() => setActiveJewelryType("all")}
-            >
-              All
-            </button>
-            {jewelryTypeOptions.map((type) => (
-              <button
-                key={type}
-                type="button"
-                className={`shop-page__sub-pill ${activeJewelryType === type ? "shop-page__sub-pill--active" : ""}`}
-                onClick={() => setActiveJewelryType(type)}
-              >
-                {getJewelryTypeLabel(type)}
-              </button>
-            ))}
-          </div>
-        )}
 
-        {/* Product count */}
-        <div className="shop-page__count">
-          <span className="shop-count-text">{filteredProducts.length} products available</span>
-          {hasActiveFilters && (
-            <button
-              onClick={() => {
-                setActiveCategory("All");
-                setActiveJewelryType("all");
-                setShowAvailableOnly(false);
-              }}
-              className="shop-page__clear"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
 
         {/* Main content with sidebar */}
         <div className="shop-page__layout">
@@ -438,7 +398,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
           padding: var(--space-2) var(--gutter);
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           gap: var(--space-3);
         }
         .shop-page__header-left p {
