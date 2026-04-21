@@ -16,6 +16,44 @@ const DEFAULT_ARTISAN = {
   href: "",
 };
 
+const STORY_TEMPLATES = [
+  {
+    value: "custom",
+    label: "Custom - Write your own",
+    text: ""
+  },
+  {
+    value: "heritage-general",
+    label: "Heritage Focus - General",
+    text: "[Name] draws from Kenyan beading traditions to create [craft] that celebrates authentic craftsmanship. Each piece is handmade with care, honoring heritage while bringing contemporary elegance to every detail."
+  },
+  {
+    value: "heritage-ceremonial",
+    label: "Heritage Focus - Ceremonial",
+    text: "[Name] specializes in ceremonial beadwork that blends traditional Kenyan aesthetics with bold, balanced color. Each piece is crafted to celebrate significant moments and heritage."
+  },
+  {
+    value: "heritage-playful",
+    label: "Heritage Focus - Playful",
+    text: "[Name] creates lighter jewelry designed to move well with the body. Drawing from Kenyan traditions, their work brings playful elegance and contemporary style to every handmade piece."
+  },
+  {
+    value: "heritage-home",
+    label: "Heritage Focus - Home Decor",
+    text: "[Name] brings Kenyan beading traditions into home spaces, creating pieces that celebrate craftsmanship and cultural heritage. Each item is handmade to add warmth and character to any room."
+  },
+  {
+    value: "philosophy",
+    label: "Philosophy-Driven",
+    text: "[Name] believes that every piece should tell a story and stand the test of time. Their approach focuses on [specialty], resulting in jewelry that feels both personal and timeless."
+  },
+  {
+    value: "specialist",
+    label: "Specialist Focus",
+    text: "[Name] specializes in [craft type] with an emphasis on [characteristic]. Each piece is crafted to [purpose], celebrating both traditional techniques and contemporary vision."
+  },
+];
+
 const DEFAULT_ARTISANS = [
   {
     id: 1,
@@ -123,6 +161,7 @@ export default function AdminArtisansPage() {
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(DEFAULT_ARTISAN);
+  const [selectedTemplate, setSelectedTemplate] = useState("custom");
   const [message, setMessage] = useState("");
   const [availableImages, setAvailableImages] = useState([]);
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -227,12 +266,14 @@ export default function AdminArtisansPage() {
     setEditingId(null);
     setShowForm(true);
     setFormData({ ...DEFAULT_ARTISAN, id: Date.now() });
+    setSelectedTemplate("custom");
     setShowImagePicker(false);
   }
 
   function handleEdit(artisan) {
     setEditingId(artisan.id);
     setFormData(artisan);
+    setSelectedTemplate("custom");
     setShowImagePicker(false);
   }
 
@@ -261,6 +302,7 @@ export default function AdminArtisansPage() {
     setEditingId(null);
     setShowForm(false);
     setFormData(DEFAULT_ARTISAN);
+    setSelectedTemplate("custom");
     setShowImagePicker(false);
   }
 
@@ -268,6 +310,7 @@ export default function AdminArtisansPage() {
     setEditingId(null);
     setShowForm(false);
     setFormData(DEFAULT_ARTISAN);
+    setSelectedTemplate("custom");
     setShowImagePicker(false);
   }
 
@@ -379,15 +422,34 @@ export default function AdminArtisansPage() {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Story *</label>
+              <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Story Template *</label>
+              <select 
+                value={selectedTemplate} 
+                onChange={(e) => {
+                  const template = STORY_TEMPLATES.find(t => t.value === e.target.value);
+                  setSelectedTemplate(e.target.value);
+                  if (template && template.text) {
+                    setFormData({...formData, story: template.text});
+                  } else {
+                    setFormData({...formData, story: ""});
+                  }
+                }}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 6, fontSize: 14, marginBottom: 12 }}
+              >
+                {STORY_TEMPLATES.map(template => (
+                  <option key={template.value} value={template.value}>{template.label}</option>
+                ))}
+              </select>
+              
+              <label style={{ display: "block", marginBottom: 4, fontSize: 14, fontWeight: 500 }}>Story Text *</label>
               <textarea 
                 value={formData.story} 
                 onChange={e => setFormData({...formData, story: e.target.value})} 
                 rows={4} 
-                placeholder="E.g. '[Name] draws from Kenyan beading traditions to create [craft] that celebrates authentic craftsmanship. Each piece is handmade with [hours] of care, honoring heritage while bringing contemporary elegance to every detail.'"
+                placeholder="Choose a template above, then customize here..."
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #e5e5e5", borderRadius: 6, resize: "vertical", fontSize: 14 }} 
               />
-              <p style={{ fontSize: 12, color: "#999", marginTop: 4 }}>Keep it 1-2 sentences. Focus on their heritage, craft style, or philosophy.</p>
+              <p style={{ fontSize: 12, color: "#999", marginTop: 4 }}>Keep it 1-2 sentences. Focus on heritage, craft style, or philosophy.</p>
             </div>
 
             <div style={{ display: "flex", gap: 12 }}>
