@@ -110,7 +110,11 @@ export default function handler(req, res) {
       return res.status(200).json({ success: true, count: testimonialsTosave.length });
     } catch (error) {
       console.error("Testimonials POST error:", error);
-      return res.status(500).json({ error: error.message || "Could not save testimonial" });
+      console.error("Error stack:", error.stack);
+      return res.status(500).json({ 
+        error: error.message || "Could not save testimonial",
+        details: error.toString()
+      });
     }
   }
 

@@ -83,7 +83,8 @@ export default function ReviewsPage() {
         setMessage("");
       }, 6000);
     } catch (error) {
-      setMessage("Error submitting review. Please try again.");
+      const errorMsg = error.message || "Error submitting review";
+      setMessage(`Error: ${errorMsg}`);
       console.error("Submission error:", error.message || error);
     } finally {
       setLoading(false);
