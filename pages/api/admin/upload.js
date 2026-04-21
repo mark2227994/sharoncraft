@@ -25,6 +25,17 @@ function sanitizeFolderPath(value) {
     .join("/");
 }
 
+function isLambda() {
+  return process.env.LAMBDA_TASK_ROOT || process.env.AWS_LAMBDA_FUNCTION_NAME || process.cwd().includes("/var/task");
+}
+
+function getStorageDir() {
+  if (isLambda()) {
+    return "/tmp/uploads";
+  }
+  return path.join(process.cwd(), "public", "uploads");
+}
+
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -73,7 +84,7 @@ export default async function handler(req, res) {
     await fs.unlink(file.filepath).catch(() => {});
   }
 
-  // Build a clean path for public storage
+  // Build a clean path for storage
   const originalName = file.originalFilename || "upload";
   const ext = path.extname(originalName) || ".webp";
   const baseName = path.basename(originalName, ext)
@@ -85,18 +96,24 @@ export default async function handler(req, res) {
   const requestedFolder = Array.isArray(fields?.folder) ? fields.folder[0] : fields?.folder;
   const cleanFolder = sanitizeFolderPath(requestedFolder);
   
-  // Save to public/uploads directory (locally accessible)
-  const publicDir = path.join(process.cwd(), "public", "uploads", cleanFolder);
+  // Get the appropriate storage directory (handles Lambda and local)
+  const storageBaseDir = getStorageDir();
+  const storageDir = cleanFolder ? path.join(storageBaseDir, cleanFolder) : storageBaseDir;
+  
   try {
-    await fs.mkdir(publicDir, { recursive: true });
+    await fs.mkdir(storageDir, { recursive: true });
   } catch (error) {
-    return res.status(500).json({ error: `Could not create directory: ${String(error.message || error)}` });
+    console.error("Storage error:", error);
+    return res.status(500).json({ 
+      error: `Could not create storage directory. This may be a temporary Lambda limitation. Please try again.`
+    });
   }
 
-  const filePath = path.join(publicDir, fileName);
+  const filePath = path.join(storageDir, fileName);
   try {
     await fs.writeFile(filePath, fileBuffer);
   } catch (error) {
+    console.error("Write error:", error);
     return res.status(500).json({ error: `Could not save file: ${String(error.message || error)}` });
   }
 
