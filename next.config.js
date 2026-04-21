@@ -34,6 +34,16 @@ const nextConfig = {
       { source: "/bridal-bead-sets-kenya.html", destination: "/shop?category=Bridal%20%26%20Occasion", permanent: true },
       { source: "/products/:slug.html", destination: "/product/:slug", permanent: true },
       { source: "/product", destination: "/shop", permanent: true },
+      // Article page redirects
+      { source: "/articles/history-of-maasai-beadwork.html", destination: "/journal", permanent: true },
+      { source: "/articles/where-to-buy-kenyan-artifacts.html", destination: "/journal", permanent: true },
+      { source: "/articles/best-handmade-kenyan-gifts.html", destination: "/journal", permanent: true },
+      { source: "/articles/how-to-style-beaded-home-decor.html", destination: "/journal", permanent: true },
+      { source: "/articles/how-to-choose-maasai-jewelry.html", destination: "/journal", permanent: true },
+      // Archive page redirects
+      { source: "/archive/journal.html", destination: "/journal", permanent: true },
+      { source: "/archive/product.html", destination: "/shop", permanent: true },
+      { source: "/archive/shop.html", destination: "/shop", permanent: true },
     ];
   },
 };
