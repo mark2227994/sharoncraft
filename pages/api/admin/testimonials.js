@@ -89,15 +89,25 @@ export default function handler(req, res) {
         return res.status(400).json({ error: "Testimonials must be an array" });
       }
 
-      // Read existing testimonials and append new ones
-      const existing = readTestimonials();
-      console.log("Existing testimonials count:", existing.length);
+      // Check if this is a new customer review submission (has submittedAt field)
+      // vs admin management of testimonials (no submittedAt field)
+      const isNewReviewSubmission = newTestimonials.some(t => t.submittedAt);
       
-      const combined = [...existing, ...newTestimonials];
-      console.log("Combined testimonials count:", combined.length);
+      let testimonialsTosave;
+      if (isNewReviewSubmission) {
+        // Customer submitting a new review - append to existing
+        const existing = readTestimonials();
+        console.log("New review submission - appending. Existing count:", existing.length);
+        testimonialsTosave = [...existing, ...newTestimonials];
+      } else {
+        // Admin managing testimonials - replace the entire list
+        console.log("Admin management - replacing entire list");
+        testimonialsTosave = newTestimonials;
+      }
       
-      writeTestimonials(combined);
-      return res.status(200).json({ success: true, count: combined.length });
+      console.log("Total testimonials after operation:", testimonialsTosave.length);
+      writeTestimonials(testimonialsTosave);
+      return res.status(200).json({ success: true, count: testimonialsTosave.length });
     } catch (error) {
       console.error("Testimonials POST error:", error);
       return res.status(500).json({ error: error.message || "Could not save testimonial" });
