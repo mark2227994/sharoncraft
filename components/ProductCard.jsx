@@ -3,7 +3,7 @@ import Icon from "./icons";
 import { useCart } from "../lib/cart-context";
 
 export default function ProductCard({ product }) {
-  const { addToCart, isWishlisted, toggleWishlist } = useCart();
+  const { addToCart, isWishlisted, toggleWishlist, openCart } = useCart();
   const { slug, name, artisan, price, originalPrice, image, images, isSold, isNew } = product;
   const imageSrc = image || images?.[0]?.src || "/media/site/placeholder.svg";
   const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : null;
@@ -15,7 +15,9 @@ export default function ProductCard({ product }) {
 
   function handleAddToCart(e) {
     e.preventDefault();
+    e.stopPropagation();
     addToCart(product);
+    openCart();
   }
 
   function handleToggleWishlist(e) {

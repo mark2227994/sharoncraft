@@ -85,6 +85,26 @@ export function CartProvider({ children }) {
       };
     }
 
+    function addItemToCart(product) {
+      setItems((current) => {
+        const existing = current.find((item) => item.id === product.id);
+        if (existing) {
+          return current.map((item) =>
+            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+          );
+        }
+        return current.concat({
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          artisan: product.artisan,
+          quantity: 1,
+        });
+      });
+    }
+
     return {
       items,
       wishlistItems,
@@ -105,25 +125,8 @@ export function CartProvider({ children }) {
       toggleCart() {
         setIsCartOpen((current) => !current);
       },
-      addItem(product) {
-        setItems((current) => {
-          const existing = current.find((item) => item.id === product.id);
-          if (existing) {
-            return current.map((item) =>
-              item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-            );
-          }
-          return current.concat({
-            id: product.id,
-            slug: product.slug,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-            artisan: product.artisan,
-            quantity: 1,
-          });
-        });
-      },
+      addItem: addItemToCart,
+      addToCart: addItemToCart,
       updateQuantity(id, quantity) {
         setItems((current) =>
           current.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item)),
