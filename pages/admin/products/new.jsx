@@ -519,6 +519,7 @@ export default function AdminNewProductPage() {
               <LocalImageUpload
                 label="Upload Close-Up"
                 folder={uploadFolder}
+                currentPath={imageValue || ""}
                 onUploaded={(path) => setValue("image", path, { shouldValidate: true })}
               />
 
@@ -534,6 +535,7 @@ export default function AdminNewProductPage() {
               <LocalImageUpload
                 label="Upload Styled Photo"
                 folder={uploadFolder}
+                currentPath={stylingImageValue || ""}
                 onUploaded={(path) => setValue("stylingImage", path, { shouldValidate: true })}
               />
 
@@ -549,6 +551,7 @@ export default function AdminNewProductPage() {
               <LocalImageUpload
                 label="Upload Detail Photo"
                 folder={uploadFolder}
+                currentPath={detailImageValue || ""}
                 onUploaded={(path) => setValue("detailImage", path, { shouldValidate: true })}
               />
             </div>

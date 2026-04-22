@@ -105,6 +105,7 @@ export default function HeroSettingsPage() {
           <LocalImageUpload
             label="Upload hero image"
             folder="site/homepage"
+            currentPath={form.heroImage || ""}
             onUploaded={(path) => setField("heroImage", path)}
           />
 

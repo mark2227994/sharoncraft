@@ -522,6 +522,7 @@ export default function AdminProductEditorPage() {
               <LocalImageUpload
                 label="Upload close-up image"
                 folder={uploadFolder}
+                currentPath={primaryImageValue || ""}
                 onUploaded={(uploadedPath) => setValue("image", uploadedPath)}
               />
               <label className="admin-field">
@@ -535,6 +536,7 @@ export default function AdminProductEditorPage() {
               <LocalImageUpload
                 label="Upload second gallery image"
                 folder={uploadFolder}
+                currentPath={stylingImageValue || ""}
                 onUploaded={(uploadedPath) => setValue("stylingImage", uploadedPath)}
               />
               <label className="admin-field">
@@ -548,6 +550,7 @@ export default function AdminProductEditorPage() {
               <LocalImageUpload
                 label="Upload detail image"
                 folder={uploadFolder}
+                currentPath={detailImageValue || ""}
                 onUploaded={(uploadedPath) => setValue("detailImage", uploadedPath)}
               />
             </div>

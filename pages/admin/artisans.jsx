@@ -463,6 +463,11 @@ export default function AdminArtisansPage() {
                 onChange={handleLocalImageUpload}
                 style={{ display: "none" }}
               />
+              {String(formData.image || "").startsWith("/uploads/") ? (
+                <p style={{ marginTop: 8, color: "#b45309", fontSize: 12 }}>
+                  Legacy path detected (`/uploads/...`). Please re-upload this image.
+                </p>
+              ) : null}
               {formData.image && (
                 <input type="text" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={{ width: "100%", marginTop: 8, padding: "8px 12px", border: "1px solid #e5e5e5", borderRadius: 6, fontSize: 12 }} placeholder="Or paste a custom URL" />
               )}

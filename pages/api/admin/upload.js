@@ -1,6 +1,7 @@
 import formidable from "formidable";
 import fs from "fs/promises";
 import path from "path";
+import { put } from "@vercel/blob";
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export const config = {
@@ -10,6 +11,13 @@ export const config = {
 };
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
+const MIME_EXTENSION_MAP = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/svg+xml": ".svg",
+};
 
 function sanitizeFolderPath(value) {
   return String(value || "")
@@ -25,17 +33,6 @@ function sanitizeFolderPath(value) {
     .join("/");
 }
 
-function isLambda() {
-  return process.env.LAMBDA_TASK_ROOT || process.env.AWS_LAMBDA_FUNCTION_NAME || process.cwd().includes("/var/task");
-}
-
-function getStorageDir() {
-  if (isLambda()) {
-    return "/tmp/uploads";
-  }
-  return path.join(process.cwd(), "public", "uploads");
-}
-
 export default async function handler(req, res) {
   if (!isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -44,6 +41,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return res.status(500).json({ error: "Upload storage is not configured (missing BLOB_READ_WRITE_TOKEN)." });
   }
 
   // Parse the multipart form
@@ -64,12 +65,12 @@ export default async function handler(req, res) {
   }
 
   const list = files.file;
-  if (!list?.length) {
+  const file = Array.isArray(list) ? list[0] : list;
+  if (!file) {
     return res.status(400).json({ error: "Add an image (JPEG, PNG, WebP, GIF, or SVG)." });
   }
 
-  const file = list[0];
-  if (!ALLOWED.has(file.mimetype)) {
+  if (!ALLOWED.has(String(file.mimetype || ""))) {
     await fs.unlink(file.filepath).catch(() => {});
     return res.status(400).json({ error: "Invalid file type" });
   }
@@ -78,6 +79,9 @@ export default async function handler(req, res) {
   let fileBuffer;
   try {
     fileBuffer = await fs.readFile(file.filepath);
+    if (!fileBuffer || fileBuffer.length === 0) {
+      return res.status(400).json({ error: "Uploaded file is empty. Please choose a valid image." });
+    }
   } catch (error) {
     return res.status(500).json({ error: `Could not read file: ${String(error.message || error)}` });
   } finally {
@@ -85,39 +89,29 @@ export default async function handler(req, res) {
   }
 
   // Build a clean path for storage
-  const originalName = file.originalFilename || "upload";
-  const ext = path.extname(originalName) || ".webp";
+  const originalName = String(file.originalFilename || "upload");
+  const derivedExtension = path.extname(originalName);
+  const ext = derivedExtension || MIME_EXTENSION_MAP[file.mimetype] || ".webp";
   const baseName = path.basename(originalName, ext)
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, "-")
     .replace(/-+/g, "-")
-    .slice(0, 60);
+    .replace(/^-|-$/g, "")
+    .slice(0, 60) || "upload";
   const fileName = `${baseName}-${Date.now()}${ext}`;
   const requestedFolder = Array.isArray(fields?.folder) ? fields.folder[0] : fields?.folder;
   const cleanFolder = sanitizeFolderPath(requestedFolder);
-  
-  // Get the appropriate storage directory (handles Lambda and local)
-  const storageBaseDir = getStorageDir();
-  const storageDir = cleanFolder ? path.join(storageBaseDir, cleanFolder) : storageBaseDir;
-  
+  const blobKey = cleanFolder ? `uploads/${cleanFolder}/${fileName}` : `uploads/${fileName}`;
+
   try {
-    await fs.mkdir(storageDir, { recursive: true });
-  } catch (error) {
-    console.error("Storage error:", error);
-    return res.status(500).json({ 
-      error: `Could not create storage directory. This may be a temporary Lambda limitation. Please try again.`
+    const uploaded = await put(blobKey, fileBuffer, {
+      access: "public",
+      addRandomSuffix: false,
+      contentType: String(file.mimetype || "application/octet-stream"),
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
-  }
-
-  const filePath = path.join(storageDir, fileName);
-  try {
-    await fs.writeFile(filePath, fileBuffer);
+    return res.status(200).json({ path: uploaded.url });
   } catch (error) {
-    console.error("Write error:", error);
-    return res.status(500).json({ error: `Could not save file: ${String(error.message || error)}` });
+    return res.status(500).json({ error: `Could not save file to Blob storage: ${String(error?.message || error)}` });
   }
-
-  // Return public URL path
-  const publicPath = `/uploads/${cleanFolder}/${fileName}`.replace(/\/+/g, "/");
-  return res.status(200).json({ path: publicPath });
 }

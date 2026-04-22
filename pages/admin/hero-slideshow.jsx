@@ -190,6 +190,11 @@ export default function AdminHeroSlideshowPage() {
                 placeholder="/media/site/homepage/image.jpg"
               />
             </label>
+            {String(formData.image || "").startsWith("/uploads/") ? (
+              <p className="admin-note" style={{ color: "#b45309", marginTop: "-8px", marginBottom: "12px" }}>
+                Legacy path detected (`/uploads/...`). Re-upload and use Desktop/Mobile image fields.
+              </p>
+            ) : null}
 
             <label className="admin-field">
               <span>Desktop Image (1400×1800px)</span>
@@ -205,6 +210,7 @@ export default function AdminHeroSlideshowPage() {
             <LocalImageUpload
               label="Upload Desktop Image"
               folder="site/homepage"
+              currentPath={formData.imageDesktop || ""}
               onUploaded={(path) => handleFormChange("imageDesktop", path)}
             />
 
@@ -234,6 +240,7 @@ export default function AdminHeroSlideshowPage() {
             <LocalImageUpload
               label="Upload Mobile Image"
               folder="site/homepage"
+              currentPath={formData.imageMobile || ""}
               onUploaded={(path) => handleFormChange("imageMobile", path)}
             />
 

@@ -1,9 +1,14 @@
 import { useState } from "react";
 
+function isLegacyUploadPath(value) {
+  return String(value || "").trim().startsWith("/uploads/");
+}
+
 export default function LocalImageUpload({
   onUploaded,
   label = "Choose image from your device",
   folder = "",
+  currentPath = "",
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -38,7 +43,6 @@ export default function LocalImageUpload({
       if (!response.ok) {
         const errorMsg = data.error || `Upload failed (${response.status})`;
         setError(errorMsg);
-        console.error("Upload error:", errorMsg, data);
         return;
       }
 
@@ -53,7 +57,6 @@ export default function LocalImageUpload({
       input.value = "";
       const errorMsg = err?.message || "Network error during upload";
       setError(errorMsg);
-      console.error("Upload exception:", err);
     }
   }
 
@@ -69,29 +72,34 @@ export default function LocalImageUpload({
       />
       {busy ? (
         <p className="admin-note" style={{ marginTop: "6px", color: "#2E7D32" }}>
-          ✓ Uploading...
+          Uploading...
         </p>
       ) : null}
       {error ? (
         <p className="admin-form-error" style={{ marginTop: "6px", marginBottom: 0 }}>
-          ❌ {error}
+          {error}
+        </p>
+      ) : null}
+      {isLegacyUploadPath(currentPath) ? (
+        <p className="admin-note" style={{ marginTop: "6px", color: "#b45309" }}>
+          Legacy path detected (`/uploads/...`). Re-upload this image to fix it.
         </p>
       ) : null}
       {uploadedUrl && !busy ? (
         <div style={{ marginTop: "8px" }}>
-          <img 
-            src={uploadedUrl} 
-            alt="Uploaded preview" 
-            style={{ 
-              maxWidth: "120px", 
-              maxHeight: "120px", 
+          <img
+            src={uploadedUrl}
+            alt="Uploaded preview"
+            style={{
+              maxWidth: "120px",
+              maxHeight: "120px",
               borderRadius: "4px",
               border: "2px solid #4CAF50",
-              padding: "4px"
-            }} 
+              padding: "4px",
+            }}
           />
           <p className="admin-note" style={{ marginTop: "6px", color: "#2E7D32" }}>
-            ✓ Image uploaded successfully
+            Image uploaded successfully
           </p>
         </div>
       ) : null}

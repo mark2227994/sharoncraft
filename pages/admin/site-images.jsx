@@ -330,6 +330,7 @@ export default function AdminSiteImagesPage() {
                     <LocalImageUpload
                       label="Upload from device"
                       folder={field.uploadFolder}
+                      currentPath={form[field.key] || ""}
                       onUploaded={(path) => set(field.key, path)}
                     />
                   </div>
