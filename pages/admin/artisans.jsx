@@ -599,6 +599,14 @@ export default function AdminArtisansPage() {
             <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: "#333" }}>
               Current Artisans ({artisans.length})
             </h3>
+            <button
+              type="button"
+              onClick={handleNew}
+              className="artisan-btn artisan-btn--header"
+              disabled={savingArtisans}
+            >
+              Add Artisan
+            </button>
           </div>
           <div className="artisans-grid">
             {artisans.map(artisan => (
@@ -652,6 +660,10 @@ export default function AdminArtisansPage() {
             }
 
             .artisans-header {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.75rem;
               margin-bottom: 1.5rem;
               padding-bottom: 1rem;
               border-bottom: 2px solid #f5f5f5;
@@ -799,6 +811,20 @@ export default function AdminArtisansPage() {
               border-color: #f87171;
             }
 
+            .artisan-btn--header {
+              flex: 0 0 auto;
+              min-width: 130px;
+              background: #C04D29;
+              color: #fff;
+              border-color: #C04D29;
+            }
+
+            .artisan-btn--header:hover:not(:disabled) {
+              background: #a43f21;
+              border-color: #a43f21;
+              color: #fff;
+            }
+
             .artisan-btn:disabled {
               opacity: 0.6;
               cursor: not-allowed;
@@ -811,6 +837,15 @@ export default function AdminArtisansPage() {
             }
 
             @media (max-width: 768px) {
+              .artisans-header {
+                align-items: stretch;
+                flex-direction: column;
+              }
+
+              .artisan-btn--header {
+                width: 100%;
+              }
+
               .artisans-grid {
                 grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
               }
