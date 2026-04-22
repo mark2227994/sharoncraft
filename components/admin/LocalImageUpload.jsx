@@ -33,7 +33,7 @@ export default function LocalImageUpload({
       const response = await fetch("/api/admin/upload", {
         method: "POST",
         body,
-        credentials: "same-origin",
+        credentials: "include",
       });
 
       setBusy(false);
@@ -41,6 +41,10 @@ export default function LocalImageUpload({
 
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (response.status === 401) {
+          setError("Upload session expired. Refresh the admin page and sign in again.");
+          return;
+        }
         const errorMsg = data.error || `Upload failed (${response.status})`;
         setError(errorMsg);
         return;

@@ -20,19 +20,25 @@ const IMAGE_FIELDS = [
   {
     key: "collectionJewellery",
     label: "Collection card - Jewellery",
-    uploadFolder: "site/collections",
+    uploadFolder: "site/homepage",
     localFolder: "public/media/site/collections",
   },
   {
     key: "collectionHome",
     label: "Collection card - Home decor",
-    uploadFolder: "site/collections",
+    uploadFolder: "site/homepage",
     localFolder: "public/media/site/collections",
   },
   {
     key: "collectionAccessories",
     label: "Collection card - Gifted carry",
-    uploadFolder: "site/collections",
+    uploadFolder: "site/homepage",
+    localFolder: "public/media/site/collections",
+  },
+  {
+    key: "collectionBridal",
+    label: "Collection card - Bridal & occasion",
+    uploadFolder: "site/homepage",
     localFolder: "public/media/site/collections",
   },
   {

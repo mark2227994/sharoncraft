@@ -8,6 +8,7 @@ const ALLOWED_KEYS = [
   "collectionJewellery",
   "collectionHome",
   "collectionAccessories",
+  "collectionBridal",
   "pageTexture",
   // Text content
   "heroTitle",

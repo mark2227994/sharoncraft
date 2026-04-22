@@ -10,6 +10,7 @@ const SITE_IMAGE_FIELDS = [
   ["collectionJewellery", "Jewellery collection card"],
   ["collectionHome", "Home collection card"],
   ["collectionAccessories", "Accessories collection card"],
+  ["collectionBridal", "Bridal & occasion collection card"],
   ["pageTexture", "Page texture"],
 ];
 

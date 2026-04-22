@@ -4,6 +4,205 @@
   "collectionJewellery": "/media/site/placeholder.svg",
   "collectionHome": "/media/site/placeholder.svg",
   "collectionAccessories": "/media/site/placeholder.svg",
+  "collectionBridal": "/media/site/placeholder.svg",
   "pageTexture": "/textures/linen-noise.svg",
-  "artisanStories": "[{\"id\":1,\"name\":\"Sharon Ruth\",\"location\":\"Nairobi, Kenya\",\"craft\":\"Beaded Jewelry & Accessories\",\"image\":\"\",\"story\":\"Sharon Ruth is the founder and lead artisan of SharonCraft. With over 12 years of experience in traditional Kenyan beadwork, she combines ancestral techniques with contemporary design. Every piece carries the spirit of Kenya's rich cultural heritage.\",\"quote\":\"I create not just jewelry, but stories of our people.\",\"yearsExperience\":\"12+\",\"specialties\":\"Beaded earrings, necklaces, bracelets, custom designs\",\"whatsapp\":\"+254712345678\",\"featured\":true,\"mediaGallery\":[],\"href\":\"/shop\"},{\"id\":2,\"name\":\"Ken Mutinda\",\"location\":\"Nairobi, Kenya\",\"craft\":\"Home Decor & Accessories\",\"image\":\"\",\"story\":\"Ken Mutinda specializes in transforming beads into functional art for the home. His expertise in geometric patterns and color combinations brings Kenyan design into modern living spaces. He believes that home decor should tell a story.\",\"quote\":\"Beads are not just ornaments; they are conversations with the past.\",\"yearsExperience\":\"8+\",\"specialties\":\"Home decor, beaded bags, geometric patterns\",\"whatsapp\":\"+254787654321\",\"featured\":true,\"mediaGallery\":[],\"href\":\"/shop?category=Home%20Decor\"}]"
+  "heroTitle": "Handmade Kenyan jewellery & home decor",
+  "heroSubtitle": "Crafted by artisans in Kenya. Every piece tells a story.",
+  "artisanBio": "Sharon is a Kenyan artisan who has been crafting beaded jewellery for over 10 years.",
+  "artisanStories": "[{\"id\":1,\"name\":\"Sharon Ruth\",\"location\":\"Nairobi, Kenya\",\"craft\":\"Beaded Jewelry & Accessories\",\"image\":\"\",\"story\":\"Sharon Ruth is the founder and lead artisan of SharonCraft. With over 12 years of experience in traditional Kenyan beadwork, she combines ancestral techniques with contemporary design. Every piece carries the spirit of Kenya's rich cultural heritage.\",\"quote\":\"I create not just jewelry, but stories of our people.\",\"yearsExperience\":\"12+\",\"specialties\":\"Beaded earrings, necklaces, bracelets, custom designs\",\"whatsapp\":\"+254712345678\",\"featured\":true,\"mediaGallery\":[],\"href\":\"/shop\"},{\"id\":2,\"name\":\"Ken Mutinda\",\"location\":\"Nairobi, Kenya\",\"craft\":\"Home Decor & Accessories\",\"image\":\"\",\"story\":\"Ken Mutinda specializes in transforming beads into functional art for the home. His expertise in geometric patterns and color combinations brings Kenyan design into modern living spaces. He believes that home decor should tell a story.\",\"quote\":\"Beads are not just ornaments; they are conversations with the past.\",\"yearsExperience\":\"8+\",\"specialties\":\"Home decor, beaded bags, geometric patterns\",\"whatsapp\":\"+254787654321\",\"featured\":true,\"mediaGallery\":[],\"href\":\"/shop?category=Home%20Decor\"}]",
+  "aboutStory": "SharonCraft was born from a passion for preserving Kenya's rich beadwork traditions while sharing them with the world.",
+  "contactWhatsApp": "0112222572",
+  "contactEmail": "",
+  "businessHours": "Mon-Sat, 9am-6pm EAT",
+  "deliveryNote": "We deliver across Kenya. Standard delivery is KES 300.",
+  "siteContentUpdatedAt": "2026-04-22T12:05:18.291Z",
+  "navigation": {
+    "header": [
+      {
+        "id": 1,
+        "label": "Shop",
+        "url": "/shop",
+        "order": 1
+      },
+      {
+        "id": 2,
+        "label": "Artisans",
+        "url": "/artisans",
+        "order": 2
+      },
+      {
+        "id": 3,
+        "label": "About",
+        "url": "/about",
+        "order": 3
+      },
+      {
+        "id": 4,
+        "label": "Journal",
+        "url": "/journal",
+        "order": 4
+      },
+      {
+        "id": 5,
+        "label": "Custom Orders",
+        "url": "/custom-order",
+        "order": 5
+      }
+    ],
+    "footer": [
+      {
+        "section": "Customer Service",
+        "items": [
+          {
+            "label": "FAQ",
+            "url": "/faq"
+          },
+          {
+            "label": "Contact",
+            "url": "/contact"
+          },
+          {
+            "label": "Returns",
+            "url": "/shipping"
+          }
+        ]
+      },
+      {
+        "section": "About",
+        "items": [
+          {
+            "label": "Our Story",
+            "url": "/about"
+          },
+          {
+            "label": "Artisans",
+            "url": "/artisans"
+          },
+          {
+            "label": "Careers",
+            "url": "/contact"
+          }
+        ]
+      },
+      {
+        "section": "Legal",
+        "items": [
+          {
+            "label": "Privacy Policy",
+            "url": "/privacy"
+          },
+          {
+            "label": "Terms",
+            "url": "/terms"
+          },
+          {
+            "label": "Shipping",
+            "url": "/shipping"
+          }
+        ]
+      }
+    ]
+  },
+  "footerContent": {
+    "column1": {
+      "title": "SharonCraft",
+      "bio": "Connecting hands with hearts. 47 Kenyan artisans crafting stories into every piece.",
+      "socialLinks": [
+        {
+          "platform": "instagram",
+          "url": "https://instagram.com/sharoncraft"
+        },
+        {
+          "platform": "tiktok",
+          "url": "https://tiktok.com/@sharoncraft"
+        },
+        {
+          "platform": "facebook",
+          "url": "https://facebook.com/sharoncraft"
+        }
+      ],
+      "newsletter": {
+        "title": "Subscribe",
+        "placeholder": "Enter your email",
+        "buttonText": "Join"
+      }
+    },
+    "column2": {
+      "title": "Customer Service",
+      "links": [
+        {
+          "label": "FAQ",
+          "url": "/faq"
+        },
+        {
+          "label": "Contact",
+          "url": "/contact"
+        },
+        {
+          "label": "Shipping",
+          "url": "/shipping"
+        },
+        {
+          "label": "Returns",
+          "url": "/shipping"
+        }
+      ]
+    },
+    "column3": {
+      "title": "About",
+      "links": [
+        {
+          "label": "Our Story",
+          "url": "/about"
+        },
+        {
+          "label": "Artisans",
+          "url": "/artisans"
+        },
+        {
+          "label": "Journal",
+          "url": "/journal"
+        },
+        {
+          "label": "Careers",
+          "url": "/contact"
+        }
+      ]
+    },
+    "column4": {
+      "title": "Legal",
+      "links": [
+        {
+          "label": "Privacy Policy",
+          "url": "/privacy"
+        },
+        {
+          "label": "Terms & Conditions",
+          "url": "/terms"
+        },
+        {
+          "label": "Shipping Policy",
+          "url": "/shipping"
+        },
+        {
+          "label": "Return Policy",
+          "url": "/shipping"
+        }
+      ]
+    },
+    "bottom": {
+      "copyright": "(c) 2026 SharonCraft. All rights reserved.",
+      "paymentMethods": [
+        "Visa",
+        "Mastercard",
+        "M-Pesa",
+        "Apple Pay"
+      ],
+      "trustBadges": [
+        "Handmade",
+        "Fair Trade",
+        "Secure"
+      ]
+    }
+  }
 }
