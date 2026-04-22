@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 
 export default async function handler(req, res) {
@@ -8,13 +8,15 @@ export default async function handler(req, res) {
 
   try {
     const imagesDir = path.join(process.cwd(), "public", "media", "site", "artisans");
-
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(imagesDir)) {
-      fs.mkdirSync(imagesDir, { recursive: true });
+    let files = [];
+    try {
+      files = await fs.readdir(imagesDir);
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        return res.status(200).json({ images: [] });
+      }
+      throw error;
     }
-
-    const files = fs.readdirSync(imagesDir);
 
     const images = files
       .filter(file => /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(file))

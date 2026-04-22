@@ -3,21 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { formatKES } from "../../lib/formatters";
 
-const DEFAULT_ABANDONED = [
-  { id: "ab_1", customerName: "John Doe", email: "john@example.com", phone: "+254700000001", cartItems: 3, cartValue: 8500, abandonedAt: "2024-03-15T10:30:00", status: "pending", remindersSent: 0 },
-  { id: "ab_2", customerName: "Jane Smith", email: "jane@example.com", phone: "+254700000002", cartItems: 2, cartValue: 4200, abandonedAt: "2024-03-14T14:20:00", status: "recovered", remindersSent: 2, recoveredAt: "2024-03-16T09:15:00" },
-  { id: "ab_3", customerName: "Bob Wilson", email: "bob@example.com", phone: "+254700000003", cartItems: 1, cartValue: 2500, abandonedAt: "2024-03-13T16:45:00", status: "lost", remindersSent: 3, lastReminder: "2024-03-15T16:45:00" },
-];
-
 async function fetchAbandoned() {
   const response = await fetch("/api/admin/marketing", { credentials: "same-origin" });
   if (!response.ok) throw new Error("Could not load abandoned carts");
   const data = await response.json();
   const entries = Array.isArray(data?.studio?.abandonedCheckouts) ? data.studio.abandonedCheckouts : [];
 
-  if (entries.length === 0) {
-    return DEFAULT_ABANDONED;
-  }
+  if (entries.length === 0) return [];
 
   return entries.map((entry) => ({
     id: entry.id,

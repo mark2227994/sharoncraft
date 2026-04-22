@@ -2,12 +2,6 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "../../components/admin/AdminLayout";
 
-const DEFAULT_SUBSCRIBERS = [
-  { id: "sub_1", email: "john@example.com", name: "John Doe", status: "active", joinedAt: "2024-01-15", campaigns: 5 },
-  { id: "sub_2", email: "jane@example.com", name: "Jane Smith", status: "active", joinedAt: "2024-02-20", campaigns: 3 },
-  { id: "sub_3", email: "bob@example.com", name: "Bob Wilson", status: "unsubscribed", joinedAt: "2023-11-10", campaigns: 12 },
-];
-
 const CAMPAIGN_TEMPLATES = [
   { id: "new_collection", name: "New Collection Launch", subject: "New Arrivals: Fresh Beadwork Collection" },
   { id: "discount", name: "Special Offer", subject: "Special Discount Just for You" },
@@ -19,7 +13,7 @@ async function fetchNewsletterWorkspace() {
   if (!response.ok) throw new Error("Could not load newsletter workspace");
   const data = await response.json();
   return {
-    subscribers: Array.isArray(data?.subscribers) && data.subscribers.length > 0 ? data.subscribers : DEFAULT_SUBSCRIBERS,
+    subscribers: Array.isArray(data?.subscribers) ? data.subscribers : [],
     campaigns: Array.isArray(data?.campaigns) ? data.campaigns : [],
   };
 }
@@ -208,6 +202,7 @@ export default function NewsletterPage() {
             <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Joined</th><th>Campaigns</th><th>Actions</th></tr></thead>
             <tbody>
               {isLoading ? <tr><td colSpan={6} className="admin-empty">Loading...</td></tr> : null}
+              {!isLoading && subscribers.length === 0 ? <tr><td colSpan={6} className="admin-empty">No subscribers yet</td></tr> : null}
               {subscribers.map((subscriber) => (
                 <tr key={subscriber.id}>
                   <td>{subscriber.name || "-"}</td>

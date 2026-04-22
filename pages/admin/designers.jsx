@@ -3,17 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { formatKES } from "../../lib/formatters";
 
-const DEFAULT_DESIGNERS = [
-  { id: "des_1", name: "Grace Nkirote", location: "Nairobi", specialty: "Maasai Beadwork", phone: "+254700000001", email: "grace@sharoncraft.co.ke", status: "active", totalOrders: 45, totalPaid: 125000, pendingPayment: 15000 },
-  { id: "des_2", name: "Faith Wanjiku", location: "Kisumu", specialty: "Bracelets & Necklaces", phone: "+254700000002", email: "faith@sharoncraft.co.ke", status: "active", totalOrders: 32, totalPaid: 85000, pendingPayment: 0 },
-  { id: "des_3", name: "Mary Atieno", location: "Mombasa", specialty: "Home Decor Items", phone: "+254700000003", email: "mary@sharoncraft.co.ke", status: "paused", totalOrders: 18, totalPaid: 52000, pendingPayment: 8000 },
-];
-
 async function fetchDesigners() {
   const response = await fetch("/api/admin/designers", { credentials: "same-origin" });
   if (!response.ok) throw new Error("Could not load designers");
   const data = await response.json();
-  return Array.isArray(data) && data.length > 0 ? data : DEFAULT_DESIGNERS;
+  return Array.isArray(data) ? data : [];
 }
 
 export default function DesignersPage() {
