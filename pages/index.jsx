@@ -217,18 +217,14 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Custom Orders - Simplified */}
-      <section className="custom-orders-banner" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-6) auto', padding: 'var(--space-6) var(--gutter)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 'var(--space-6)', alignItems: 'center' }}>
-          <div>
-            <h3 className="display-sm">Design With Us</h3>
-            <p style={{ marginTop: 'var(--space-2)', color: 'var(--text-secondary)', fontSize: '16px' }}>
-              Custom pieces made to your exact vision. Premium materials, fast delivery.
-            </p>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <a href="/custom-order" className="custom-order-btn">Start Design</a>
-          </div>
+      {/* Custom Orders - Minimal Gold Card */}
+      <section className="custom-orders-section">
+        <div className="custom-orders-card">
+          <h3 className="custom-orders-card__title">Design With Us</h3>
+          <p className="custom-orders-card__description">
+            Custom pieces made to your exact vision. Premium materials, fast delivery.
+          </p>
+          <a href="/custom-order" className="custom-orders-button">Start Design</a>
         </div>
       </section>
 
@@ -567,22 +563,8 @@ export default function HomePage({
         }
         @media (min-width: 900px) {
           /* Collections responsive styles moved to assets/css/collections-section.css */
-        .custom-order-btn {
-          display: inline-block;
-          padding: 14px 28px;
-          background: linear-gradient(135deg, #d4a574 0%, #c49464 100%);
-          color: white;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 15px;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
         }
-        .custom-order-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(212, 165, 116, 0.4);
-        }
+        /* Custom orders button styling moved to assets/css/custom-orders-card.css */
         .how-it-made-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
