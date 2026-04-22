@@ -105,9 +105,6 @@
   position: relative;
   z-index: 10;
   padding: var(--overlay-padding);
-  background: var(--overlay-bg);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   max-width: 500px;
   border-radius: 0;
   margin-bottom: 2rem;
