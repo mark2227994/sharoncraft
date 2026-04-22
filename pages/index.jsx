@@ -362,90 +362,7 @@ export default function HomePage({
           opacity: 0.45;
           margin-top: 18px;
         }
-        .collections-section {
-          padding: var(--space-6) 0 var(--space-8);
-        }
-        .collections-grid {
-          max-width: var(--max-width);
-          margin: 0 auto;
-          padding: 0 var(--gutter);
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: var(--space-4);
-        }
-        .collections-intro {
-          max-width: var(--max-width);
-          margin: 0 auto;
-          padding: 0 var(--gutter);
-        }
-        .collection-card {
-          position: relative;
-          min-height: 280px;
-          overflow: hidden;
-          border-radius: 2px;
-          cursor: pointer;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .collection-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-        }
-        .collection-card:hover .collection-card__image {
-          transform: scale(1.08);
-        }
-        .collection-card__image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.4s ease;
-          animation: fadeInImage 0.5s ease-in;
-        }
-        @keyframes fadeInImage {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        .collection-card__overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to top, rgba(28, 18, 9, 0.7), transparent 70%);
-        }
-        .collection-card__badge {
-          position: absolute;
-          top: 12px;
-          right: 12px;
-          background: var(--color-white);
-          color: var(--text-primary);
-          padding: 6px 12px;
-          border-radius: 20px;
-          font-size: var(--text-xs);
-          font-weight: 600;
-        }
-        .collection-card__title {
-          position: absolute;
-          left: 18px;
-          bottom: 18px;
-          color: var(--color-cream);
-          z-index: 1;
-        }
-        .collection-card img {
-          object-fit: cover;
-        }
-        .collection-card__overlay {
-          background: linear-gradient(to top, rgba(28, 18, 9, 0.7), transparent 70%);
-        }
-        .collection-card__title {
-          position: absolute;
-          left: 18px;
-          bottom: 18px;
-          color: var(--color-cream);
-          z-index: 1;
-        }
+        /* Collections styling moved to assets/css/collections-section.css */
         .trust-bar {
           max-width: var(--max-width);
           margin: 0 auto;
@@ -642,35 +559,13 @@ export default function HomePage({
         }
 
         @media (max-width: 599px) {
-          .collections-grid {
-            grid-template-columns: 1fr;
-            gap: var(--space-3);
-          }
-          .collection-card {
-            min-height: 220px;
-          }
+          /* Collections responsive styles moved to assets/css/collections-section.css */
         }
         @media (min-width: 600px) and (max-width: 899px) {
-          .collections-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--space-4);
-          }
-          .collection-card {
-            min-height: 260px;
-          }
+          /* Collections responsive styles moved to assets/css/collections-section.css */
         }
         @media (min-width: 900px) {
-          .collections-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--space-4);
-          }
-          .collection-card {
-            min-height: 280px;
-          }
-          .trust-bar {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
-        }
+          /* Collections responsive styles moved to assets/css/collections-section.css */
         .custom-order-btn {
           display: inline-block;
           padding: 14px 28px;

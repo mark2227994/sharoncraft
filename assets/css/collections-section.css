@@ -1,0 +1,182 @@
+/* ============================================================================
+   COLLECTIONS / SHOP BY CATEGORY SECTION
+   ============================================================================
+   Luxury ecommerce grid with minimal design, image-first layout.
+   4 columns on desktop, 2 on tablet, 1 on mobile.
+   ========================================================================== */
+
+:root {
+  /* Collections grid spacing */
+  --collections-gap: 2rem;
+  --collections-padding: 3rem var(--gutter);
+  --collections-padding-mobile: 2rem var(--gutter);
+}
+
+/* ============================================================================
+   SECTION CONTAINER
+   ========================================================================== */
+.collections-section {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--collections-padding);
+}
+
+/* ============================================================================
+   GRID LAYOUT
+   ========================================================================== */
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--collections-gap);
+  margin-top: 2rem;
+}
+
+/* ============================================================================
+   COLLECTION CARD
+   ========================================================================== */
+.collection-card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+/* ============================================================================
+   CARD IMAGE
+   ========================================================================== */
+.collection-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collection-card:hover .collection-card__image {
+  transform: scale(1.04);
+}
+
+/* ============================================================================
+   CARD OVERLAY (Gradient for readability)
+   ========================================================================== */
+.collection-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(28, 18, 9, 0.4) 0%,
+    rgba(28, 18, 9, 0.15) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* ============================================================================
+   CARD CONTENT (Title + Badge)
+   ========================================================================== */
+.collection-card__title,
+.collection-card__badge {
+  position: relative;
+  z-index: 2;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  width: 100%;
+}
+
+/* Card Title */
+.collection-card__title {
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.25px;
+  color: white;
+  margin: 0;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Item Count Badge */
+.collection-card__badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.5px;
+  margin-top: 0.5rem;
+  padding-bottom: 0;
+}
+
+/* Gold accent on hover */
+.collection-card:hover .collection-card__title {
+  color: #c9a86a;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collection-card:hover .collection-card__badge {
+  color: #c9a86a;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) {
+  .collections-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .collections-section {
+    padding: 2.5rem var(--gutter);
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 768px) {
+  .collections-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .collections-section {
+    padding: 2rem var(--gutter);
+  }
+
+  .collection-card__title {
+    font-size: 1.25rem;
+  }
+
+  .collection-card__badge {
+    font-size: 0.8rem;
+  }
+
+  .collection-card {
+    aspect-ratio: 1 / 0.8;
+  }
+}
+
+/* Small mobile: Optimize spacing */
+@media (max-width: 480px) {
+  .collections-section {
+    padding: 1.5rem var(--gutter);
+  }
+
+  .collection-card__title {
+    font-size: 1.125rem;
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  .collection-card__badge {
+    padding: 0 1rem;
+  }
+}

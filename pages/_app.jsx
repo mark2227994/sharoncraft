@@ -5,6 +5,7 @@ import "../styles/typography.css";
 import "../styles/components/nav.css";
 import "../styles/components/hero.css";
 import "../assets/css/hero-slideshow.css";
+import "../assets/css/collections-section.css";
 import "../styles/components/product-grid.css";
 import "../styles/components/product-card.css";
 import "../styles/components/filters.css";
