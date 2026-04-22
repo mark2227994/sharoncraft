@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import "../assets/css/hero-slideshow.css";
 
 export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
