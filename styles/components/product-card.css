@@ -2,25 +2,27 @@
   display: flex;
   flex-direction: column;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  border: 1px solid #e5e5e5;
-  transition: box-shadow 200ms ease, border-color 200ms ease, transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid rgba(201, 168, 106, 0.15);
+  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* Desktop hover animations */
 @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
   .product-card {
-    transition: box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1), 
-                border-color 200ms ease, 
-                transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .product-card:hover {
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-    border-color: #d5d5d5;
+    box-shadow: 0 8px 24px rgba(201, 168, 106, 0.12);
+    border-color: #c9a86a;
     transform: translateY(-4px);
   }
 }
@@ -28,8 +30,8 @@
 /* Mobile/tablet hover */
 @media (max-width: 1023px) {
   .product-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #d5d5d5;
+    box-shadow: 0 4px 12px rgba(201, 168, 106, 0.1);
+    border-color: rgba(201, 168, 106, 0.3);
   }
 }
 
@@ -56,55 +58,59 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  filter: grayscale(15%) sepia(5%) brightness(1);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
   .product-card:hover .product-card__image {
     transform: scale(1.05);
+    filter: grayscale(0%) sepia(0%) brightness(1.05);
   }
 }
 
 @media (max-width: 1023px) {
   .product-card:hover .product-card__image {
     transform: scale(1.02);
+    filter: grayscale(5%) sepia(2%) brightness(1.02);
   }
 }
 
 /* Badges */
 .product-card__badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.7rem;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 0;
+  font-size: 0.65rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   z-index: 2;
 }
 
 .product-card__badge--sold {
-  background: #333;
+  background: #1c1209;
   color: #fff;
 }
 
 .product-card__badge--new {
-  background: var(--color-terracotta);
+  background: #c9a86a;
   color: #fff;
 }
 
 .product-card__badge--discount {
-  background: #e74c3c;
+  background: #C4622D;
   color: #fff;
 }
 
 /* Wishlist button */
 .product-card__wishlist {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  left: 12px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -113,34 +119,34 @@
   align-items: center;
   justify-content: center;
   color: #999;
-  border: 1px solid #e5e5e5;
+  border: 1px solid rgba(201, 168, 106, 0.3);
   cursor: pointer;
   padding: 0;
-  transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 3;
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
   .product-card__wishlist:hover {
-    color: var(--color-terracotta);
-    background: #fff;
-    border-color: var(--color-terracotta);
+    color: #fff;
+    background: #c9a86a;
+    border-color: #c9a86a;
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(217, 108, 72, 0.2);
+    box-shadow: 0 4px 12px rgba(201, 168, 106, 0.25);
   }
 }
 
 @media (max-width: 1023px) {
   .product-card__wishlist:hover {
-    color: var(--color-terracotta);
-    background: #fff;
-    border-color: var(--color-terracotta);
+    color: #fff;
+    background: #c9a86a;
+    border-color: #c9a86a;
   }
 }
 
 /* Content section */
 .product-card__content {
-  padding: 12px 14px;
+  padding: 14px 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -151,9 +157,9 @@
 .product-card__artisan {
   font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  color: #999;
+  color: #c9a86a;
 }
 
 .product-card__artisan-name {
@@ -163,8 +169,8 @@
 /* Product name */
 .product-card__name {
   font-size: 14px;
-  font-weight: 500;
-  color: #111;
+  font-weight: 600;
+  color: #1c1209;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -178,13 +184,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .product-card__stars {
   display: flex;
   gap: 2px;
-  color: #ffc107;
+  color: #c9a86a;
 }
 
 .product-card__stars svg {
@@ -203,13 +209,13 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .product-card__price {
   font-size: 15px;
   font-weight: 700;
-  color: #111;
+  color: #c9a86a;
 }
 
 .product-card__original-price {
@@ -220,7 +226,7 @@
 
 /* Action buttons */
 .product-card__actions {
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-top: 1px solid #f0f0f0;
   display: flex;
   gap: 8px;
@@ -229,31 +235,32 @@
 .product-card__add-btn {
   flex: 1;
   padding: 10px 12px;
-  background: var(--color-terracotta);
+  background: #c9a86a;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 0;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
   .product-card__add-btn:hover:not(:disabled) {
-    background: #a63f1f;
+    background: #b39354;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(217, 108, 72, 0.25);
+    box-shadow: 0 4px 12px rgba(201, 168, 106, 0.2);
   }
 }
 
 @media (max-width: 1023px) {
   .product-card__add-btn:hover:not(:disabled) {
-    background: #a63f1f;
+    background: #b39354;
   }
 }
 
