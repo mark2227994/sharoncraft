@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <linearGradient id="ph-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F9F6EE" />
+      <stop offset="100%" stop-color="#EDE8DE" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#ph-bg)" />
+  <rect x="72" y="280" width="656" height="440" fill="none" stroke="#B87333" stroke-width="2" opacity="0.35" rx="6" />
+  <circle cx="400" cy="420" r="48" fill="#C04D29" opacity="0.12" />
+  <path d="M320 520 L400 440 L480 520 L520 480 L520 640 L280 640 L280 480 Z" fill="#B87333" opacity="0.1" />
+  <text x="400" y="820" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="20" fill="#9C856A">
+    Placeholder  add your photo
+  </text>
+  <text x="400" y="852" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#9C856A" opacity="0.85">
+    Admin ’ Look, or replace files in public/media/site/
+  </text>
+</svg>

@@ -22,7 +22,7 @@ const defaultFooterContent = {
       { label: "FAQ", url: "/faq" },
       { label: "Contact", url: "/contact" },
       { label: "Shipping", url: "/shipping" },
-      { label: "Returns", url: "/returns" },
+      { label: "Returns", url: "/shipping" },
     ],
   },
   column3: {
@@ -30,8 +30,8 @@ const defaultFooterContent = {
     links: [
       { label: "Our Story", url: "/about" },
       { label: "Artisans", url: "/artisans" },
-      { label: "Journal", url: "/articles" },
-      { label: "Careers", url: "/careers" },
+      { label: "Journal", url: "/journal" },
+      { label: "Careers", url: "/contact" },
     ],
   },
   column4: {
@@ -40,7 +40,7 @@ const defaultFooterContent = {
       { label: "Privacy Policy", url: "/privacy" },
       { label: "Terms & Conditions", url: "/terms" },
       { label: "Shipping Policy", url: "/shipping" },
-      { label: "Return Policy", url: "/returns" },
+      { label: "Return Policy", url: "/shipping" },
     ],
   },
   bottom: {

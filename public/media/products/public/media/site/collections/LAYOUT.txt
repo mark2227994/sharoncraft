@@ -1,0 +1,8 @@
+Collection card image assets.
+
+Recommended files
+  collection-jewellery.webp
+  collection-home.webp
+  collection-accessories.webp
+
+These images appear in the "Browse All Collections" section.

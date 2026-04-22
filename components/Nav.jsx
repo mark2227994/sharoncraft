@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "../lib/cart-context";
-import { mobileNavLinks, primaryNavLinks } from "../data/site";
+import { mobileNavLinks, mobileUtilityNavLinks, primaryNavLinks } from "../data/site";
 import Icon from "./icons";
+
+function buildMobileNavItems(items) {
+  return [...items, ...mobileUtilityNavLinks];
+}
 
 export default function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -31,8 +35,9 @@ export default function Nav() {
       const res = await fetch("/api/admin/navigation");
       const data = await res.json();
       if (data.header && Array.isArray(data.header)) {
-        setNavItems(data.header.map(h => ({ href: h.url, label: h.label })));
-        setMobileItems(data.header.map(h => ({ href: h.url, label: h.label })));
+        const headerItems = data.header.map((item) => ({ href: item.url, label: item.label }));
+        setNavItems(headerItems);
+        setMobileItems(buildMobileNavItems(headerItems));
       }
     } catch (e) {
       // Keep default nav items

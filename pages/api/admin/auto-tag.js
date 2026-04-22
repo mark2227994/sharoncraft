@@ -63,8 +63,7 @@ function extractTags(productName, description, materials) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const auth = await isAuthorizedRequest(req);
-  if (!auth.authorized) return res.status(401).json({ error: "Unauthorized" });
+  if (!isAuthorizedRequest(req)) return res.status(401).json({ error: "Unauthorized" });
 
   const { name, description, materials, category, jewelryType } = req.body;
 

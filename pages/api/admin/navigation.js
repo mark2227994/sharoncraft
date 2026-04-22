@@ -6,7 +6,7 @@ const defaultNavigation = {
     { id: 1, label: "Shop", url: "/shop", order: 1 },
     { id: 2, label: "Artisans", url: "/artisans", order: 2 },
     { id: 3, label: "About", url: "/about", order: 3 },
-    { id: 4, label: "Journal", url: "/articles", order: 4 },
+    { id: 4, label: "Journal", url: "/journal", order: 4 },
     { id: 5, label: "Custom Orders", url: "/custom-order", order: 5 },
   ],
   footer: [
@@ -15,7 +15,7 @@ const defaultNavigation = {
       items: [
         { label: "FAQ", url: "/faq" },
         { label: "Contact", url: "/contact" },
-        { label: "Returns", url: "/returns" },
+        { label: "Returns", url: "/shipping" },
       ],
     },
     {
@@ -23,7 +23,7 @@ const defaultNavigation = {
       items: [
         { label: "Our Story", url: "/about" },
         { label: "Artisans", url: "/artisans" },
-        { label: "Careers", url: "/careers" },
+        { label: "Careers", url: "/contact" },
       ],
     },
     {

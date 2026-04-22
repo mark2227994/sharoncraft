@@ -538,13 +538,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
         /* Different Grid Views */
         .shop-products__4-col {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(2, 1fr);
           gap: var(--space-4);
           margin-bottom: var(--space-6);
         }
         .shop-products__3-col {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(2, 1fr);
           gap: var(--space-4);
           margin-bottom: var(--space-6);
         }
@@ -556,9 +556,26 @@ export default function ShopPage({ products, categories, initialCategory, initia
         }
         .shop-products__5-col {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          grid-template-columns: repeat(2, 1fr);
           gap: var(--space-3);
           margin-bottom: var(--space-6);
+        }
+        
+        /* Desktop: 1200px and above - 4 columns */
+        @media (min-width: 1200px) {
+          .shop-products__4-col {
+            grid-template-columns: repeat(4, 1fr);
+          }
+          .shop-products__5-col {
+            grid-template-columns: repeat(5, 1fr);
+          }
+        }
+        
+        /* Tablet: 1024px and above - 3 columns */
+        @media (min-width: 1024px) {
+          .shop-products__3-col {
+            grid-template-columns: repeat(3, 1fr);
+          }
         }
         .shop-products__list {
           display: flex;
@@ -774,31 +791,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .grid-toggle {
             display: none;
           }
-          .shop-products__4-col {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .shop-products__5-col {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .shop-products__3-col {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .shop-products__2-col {
-            grid-template-columns: 1fr;
-          }
           .shop-products__list .product-card {
             flex-direction: column;
           }
           .shop-products__list .product-card__image-wrap {
             width: 100%;
             height: 200px;
-          }
-        }
-        @media (max-width: 599px) {
-          .shop-products__5-col,
-          .shop-products__4-col,
-          .shop-products__3-col {
-            grid-template-columns: 1fr;
           }
         }
 

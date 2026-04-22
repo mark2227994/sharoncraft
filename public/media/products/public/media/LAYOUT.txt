@@ -1,0 +1,25 @@
+public/media/ — image map for SharonCraft
+========================================
+
+products/     Shop catalog photos only.
+              Suggested names: <product-slug>-main.webp, <slug>-detail-1.webp
+              Use paths like: /media/products/my-piece-main.webp
+
+              SIZE GUIDE (catalog, WebP or JPEG)
+              — Main card: ~1000×1300px (about 4:5) or 1200×1200 square; min width 900px.
+              — Extra angles: same height as main for a consistent grid feel.
+              — Keep files under ~300KB when possible (quality 80–85 in export).
+
+site/         Home page only (hero, artisan portrait, three collection cards).
+              Default: placeholder.svg fills every slot until you upload real files.
+              In Admin → Look, point each row at e.g. /media/site/hero.webp
+
+              SIZE GUIDE (site)
+              — Hero (tall panel): portrait-friendly, min ~1400×1800px; tall 3:4 or 4:5 crops work well with object-fit cover.
+              — Artisan block: ~1200×1200px or 1200×900px landscape; subject centered.
+              — Collection cards (three tiles): ~1200×800px (3:2) or 1600×900 (16:9); safe area for title at bottom.
+
+uploads/      Files you pick with “Choose from device” in admin land here first.
+              Optional: rename and move into products/ or site/ when ready.
+
+textures/     (under public/textures/) Page background pattern SVGs.

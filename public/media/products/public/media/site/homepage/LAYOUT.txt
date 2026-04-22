@@ -1,0 +1,7 @@
+Home page image assets.
+
+Recommended files
+  hero.webp
+  artisan.webp
+
+Use these for the homepage hero banner and the artisan spotlight block.

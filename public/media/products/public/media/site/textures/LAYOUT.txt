@@ -1,0 +1,6 @@
+Site texture assets.
+
+Recommended files
+  linen-noise.svg
+
+Use this folder for repeatable background textures or alternate paper grain tiles.
