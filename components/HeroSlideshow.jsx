@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import "../assets/css/hero-slideshow.css";
 
 export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [loadedSlides, setLoadedSlides] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const heroRef = useRef(null);
 
   // Detect mobile viewport
   useEffect(() => {
@@ -15,6 +17,30 @@ export default function HeroSlideshow({ slides = [] }) {
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Intersection Observer: Add nav transparency class when hero exits
+  useEffect(() => {
+    if (!heroRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const nav = document.querySelector("header.nav");
+        if (!nav) return;
+
+        if (!entry.isIntersecting) {
+          // Hero is out of view - show nav background
+          nav.classList.add("nav--hero-exit");
+        } else {
+          // Hero is in view - keep nav transparent
+          nav.classList.remove("nav--hero-exit");
+        }
+      },
+      { threshold: 0.8 }
+    );
+
+    observer.observe(heroRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // Fetch slides from API on mount
@@ -177,7 +203,7 @@ export default function HeroSlideshow({ slides = [] }) {
   };
 
   return (
-    <section className="hero-slideshow">
+    <section className="hero-slideshow" ref={heroRef}>
       <div className="hero-slideshow__container">
         {/* Slides */}
         {slidesData.map((slide, index) => (
@@ -329,454 +355,7 @@ export default function HeroSlideshow({ slides = [] }) {
         ))}
       </div>
 
-      <style jsx>{`
-        .hero-slideshow {
-          position: relative;
-          width: 100%;
-          background: #000;
-          overflow: hidden;
-          min-height: 500px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .hero-slideshow__container {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          min-height: 500px;
-        }
-
-        /* ========== SLIDES ========== */
-        .hero-slideshow__slide {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-          transition: opacity 0.8s ease-in-out;
-        }
-
-        .hero-slideshow__slide--active {
-          opacity: 1;
-          z-index: 10;
-        }
-
-        /* ========== BACKGROUND IMAGE ========== */
-        .hero-slideshow__image {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-        }
-
-        /* ========== GRADIENT OVERLAYS ========== */
-        .hero-slideshow__overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 1;
-        }
-
-        /* Bottom gradient - for Artisan/Product/Quote */
-        .hero-slideshow__overlay--artisan,
-        .hero-slideshow__overlay--product,
-        .hero-slideshow__overlay--brand {
-          background: linear-gradient(
-            to top,
-            rgba(0, 0, 0, 0.85) 0%,
-            rgba(0, 0, 0, 0.5) 40%,
-            rgba(0, 0, 0, 0) 100%
-          );
-        }
-
-        /* Center radial gradient - for Discount/Bundle/Shipping */
-        .hero-slideshow__overlay--discount,
-        .hero-slideshow__overlay--bundle,
-        .hero-slideshow__overlay--shipping {
-          background: radial-gradient(
-            ellipse at center,
-            rgba(0, 0, 0, 0.8) 0%,
-            rgba(0, 0, 0, 0.4) 60%,
-            rgba(0, 0, 0, 0) 100%
-          );
-        }
-
-        /* Sandwich gradient - for Testimonials */
-        .hero-slideshow__overlay--testimonial {
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.6) 0%,
-            rgba(0, 0, 0, 0) 25%,
-            rgba(0, 0, 0, 0) 75%,
-            rgba(0, 0, 0, 0.8) 100%
-          );
-        }
-
-        /* ========== CONTENT ========== */
-        .hero-slideshow__content {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 2;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          padding: 60px var(--gutter);
-          max-width: 1400px;
-          margin: 0 auto;
-          color: white;
-          animation: slideInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .hero-slideshow__badge {
-          font-size: 0.9rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          margin: 0 0 var(--space-2) 0;
-          opacity: 0.9;
-        }
-
-        .hero-slideshow__title {
-          font-size: 2.75rem;
-          font-weight: 700;
-          margin: 0 0 var(--space-2) 0;
-          line-height: 1.15;
-          font-family: Georgia, serif;
-        }
-
-        .hero-slideshow__subtitle {
-          font-size: 1.25rem;
-          font-weight: 400;
-          margin: 0 0 var(--space-1) 0;
-          opacity: 0.95;
-        }
-
-        .hero-slideshow__description {
-          font-size: 1.125rem;
-          margin: 0 0 var(--space-3) 0;
-          line-height: 1.6;
-          opacity: 0.9;
-          max-width: 500px;
-        }
-
-        .hero-slideshow__quote {
-          font-size: 1.15rem;
-          font-style: italic;
-          margin: var(--space-3) 0;
-          opacity: 0.95;
-          max-width: 450px;
-          line-height: 1.7;
-        }
-
-        .hero-slideshow__quote-large {
-          font-size: 1.5rem;
-          font-style: italic;
-          margin: var(--space-4) 0;
-          line-height: 1.8;
-          max-width: 600px;
-        }
-
-        .hero-slideshow__author {
-          font-size: 1rem;
-          font-weight: 600;
-          margin: var(--space-2) 0;
-          opacity: 0.9;
-        }
-
-        .hero-slideshow__details {
-          font-size: 1rem;
-          opacity: 0.9;
-          margin: 0 0 var(--space-2) 0;
-        }
-
-        .hero-slideshow__rating {
-          font-size: 1.1rem;
-          margin: var(--space-2) 0;
-          letter-spacing: 2px;
-        }
-
-        .hero-slideshow__price {
-          font-size: 1.75rem;
-          font-weight: 700;
-          margin: var(--space-3) 0;
-        }
-
-        .hero-slideshow__savings {
-          font-size: 0.95rem;
-          opacity: 0.85;
-          margin: var(--space-1) 0;
-        }
-
-        .hero-slideshow__stats {
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin: var(--space-3) 0;
-          opacity: 0.95;
-        }
-
-        .hero-slideshow__badge-small {
-          font-size: 0.85rem;
-          opacity: 0.8;
-          margin: var(--space-1) 0;
-        }
-
-        /* CTA Button */
-        .hero-slideshow__cta {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 14px 32px;
-          background: white;
-          color: #C04D29;
-          border: none;
-          border-radius: 4px;
-          font-weight: 700;
-          font-size: 0.95rem;
-          text-decoration: none;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          margin-top: var(--space-4);
-          width: fit-content;
-        }
-
-        .hero-slideshow__cta:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
-          background: #f5f5f5;
-        }
-
-        /* ========== NAVIGATION ========== */
-        .hero-slideshow__nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 20;
-          background: rgba(255, 255, 255, 0.15);
-          border: 2px solid white;
-          color: white;
-          font-size: 2rem;
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0;
-        }
-
-        .hero-slideshow:hover .hero-slideshow__nav {
-          opacity: 0.8;
-        }
-
-        .hero-slideshow__nav:hover {
-          background: rgba(255, 255, 255, 0.25);
-          transform: translateY(-50%) scale(1.1);
-        }
-
-        .hero-slideshow__nav--prev {
-          left: 30px;
-        }
-
-        .hero-slideshow__nav--next {
-          right: 30px;
-        }
-
-        /* Dot Navigation */
-        .hero-slideshow__dots {
-          position: absolute;
-          bottom: 30px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 20;
-          display: flex;
-          gap: var(--space-2);
-          align-items: center;
-        }
-
-        .hero-slideshow__dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.4);
-          border: 2px solid white;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          padding: 0;
-        }
-
-        .hero-slideshow__dot:hover {
-          background: rgba(255, 255, 255, 0.6);
-        }
-
-        .hero-slideshow__dot--active {
-          background: white;
-          box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-        }
-
-        /* Animations */
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 1024px) {
-          .hero-slideshow {
-            min-height: 420px;
-          }
-
-          .hero-slideshow__container {
-            min-height: 420px;
-          }
-
-          .hero-slideshow__content {
-            padding: 50px var(--gutter);
-          }
-
-          .hero-slideshow__title {
-            font-size: 2.25rem;
-          }
-
-          .hero-slideshow__description {
-            font-size: 1rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .hero-slideshow {
-            min-height: 380px;
-          }
-
-          .hero-slideshow__container {
-            min-height: 380px;
-          }
-
-          .hero-slideshow__content {
-            padding: 40px var(--gutter);
-            justify-content: center;
-            text-align: center;
-          }
-
-          .hero-slideshow__title {
-            font-size: 1.875rem;
-          }
-
-          .hero-slideshow__subtitle {
-            font-size: 1.1rem;
-          }
-
-          .hero-slideshow__description {
-            font-size: 0.95rem;
-            margin: 0 auto var(--space-2);
-          }
-
-          .hero-slideshow__quote {
-            font-size: 1rem;
-            margin: var(--space-2) auto;
-          }
-
-          .hero-slideshow__quote-large {
-            font-size: 1.25rem;
-            margin: var(--space-3) auto;
-          }
-
-          .hero-slideshow__cta {
-            margin: var(--space-3) auto 0;
-          }
-
-          .hero-slideshow__nav {
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
-            opacity: 0.6;
-          }
-
-          .hero-slideshow__nav--prev {
-            left: 15px;
-          }
-
-          .hero-slideshow__nav--next {
-            right: 15px;
-          }
-
-          .hero-slideshow__dots {
-            bottom: 20px;
-          }
-
-          .hero-slideshow__dot {
-            width: 10px;
-            height: 10px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero-slideshow {
-            min-height: 320px;
-          }
-
-          .hero-slideshow__container {
-            min-height: 320px;
-          }
-
-          .hero-slideshow__content {
-            padding: 30px var(--gutter);
-          }
-
-          .hero-slideshow__title {
-            font-size: 1.5rem;
-          }
-
-          .hero-slideshow__description {
-            font-size: 0.9rem;
-          }
-
-          .hero-slideshow__quote-large {
-            font-size: 1.1rem;
-          }
-
-          .hero-slideshow__cta {
-            padding: 12px 24px;
-            font-size: 0.85rem;
-          }
-
-          .hero-slideshow__nav {
-            display: none;
-          }
-
-          .hero-slideshow__dots {
-            bottom: 15px;
-            gap: 6px;
-          }
-
-          .hero-slideshow__dot {
-            width: 8px;
-            height: 8px;
-          }
-        }
-      `}</style>
+      {/* Styles managed by hero-slideshow.css */}
     </section>
   );
 }
