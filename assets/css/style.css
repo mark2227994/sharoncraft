@@ -2571,7 +2571,7 @@ body.cart-open .product-sticky-bar {
 .site-footer {
   padding: 3rem 0 7rem;
   margin-top: 2rem;
-  background: linear-gradient(180deg, rgba(92, 64, 51, 0.98), rgba(62, 42, 33, 1));
+  background: #0a0a0a;
   color: #fffaf3;
 }
 
@@ -2596,8 +2596,8 @@ body.cart-open .product-sticky-bar {
   gap: 0.4rem;
   padding: 1rem 1rem 1.1rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 250, 243, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 168, 106, 0.12);
 }
 
 .footer-accordion-toggle {
@@ -2623,7 +2623,7 @@ body.cart-open .product-sticky-bar {
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(201, 168, 106, 0.08);
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
@@ -2642,7 +2642,7 @@ body.cart-open .product-sticky-bar {
   display: inline-flex;
   padding: 0.6rem 0.95rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(201, 168, 106, 0.08);
 }
 
 .footer-link-list a,
