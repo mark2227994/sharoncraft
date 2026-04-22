@@ -11,6 +11,7 @@ export const collectionCardLayout = [
   { title: "Jewellery", href: "/shop?category=Jewellery", imageKey: "collectionJewellery", itemCount: 24 },
   { title: "Home Objects", href: "/shop?category=Home%20Decor", imageKey: "collectionHome", itemCount: 18 },
   { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories", itemCount: 12 },
+  { title: "Bridal & Occasion", href: "/shop?category=Bridal%20%26%20Occasion", imageKey: "collectionBridal", itemCount: 16 },
 ];
 
 export const defaultAboutStory =
@@ -32,23 +33,21 @@ export const trustItems = [
 ];
 
 export const primaryNavLinks = [
-  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
-  { href: "/shop#collections", label: "Collections" },
   { href: "/artisans", label: "Artisans" },
-  { href: "/journal", label: "Journal" },
   { href: "/about", label: "About" },
+  { href: "/journal", label: "Journal" },
+  { href: "/custom-order", label: "Custom Orders" },
+];
+
+export const mobileUtilityNavLinks = [
+  { href: "/wishlist", label: "Wishlist" },
+  { href: "/cart", label: "Cart" },
 ];
 
 export const mobileNavLinks = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/shop#collections", label: "Collections" },
-  { href: "/artisans", label: "Artisans" },
-  { href: "/journal", label: "Journal" },
-  { href: "/about", label: "About" },
-  { href: "/wishlist", label: "Wishlist" },
-  { href: "/cart", label: "Cart" },
+  ...primaryNavLinks,
+  ...mobileUtilityNavLinks,
 ];
 
 export const artisanFeature = {
