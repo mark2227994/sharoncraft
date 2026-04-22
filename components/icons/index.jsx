@@ -1,9 +1,10 @@
 // components/icons/index.jsx
 // All icons: 24x24 viewBox, stroke-based, no fills except where noted.
 // Use: <Icon name="cart" size={20} color="currentColor" />
+// Use with fill: <Icon name="heart" size={20} fill="var(--color-accent)" />
 
 const paths = {
-  cart:      "M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0",
+  cart:      "M6 3h13l1 3v13a2 2 0 01-2 2H9a2 2 0 01-2-2V6l2-3zM9 6h6M8 10h8",
   search:    "M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z",
   menu:      "M4 6h16M4 12h16M4 18h10",
   close:     "M18 6L6 18M6 6l12 12",
@@ -37,7 +38,7 @@ const paths = {
   "shopping-bag": "M6 2L4 6v14a2 2 0 002 2h12a2 2 0 002-2V6l-2-4zM9 2v4M15 2v4",
 };
 
-export default function Icon({ name, size = 24, color = "currentColor", strokeWidth = 1.5, className = "" }) {
+export default function Icon({ name, size = 24, color = "currentColor", fill = "none", strokeWidth = 1.5, className = "" }) {
   const d = paths[name];
   if (!d) return null;
   return (
@@ -45,7 +46,7 @@ export default function Icon({ name, size = 24, color = "currentColor", strokeWi
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={color}
       strokeWidth={strokeWidth}
       strokeLinecap="round"

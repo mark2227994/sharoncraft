@@ -1,0 +1,528 @@
+/* ============================================================================
+   HEADER NAVIGATION SYSTEM
+   ============================================================================
+   A systematic, scalable header design with consistent spacing, typography,
+   and interaction patterns. Replaces vibe-coded header styles.
+   ========================================================================== */
+
+/* SPACING SYSTEM (base 0.5rem = 8px) */
+:root {
+  /* Header dimensions */
+  --nav-height: 64px;
+  --nav-padding-inline: 1rem;
+  --nav-gap: 1rem;
+  
+  /* Element spacing increments (multiples of 0.5rem) */
+  --space-xs: 0.25rem;   /* 4px - extra tight */
+  --space-sm: 0.5rem;    /* 8px - tight */
+  --space-md: 1rem;      /* 16px - comfortable */
+  --space-lg: 1.5rem;    /* 24px - spacious */
+  --space-xl: 2rem;      /* 32px - very spacious */
+  
+  /* Button/Badge sizing system */
+  --btn-height: 40px;
+  --btn-height-compact: 36px;
+  --btn-padding-x: 0.75rem;
+  --btn-padding-y: 0.5rem;
+  --btn-border-radius: 8px;
+  
+  /* Typography spacing */
+  --text-gap-inline: 0.5rem;  /* Gap between icon and text in buttons */
+  
+  /* Timing system */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+}
+
+/* ============================================================================
+   HEADER CONTAINER
+   ========================================================================== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: var(--nav-height);
+  padding: 0 var(--nav-padding-inline);
+  background: rgba(249, 246, 240, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(92, 64, 51, 0.08);
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nav-gap);
+}
+
+/* Scrolled state: strengthen backdrop */
+.nav--scrolled {
+  background: rgba(249, 246, 240, 0.98);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom-color: rgba(92, 64, 51, 0.12);
+}
+
+/* ============================================================================
+   LOGO & BRANDING
+   ========================================================================== */
+.nav__logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.nav__logo-lockup:hover {
+  opacity: 0.85;
+}
+
+.nav__logo-mark {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.nav__brand-name {
+  font-family: Georgia, Times New Roman, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.nav__logo-lockup:hover .nav__brand-name {
+  color: var(--color-accent);
+}
+
+/* ============================================================================
+   SEARCH (desktop only)
+   ========================================================================== */
+.nav__search-form {
+  display: none;
+  align-items: center;
+  flex: 0 1 320px;
+  height: var(--btn-height);
+}
+
+.nav__search-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  gap: var(--space-sm);
+  padding: 0 var(--space-md);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(192, 77, 41, 0.15);
+  border-bottom: 2px solid transparent;
+  border-radius: var(--btn-border-radius);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.nav__search-wrapper:hover {
+  border-color: rgba(192, 77, 41, 0.25);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.nav__search-wrapper:focus-within {
+  border-bottom-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.99);
+}
+
+.nav__search-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.nav__search-input {
+  flex: 1;
+  width: 100%;
+  padding: var(--btn-padding-y) 0;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.nav__search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.nav__search-input:focus {
+  outline: none;
+}
+
+/* ============================================================================
+   DESKTOP NAVIGATION LINKS
+   ========================================================================== */
+.nav__desktop-nav {
+  display: none;
+  flex: 0 1 auto;
+  margin: 0 var(--space-lg);
+  padding: 0;
+}
+
+.nav__links {
+  display: none;
+  align-items: center;
+  gap: var(--space-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav__link {
+  display: block;
+  position: relative;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-accent);
+  transition: width var(--transition-fast);
+}
+
+.nav__link:hover {
+  color: var(--color-accent);
+}
+
+.nav__link:hover::after {
+  width: 100%;
+}
+
+/* ============================================================================
+   ACTION BUTTONS
+   ========================================================================== */
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-left: auto;
+}
+
+/* Base button style */
+.nav__action-btn {
+  display: none;
+  align-items: center;
+  gap: var(--text-gap-inline);
+  height: var(--btn-height-compact);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--btn-border-radius);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  position: relative;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav__action-btn:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.nav__action-btn:active {
+  opacity: 0.9;
+}
+
+/* Primary buttons (Account, Wishlist) */
+.nav__account-btn,
+.nav__wishlist-btn {
+  color: var(--text-primary);
+}
+
+.nav__account-btn:hover,
+.nav__wishlist-btn:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* Cart button - special styling */
+.nav__cart-btn {
+  display: none;
+  background: var(--color-accent);
+  color: var(--color-white);
+  padding: var(--btn-padding-y) calc(var(--btn-padding-x) + 0.25rem);
+  border-bottom-color: transparent;
+}
+
+.nav__cart-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-white);
+  border-bottom-color: var(--color-white);
+  opacity: 0.9;
+}
+
+.nav__cart-btn:active {
+  opacity: 0.85;
+}
+
+/* Label text (hidden on mobile) */
+.nav__btn-label {
+  display: none;
+  text-transform: uppercase;
+}
+
+/* Badge counter */
+.nav__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-cream);
+  background: var(--color-terracotta);
+  color: var(--color-white);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.nav__badge--new {
+  animation: badgePulse 600ms ease-out;
+}
+
+.nav__wishlist-badge {
+  background: #e74c3c;
+}
+
+.nav__cart-badge {
+  background: var(--color-terracotta);
+}
+
+/* Wishlist filled state */
+.nav__wishlist-btn.is-wishlist svg {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+}
+
+/* ============================================================================
+   MOBILE HAMBURGER & ICON BUTTONS
+   ========================================================================== */
+.nav__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--btn-border-radius);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.nav__icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================================
+   MOBILE MENU (SIDE DRAWER)
+   ========================================================================== */
+.side-drawer {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+.side-drawer__overlay {
+  flex: 1;
+  background: rgba(28, 18, 9, 0.5);
+  cursor: pointer;
+}
+
+.side-drawer__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(320px, 85vw);
+  height: 100%;
+  padding: var(--space-lg) var(--space-md);
+  background: var(--color-ink);
+  animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.side-drawer__nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.side-drawer__nav-link {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--color-cream);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.side-drawer__nav-link:hover {
+  color: var(--color-ochre-light);
+}
+
+/* ============================================================================
+   ANNOUNCEMENT BAR (above nav)
+   ========================================================================== */
+.nav__announcement {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: var(--space-md) var(--nav-padding-inline);
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: var(--color-white);
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.nav__announcement p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+/* Adjust nav position when announcement is visible */
+body:not([data-hide-announcement]) .nav {
+  top: 36px; /* Height of announcement bar */
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* Tablet and up (768px+) */
+@media (min-width: 768px) {
+  .nav__desktop-nav,
+  .nav__links {
+    display: flex;
+  }
+  
+  .nav__search-form,
+  .nav__action-btn,
+  .nav__btn-label {
+    display: flex;
+  }
+  
+  .nav__hamburger {
+    display: none;
+  }
+}
+
+/* Mobile (below 768px) */
+@media (max-width: 767px) {
+  .nav__logo-lockup {
+    gap: var(--space-sm);
+    max-width: min(220px, 52vw);
+  }
+  
+  .nav__logo-mark {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .nav__brand-name {
+    font-size: 1.1rem;
+  }
+  
+  .nav__search-form {
+    display: none;
+  }
+  
+  .nav__action-btn {
+    display: none;
+  }
+  
+  .nav__icon-btn {
+    display: flex;
+  }
+  
+  .nav__btn-label {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   UTILITIES & STATES
+   ========================================================================== */
+
+/* Visually hidden but accessible */
+.nav__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible ring */
+.nav__action-btn:focus-visible,
+.nav__link:focus-visible,
+.nav__icon-btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--btn-border-radius);
+}
