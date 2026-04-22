@@ -14,7 +14,22 @@ export default function ImportHistoryPanel() {
       const response = await fetch("/api/admin/import-history?limit=20", {
         credentials: "same-origin",
       });
-      const data = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      let data = null;
+
+      if (contentType.includes("application/json")) {
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("Import history is temporarily unavailable. Please refresh.");
+        }
+      } else {
+        const raw = await response.text();
+        const preview = raw.slice(0, 120).replace(/\s+/g, " ").trim();
+        throw new Error(
+          `Import history API returned non-JSON (${response.status}). ${preview || "Empty response."}`,
+        );
+      }
 
       if (!response.ok) throw new Error(data.error || "Failed to fetch");
 

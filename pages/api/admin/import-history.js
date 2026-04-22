@@ -1,4 +1,4 @@
-import { supabase } from "../../../lib/supabase-server";
+import { supabase, supabaseAdmin } from "../../../lib/supabase-server";
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 /**
@@ -6,17 +6,24 @@ import { isAuthorizedRequest } from "../../../lib/admin-auth";
  */
 
 export default async function handler(req, res) {
-  const auth = await isAuthorizedRequest(req);
-  if (!auth.authorized) return res.status(401).json({ error: "Unauthorized" });
+  if (!isAuthorizedRequest(req)) return res.status(401).json({ error: "Unauthorized" });
+  const db = supabaseAdmin || supabase;
+  if (!db) {
+    return res.status(500).json({ error: "Supabase is not configured on this environment" });
+  }
 
   if (req.method === "GET") {
-    // Get import history
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("import_history")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(100);
+
+      // Keep the dashboard usable even before the optional table exists.
+      if (error && /import_history/i.test(String(error.message || ""))) {
+        return res.status(200).json([]);
+      }
 
       if (error) throw error;
       return res.status(200).json(data || []);
@@ -35,7 +42,7 @@ export default async function handler(req, res) {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("import_history")
         .insert([
           {
@@ -49,6 +56,14 @@ export default async function handler(req, res) {
         ])
         .select()
         .single();
+
+      if (error && /import_history/i.test(String(error.message || ""))) {
+        return res.status(200).json({
+          ok: true,
+          skipped: true,
+          message: "Import history table is not set up yet.",
+        });
+      }
 
       if (error) throw error;
       return res.status(201).json(data);
