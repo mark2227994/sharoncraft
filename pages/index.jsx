@@ -228,30 +228,28 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Simplified Payment Methods */}
-      <section className="payment-methods-section" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-4) var(--gutter)' }}>
-        <div className="payment-methods-content">
-          <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
-            <p className="overline">Flexible Payment</p>
-            <h3 className="display-sm" style={{ margin: 'var(--space-1) 0' }}>Multiple Payment Methods</h3>
+      {/* Payment Methods - Gold Card Grid */}
+      <section className="payment-methods-section">
+        <div className="payment-methods-heading">
+          <p className="payment-methods-heading__kicker">Flexible Payment</p>
+          <h3 className="payment-methods-heading__title">Multiple Payment Methods</h3>
+        </div>
+        <div className="payment-methods-grid">
+          <div className="payment-method">
+            <div className="payment-method__icon"><Icon name="dollar" size={24} /></div>
+            <span className="payment-method__text">M-Pesa</span>
           </div>
-          <div className="payment-methods-grid">
-            <div className="payment-method">
-              <div className="payment-method__icon"><Icon name="dollar" size={24} /></div>
-              <span>M-Pesa</span>
-            </div>
-            <div className="payment-method">
-              <div className="payment-method__icon"><Icon name="dollar" size={24} /></div>
-              <span>Bank Transfer</span>
-            </div>
-            <div className="payment-method">
-              <div className="payment-method__icon"><Icon name="truck" size={24} /></div>
-              <span>Cash on Delivery</span>
-            </div>
-            <div className="payment-method">
-              <div className="payment-method__icon"><Icon name="mpesa" size={24} /></div>
-              <span>Lipa Na M-Pesa</span>
-            </div>
+          <div className="payment-method">
+            <div className="payment-method__icon"><Icon name="dollar" size={24} /></div>
+            <span className="payment-method__text">Bank Transfer</span>
+          </div>
+          <div className="payment-method">
+            <div className="payment-method__icon"><Icon name="truck" size={24} /></div>
+            <span className="payment-method__text">Cash on Delivery</span>
+          </div>
+          <div className="payment-method">
+            <div className="payment-method__icon"><Icon name="mpesa" size={24} /></div>
+            <span className="payment-method__text">Lipa Na M-Pesa</span>
           </div>
         </div>
       </section>
@@ -392,79 +390,7 @@ export default function HomePage({
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-        .payment-methods-section {
-          background: linear-gradient(135deg, #F5F3F0 0%, #FAF8F6 100%);
-          border-top: 1px solid var(--border-default);
-          border-bottom: 1px solid var(--border-default);
-          margin-top: var(--space-6);
-        }
-        .payment-methods-content {
-          display: grid;
-          gap: var(--space-4);
-        }
-        .payment-methods-content > div:first-child {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: var(--space-4);
-        }
-        .payment-methods-content .overline {
-          margin: 0;
-          color: var(--text-secondary);
-        }
-        .payment-methods-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: var(--space-3);
-        }
-        .payment-method {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--space-2);
-          padding: var(--space-4);
-          background: var(--color-white);
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-md);
-          text-align: center;
-          transition: all 0.2s ease;
-        }
-        .payment-method:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          border-color: var(--color-terracotta);
-        }
-        .payment-method__icon {
-          font-size: 2rem;
-          line-height: 1;
-        }
-        .payment-method span {
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: var(--text-primary);
-        }
-        .payment-method__note {
-          font-size: 0.75rem;
-          font-weight: 400;
-          color: var(--text-secondary);
-          margin-top: -2px;
-        }
-        @keyframes slideInFromLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @media (min-width: 600px) {
-          .collection-card {
-            flex: 0 0 45vw;
-          }
-        }
-
+        /* Payment methods styling moved to assets/css/payment-methods.css */
         .trust-signals {
           background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(139, 90, 43, 0.03) 100%);
           border-radius: var(--radius-lg);
