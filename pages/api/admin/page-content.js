@@ -1,7 +1,5 @@
-import fs from 'fs';
-import path from 'path';
-
-const dataFile = path.join(process.cwd(), 'data', 'page-content.json');
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
+import { readAdminContentField, writeAdminContentField } from "../../../lib/admin-content";
 
 const defaultPageContent = {
   about: {
@@ -161,33 +159,25 @@ const defaultPageContent = {
   }
 };
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      let data;
-      if (fs.existsSync(dataFile)) {
-        data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-      } else {
-        data = defaultPageContent;
-      }
-      res.status(200).json(data);
-    } catch (error) {
-      console.error('Error reading page content:', error);
-      res.status(200).json(defaultPageContent);
-    }
-  } else if (req.method === 'POST') {
-    try {
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      fs.writeFileSync(dataFile, JSON.stringify(req.body, null, 2));
-      res.status(200).json({ success: true, data: req.body });
-    } catch (error) {
-      console.error('Error saving page content:', error);
-      res.status(500).json({ error: 'Failed to save page content' });
-    }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req, res) {
+  if (req.method === "GET") {
+    const data = await readAdminContentField("pageContent", defaultPageContent);
+    return res.status(200).json(data);
   }
+
+  if (req.method === "POST") {
+    if (!isAuthorizedRequest(req)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const payload = req.body && typeof req.body === "object" ? req.body : defaultPageContent;
+      await writeAdminContentField("pageContent", payload);
+      return res.status(200).json({ success: true, data: payload });
+    } catch (error) {
+      console.error("Error saving page content:", error);
+      return res.status(500).json({ error: "Failed to save page content" });
+    }
+  }
+
+  return res.status(405).json({ error: "Method not allowed" });
 }

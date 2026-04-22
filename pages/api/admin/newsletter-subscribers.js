@@ -1,15 +1,14 @@
-import { supabase } from "../../../lib/supabase-server";
+import { supabaseAdmin } from "../../../lib/supabase-server";
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export default async function handler(req, res) {
-  // Verify admin session
-  const sessionToken = req.cookies.admin_session;
-  if (!sessionToken) {
+  if (!isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
   if (req.method === "GET") {
     try {
-      const { data: subscribers, error } = await supabase
+      const { data: subscribers, error } = await supabaseAdmin
         .from("newsletter_subscribers")
         .select("email, subscribed_at, status")
         .order("subscribed_at", { ascending: false });
@@ -31,7 +30,7 @@ export default async function handler(req, res) {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from("newsletter_subscribers")
         .delete()
         .eq("email", email.toLowerCase());

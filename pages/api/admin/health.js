@@ -8,7 +8,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "https://vonzscriztdcdhobulhy.s
 const SUPABASE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.SUPABASE_ANON_KEY ||
-  "sb_publishable_3CbiLXuCbqRGjKmBp7Ez3w_NV4HaLXa";
+  "";
 
 const BLOB_SITE_CONTENT_PATH = "site-content/site-images.json";
 const STORAGE_BUCKET = "product-images";

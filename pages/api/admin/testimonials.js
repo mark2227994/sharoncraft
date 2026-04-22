@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "../../../lib/supabase-server";
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 // Create testimonials table if it doesn't exist (will be idempotent)
 async function ensureTestimonialsTable() {
@@ -24,10 +25,14 @@ export default function handler(req, res) {
 
 async function handleGet(req, res) {
   try {
-    const { data, error } = await supabaseAdmin
+    const query = supabaseAdmin
       .from("testimonials")
       .select("*")
       .order("createdAt", { ascending: false });
+
+    const { data, error } = isAuthorizedRequest(req)
+      ? await query
+      : await query.eq("approved", true);
 
     if (error) {
       console.error("Testimonials GET error:", error);
@@ -88,6 +93,9 @@ async function handlePost(req, res) {
       console.log("Successfully inserted", data?.length || 0, "testimonials");
       return res.status(200).json({ success: true, count: data?.length || 0 });
     } else {
+      if (!isAuthorizedRequest(req)) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
       // Admin managing testimonials - update entire list
       console.log("Admin management - updating testimonials");
 

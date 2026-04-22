@@ -1,6 +1,11 @@
 import { readSiteImages } from "../../../lib/site-images";
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
 export default async function handler(req, res) {
+  if (!isAuthorizedRequest(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }

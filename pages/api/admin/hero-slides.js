@@ -1,8 +1,5 @@
-import fs from "fs";
-import path from "path";
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
-
-const filePath = path.join(process.cwd(), "data", "hero-slides.json");
+import { readAdminContentField, writeAdminContentField } from "../../../lib/admin-content";
 
 // Default slides
 const DEFAULT_SLIDES = [
@@ -113,30 +110,7 @@ const DEFAULT_SLIDES = [
   },
 ];
 
-function readSlides() {
-  try {
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, "utf-8");
-      return JSON.parse(data);
-    }
-  } catch {}
-  return DEFAULT_SLIDES;
-}
-
-function writeSlides(slides) {
-  try {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, JSON.stringify(slides, null, 2));
-  } catch (error) {
-    console.error("Error writing slides:", error);
-    throw new Error("Could not save slides");
-  }
-}
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   // Check authorization for all methods
   if (req.method !== "GET" && !isAuthorizedRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -144,7 +118,7 @@ export default function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const slides = readSlides();
+      const slides = await readAdminContentField("heroSlides", DEFAULT_SLIDES);
       return res.status(200).json({ slides });
     } catch (error) {
       console.error("Error reading slides:", error);
@@ -176,7 +150,7 @@ export default function handler(req, res) {
         }
       }
 
-      writeSlides(slides);
+      await writeAdminContentField("heroSlides", slides);
       return res.status(200).json({ success: true, message: "Slides saved" });
     } catch (error) {
       console.error("Error saving slides:", error);

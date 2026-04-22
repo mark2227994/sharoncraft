@@ -225,7 +225,7 @@ function toPersistedArtisans(artisans) {
 
 export default function AdminArtisansPage() {
   const fileInputRef = useRef(null);
-  const [artisans, setArtisans] = useState(DEFAULT_ARTISANS);
+  const [artisans, setArtisans] = useState([]);
 
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -271,9 +271,7 @@ export default function AdminArtisansPage() {
 
       const result = await response.json();
       const parsed = parseArtisanStories(result?.artisanStories);
-      if (parsed.length > 0) {
-        setArtisans(parsed);
-      }
+      setArtisans(parsed);
     } catch {
       // keep defaults if loading fails
     }

@@ -1,7 +1,5 @@
-import fs from 'fs';
-import path from 'path';
-
-const dataFile = path.join(process.cwd(), 'data', 'promotions.json');
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
+import { readAdminContentField, writeAdminContentField } from "../../../lib/admin-content";
 
 const defaultPromotions = [
   {
@@ -40,33 +38,25 @@ const defaultPromotions = [
   }
 ];
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      let data;
-      if (fs.existsSync(dataFile)) {
-        data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-      } else {
-        data = defaultPromotions;
-      }
-      res.status(200).json(data);
-    } catch (error) {
-      console.error('Error reading promotions:', error);
-      res.status(200).json(defaultPromotions);
-    }
-  } else if (req.method === 'POST') {
-    try {
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      fs.writeFileSync(dataFile, JSON.stringify(req.body, null, 2));
-      res.status(200).json({ success: true, data: req.body });
-    } catch (error) {
-      console.error('Error saving promotions:', error);
-      res.status(500).json({ error: 'Failed to save promotions' });
-    }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req, res) {
+  if (req.method === "GET") {
+    const data = await readAdminContentField("promotions", defaultPromotions);
+    return res.status(200).json(Array.isArray(data) ? data : defaultPromotions);
   }
+
+  if (req.method === "POST") {
+    if (!isAuthorizedRequest(req)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    try {
+      const payload = Array.isArray(req.body) ? req.body : defaultPromotions;
+      await writeAdminContentField("promotions", payload);
+      return res.status(200).json({ success: true, data: payload });
+    } catch (error) {
+      console.error("Error saving promotions:", error);
+      return res.status(500).json({ error: "Failed to save promotions" });
+    }
+  }
+
+  return res.status(405).json({ error: "Method not allowed" });
 }

@@ -1,71 +1,62 @@
-import fs from 'fs';
-import path from 'path';
-
-const dataFile = path.join(process.cwd(), 'data', 'navigation.json');
+import { isAuthorizedRequest } from "../../../lib/admin-auth";
+import { readAdminContentField, writeAdminContentField } from "../../../lib/admin-content";
 
 const defaultNavigation = {
   header: [
-    { id: 1, label: 'Shop', url: '/shop', order: 1 },
-    { id: 2, label: 'Artisans', url: '/artisans', order: 2 },
-    { id: 3, label: 'About', url: '/about', order: 3 },
-    { id: 4, label: 'Journal', url: '/articles', order: 4 },
-    { id: 5, label: 'Custom Orders', url: '/custom-order', order: 5 }
+    { id: 1, label: "Shop", url: "/shop", order: 1 },
+    { id: 2, label: "Artisans", url: "/artisans", order: 2 },
+    { id: 3, label: "About", url: "/about", order: 3 },
+    { id: 4, label: "Journal", url: "/articles", order: 4 },
+    { id: 5, label: "Custom Orders", url: "/custom-order", order: 5 },
   ],
   footer: [
     {
-      section: 'Customer Service',
+      section: "Customer Service",
       items: [
-        { label: 'FAQ', url: '/faq' },
-        { label: 'Contact', url: '/contact' },
-        { label: 'Returns', url: '/returns' }
-      ]
+        { label: "FAQ", url: "/faq" },
+        { label: "Contact", url: "/contact" },
+        { label: "Returns", url: "/returns" },
+      ],
     },
     {
-      section: 'About',
+      section: "About",
       items: [
-        { label: 'Our Story', url: '/about' },
-        { label: 'Artisans', url: '/artisans' },
-        { label: 'Careers', url: '/careers' }
-      ]
+        { label: "Our Story", url: "/about" },
+        { label: "Artisans", url: "/artisans" },
+        { label: "Careers", url: "/careers" },
+      ],
     },
     {
-      section: 'Legal',
+      section: "Legal",
       items: [
-        { label: 'Privacy Policy', url: '/privacy' },
-        { label: 'Terms', url: '/terms' },
-        { label: 'Shipping', url: '/shipping' }
-      ]
-    }
-  ]
+        { label: "Privacy Policy", url: "/privacy" },
+        { label: "Terms", url: "/terms" },
+        { label: "Shipping", url: "/shipping" },
+      ],
+    },
+  ],
 };
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      let data;
-      if (fs.existsSync(dataFile)) {
-        data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-      } else {
-        data = defaultNavigation;
-      }
-      res.status(200).json(data);
-    } catch (error) {
-      console.error('Error reading navigation:', error);
-      res.status(200).json(defaultNavigation);
-    }
-  } else if (req.method === 'POST') {
-    try {
-      const dataDir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      fs.writeFileSync(dataFile, JSON.stringify(req.body, null, 2));
-      res.status(200).json({ success: true, data: req.body });
-    } catch (error) {
-      console.error('Error saving navigation:', error);
-      res.status(500).json({ error: 'Failed to save navigation' });
-    }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(req, res) {
+  if (req.method === "GET") {
+    const data = await readAdminContentField("navigation", defaultNavigation);
+    return res.status(200).json(data);
   }
+
+  if (req.method === "POST") {
+    if (!isAuthorizedRequest(req)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+      const payload = req.body && typeof req.body === "object" ? req.body : defaultNavigation;
+      await writeAdminContentField("navigation", payload);
+      return res.status(200).json({ success: true, data: payload });
+    } catch {
+      return res.status(500).json({ error: "Failed to save navigation" });
+    }
+  }
+
+  res.setHeader("Allow", "GET, POST");
+  return res.status(405).json({ error: "Method not allowed" });
 }
