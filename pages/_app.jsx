@@ -10,6 +10,7 @@ import "../assets/css/custom-orders-card.css";
 import "../assets/css/payment-methods.css";
 import "../assets/css/artisan-section.css";
 import "../assets/css/curated-section-luxury.css";
+import "../assets/css/shop-luxury-minimal.css";
 import "../styles/components/product-grid.css";
 import "../styles/components/product-card.css";
 import "../styles/components/filters.css";
