@@ -1,5 +1,5 @@
 import ArtisanTimeline from "../components/ArtisanTimeline";
-import ArtisanStories from "../components/ArtisanStories";
+import ArtisanExpandingCards from "../components/ArtisanExpandingCards";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import HeroSlideshow from "../components/HeroSlideshow";
@@ -320,12 +320,7 @@ export default function HomePage({
 
         <TrustBadges />
 
-        <section className="artisan-stories-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
-          <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-            <h2 className="display-md">Our Artisans</h2>
-          </div>
-          <ArtisanStories artisans={artisans} />
-        </section>
+        <ArtisanExpandingCards artisans={artisans} />
 
         <ArticleCarousel />
 
