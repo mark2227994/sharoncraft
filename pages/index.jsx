@@ -171,6 +171,7 @@ function CuratedSection({ bestSellers, newArrivals }) {
 function SectionHeading({ title, kicker }) {
   return (
     <div className="section-heading">
+      <span className="section-heading__rule" aria-hidden="true" />
       <div>
         {kicker ? <p className="overline">{kicker}</p> : null}
         <h2 className="display-md">{title}</h2>
