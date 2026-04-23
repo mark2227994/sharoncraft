@@ -307,8 +307,10 @@ export default function ShopSidebar({
       )}
 
       <style jsx>{`
+        /* LUXURY ECOMMERCE SIDEBAR - 2026 */
+        
         .shop-sidebar__desktop {
-          width: 240px;
+          width: 260px;
           flex-shrink: 0;
           position: sticky;
           top: calc(var(--nav-height) + 80px);
@@ -317,6 +319,25 @@ export default function ShopSidebar({
           overflow-y: auto;
           transition: opacity 300ms ease, transform 300ms ease;
         }
+        
+        .shop-sidebar__desktop::-webkit-scrollbar {
+          width: 4px;
+        }
+        
+        .shop-sidebar__desktop::-webkit-scrollbar-track {
+          background: #f5f5f5;
+          border-radius: 10px;
+        }
+        
+        .shop-sidebar__desktop::-webkit-scrollbar-thumb {
+          background: #ddd;
+          border-radius: 10px;
+        }
+        
+        .shop-sidebar__desktop::-webkit-scrollbar-thumb:hover {
+          background: #bbb;
+        }
+        
         @media (max-width: 899px) {
           .shop-sidebar__desktop {
             display: none;
@@ -324,219 +345,288 @@ export default function ShopSidebar({
         }
 
         .shop-sidebar {
-          background: var(--color-white);
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-lg);
-          padding: var(--space-4);
-          transition: box-shadow 300ms ease;
+          background: #ffffff;
+          border: 1px solid #f0f0f0;
+          border-radius: 0;
+          padding: 0;
+          transition: all 300ms ease;
         }
-        @media (hover: hover) {
-          .shop-sidebar:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-          }
-        }
+
         .shop-sidebar__section {
-          margin-bottom: var(--space-4);
-          padding-bottom: var(--space-4);
-          border-bottom: 1px solid var(--border-default);
+          margin-bottom: 0;
+          padding: 20px 0;
+          border-bottom: 1px solid #f5f5f5;
+          border-top: none;
         }
+        
+        .shop-sidebar__section:first-of-type {
+          padding-top: 0;
+        }
+        
         .shop-sidebar__section:last-of-type {
           border-bottom: none;
-          margin-bottom: var(--space-3);
+          margin-bottom: 0;
         }
+        
         .shop-sidebar__title {
-          font-size: var(--text-sm);
-          font-weight: 600;
-          margin-bottom: var(--space-3);
-          color: var(--text-primary);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          margin-bottom: 12px;
+          color: #000;
+          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
+        
         .shop-sidebar__select {
           width: 100%;
-          padding: 10px 12px;
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-md);
-          font-size: var(--text-sm);
-          background: var(--color-white);
+          padding: 10px 0;
+          border: none;
+          border-bottom: 1px solid #e5e5e5;
+          font-size: 12px;
+          background: transparent;
           cursor: pointer;
+          color: #000;
+          font-weight: 500;
         }
+        
         .shop-sidebar__options {
           display: flex;
           flex-direction: column;
-          gap: var(--space-2);
+          gap: 10px;
         }
+        
         .shop-sidebar__radio,
         .shop-sidebar__checkbox {
           display: flex;
           align-items: center;
-          gap: var(--space-2);
-          font-size: var(--text-sm);
+          gap: 10px;
+          font-size: 12px;
           cursor: pointer;
-          padding: 4px 0;
+          padding: 0;
+          color: #333;
+          transition: color 0.2s ease;
         }
+        
+        .shop-sidebar__radio:hover,
+        .shop-sidebar__checkbox:hover {
+          color: #000;
+        }
+        
         .shop-sidebar__radio input,
         .shop-sidebar__checkbox input {
           display: none;
         }
+        
         .shop-sidebar__radio-custom {
-          width: 16px;
-          height: 16px;
-          border: 2px solid var(--border-default);
+          width: 14px;
+          height: 14px;
+          border: 1.5px solid #999;
           border-radius: 50%;
           position: relative;
           flex-shrink: 0;
+          transition: all 0.2s ease;
         }
+        
         .shop-sidebar__radio input:checked + .shop-sidebar__radio-custom {
-          border-color: var(--color-terracotta);
+          border-color: #000;
+          background: #000;
         }
+        
         .shop-sidebar__radio input:checked + .shop-sidebar__radio-custom::after {
           content: "";
           position: absolute;
           top: 3px;
           left: 3px;
-          width: 6px;
-          height: 6px;
-          background: var(--color-terracotta);
+          width: 4px;
+          height: 4px;
+          background: #fff;
           border-radius: 50%;
         }
+        
         .shop-sidebar__checkbox-custom {
-          width: 18px;
-          height: 18px;
-          border: 2px solid var(--border-default);
-          border-radius: 4px;
+          width: 14px;
+          height: 14px;
+          border: 1.5px solid #999;
+          border-radius: 2px;
           position: relative;
           flex-shrink: 0;
+          transition: all 0.2s ease;
         }
+        
         .shop-sidebar__checkbox input:checked + .shop-sidebar__checkbox-custom {
-          background: var(--color-terracotta);
-          border-color: var(--color-terracotta);
+          background: #000;
+          border-color: #000;
         }
+        
         .shop-sidebar__checkbox input:checked + .shop-sidebar__checkbox-custom::after {
           content: "✓";
           position: absolute;
-          top: -2px;
-          left: 2px;
+          top: -3px;
+          left: 1px;
           color: white;
-          font-size: 12px;
+          font-size: 10px;
           font-weight: bold;
         }
+        
         .shop-sidebar__clear {
           width: 100%;
-          padding: 10px;
-          background: var(--color-terracotta);
-          border: none;
-          border-radius: var(--radius-md);
-          font-size: var(--text-sm);
-          color: white;
-          font-weight: 600;
+          padding: 12px 0;
+          background: transparent;
+          border: 1px solid #000;
+          border-radius: 0;
+          font-size: 11px;
+          color: #000;
+          font-weight: 700;
           cursor: pointer;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          transition: all 0.2s ease;
+          margin-top: 8px;
+        }
+        
+        .shop-sidebar__clear:hover {
+          background: #000;
+          color: #fff;
         }
 
-        /* Mobile drawer styles */
+        /* Mobile drawer styles - Luxury */
         .shop-sidebar__overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.4);
           z-index: 1000;
           animation: fadeIn 0.2s;
+          backdrop-filter: blur(2px);
         }
+        
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
+        
         .shop-sidebar__drawer {
           position: fixed;
           bottom: 0;
           left: 0;
           right: 0;
-          background: var(--color-white);
-          border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+          background: #ffffff;
+          border-radius: 12px 12px 0 0;
           max-height: 85vh;
-          animation: slideUp 0.3s;
+          animation: slideUp 0.3s ease-out;
+          box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08);
         }
+        
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
         }
+        
         .shop-sidebar__drawer-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: var(--space-4);
-          border-bottom: 1px solid var(--border-default);
+          padding: 20px 20px;
+          border-bottom: 1px solid #f0f0f0;
         }
+        
         .shop-sidebar__drawer-header h3 {
-          font-size: var(--text-lg);
+          font-size: 16px;
           font-weight: 600;
+          color: #000;
+          letter-spacing: 0.5px;
         }
+        
         .shop-sidebar__close {
           background: none;
           border: none;
           cursor: pointer;
           padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          transition: background 0.2s ease;
+          border-radius: 4px;
         }
+        
+        .shop-sidebar__close:hover {
+          background: #f5f5f5;
+        }
+        
         .shop-sidebar__drawer-content {
-          padding: var(--space-4);
+          padding: 20px;
           overflow-y: auto;
-          max-height: calc(85vh - 60px);
+          max-height: calc(85vh - 70px);
         }
 
-        /* Layout Options Styles - Professional Ecommerce */
+        /* Layout Options - Minimal Luxury */
         .shop-sidebar__layout-options {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 8px;
-          margin-bottom: var(--space-2);
+          margin-bottom: 0;
         }
+        
         .shop-sidebar__layout-btn {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 8px;
-          background: transparent;
-          border: 1px solid transparent;
-          border-radius: var(--radius-md);
+          padding: 10px;
+          background: #f8f8f8;
+          border: 1px solid #e5e5e5;
+          border-radius: 0;
           cursor: pointer;
           transition: all 0.2s ease;
-          color: var(--text-secondary);
+          color: #666;
           position: relative;
           line-height: 1;
-          width: 40px;
+          width: 100%;
           height: 40px;
+          aspect-ratio: 1;
         }
+        
         .shop-sidebar__layout-btn svg {
-          width: 18px;
-          height: 18px;
+          width: 16px;
+          height: 16px;
           stroke-linecap: round;
           stroke-linejoin: round;
         }
+        
         .shop-sidebar__layout-btn:hover {
-          background: rgba(192, 77, 41, 0.08);
-          border-color: rgba(192, 77, 41, 0.2);
-          color: var(--color-accent);
+          background: #f0f0f0;
+          border-color: #999;
+          color: #000;
         }
+        
         .shop-sidebar__layout-btn--active {
-          background: linear-gradient(135deg, #C04D29 0%, #D4A574 100%);
-          color: var(--color-white);
-          border-color: #C04D29;
-          box-shadow: 0 2px 8px rgba(192, 77, 41, 0.3);
+          background: #000;
+          color: #fff;
+          border-color: #000;
         }
+        
         .layout-tooltip {
           position: absolute;
           bottom: -28px;
           left: 50%;
           transform: translateX(-50%);
-          background: rgba(0, 0, 0, 0.85);
+          background: rgba(0, 0, 0, 0.9);
           color: white;
           padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 11px;
+          border-radius: 3px;
+          font-size: 10px;
           font-weight: 600;
           white-space: nowrap;
           pointer-events: none;
           opacity: 0;
           transition: opacity 0.2s ease;
           z-index: 100;
+          letter-spacing: 0.5px;
         }
+        
         .shop-sidebar__layout-btn:hover .layout-tooltip {
           opacity: 1;
         }
@@ -547,17 +637,17 @@ export default function ShopSidebar({
             gap: 6px;
           }
           .shop-sidebar__layout-btn {
-            width: 36px;
+            width: 100%;
             height: 36px;
             padding: 6px;
           }
           .shop-sidebar__layout-btn svg {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
           }
           .layout-tooltip {
             bottom: -24px;
-            font-size: 10px;
+            font-size: 9px;
           }
         }
       `}</style>
