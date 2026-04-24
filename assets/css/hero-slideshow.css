@@ -20,9 +20,9 @@
   --overlay-padding-mobile: 1.5rem 1.5rem;
 
   /* Text colors */
-  --hero-title-color: #1c1209;
-  --hero-subtitle-color: #5c4033;
-  --hero-text-color: #5c4033;
+  --hero-title-color: #ffffff;
+  --hero-subtitle-color: #ffffff;
+  --hero-text-color: #ffffff;
 
   /* Animations */
   --hero-fade-duration: 600ms;
@@ -121,7 +121,7 @@
   font-size: 2.25rem;
   font-weight: 600;
   line-height: 1.1;
-  letter-spacing: -0.5px;
+  letter-spacing: 0.5px;
   color: var(--hero-title-color);
   margin: 0 0 0.5rem 0;
   white-space: normal;
@@ -135,7 +135,7 @@
   line-height: 1.4;
   color: var(--hero-subtitle-color);
   margin: 0 0 1.5rem 0;
-  letter-spacing: 0;
+  letter-spacing: 0.3px;
 }
 
 /* Description/Story (3-4 words) */
@@ -146,6 +146,7 @@
   color: var(--hero-text-color);
   margin: 0 0 1.5rem 0;
   max-width: 90%;
+  letter-spacing: 0.2px;
 }
 
 /* Quote (for testimonials) */

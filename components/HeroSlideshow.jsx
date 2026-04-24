@@ -315,7 +315,10 @@ export default function HeroSlideshow({ slides = [] }) {
               )}
 
               {/* CTA Button */}
-              <Link href={slide.ctaLink || "/shop"}>
+              <Link 
+                href={slide.ctaLink || "/shop"}
+                legacyBehavior
+              >
                 <a className="hero-slideshow__cta">► {slide.cta}</a>
               </Link>
             </div>
