@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "../lib/cart-context";
 import { mobileNavLinks, mobileUtilityNavLinks, primaryNavLinks } from "../data/site";
 import Icon from "./icons";
@@ -16,10 +16,11 @@ export default function Nav() {
   const [user, setUser] = useState(null);
   const [navItems, setNavItems] = useState(primaryNavLinks);
   const [mobileItems, setMobileItems] = useState(mobileNavLinks);
+  const searchInputRef = useRef(null);
   const { count, wishlistCount, openCart } = useCart();
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 100);
+    const onScroll = () => setIsScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -30,70 +31,64 @@ export default function Nav() {
     fetchNavigation();
   }, []);
 
+  useEffect(() => {
+    if (searchActive) {
+      searchInputRef.current?.focus();
+    }
+  }, [searchActive]);
+
+  useEffect(() => {
+    if (!searchActive) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setSearchActive(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [searchActive]);
+
   async function fetchNavigation() {
     try {
-      const res = await fetch("/api/admin/navigation");
-      const data = await res.json();
+      const response = await fetch("/api/admin/navigation");
+      const data = await response.json();
+
       if (data.header && Array.isArray(data.header)) {
         const headerItems = data.header.map((item) => ({ href: item.url, label: item.label }));
         setNavItems(headerItems);
         setMobileItems(buildMobileNavItems(headerItems));
       }
-    } catch (e) {
-      // Keep default nav items
+    } catch (error) {
+      // Keep default nav items.
     }
   }
 
   async function checkSession() {
     try {
-      const res = await fetch("/api/auth/session");
-      const data = await res.json();
+      const response = await fetch("/api/auth/session");
+      const data = await response.json();
       setUser(data.user);
-    } catch (e) {
+    } catch (error) {
       setUser(null);
     }
   }
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  function handleSearch(event) {
+    event.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/shop?search=${encodeURIComponent(searchQuery)}`;
     }
-  };
+  }
 
   return (
     <>
-      {/* Announcement Bar */}
       <div className="nav__announcement">
-        <p><Icon name="star" size={16} /> New collection: Limited edition Maasai-inspired pieces now available!</p>
+        <p>Handmade in Kenya | Limited edition Maasai-inspired pieces now available</p>
       </div>
 
-      <header className={`nav ${isScrolled ? "nav--scrolled" : ""}`}>
-        <Link href="/" className="nav__logo-lockup" aria-label="SharonCraft home">
-          <img
-            src="/apple-touch-icon.png"
-            alt="SharonCraft Logo"
-            className="nav__logo-mark"
-            loading="eager"
-            decoding="async"
-          />
-          <span className="nav__brand-name">SharonCraft</span>
-        </Link>
-
-        {/* Search Bar - Prominent on Desktop */}
-        <form className="nav__search-form" onSubmit={handleSearch}>
-          <div className="nav__search-wrapper">
-            <Icon name="search" size={18} className="nav__search-icon" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="nav__search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </form>
-
+      <header className={`nav ${isScrolled ? "nav--scrolled" : ""} ${searchActive ? "nav--search-open" : ""}`}>
         <nav aria-label="Primary" className="nav__desktop-nav">
           <ul className="nav__links">
             {navItems.map((link) => (
@@ -106,30 +101,77 @@ export default function Nav() {
           </ul>
         </nav>
 
+        <Link href="/" className="nav__logo-lockup" aria-label="SharonCraft home">
+          <img
+            src="/apple-touch-icon.png"
+            alt="SharonCraft Logo"
+            className="nav__logo-mark"
+            loading="eager"
+            decoding="async"
+          />
+          <span className="nav__brand-name">SharonCraft</span>
+        </Link>
+
         <div className="nav__actions">
-          <Link href={user ? "/account" : "/login"} className="nav__action-btn nav__account-btn" aria-label={user ? "My account" : "Login"}>
-            <Icon name="user" size={18} />
-            <span className="nav__btn-label">{user ? "ACCOUNT" : "LOGIN"}</span>
-          </Link>
-          <Link href="/wishlist" className="nav__action-btn nav__wishlist-btn" aria-label="View wishlist">
-            <Icon name="heart" size={18} />
-            <span className="nav__btn-label">WISHLIST</span>
-            {wishlistCount > 0 ? <span className="nav__badge nav__wishlist-badge">{wishlistCount}</span> : null}
-          </Link>
-          <button type="button" className="nav__action-btn nav__cart-btn" aria-label="View cart" onClick={openCart}>
-            <Icon name="cart" size={18} />
-            <span className="nav__btn-label">CART</span>
-            {count > 0 ? <span className="nav__badge nav__cart-badge">{count}</span> : null}
+          <button
+            type="button"
+            className={`nav__icon-btn nav__search-toggle ${searchActive ? "nav__icon-btn--active" : ""}`}
+            aria-label={searchActive ? "Close search" : "Open search"}
+            aria-expanded={searchActive}
+            onClick={() => setSearchActive((current) => !current)}
+          >
+            <Icon name={searchActive ? "close" : "search"} size={17} />
           </button>
+
+          <Link
+            href={user ? "/account" : "/login"}
+            className="nav__icon-btn nav__utility-btn"
+            aria-label={user ? "My account" : "Login"}
+          >
+            <Icon name="user" size={17} />
+          </Link>
+
+          <Link href="/wishlist" className="nav__icon-btn nav__utility-btn" aria-label="View wishlist">
+            <Icon name="heart" size={17} />
+            {wishlistCount > 0 ? <span className="nav__badge">{wishlistCount}</span> : null}
+          </Link>
+
+          <button
+            type="button"
+            className="nav__icon-btn nav__utility-btn nav__cart-btn"
+            aria-label="View cart"
+            onClick={openCart}
+          >
+            <Icon name="shopping-bag" size={17} />
+            {count > 0 ? <span className="nav__badge">{count}</span> : null}
+          </button>
+
           <button
             type="button"
             className="nav__icon-btn nav__hamburger"
             onClick={() => setIsOpen(true)}
             aria-label="Open navigation menu"
           >
-            <Icon name="menu" size={20} />
+            <Icon name="menu" size={19} />
           </button>
         </div>
+
+        <form className={`nav__search-panel ${searchActive ? "nav__search-panel--active" : ""}`} onSubmit={handleSearch}>
+          <div className="nav__search-shell">
+            <Icon name="search" size={16} className="nav__search-shell-icon" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search products"
+              className="nav__search-input"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+            <button type="submit" className="nav__search-submit">
+              Search
+            </button>
+          </div>
+        </form>
       </header>
 
       {isOpen ? (
@@ -137,12 +179,11 @@ export default function Nav() {
           <div className="side-drawer__panel">
             <button
               type="button"
-              className="nav__icon-btn"
-              style={{ color: "var(--color-cream)", alignSelf: "flex-end" }}
+              className="nav__icon-btn side-drawer__close"
               onClick={() => setIsOpen(false)}
               aria-label="Close navigation menu"
             >
-              <Icon name="close" size={20} />
+              <Icon name="close" size={18} />
             </button>
             <nav>
               <ul className="side-drawer__nav-links">

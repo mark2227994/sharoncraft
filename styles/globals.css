@@ -71,7 +71,8 @@
   /* Layout */
   --max-width: 1440px;
   --gutter: 8px;
-  --nav-height: 60px;
+  --announcement-height: 28px;
+  --nav-height: 58px;
 }
 
 @media (min-width: 600px) {
@@ -118,9 +119,10 @@ ul { list-style: none; }
 input, select, textarea { font-family: inherit; }
 
 /* ---- Fixed nav offset: account for fixed header + announcement bar ---- */
-main, article, section:first-of-type {
-  margin-top: calc(30px + var(--nav-height));
-  scroll-margin-top: calc(30px + var(--nav-height));
+main,
+article {
+  margin-top: calc(var(--announcement-height) + var(--nav-height));
+  scroll-margin-top: calc(var(--announcement-height) + var(--nav-height));
 }
 
 /* ---- Focus ring — accessible, on-brand ---- */
