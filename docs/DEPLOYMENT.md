@@ -56,6 +56,19 @@ git push origin main
 npm run notify:indexnow:changed
 ```
 
+If you are deploying with the Vercel CLI instead of waiting for Git-based deploys:
+
+- `npm run deploy:preview`
+  Makes a preview/staged deployment
+- `npm run deploy:prod`
+  Makes a production deployment
+
+Important:
+
+- `vercel deploy` without `--prod` creates a preview deployment
+- pushing a non-production branch also usually creates a preview deployment
+- for a live deploy, either push to the configured Vercel production branch or use `npm run deploy:prod`
+
 ## 5. After deploy
 
 Open the live website and check:

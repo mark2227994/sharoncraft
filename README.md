@@ -113,6 +113,15 @@ The current workflow is Git-based:
 4. Let the hosting provider redeploy from GitHub.
 5. Run `npm run notify:indexnow:changed` after the live deploy for a focused IndexNow update, or `npm run notify:indexnow` if you want to resubmit the whole sitemap.
 
+If you deploy with the Vercel CLI instead of pushing to `main`, use:
+
+- `npm run deploy:preview`
+  Creates a preview deployment
+- `npm run deploy:prod`
+  Creates a production deployment with `vercel deploy --prod`
+
+This matters because deploying from a feature branch normally lands as a preview/staged deploy unless you push to the Vercel production branch or deploy with `--prod`.
+
 See [DEPLOYMENT.md](/c:/Users/USER/Desktop/projects/bead%20VN2/docs/DEPLOYMENT.md) for the detailed checklist.
 
 ## Before changing Supabase

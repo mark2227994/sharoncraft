@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "deploy:preview": "node scripts/deploy-vercel.js",
+    "deploy:prod": "node scripts/deploy-vercel.js --prod",
     "build:release": "npm run build:images && npm run build:seo && node scripts/verify-release.js",
     "build:images": "node scripts/generate-responsive-images.js",
     "build:seo": "node scripts/generate-product-share-pages.js && node scripts/generate-sitemap.js && node scripts/generate-merchant-feed.js",

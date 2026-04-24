@@ -26,12 +26,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [gridView, setGridView] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('shopGridView') || '4-col';
-    }
-    return '4-col';
-  });
+  const [gridView, setGridView] = useState("5-col");
 
   // Persist grid view to localStorage
   useEffect(() => {
@@ -299,7 +294,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                   <div className="masonry-wrapper">
                     {paginatedProducts.map((product) => (
                       <div key={product.id} className="masonry-item">
-                        <ProductCard product={product} />
+                        <ProductCard product={product} variant="shop-catalog" />
                       </div>
                     ))}
                   </div>
@@ -308,7 +303,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                   <div className={`shop-products__${gridView}`}>
                     {paginatedProducts.map((product) => (
                       <div key={product.id} className="product-card-grid-item">
-                        <ProductCard product={product} />
+                        <ProductCard product={product} variant="shop-catalog" />
                       </div>
                     ))}
                   </div>
@@ -606,19 +601,19 @@ export default function ShopPage({ products, categories, initialCategory, initia
         .shop-products__5-col {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
+          gap: 16px;
           margin-bottom: 0;
+        }
+
+        .product-card-grid-item {
+          display: flex;
+          min-width: 0;
         }
         
         /* Desktop breakpoints */
-        @media (min-width: 1200px) {
-          .shop-products__4-col {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-          }
+        @media (min-width: 768px) {
           .shop-products__5-col {
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
           }
         }
         
@@ -626,6 +621,21 @@ export default function ShopPage({ products, categories, initialCategory, initia
           .shop-products__3-col {
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
+          }
+
+          .shop-products__5-col {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .shop-products__4-col {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+          }
+
+          .shop-products__5-col {
+            grid-template-columns: repeat(5, 1fr);
           }
         }
         
@@ -836,9 +846,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
         @media (max-width: 1200px) {
           .shop-products__4-col {
             grid-template-columns: repeat(3, 1fr);
-          }
-          .shop-products__5-col {
-            grid-template-columns: repeat(4, 1fr);
           }
         }
         @media (max-width: 899px) {
@@ -1056,13 +1063,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
           column-width: minmax(200px, 1fr);
           gap: var(--space-4);
         }
-        .masonry-item {\n          break-inside: avoid;\n          margin-bottom: var(--space-4);\n          border-radius: 6px;\n          transition: box-shadow 0.2s ease;\n        }\n        .masonry-item:hover {\n          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n        }
+        .masonry-item {\n          break-inside: avoid;\n          margin-bottom: var(--space-4);\n          border-radius: 6px;\n        }
         .product-card-with-actions {
           display: flex;
           flex-direction: column;
           height: 100%;
         }
-        .product-card-grid-item {\n          display: flex;\n          border-radius: 6px;\n          transition: box-shadow 0.2s ease;\n        }\n        .product-card-grid-item:hover {\n          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n        }
+        .product-card-grid-item {\n          display: flex;\n          border-radius: 6px;\n          min-width: 0;\n        }
         .product-card__image-wrap {
           position: relative;
           overflow: hidden;
@@ -1571,13 +1578,13 @@ export default function ShopPage({ products, categories, initialCategory, initia
           column-width: minmax(200px, 1fr);
           gap: var(--space-4);
         }
-        .masonry-item {\n          break-inside: avoid;\n          margin-bottom: var(--space-4);\n          border-radius: 6px;\n          transition: box-shadow 0.2s ease;\n        }\n        .masonry-item:hover {\n          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n        }
+        .masonry-item {\n          break-inside: avoid;\n          margin-bottom: var(--space-4);\n          border-radius: 6px;\n        }
         .product-card-with-actions {
           display: flex;
           flex-direction: column;
           height: 100%;
         }
-        .product-card-grid-item {\n          display: flex;\n          border-radius: 6px;\n          transition: box-shadow 0.2s ease;\n        }\n        .product-card-grid-item:hover {\n          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n        }
+        .product-card-grid-item {\n          display: flex;\n          border-radius: 6px;\n          min-width: 0;\n        }
         .product-card__image-wrap {
           position: relative;
           overflow: hidden;

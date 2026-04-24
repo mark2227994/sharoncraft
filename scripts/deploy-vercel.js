@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+const { spawnSync } = require("node:child_process");
+
+const isWindows = process.platform === "win32";
+const args = process.argv.slice(2);
+const isProd = args.includes("--prod");
+
+function run(command, commandArgs) {
+  const result = spawnSync(command, commandArgs, {
+    stdio: "inherit",
+    shell: false,
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (typeof result.status === "number" && result.status !== 0) {
+    process.exit(result.status);
+  }
+}
+
+function read(command, commandArgs) {
+  const result = spawnSync(command, commandArgs, {
+    encoding: "utf8",
+    shell: false,
+  });
+
+  if (result.error || result.status !== 0) {
+    return "";
+  }
+
+  return String(result.stdout || "").trim();
+}
+
+const gitCommand = isWindows ? "cmd" : "git";
+const gitArgs = isWindows ? ["/c", "git", "branch", "--show-current"] : ["branch", "--show-current"];
+const branch = read(gitCommand, gitArgs);
+
+if (isProd) {
+  console.log("[deploy] Starting a production deploy to Vercel.");
+  if (branch && branch !== "main") {
+    console.log(
+      `[deploy] Current branch is "${branch}". Git pushes from non-production branches usually create preview deployments, so this command uses "--prod" to publish live.`
+    );
+  }
+} else {
+  console.log("[deploy] Starting a preview deploy to Vercel.");
+}
+
+const vercelCommand = isWindows ? "cmd" : "vercel";
+const vercelArgs = isWindows
+  ? ["/c", "vercel", "deploy", "--yes"]
+  : ["deploy", "--yes"];
+
+if (isProd) {
+  vercelArgs.push("--prod");
+}
+
+run(vercelCommand, vercelArgs);
