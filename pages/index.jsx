@@ -172,11 +172,11 @@ function CuratedSection({ bestSellers, newArrivals }) {
 
 function SectionHeading({ title, kicker }) {
   return (
-    <div className="section-heading">
+    <div className="section-heading home-page__section-heading">
       <span className="section-heading__rule" aria-hidden="true" />
       <div>
-        {kicker ? <p className="overline">{kicker}</p> : null}
-        <h2 className="display-md">{title}</h2>
+        {kicker ? <p className="overline home-page__section-kicker">{kicker}</p> : null}
+        <h2 className="display-md home-page__section-title">{title}</h2>
       </div>
       <span className="section-heading__rule" aria-hidden="true" />
     </div>
@@ -392,6 +392,40 @@ export default function HomePage({
           letter-spacing: 2.5px;
           text-transform: uppercase;
         }
+
+        @media (max-width: 768px) {
+          /* Homepage announcement marquee */
+          body.home-page--hero-refresh {
+            --announcement-height: 28px;
+          }
+
+          body.home-page--hero-refresh .nav__announcement {
+            height: var(--announcement-height);
+            min-height: var(--announcement-height);
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+          }
+
+          body.home-page--hero-refresh .nav__announcement p {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            font-size: 10px;
+            line-height: 1;
+            animation: homeAnnouncementMarquee 20s linear infinite;
+          }
+        }
+
+        @keyframes homeAnnouncementMarquee {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-100%);
+          }
+        }
       `}</style>
 
       <style jsx>{`
@@ -540,6 +574,30 @@ export default function HomePage({
         @media (max-width: 599px) {
           /* Collections responsive styles moved to assets/css/collections-section.css */
         }
+
+        @media (max-width: 768px) {
+          /* Homepage collections heading */
+          .collections-section .home-page__section-heading {
+            padding-top: 24px;
+            padding-bottom: 0;
+            gap: 12px;
+          }
+
+          .collections-section .home-page__section-kicker {
+            margin: 0;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: #999999;
+          }
+
+          .collections-section .home-page__section-title {
+            margin: 0 0 16px;
+            font-size: 16px;
+            font-weight: 300;
+            font-family: inherit;
+          }
+        }
+
         @media (min-width: 600px) and (max-width: 899px) {
           /* Collections responsive styles moved to assets/css/collections-section.css */
         }

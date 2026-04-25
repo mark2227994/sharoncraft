@@ -91,21 +91,32 @@ export default function QuickStatsBar() {
         /* =========================
            Responsive layout
            ========================= */
-        @media (max-width: 767px) {
+        @media (max-width: 768px) {
+          /* Mobile stats grid */
           .quick-stats-bar {
             padding: 24px 0;
           }
 
           .quick-stats-container {
             grid-template-columns: repeat(2, 1fr);
-            row-gap: 20px;
+            row-gap: 0;
           }
 
           .quick-stat-item {
             padding: 0 14px;
           }
 
-          .quick-stat-item:nth-child(2)::after {
+          .quick-stat-item:nth-child(-n + 2) {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 20px;
+          }
+
+          .quick-stat-item:nth-child(n + 3) {
+            padding-top: 20px;
+          }
+
+          .quick-stat-item:nth-child(2)::after,
+          .quick-stat-item:nth-child(4)::after {
             display: none;
           }
 
@@ -114,6 +125,7 @@ export default function QuickStatsBar() {
           }
 
           .quick-stat-sublabel {
+            font-size: 9px;
             letter-spacing: 2px;
           }
         }

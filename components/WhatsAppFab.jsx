@@ -78,10 +78,13 @@ export default function WhatsAppFab() {
 
         @media (max-width: 768px) {
           .whatsapp-fab {
-            width: 56px;
-            height: 56px;
-            bottom: 80px;
-            right: 12px;
+            width: 44px;
+            height: 44px;
+            bottom: 72px;
+            right: 16px;
+            background: #1c1c1c;
+            color: #ffffff;
+            box-shadow: none;
           }
         }
 
