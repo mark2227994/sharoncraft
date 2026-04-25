@@ -76,14 +76,15 @@ export default function CartDrawer() {
       <button type="button" className="cart-drawer__overlay" onClick={closeCart} aria-label="Close cart" />
 
       <aside className="cart-drawer__panel">
+        {/* Cart header */}
         <header className="cart-drawer__header">
           <div className="cart-drawer__header-copy">
             <p className="cart-drawer__eyebrow">Your Selection</p>
-            <h2>{count} {count === 1 ? "Piece" : "Pieces"}</h2>
+            <h2 className="cart-drawer__title">{count} {count === 1 ? "Piece" : "Pieces"}</h2>
             <p className="cart-drawer__subcopy">Handmade pieces reserved for this moment.</p>
           </div>
           <button type="button" className="cart-drawer__close" onClick={closeCart} aria-label="Close cart">
-            <Icon name="close" size={18} />
+            <Icon name="close" size={14} />
           </button>
         </header>
 
@@ -99,6 +100,7 @@ export default function CartDrawer() {
           </div>
         ) : (
           <>
+            {/* Cart items */}
             <div className="cart-drawer__body">
               <div className="cart-drawer__body-intro">
                 <span className="cart-drawer__body-kicker">Curated For You</span>
@@ -163,11 +165,12 @@ export default function CartDrawer() {
               ))}
             </div>
 
+            {/* Cart summary and actions */}
             <footer className="cart-drawer__footer">
               <div className="cart-drawer__summary cart-drawer__summary--simple">
                 <div className="cart-drawer__summary-row">
-                  <span>Subtotal</span>
-                  <strong>{formatKES(subtotal)}</strong>
+                  <span className="cart-drawer__summary-label">Subtotal</span>
+                  <strong className="cart-drawer__summary-amount">{formatKES(subtotal)}</strong>
                 </div>
               </div>
 
@@ -180,10 +183,7 @@ export default function CartDrawer() {
                   onClick={() => setIsNoteOpen((current) => !current)}
                   aria-expanded={isNoteOpen}
                 >
-                  <span>Add order note</span>
-                  <span className={`cart-drawer__note-toggle-icon${isNoteOpen ? " cart-drawer__note-toggle-icon--open" : ""}`}>
-                    <Icon name="plus" size={14} />
-                  </span>
+                  <span className="cart-drawer__note-label">+ add a note</span>
                 </button>
 
                 {isNoteOpen ? (
@@ -206,7 +206,7 @@ export default function CartDrawer() {
                 </Link>
 
                 <Link href="/cart" className="cart-drawer__view-full" onClick={closeCart}>
-                  View Cart
+                  View full cart {"\u2192"}
                 </Link>
               </div>
             </footer>
