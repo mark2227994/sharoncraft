@@ -4,9 +4,13 @@ import Link from "next/link";
 export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
-  const [loadedSlides, setLoadedSlides] = useState([]);
+  const [loadedSlides, setLoadedSlides] = useState(Array.isArray(slides) ? slides : []);
   const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef(null);
+
+  useEffect(() => {
+    setLoadedSlides(Array.isArray(slides) ? slides : []);
+  }, [slides]);
 
   // Detect mobile viewport
   useEffect(() => {
@@ -159,7 +163,7 @@ export default function HeroSlideshow({ slides = [] }) {
     },
   ];
 
-  const slidesData = loadedSlides.length > 0 ? loadedSlides : (slides.length > 0 ? slides : defaultSlides);
+  const slidesData = loadedSlides.length > 0 ? loadedSlides : defaultSlides;
   const currentSlideData = slidesData[currentSlide];
 
   // Helper: Get responsive image (fallback to image field for backwards compatibility)
@@ -169,6 +173,22 @@ export default function HeroSlideshow({ slides = [] }) {
     }
     return slide.imageDesktop || slide.image;
   };
+
+  function getSlideHeading(slide) {
+    if (slide.type === "discount") {
+      return [slide.title, slide.subtitle].filter(Boolean).join(" ");
+    }
+
+    return slide.title;
+  }
+
+  function getSlideCtaLabel(slide) {
+    if (slide.type === "discount") {
+      return "Claim Offer";
+    }
+
+    return slide.cta;
+  }
 
   // Auto-advance slides
   useEffect(() => {
@@ -232,7 +252,7 @@ export default function HeroSlideshow({ slides = [] }) {
 
               {slide.type === "artisan" && (
                 <>
-                  <h2 className="hero-slideshow__title">{slide.title}</h2>
+                  <h2 className="hero-slideshow__title">{getSlideHeading(slide)}</h2>
                   <p className="hero-slideshow__subtitle">{slide.subtitle}</p>
                   <p className="hero-slideshow__description">
                     {slide.description}
@@ -245,7 +265,7 @@ export default function HeroSlideshow({ slides = [] }) {
 
               {slide.type === "discount" && (
                 <>
-                  <h2 className="hero-slideshow__title">{slide.title}</h2>
+                  <h2 className="hero-slideshow__title">{getSlideHeading(slide)}</h2>
                   <p className="hero-slideshow__description">
                     {slide.description}
                   </p>
@@ -254,7 +274,7 @@ export default function HeroSlideshow({ slides = [] }) {
 
               {slide.type === "product" && (
                 <>
-                  <h2 className="hero-slideshow__title">{slide.title}</h2>
+                  <h2 className="hero-slideshow__title">{getSlideHeading(slide)}</h2>
                   <p className="hero-slideshow__description">
                     {slide.subtitle}
                   </p>
@@ -287,7 +307,7 @@ export default function HeroSlideshow({ slides = [] }) {
 
               {slide.type === "bundle" && (
                 <>
-                  <h2 className="hero-slideshow__title">{slide.title}</h2>
+                  <h2 className="hero-slideshow__title">{getSlideHeading(slide)}</h2>
                   <p className="hero-slideshow__description">
                     {slide.description}
                   </p>
@@ -297,7 +317,7 @@ export default function HeroSlideshow({ slides = [] }) {
 
               {slide.type === "brand" && (
                 <>
-                  <h2 className="hero-slideshow__title">{slide.title}</h2>
+                  <h2 className="hero-slideshow__title">{getSlideHeading(slide)}</h2>
                   <p className="hero-slideshow__description">
                     {slide.description}
                   </p>
@@ -307,7 +327,7 @@ export default function HeroSlideshow({ slides = [] }) {
 
               {slide.type === "shipping" && (
                 <>
-                  <h2 className="hero-slideshow__title">{slide.title}</h2>
+                  <h2 className="hero-slideshow__title">{getSlideHeading(slide)}</h2>
                   <p className="hero-slideshow__description">
                     {slide.description}
                   </p>
@@ -319,7 +339,7 @@ export default function HeroSlideshow({ slides = [] }) {
                 href={slide.ctaLink || "/shop"}
                 legacyBehavior
               >
-                <a className="hero-slideshow__cta">► {slide.cta}</a>
+                <a className="hero-slideshow__cta">{getSlideCtaLabel(slide)}</a>
               </Link>
             </div>
           </div>

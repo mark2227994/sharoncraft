@@ -13,6 +13,7 @@ import "../assets/css/curated-section-luxury.css";
 import "../assets/css/shop-luxury-minimal.css";
 import "../styles/components/product-grid.css";
 import "../styles/components/product-card.css";
+import "../styles/components/shop-page.css";
 import "../styles/components/filters.css";
 import "../styles/components/footer.css";
 import "../styles/components/admin.css";

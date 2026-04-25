@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const { draftId, name, phone, area, items, subtotal, total, delivery, deliveryMethod, status = "open" } = body;
+  const { draftId, name, phone, area, items, subtotal, total, delivery, deliveryMethod, note, status = "open" } = body;
 
   if (!draftId) {
     return res.status(400).json({ error: "draftId required" });
@@ -50,6 +50,7 @@ export default async function handler(req, res) {
     delivery: Number(deliveryFee || 0),
     deliveryMethod: normalizedDeliveryMethod,
     total: Number(total || 0),
+    note: String(note || "").trim(),
     source: "checkout",
   };
 

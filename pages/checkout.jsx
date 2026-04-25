@@ -29,6 +29,7 @@ function buildWhatsAppMessage({
   subtotal,
   total,
   whatsappNote,
+  orderNote,
   deliveryMethod,
   deliveryFee,
 }) {
@@ -64,6 +65,11 @@ function buildWhatsAppMessage({
     lines.push(whatsappNote);
     lines.push("");
   }
+  if (orderNote) {
+    lines.push("ORDER NOTE:");
+    lines.push(orderNote);
+    lines.push("");
+  }
   lines.push("PAYMENT OPTIONS:");
   lines.push("- M-Pesa (till 254112222572)");
   lines.push("- Bank transfer");
@@ -75,7 +81,7 @@ function buildWhatsAppMessage({
 }
 
 export default function CheckoutPage() {
-  const { items, subtotal, clear, deliveryMethod, setDeliveryMethod } = useCart();
+  const { items, subtotal, clear, deliveryMethod, setDeliveryMethod, orderNote } = useCart();
   const {
     register,
     handleSubmit,
@@ -110,6 +116,7 @@ export default function CheckoutPage() {
           delivery,
           deliveryMethod,
           total,
+          note: orderNote,
           status: "open",
         }),
       }).catch(() => {});
@@ -118,7 +125,7 @@ export default function CheckoutPage() {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [completed, delivery, deliveryMethod, items, subtotal, total, watchedArea, watchedName, watchedPhone]);
+  }, [completed, delivery, deliveryMethod, items, orderNote, subtotal, total, watchedArea, watchedName, watchedPhone]);
 
   async function onSubmit(data) {
     if (items.length === 0) return;
@@ -139,6 +146,7 @@ export default function CheckoutPage() {
           delivery,
           deliveryMethod,
           total,
+          note: orderNote,
         }),
       });
 
@@ -158,6 +166,7 @@ export default function CheckoutPage() {
         deliveryFee: delivery,
         total,
         whatsappNote: body.whatsappNote,
+        orderNote,
       });
 
       const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -174,6 +183,7 @@ export default function CheckoutPage() {
           delivery,
           deliveryMethod,
           total,
+          note: orderNote,
           status: "converted",
         }),
       }).catch(() => {});

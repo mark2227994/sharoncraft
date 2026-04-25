@@ -153,6 +153,30 @@
     };
   };
 
+  const ensureUniqueProductIds = (products) => {
+    const usedIds = new Set();
+
+    return (Array.isArray(products) ? products : []).map((product, index) => {
+      const baseId =
+        normalizeText(product && product.id) ||
+        slugify(product && product.name) ||
+        `product-${index + 1}`;
+      let id = baseId;
+      let suffix = 2;
+
+      while (usedIds.has(id)) {
+        id = `${baseId}-${suffix}`;
+        suffix += 1;
+      }
+
+      usedIds.add(id);
+      return {
+        ...product,
+        id,
+      };
+    });
+  };
+
   const mapProductToRow = (product, index) => ({
     id: normalizeText(product && product.id) || `product-${Date.now().toString(36)}-${index}`,
     image: normalizeText(product && product.image),
@@ -349,7 +373,7 @@
       throw error;
     }
 
-    return Array.isArray(data) ? data.map(mapRowToProduct) : [];
+    return ensureUniqueProductIds(Array.isArray(data) ? data.map(mapRowToProduct) : []);
   };
 
   const fetchOrders = async () => {
@@ -610,7 +634,8 @@
     await requireUser();
 
     const config = getConfig();
-    const rows = (Array.isArray(products) ? products : []).map((product, index) => mapProductToRow(product, index));
+    const normalizedProducts = ensureUniqueProductIds(Array.isArray(products) ? products : []);
+    const rows = normalizedProducts.map((product, index) => mapProductToRow(product, index));
     const nextIds = new Set(rows.map((row) => row.id));
 
     const { data: existingRows, error: existingError } = await supabase
@@ -646,7 +671,7 @@
       }
     }
 
-    return rows.map(mapRowToProduct);
+    return ensureUniqueProductIds(rows.map(mapRowToProduct));
   };
 
   const saveOrders = async (orders) => {

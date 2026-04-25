@@ -21,6 +21,7 @@ const paths = {
   dashboard: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
   logout:    "M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9",
   plus:      "M12 5v14M5 12h14",
+  minus:     "M5 12h14",
   check:     "M20 6L9 17l-5-5",
   alert:     "M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01",
   filter:    "M22 3H2l8 9.46V19l4 2v-8.54L22 3z",

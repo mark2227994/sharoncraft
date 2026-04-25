@@ -1,6 +1,7 @@
 import ArtisanTimeline from "../components/ArtisanTimeline";
 import ArtisanExpandingCards from "../components/ArtisanExpandingCards";
 import CategoryStrip from "../components/CategoryStrip";
+import EditorialCuratedSection from "../components/EditorialCuratedSection";
 import Footer from "../components/Footer";
 import HeroSlideshow from "../components/HeroSlideshow";
 import MasonryGrid from "../components/MasonryGrid";
@@ -15,10 +16,11 @@ import ArticleCarousel from "../components/ArticleCarousel";
 import QuickStatsBar from "../components/QuickStatsBar";
 import Icon from "../components/icons";
 import { buildCollectionCards, buildFeaturedArtisans, trustItems } from "../data/site";
+import { readAdminContentField } from "../lib/admin-content";
 import { filterPublishedProducts, getCatalogCategories, prioritizeCategories } from "../lib/products";
 import { readProducts } from "../lib/store";
 import { readSiteImages } from "../lib/site-images";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function CuratedSection({ bestSellers, newArrivals }) {
   const [activeTab, setActiveTab] = useState("best-sellers");
@@ -189,7 +191,21 @@ export default function HomePage({
   artisans,
   categories,
   siteContent,
+  heroSlides,
 }) {
+  const curatedProducts = (
+    featuredProducts.length
+      ? featuredProducts
+      : recentProducts.length
+        ? recentProducts
+        : allProducts
+  ).slice(0, 3);
+
+  useEffect(() => {
+    document.body.classList.add("home-page--hero-refresh");
+    return () => document.body.classList.remove("home-page--hero-refresh");
+  }, []);
+
   return (
     <>
       <SeoHead
@@ -198,7 +214,7 @@ export default function HomePage({
         path="/"
       />
       <Nav />
-      <HeroSlideshow />
+      <HeroSlideshow slides={heroSlides} />
 
       <QuickStatsBar />
 
@@ -210,8 +226,11 @@ export default function HomePage({
             <a key={collection.title} href={collection.href} className="collection-card">
               <img src={collection.image} alt={collection.title} className="collection-card__image" loading="lazy" decoding="async" />
               <span className="collection-card__overlay" />
-              {collection.itemCount && <span className="collection-card__badge">{collection.itemCount} items</span>}
-              <span className="collection-card__title display-md">{collection.title}</span>
+              {/* Text layer kept inside the card so overlay and positioning stay section-specific. */}
+              <span className="collection-card__content">
+                {collection.itemCount && <span className="collection-card__badge">{collection.itemCount} items</span>}
+                <span className="collection-card__title display-md">{collection.title}</span>
+              </span>
             </a>
           ))}
         </div>
@@ -220,11 +239,35 @@ export default function HomePage({
       {/* Custom Orders - Minimal Gold Card */}
       <section className="custom-orders-section">
         <div className="custom-orders-card">
-          <h3 className="custom-orders-card__title">Design With Us</h3>
-          <p className="custom-orders-card__description">
-            Custom pieces made to your exact vision. Premium materials, fast delivery.
-          </p>
-          <a href="/custom-order" className="custom-orders-button">Start Design</a>
+          <div className="custom-orders-media" aria-hidden="true">
+            {/* MEDIA: Replace src="" with your video or image URL here */}
+            <video
+              className="custom-orders-media__video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              src=""
+            />
+            <img
+              className="custom-orders-media__image"
+              src="/media/site/homepage/design.jpg"
+              alt="Jewelry being handcrafted"
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="custom-orders-media__overlay" />
+          </div>
+
+          <div className="custom-orders-content">
+            <p className="custom-orders-card__label">Custom Orders</p>
+            <h3 className="custom-orders-card__title">Design With Us</h3>
+            <p className="custom-orders-card__description">
+              Tell us your vision. We work with Kenya&apos;s finest artisans to craft a piece made entirely for you.
+            </p>
+            <a href="/custom-order" className="custom-orders-button">Start Design</a>
+            <a href="/custom-order" className="custom-orders-link">See past custom work →</a>
+          </div>
         </div>
       </section>
 
@@ -281,10 +324,7 @@ export default function HomePage({
       </section>
 
       <main>
-        <CuratedSection 
-          bestSellers={featuredProducts}
-          newArrivals={recentProducts}
-        />
+        <EditorialCuratedSection products={curatedProducts} />
 
         <section className="how-it-made-section" style={{ maxWidth: 'var(--max-width)', margin: 'var(--space-8) auto', padding: 'var(--space-8) var(--gutter)' }}>
           <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
@@ -332,6 +372,27 @@ export default function HomePage({
       </main>
 
       <Footer siteContent={siteContent} />
+
+      <style jsx global>{`
+        /* =========================
+           Homepage announcement bar
+           ========================= */
+        body.home-page--hero-refresh {
+          --announcement-height: 23px;
+        }
+
+        body.home-page--hero-refresh .nav__announcement {
+          min-height: var(--announcement-height);
+          padding: 5px 0;
+        }
+
+        body.home-page--hero-refresh .nav__announcement p {
+          font-size: 11px;
+          font-weight: 300;
+          letter-spacing: 2.5px;
+          text-transform: uppercase;
+        }
+      `}</style>
 
       <style jsx>{`
         main {
@@ -598,7 +659,119 @@ export default function HomePage({
 }
 
 export async function getServerSideProps() {
-  const [products, siteImages] = await Promise.all([readProducts(), readSiteImages()]);
+  const defaultHeroSlides = [
+    {
+      id: 1,
+      type: "artisan",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "Nafula's Vision",
+      subtitle: "Ceremonial Beadwork",
+      description: "15+ years of crafting bold, ceremonial pieces",
+      duration: 6,
+      cta: "Meet Nafula",
+      ctaLink: "/artisans/nafula",
+    },
+    {
+      id: 2,
+      type: "discount",
+      image: "/media/site/homepage/ai-home-hero-decor-card.jpg",
+      imageDesktop: "/media/site/homepage/ai-home-hero-decor-card.jpg",
+      imageMobile: "/media/site/homepage/ai-home-hero-decor-card.jpg",
+      title: "20% Off",
+      subtitle: "Gift Collections",
+      description: "This week only",
+      duration: 5,
+      cta: "Shop Gift Sets",
+      ctaLink: "/shop?category=gifts",
+    },
+    {
+      id: 3,
+      type: "product",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "Featured: Wedding Jewelry",
+      subtitle: "Bridal Beadwork",
+      description: "From Achieng's collection",
+      price: "$129",
+      duration: 7,
+      cta: "View Collection",
+      ctaLink: "/shop?category=wedding",
+    },
+    {
+      id: 4,
+      type: "testimonial",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "Sarah's Wedding",
+      subtitle: '"Every bead told a story"',
+      description: "London, UK",
+      duration: 6,
+      cta: "Read Reviews",
+      ctaLink: "/reviews",
+    },
+    {
+      id: 5,
+      type: "bundle",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "Bundle & Save",
+      subtitle: "3-Piece Collection",
+      description: "Get 3 pieces for $129",
+      duration: 5,
+      cta: "Shop Bundles",
+      ctaLink: "/shop?category=bundles",
+    },
+    {
+      id: 6,
+      type: "brand",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "SharonCraft",
+      subtitle: "47 Artisans. 40+ Hours. One Piece.",
+      description: "Handmade in Kenya",
+      duration: 6,
+      cta: "Our Story",
+      ctaLink: "/about",
+    },
+    {
+      id: 7,
+      type: "artisan",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "Muthoni's Wisdom",
+      subtitle: '"I never want a piece to look repeated"',
+      description: "18+ years perfecting her craft",
+      duration: 7,
+      cta: "Explore Home Decor",
+      ctaLink: "/shop?category=home-decor",
+    },
+    {
+      id: 8,
+      type: "shipping",
+      image: "/media/site/homepage/design.jpg",
+      imageDesktop: "/media/site/homepage/design.jpg",
+      imageMobile: "/media/site/homepage/design.jpg",
+      title: "Free Shipping",
+      subtitle: "On orders over $50",
+      description: "Worldwide delivery",
+      duration: 5,
+      cta: "Shop Now",
+      ctaLink: "/shop",
+    },
+  ];
+
+  const [products, siteImages, heroSlides] = await Promise.all([
+    readProducts(),
+    readSiteImages(),
+    readAdminContentField("heroSlides", defaultHeroSlides),
+  ]);
   const publishedProducts = filterPublishedProducts(products);
 
   return {
@@ -610,6 +783,7 @@ export async function getServerSideProps() {
       categories: getCatalogCategories(publishedProducts),
       artisans: buildFeaturedArtisans(siteImages),
       siteContent: siteImages,
+      heroSlides,
     },
   };
 }

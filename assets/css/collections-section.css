@@ -1,90 +1,7 @@
 /* ============================================================================
-   COLLECTIONS / SHOP BY CATEGORY SECTION
-   ============================================================================
-   Luxury ecommerce grid with minimal design, image-first layout.
-   4 columns on desktop, 2 on tablet, 1 on mobile.
-   Staggered fade-in animations + smooth hover transitions.
+   HOMEPAGE COLLECTIONS / SHOP BY CATEGORY
+   Scoped to the homepage collections section only.
    ========================================================================== */
-
-:root {
-  /* Collections grid spacing */
-  --collections-gap: 2rem;
-  --collections-padding: 3rem var(--gutter);
-  --collections-padding-mobile: 2rem var(--gutter);
-
-  /* Animation timings */
-  --collections-fade-duration: 600ms;
-  --collections-fade-easing: cubic-bezier(0.4, 0, 0.2, 1);
-  --collections-stagger: 80ms;
-}
-
-/* ============================================================================
-   SECTION HEADING (Centered with gold lines)
-   ========================================================================== */
-.collections-section .section-heading {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: var(--space-6) var(--gutter) var(--space-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.collections-section .section-heading > div {
-  text-align: center;
-  order: 2;
-  flex: 0 1 auto;
-}
-
-.collections-section .section-heading__rule {
-  height: 1px;
-  width: 80px;
-  background: #c9a86a;
-  opacity: 0.8;
-  margin-top: 0;
-  flex: 0 0 auto;
-}
-
-.collections-section .section-heading__rule:first-child {
-  order: 1;
-}
-
-.collections-section .section-heading__rule:last-child {
-  order: 3;
-}
-
-.collections-section .section-heading .overline {
-  margin: 0 0 0.5rem 0;
-  color: #c9a86a;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-}
-
-.collections-section .section-heading h2 {
-  margin: 0;
-  font-family: Georgia, Times New Roman, serif;
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
-  color: #1c1209;
-}
-
-/* ============================================================================
-   ANIMATIONS
-   ========================================================================== */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* ============================================================================
    SECTION CONTAINER
@@ -92,194 +9,179 @@
 .collections-section {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--collections-padding);
+  padding: 48px 0;
+}
+
+/* ============================================================================
+   SECTION HEADING
+   ========================================================================== */
+.collections-section .section-heading {
+  padding: 0 0 32px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.collections-section .section-heading > div {
+  width: 100%;
+}
+
+.collections-section .section-heading__rule {
+  display: none;
+}
+
+.collections-section .section-heading .overline {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #999;
+}
+
+.collections-section .section-heading h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  color: #1c1c1c;
 }
 
 /* ============================================================================
    GRID LAYOUT
    ========================================================================== */
-.collections-grid {
+.collections-section .collections-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--collections-gap);
-  margin-top: 2rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
 }
 
 /* ============================================================================
-   COLLECTION CARD
+   CATEGORY CARD
    ========================================================================== */
-.collection-card {
+.collections-section .collection-card {
   position: relative;
+  display: block;
+  height: 420px;
   overflow: hidden;
-  aspect-ratio: 1 / 1;
+  border-radius: 0;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
-  opacity: 0;
-  animation: fadeInUp var(--collections-fade-duration) var(--collections-fade-easing) forwards;
 }
 
-/* Stagger animation delays for each card */
-.collection-card:nth-child(1) {
-  animation-delay: 0ms;
-}
-
-.collection-card:nth-child(2) {
-  animation-delay: var(--collections-stagger);
-}
-
-.collection-card:nth-child(3) {
-  animation-delay: calc(var(--collections-stagger) * 2);
-}
-
-.collection-card:nth-child(4) {
-  animation-delay: calc(var(--collections-stagger) * 3);
-}
-
-/* ============================================================================
-   CARD IMAGE
-   ========================================================================== */
-.collection-card__image {
+.collections-section .collection-card__image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s ease;
 }
 
-.collection-card:hover .collection-card__image {
-  transform: scale(1.04);
-}
-
-/* ============================================================================
-   CARD OVERLAY (Gradient for readability)
-   ========================================================================== */
-.collection-card__overlay {
+.collections-section .collection-card__overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(28, 18, 9, 0.4) 0%,
-    rgba(28, 18, 9, 0.15) 50%,
-    transparent 100%
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.15) 40%,
+    rgba(0, 0, 0, 0) 100%
   );
   pointer-events: none;
-  transition: background 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.4s ease;
 }
 
-.collection-card:hover .collection-card__overlay {
+.collections-section .collection-card__content {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.collections-section .collection-card__badge {
+  display: block;
+  margin: 0 0 6px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.collections-section .collection-card__title {
+  display: block;
+  margin: 0;
+  max-width: 100%;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: none;
+  word-break: break-word;
+}
+
+/* ============================================================================
+   CARD HOVER
+   ========================================================================== */
+.collections-section .collection-card:hover .collection-card__image,
+.collections-section .collection-card:focus-visible .collection-card__image {
+  transform: scale(1.03);
+}
+
+.collections-section .collection-card:hover .collection-card__overlay,
+.collections-section .collection-card:focus-visible .collection-card__overlay {
   background: linear-gradient(
     to top,
-    rgba(28, 18, 9, 0.55) 0%,
-    rgba(28, 18, 9, 0.25) 50%,
-    transparent 100%
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.25) 40%,
+    rgba(0, 0, 0, 0) 100%
   );
 }
 
-/* ============================================================================
-   CARD CONTENT (Title + Badge)
-   ========================================================================== */
-.collection-card__title,
-.collection-card__badge {
-  position: relative;
-  z-index: 2;
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  width: 100%;
+.collections-section .collection-card:hover .collection-card__badge,
+.collections-section .collection-card:focus-visible .collection-card__badge {
+  color: rgba(255, 255, 255, 0.7);
 }
 
-/* Card Title */
-.collection-card__title {
-  font-family: Georgia, Times New Roman, serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.25px;
-  color: white;
-  margin: 0;
-  word-wrap: break-word;
-  white-space: normal;
-  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Item Count Badge */
-.collection-card__badge {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.5px;
-  margin-top: 0.5rem;
-  padding-bottom: 0;
-  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Gold accent on hover */
-.collection-card:hover .collection-card__title {
-  color: #c9a86a;
-}
-
-.collection-card:hover .collection-card__badge {
-  color: #c9a86a;
+.collections-section .collection-card:hover .collection-card__title,
+.collections-section .collection-card:focus-visible .collection-card__title {
+  color: #fff;
 }
 
 /* ============================================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE LAYOUT
    ========================================================================== */
-
-/* Tablet: 2 columns */
-@media (max-width: 1024px) {
-  .collections-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-  }
-
-  .collections-section {
-    padding: 2.5rem var(--gutter);
-  }
-}
-
-/* Mobile: 1 column */
 @media (max-width: 768px) {
-  .collections-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  .collections-section .collections-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .collections-section {
-    padding: 2rem var(--gutter);
-  }
-
-  .collection-card__title {
-    font-size: 1.25rem;
-  }
-
-  .collection-card__badge {
-    font-size: 0.8rem;
-  }
-
-  .collection-card {
-    aspect-ratio: 1 / 0.8;
+  .collections-section .collection-card {
+    height: 300px;
   }
 }
 
-/* Small mobile: Optimize spacing */
 @media (max-width: 480px) {
-  .collections-section {
-    padding: 1.5rem var(--gutter);
+  .collections-section .collections-grid {
+    grid-template-columns: 1fr;
   }
 
-  .collection-card__title {
-    font-size: 1.125rem;
-    padding: 0 1rem 1rem 1rem;
-  }
-
-  .collection-card__badge {
-    padding: 0 1rem;
+  .collections-section .collection-card {
+    height: 220px;
   }
 }

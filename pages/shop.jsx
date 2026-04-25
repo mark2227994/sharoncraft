@@ -31,10 +31,9 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
   const sortOptions = [
     { value: "featured", label: "Featured" },
-    { value: "recent", label: "Newest Arrivals" },
-    { value: "best-sellers", label: "Best Sellers" },
-    { value: "price-asc", label: "Price: Low to High" },
-    { value: "price-desc", label: "Price: High to Low" },
+    { value: "recent", label: "Newest" },
+    { value: "price-asc", label: "Price: Low" },
+    { value: "price-desc", label: "Price: High" },
   ];
 
   useEffect(() => {
@@ -42,6 +41,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.add("shop-page--boutique");
+    return () => document.body.classList.remove("shop-page--boutique");
   }, []);
 
   const isJewelleryView = activeCategory === "Jewellery";
@@ -139,7 +143,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
       />
 
       <Nav />
-      <CategoryStrip categories={categories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
+      <CategoryStrip
+        className="shop-category-strip"
+        categories={categories}
+        activeCategory={activeCategory}
+        onSelect={handleCategorySelect}
+      />
 
       <main className="shop-page">
         <div className="shop-breadcrumb" aria-label="Breadcrumb">
@@ -162,28 +171,8 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
         <section className="shop-page__header">
           <div className="shop-page__header-left">
-            <h1 className="display-lg">Shop the collection</h1>
+            <h1 className="shop-page__title">Our Pieces</h1>
           </div>
-
-          {!isMobile ? (
-            <div className="shop-page__sort-container">
-              <label className="shop-page__sort-label" htmlFor="shop-sort-desktop">
-                Sort By
-              </label>
-              <select
-                id="shop-sort-desktop"
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
-                className="shop-page__sort-select"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : null}
         </section>
 
         {hasActiveFilters ? (
@@ -201,7 +190,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                       }}
                       aria-label={`Remove ${activeCategory} filter`}
                     >
-                      ×
+                      &times;
                     </button>
                   </div>
                 ) : null}
@@ -217,14 +206,14 @@ export default function ShopPage({ products, categories, initialCategory, initia
                       }}
                       aria-label="Remove jewellery type filter"
                     >
-                      ×
+                      &times;
                     </button>
                   </div>
                 ) : null}
 
                 {showAvailableOnly ? (
                   <div className="filter-pill">
-                    <span>In Stock Only</span>
+                    <span>Available Now</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -233,7 +222,7 @@ export default function ShopPage({ products, categories, initialCategory, initia
                       }}
                       aria-label="Remove stock filter"
                     >
-                      ×
+                      &times;
                     </button>
                   </div>
                 ) : null}
@@ -267,6 +256,21 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
           <section className="shop-page__results">
             <div className="shop-page__results-bar">
+              <p className="shop-page__count-text">{filteredProducts.length} pieces</p>
+
+              <div className="shop-page__sort-links" aria-label="Sort products">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`shop-page__sort-link ${sortBy === option.value ? "shop-page__sort-link--active" : ""}`}
+                    onClick={() => setSortBy(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
               {isMobile ? (
                 <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
                   <Icon name="filter" size={16} />
@@ -274,13 +278,11 @@ export default function ShopPage({ products, categories, initialCategory, initia
                   {hasActiveFilters ? <span className="shop-page__filter-dot" /> : null}
                 </button>
               ) : null}
-
-              <p className="shop-page__count-text">{filteredProducts.length} handmade pieces found</p>
             </div>
 
             {paginatedProducts.length === 0 ? (
               <div className="shop-page__no-results">
-                <div className="no-results-icon">⌕</div>
+                <div className="no-results-icon">?</div>
                 <h3>No products found</h3>
                 <p>We couldn&apos;t find items matching these filters.</p>
                 <div className="no-results-suggestions">

@@ -28,14 +28,6 @@ export default function ShopSidebar({
           { value: "Accessories", label: "Accessories" },
         ];
 
-  const sortOptions = [
-    { value: "featured", label: "Featured" },
-    { value: "recent", label: "Newest" },
-    { value: "best-sellers", label: "Best Sellers" },
-    { value: "price-asc", label: "Price: Low to High" },
-    { value: "price-desc", label: "Price: High to Low" },
-  ];
-
   const jewelryTypes = [
     { value: "all", label: "All Types" },
     { value: "necklace", label: "Necklaces" },
@@ -51,65 +43,81 @@ export default function ShopSidebar({
     onShowAvailableChange(false);
   }
 
-  function renderTextOptions(options, activeValue, onChange) {
+  function renderOptionList({ label, options, activeValue, onChange }) {
     return (
-      <div className="shop-sidebar__options">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            className={`shop-sidebar__text-link ${activeValue === option.value ? "shop-sidebar__text-link--active" : ""}`}
-            onClick={() => onChange(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
+      <div className="shop-sidebar__section">
+        {/* Section heading */}
+        <p className="shop-sidebar__title">{label}</p>
+
+        {/* Block list fixes merged-link rendering by giving each option its own row */}
+        <ul className="shop-sidebar__options-list" role="list">
+          {options.map((option) => (
+            <li key={option.value} className="shop-sidebar__option-item">
+              <button
+                type="button"
+                className={`shop-sidebar__text-link ${activeValue === option.value ? "shop-sidebar__text-link--active" : ""}`}
+                onClick={() => onChange(option.value)}
+              >
+                {option.label}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
 
   function renderSidebarContent() {
+    const availabilityOptions = [
+      { value: "all", label: "All" },
+      { value: "available", label: "Available Now" },
+    ];
+
     return (
       <div className="shop-sidebar">
-        <div className="shop-sidebar__section">
-          <h3 className="shop-sidebar__title">Sort By</h3>
-          <div className="shop-sidebar__select-wrap">
-            <select value={sortBy} onChange={(event) => onSortChange(event.target.value)} className="shop-sidebar__select">
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="shop-sidebar__section">
-          <h3 className="shop-sidebar__title">Categories</h3>
-          {renderTextOptions(categoryOptions, activeCategory, onCategoryChange)}
-        </div>
+        {/* Collection filters */}
+        {renderOptionList({
+          label: "Collection",
+          options: categoryOptions,
+          activeValue: activeCategory,
+          onChange: onCategoryChange,
+        })}
 
         {activeCategory === "Jewellery" ? (
-          <div className="shop-sidebar__section">
-            <h3 className="shop-sidebar__title">Jewellery Type</h3>
-            {renderTextOptions(jewelryTypes, activeJewelryType, onJewelryTypeChange)}
-          </div>
+          renderOptionList({
+            label: "Jewellery Type",
+            options: jewelryTypes,
+            activeValue: activeJewelryType,
+            onChange: onJewelryTypeChange,
+          })
         ) : null}
 
+        {/* Availability filters */}
         <div className="shop-sidebar__section">
-          <label className={`shop-sidebar__checkbox ${showAvailableOnly ? "shop-sidebar__checkbox--active" : ""}`}>
-            <input
-              type="checkbox"
-              checked={showAvailableOnly}
-              onChange={(event) => onShowAvailableChange(event.target.checked)}
-            />
-            <span className="shop-sidebar__checkbox-custom" aria-hidden="true" />
-            <span className="shop-sidebar__checkbox-label">In Stock Only</span>
-          </label>
+          <p className="shop-sidebar__title">Available Now</p>
+
+          {/* Separate block rows remove the merged availability rendering */}
+          <ul className="shop-sidebar__options-list" role="list" aria-label="Availability filter">
+            {availabilityOptions.map((option) => {
+              const isActive = option.value === "available" ? showAvailableOnly : !showAvailableOnly;
+              return (
+                <li key={option.value} className="shop-sidebar__option-item">
+                  <button
+                    type="button"
+                    className={`shop-sidebar__text-link shop-sidebar__toggle-option ${isActive ? "shop-sidebar__text-link--active" : ""}`}
+                    onClick={() => onShowAvailableChange(option.value === "available")}
+                  >
+                    {option.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
+        {/* Clear action */}
         <button type="button" onClick={handleClear} className="shop-sidebar__clear">
-          Clear All Filters
+          Clear All
         </button>
       </div>
     );
@@ -134,11 +142,14 @@ export default function ShopSidebar({
       ) : null}
 
       <style jsx>{`
+        /* =========================
+           Sidebar shell
+           ========================= */
         .shop-sidebar__desktop {
           width: 220px;
           flex-shrink: 0;
           position: sticky;
-          top: calc(var(--announcement-height) + var(--nav-height) + 44px);
+          top: calc(var(--announcement-height) + var(--nav-height) + 36px);
           align-self: start;
         }
 
@@ -148,211 +159,180 @@ export default function ShopSidebar({
           }
         }
 
+        /* =========================
+           Sidebar container
+           ========================= */
         .shop-sidebar {
           display: grid;
           gap: 0;
-          color: #171717;
-        }
-
-        .shop-sidebar__section {
-          padding: 0 0 22px;
-          margin-bottom: 22px;
-          border-bottom: 1px solid rgba(30, 26, 21, 0.09);
-        }
-
-        .shop-sidebar__title {
-          margin: 0 0 14px;
-          font-size: 11px;
-          font-weight: 400;
-          letter-spacing: 0.24em;
-          text-transform: uppercase;
-          color: #7d776f;
-        }
-
-        .shop-sidebar__select-wrap {
-          position: relative;
-        }
-
-        .shop-sidebar__select {
-          width: 100%;
-          padding: 0 0 10px;
-          border: none;
-          border-bottom: 1px solid rgba(30, 26, 21, 0.18);
+          padding: 0 24px 0 0;
+          color: #1c1c1c;
           background: transparent;
-          color: #171717;
-          font-size: 12px;
-          font-weight: 300;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          outline: none;
+          border: none;
+          box-shadow: none;
         }
 
-        .shop-sidebar__options {
-          display: grid;
-          gap: 10px;
-        }
-
-        .shop-sidebar__text-link {
-          width: fit-content;
+        /* =========================
+           Sidebar sections
+           ========================= */
+        .shop-sidebar__section {
+          margin: 0;
           padding: 0;
           border: none;
-          background: transparent;
-          color: #5f5a52;
-          font-size: 12px;
-          font-weight: 300;
-          letter-spacing: 0.14em;
+        }
+
+        /* =========================
+           Sidebar headings
+           ========================= */
+        .shop-sidebar__title {
+          display: block;
+          margin: 24px 0 10px;
+          color: #999;
+          font-size: 10px;
+          font-weight: 400;
+          letter-spacing: 3px;
           text-transform: uppercase;
+        }
+
+        /* =========================
+           Option list structure
+           ========================= */
+        .shop-sidebar__options-list {
+          margin: 0;
+          padding: 0;
+          display: block;
+        }
+
+        .shop-sidebar__option-item {
+          display: block;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+
+        /* =========================
+           Filter links
+           ========================= */
+        .shop-sidebar__text-link {
+          display: block;
+          width: 100%;
+          padding: 0 0 10px 0;
+          border: none;
+          border-left: 2px solid transparent;
+          background: transparent;
+          color: #666;
+          font-size: 12px;
+          font-weight: 400;
+          letter-spacing: 1px;
+          line-height: 1.8;
           text-align: left;
-          transition: color 180ms ease;
+          text-decoration: none;
+          transition: color 0.35s ease, border-color 0.35s ease, padding-left 0.35s ease;
+          cursor: pointer;
         }
 
         .shop-sidebar__text-link:hover {
-          color: #171717;
+          color: #8b5e3c;
         }
 
         .shop-sidebar__text-link--active {
-          color: #171717;
+          color: #1c1c1c;
           font-weight: 500;
-          text-decoration: underline;
-          text-decoration-thickness: 1px;
-          text-underline-offset: 5px;
+          border-left-color: #8b5e3c;
+          padding-left: 8px;
         }
 
-        .shop-sidebar__checkbox {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          width: fit-content;
-          cursor: pointer;
-          color: #5f5a52;
+        /* =========================
+           Availability options
+           ========================= */
+        .shop-sidebar__toggle-option {
+          font-size: 11px;
+          letter-spacing: 1px;
         }
 
-        .shop-sidebar__checkbox input {
-          position: absolute;
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .shop-sidebar__checkbox-custom {
-          width: 14px;
-          height: 14px;
-          border: 1px solid rgba(30, 26, 21, 0.36);
-          background: transparent;
-          transition: all 180ms ease;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .shop-sidebar__checkbox-custom::after {
-          content: "";
-          width: 6px;
-          height: 6px;
-          background: #171717;
-          transform: scale(0);
-          transition: transform 180ms ease;
-        }
-
-        .shop-sidebar__checkbox-label {
-          font-size: 12px;
-          font-weight: 300;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-        }
-
-        .shop-sidebar__checkbox--active {
-          color: #171717;
-        }
-
-        .shop-sidebar__checkbox--active .shop-sidebar__checkbox-custom {
-          border-color: #171717;
-        }
-
-        .shop-sidebar__checkbox--active .shop-sidebar__checkbox-custom::after {
-          transform: scale(1);
-        }
-
+        /* =========================
+           Clear action
+           ========================= */
         .shop-sidebar__clear {
-          width: fit-content;
+          display: block;
+          width: 100%;
+          margin-top: 24px;
           padding: 0;
           border: none;
           background: transparent;
-          color: #171717;
-          font-size: 11px;
+          color: #bbb;
+          font-size: 10px;
           font-weight: 400;
-          letter-spacing: 0.22em;
+          letter-spacing: 2px;
           text-transform: uppercase;
-          border-bottom: 1px solid rgba(23, 23, 23, 0.28);
-          transition: border-color 180ms ease, color 180ms ease;
+          text-align: left;
+          text-decoration: none;
+          transition: color 0.35s ease;
+          cursor: pointer;
         }
 
         .shop-sidebar__clear:hover {
-          color: #8b6b47;
-          border-color: #8b6b47;
+          color: #1c1c1c;
         }
 
+        /* =========================
+           Mobile drawer
+           ========================= */
         .shop-sidebar__overlay {
           position: fixed;
           inset: 0;
           z-index: 1100;
-          background: rgba(20, 18, 15, 0.28);
-          backdrop-filter: blur(10px);
+          background: rgba(28, 28, 28, 0.18);
         }
 
         .shop-sidebar__drawer {
-          position: absolute;
-          inset: auto 0 0 0;
-          background: #fafafa;
-          border-radius: 18px 18px 0 0;
-          border-top: 1px solid rgba(30, 26, 21, 0.08);
-          box-shadow: 0 -24px 60px rgba(20, 18, 15, 0.12);
-          animation: slideUp 220ms ease;
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          max-height: 80vh;
+          overflow-y: auto;
+          background: #fafaf8;
+          border-top: 1px solid #e8e8e8;
+          border-radius: 2px 2px 0 0;
         }
 
         .shop-sidebar__drawer-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 18px 20px;
-          border-bottom: 1px solid rgba(30, 26, 21, 0.08);
+          padding: 16px var(--gutter);
+          border-bottom: 1px solid #e8e8e8;
+          background: #fafaf8;
         }
 
         .shop-sidebar__drawer-header h3 {
           margin: 0;
-          font-size: 12px;
-          font-weight: 400;
-          letter-spacing: 0.24em;
+          color: #1c1c1c;
+          font-size: 13px;
+          font-weight: 300;
+          letter-spacing: 4px;
           text-transform: uppercase;
-          color: #171717;
         }
 
         .shop-sidebar__close {
-          width: 34px;
-          height: 34px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid rgba(30, 26, 21, 0.12);
-          border-radius: 999px;
-          background: #fff;
-          color: #171717;
+          width: 30px;
+          height: 30px;
+          border: none;
+          background: transparent;
+          color: #1c1c1c;
+          transition: color 0.35s ease;
+        }
+
+        .shop-sidebar__close:hover {
+          color: #8b5e3c;
         }
 
         .shop-sidebar__drawer-content {
-          max-height: min(75vh, 640px);
-          overflow-y: auto;
-          padding: 20px;
-        }
-
-        @keyframes slideUp {
-          from {
-            transform: translateY(24px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
+          padding: 18px var(--gutter) 20px;
         }
       `}</style>
     </>

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const { name, phone, area, items, subtotal, total, delivery, deliveryMethod } = body;
+  const { name, phone, area, items, subtotal, total, delivery, deliveryMethod, note } = body;
 
   if (!name || !phone || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     status: "new",
     fulfillmentType,
     productionNote: productionNotes.join(" | "),
-    note: "",
+    note: String(note || "").trim(),
     source: "checkout",
   });
 

@@ -4,12 +4,14 @@ import { useCart } from "../lib/cart-context";
 
 export default function ProductCard({ product, variant = "default" }) {
   const { addToCart, isWishlisted, toggleWishlist, openCart } = useCart();
-  const { slug, name, artisan, price, originalPrice, image, images, isSold, isNew } = product;
-  const imageSrc = image || images?.[0]?.src || "/media/site/placeholder.svg";
-  const discount = originalPrice ? Math.round((1 - price / originalPrice) * 100) : null;
+  const { slug, name, artisan, price, originalPrice, image, images, isSold, badge, newArrival } = product;
+  const imageSrc = image || images?.[0]?.src || images?.[0] || "/media/site/placeholder.svg";
   const saved = isWishlisted(product.id);
   const isShopCatalog = variant === "shop-catalog";
-  
+  const hasSale = Number(originalPrice) > Number(price) && !isSold;
+  const salePercent = hasSale ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  const showNewBadge = Boolean(newArrival || badge === "New");
+
   // Mock ratings - you can replace with real data from your database
   const rating = 4.5;
   const reviews = 87;
@@ -33,6 +35,13 @@ export default function ProductCard({ product, variant = "default" }) {
         <div className="product-card__media">
           <Link href={`/product/${slug}`} className="product-card__image-link" aria-label={`View ${name}`}>
             <div className="product-card__image-wrap">
+              {showNewBadge || hasSale ? (
+                <div className="product-card__badges">
+                  {showNewBadge ? <span className="product-card__badge">New</span> : null}
+                  {hasSale ? <span className="product-card__badge">Save {salePercent}%</span> : null}
+                </div>
+              ) : null}
+
               <img
                 src={imageSrc}
                 alt={name}
@@ -40,13 +49,6 @@ export default function ProductCard({ product, variant = "default" }) {
                 decoding="async"
                 className="product-card__image"
               />
-              <div className="product-card__badges">
-                {isSold ? <span className="product-card__badge product-card__badge--sold">Sold Out</span> : null}
-                {isNew && !isSold ? <span className="product-card__badge product-card__badge--new">NEW</span> : null}
-                {discount && !isSold ? (
-                  <span className="product-card__badge product-card__badge--discount">SAVE {discount}%</span>
-                ) : null}
-              </div>
             </div>
           </Link>
 
@@ -55,26 +57,16 @@ export default function ProductCard({ product, variant = "default" }) {
             aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
             onClick={handleToggleWishlist}
             style={{
-              color: saved ? "var(--color-terracotta)" : "currentColor",
-              background: saved ? "rgba(255, 255, 255, 0.99)" : "rgba(255, 255, 255, 0.95)",
+              color: saved ? "#1c1c1c" : "#555",
+              background: "rgba(250, 250, 248, 0.94)",
             }}
           >
-            <Icon name={saved ? "heart-filled" : "heart"} size={16} />
-          </button>
-
-          <button
-            className="product-card__add-btn product-card__add-btn--overlay"
-            onClick={handleAddToCart}
-            disabled={isSold}
-            aria-label={`Add ${name} to cart`}
-          >
-            <Icon name="shopping-cart" size={15} />
-            <span>{isSold ? "Sold Out" : "Add to Cart"}</span>
+            <Icon name={saved ? "heart-filled" : "heart"} size={14} />
           </button>
         </div>
 
-        <Link href={`/product/${slug}`} className="product-card__link" aria-label={`View ${name}`}>
-          <div className="product-card__content">
+        <div className="product-card__content product-card__content--shop">
+          <Link href={`/product/${slug}`} className="product-card__link" aria-label={`View ${name}`}>
             {artisan ? (
               <div className="product-card__artisan">
                 <span className="product-card__artisan-name">BY {artisan.toUpperCase()}</span>
@@ -103,15 +95,29 @@ export default function ProductCard({ product, variant = "default" }) {
             </div>
 
             <div className="product-card__pricing">
-              <span className="product-card__price">
-                {isSold ? "Sold Out" : `KES ${price.toLocaleString()}`}
-              </span>
+              <span className="product-card__price">{isSold ? "Sold Out" : `KES ${price.toLocaleString()}`}</span>
               {originalPrice && !isSold ? (
                 <span className="product-card__original-price">KES {originalPrice.toLocaleString()}</span>
               ) : null}
             </div>
+          </Link>
+
+          <div className="product-card__actions product-card__actions--shop">
+            <button
+              className="product-card__add-btn product-card__add-btn--shop"
+              onClick={handleAddToCart}
+              disabled={isSold}
+              aria-label={`Add ${name} to cart`}
+            >
+              <Icon name="shopping-cart" size={15} />
+              <span>{isSold ? "Sold Out" : "Add to Cart"}</span>
+            </button>
+
+            <Link href={`/product/${slug}`} className="product-card__view-link" aria-label={`View ${name}`}>
+              View Piece
+            </Link>
           </div>
-        </Link>
+        </div>
       </div>
     );
   }
@@ -127,11 +133,6 @@ export default function ProductCard({ product, variant = "default" }) {
             decoding="async"
             className="product-card__image"
           />
-          {isSold ? <span className="product-card__badge product-card__badge--sold">Sold Out</span> : null}
-          {isNew && !isSold ? <span className="product-card__badge product-card__badge--new">New</span> : null}
-          {discount && !isSold ? (
-            <span className="product-card__badge product-card__badge--discount">Save {discount}%</span>
-          ) : null}
           <button
             className="product-card__wishlist"
             aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
@@ -154,7 +155,6 @@ export default function ProductCard({ product, variant = "default" }) {
 
           <h3 className="product-card__name">{name}</h3>
 
-          {/* Rating and reviews */}
           <div className="product-card__rating">
             <div className="product-card__stars">
               {[...Array(5)].map((_, i) => (
@@ -174,11 +174,8 @@ export default function ProductCard({ product, variant = "default" }) {
             <span className="product-card__review-count">({reviews})</span>
           </div>
 
-          {/* Pricing */}
           <div className="product-card__pricing">
-            <span className="product-card__price">
-              {isSold ? "Sold Out" : `KES ${price.toLocaleString()}`}
-            </span>
+            <span className="product-card__price">{isSold ? "Sold Out" : `KES ${price.toLocaleString()}`}</span>
             {originalPrice && !isSold ? (
               <>
                 <span className="product-card__original-price">KES {originalPrice.toLocaleString()}</span>
@@ -188,7 +185,6 @@ export default function ProductCard({ product, variant = "default" }) {
         </div>
       </Link>
 
-      {/* Action buttons - always visible */}
       <div className="product-card__actions">
         <button
           className="product-card__add-btn"
