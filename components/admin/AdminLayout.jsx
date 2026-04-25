@@ -65,6 +65,7 @@ const navStructure = {
         { href: "/admin/homepage-sections", label: "Homepage Sections", icon: "edit" },
         { href: "/admin/promotions", label: "Promotions", icon: "star" },
         { href: "/admin/navigation", label: "Navigation", icon: "link" },
+        { href: "/admin/shop-taxonomy", label: "Shop Taxonomy", icon: "link" },
       ],
     },
     {

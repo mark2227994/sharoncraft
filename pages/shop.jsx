@@ -6,11 +6,10 @@ import ProductCard from "../components/ProductCard";
 import SeoHead from "../components/SeoHead";
 import ShopSidebar from "../components/ShopSidebar";
 import Icon from "../components/icons";
-import { shopCategoryTree } from "../data/site";
+import { normalizeShopCategoryTree, shopCategoryTree } from "../data/site";
+import { readAdminContentField } from "../lib/admin-content";
 import { filterPublishedProducts, getCategoryPriority, getJewelryTypePriority } from "../lib/products";
 import { readProducts } from "../lib/store";
-
-const SHOP_TABS = shopCategoryTree.map((node) => node.label);
 
 function flattenShopNodes(nodes, trail = []) {
   return nodes.flatMap((node) => [
@@ -18,10 +17,6 @@ function flattenShopNodes(nodes, trail = []) {
     ...(Array.isArray(node.children) ? flattenShopNodes(node.children, [...trail, node.id]) : []),
   ]);
 }
-
-const FLAT_SHOP_NODES = flattenShopNodes(shopCategoryTree);
-const SHOP_NODE_BY_ID = new Map(FLAT_SHOP_NODES.map((node) => [node.id, node]));
-const SHOP_NODE_BY_LABEL = new Map(shopCategoryTree.map((node) => [node.label, node]));
 const LEGACY_CATEGORY_MAP = new Map([
   ["All", "all"],
   ["Jewellery", "jewellery"],
@@ -80,15 +75,9 @@ function matchesRule(product, match) {
   return true;
 }
 
-function resolveCategoryId(queryCategory) {
-  const raw = typeof queryCategory === "string" ? queryCategory.trim() : "";
-  if (!raw) return "all";
-  return LEGACY_CATEGORY_MAP.get(raw) || SHOP_NODE_BY_ID.get(raw)?.id || "all";
-}
-
-function resolveSubcategoryId(querySubcategory, queryJewelryType) {
+function resolveSubcategoryId(querySubcategory, queryJewelryType, nodeById) {
   const rawSubcategory = typeof querySubcategory === "string" ? querySubcategory.trim() : "";
-  if (rawSubcategory && SHOP_NODE_BY_ID.has(rawSubcategory)) {
+  if (rawSubcategory && nodeById.has(rawSubcategory)) {
     return rawSubcategory;
   }
 
@@ -111,7 +100,7 @@ function matchesPriceRange(product, activePriceRange) {
   return true;
 }
 
-export default function ShopPage({ products, initialCategory, initialSubcategory }) {
+export default function ShopPage({ products, initialCategory, initialSubcategory, categoryTree }) {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
@@ -130,8 +119,17 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
     { value: "price-desc", label: "Price: High" },
   ];
 
-  const activeCategoryNode = SHOP_NODE_BY_ID.get(activeCategory) || SHOP_NODE_BY_ID.get("all");
-  const activeSubcategoryNode = activeSubcategory ? SHOP_NODE_BY_ID.get(activeSubcategory) : null;
+  const normalizedCategoryTree = useMemo(() => normalizeShopCategoryTree(categoryTree), [categoryTree]);
+  const shopTabs = useMemo(() => normalizedCategoryTree.map((node) => node.label), [normalizedCategoryTree]);
+  const flatShopNodes = useMemo(() => flattenShopNodes(normalizedCategoryTree), [normalizedCategoryTree]);
+  const shopNodeById = useMemo(() => new Map(flatShopNodes.map((node) => [node.id, node])), [flatShopNodes]);
+  const shopNodeByLabel = useMemo(
+    () => new Map(normalizedCategoryTree.map((node) => [node.label, node])),
+    [normalizedCategoryTree],
+  );
+
+  const activeCategoryNode = shopNodeById.get(activeCategory) || shopNodeById.get("all");
+  const activeSubcategoryNode = activeSubcategory ? shopNodeById.get(activeSubcategory) : null;
   const activeTabLabel = activeCategoryNode?.label || "All";
 
   useEffect(() => {
@@ -225,7 +223,7 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
   }
 
   function handleCategorySelect(label) {
-    const node = SHOP_NODE_BY_LABEL.get(label);
+    const node = shopNodeByLabel.get(label);
     if (!node) return;
     setActiveCategory(node.id);
     setActiveSubcategory("");
@@ -251,7 +249,7 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
       <Nav />
       <CategoryStrip
         className="shop-category-strip"
-        categories={SHOP_TABS}
+        categories={shopTabs}
         activeCategory={activeTabLabel}
         onSelect={handleCategorySelect}
       />
@@ -277,7 +275,7 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
 
         <div className="shop-page__layout">
           <ShopSidebar
-            categoryTree={shopCategoryTree}
+            categoryTree={normalizedCategoryTree}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
             activeSubcategory={activeSubcategory}
@@ -409,14 +407,28 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
 
 export async function getServerSideProps({ query }) {
   const products = filterPublishedProducts(await readProducts());
-  const initialCategory = resolveCategoryId(query.category);
-  const initialSubcategory = resolveSubcategoryId(query.subcategory, query.jewelryType);
+  const categoryTree = normalizeShopCategoryTree(
+    await readAdminContentField("shopTaxonomy", shopCategoryTree),
+  );
+  const nodeById = new Map(flattenShopNodes(categoryTree).map((node) => [node.id, node]));
+  const nodeByQueryValue = new Map(
+    categoryTree
+      .map((node) => [String(node.queryValue || "").trim(), node.id])
+      .filter(([queryValue]) => Boolean(queryValue)),
+  );
+  const rawCategory = typeof query.category === "string" ? query.category.trim() : "";
+  const initialCategory =
+    LEGACY_CATEGORY_MAP.get(rawCategory) ||
+    nodeByQueryValue.get(rawCategory) ||
+    (rawCategory && nodeById.has(rawCategory) ? rawCategory : "all");
+  const initialSubcategory = resolveSubcategoryId(query.subcategory, query.jewelryType, nodeById);
 
   return {
     props: {
       products,
       initialCategory,
       initialSubcategory,
+      categoryTree,
     },
   };
 }

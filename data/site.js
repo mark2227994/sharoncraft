@@ -402,8 +402,85 @@ export const featuredArtisans = [
   },
 ];
 
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 function compactText(value) {
   return String(value || "").trim();
+}
+
+function slugifyShopTaxonomyValue(value) {
+  return compactText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function normalizeStringList(values) {
+  const list = Array.isArray(values) ? values : String(values || "").split(",");
+  return Array.from(
+    new Set(
+      list
+        .map((value) => compactText(value))
+        .filter(Boolean),
+    ),
+  );
+}
+
+function normalizeShopNode(node, fallbackLabel = "Untitled") {
+  const label = compactText(node?.label) || fallbackLabel;
+  const id = compactText(node?.id) || slugifyShopTaxonomyValue(label) || slugifyShopTaxonomyValue(fallbackLabel) || "item";
+  const queryValue = compactText(node?.queryValue);
+  const categories = normalizeStringList(node?.match?.categories);
+  const jewelryTypes = normalizeStringList(node?.match?.jewelryTypes);
+  const keywords = normalizeStringList(node?.match?.keywords);
+  const children = Array.isArray(node?.children)
+    ? node.children.map((child, index) => normalizeShopNode(child, `${label} ${index + 1}`))
+    : [];
+
+  const normalized = {
+    id,
+    label,
+  };
+
+  if (queryValue) {
+    normalized.queryValue = queryValue;
+  }
+
+  if (categories.length > 0 || jewelryTypes.length > 0 || keywords.length > 0) {
+    normalized.match = {};
+    if (categories.length > 0) normalized.match.categories = categories;
+    if (jewelryTypes.length > 0) normalized.match.jewelryTypes = jewelryTypes;
+    if (keywords.length > 0) normalized.match.keywords = keywords;
+  }
+
+  if (children.length > 0) {
+    normalized.children = children;
+  }
+
+  return normalized;
+}
+
+export function cloneShopCategoryTree() {
+  return cloneJson(shopCategoryTree);
+}
+
+export function normalizeShopCategoryTree(value) {
+  if (!Array.isArray(value) || value.length === 0) {
+    return cloneShopCategoryTree();
+  }
+
+  const normalized = value.map((node, index) => normalizeShopNode(node, `Category ${index + 1}`));
+  const hasAllNode = normalized.some((node) => node.id === "all");
+
+  if (!hasAllNode) {
+    return cloneShopCategoryTree();
+  }
+
+  return normalized;
 }
 
 function resolveArtisanHref(craft, href) {
