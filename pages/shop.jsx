@@ -6,21 +6,116 @@ import ProductCard from "../components/ProductCard";
 import SeoHead from "../components/SeoHead";
 import ShopSidebar from "../components/ShopSidebar";
 import Icon from "../components/icons";
-import { categoryOptions } from "../data/site";
-import {
-  filterPublishedProducts,
-  getCatalogCategories,
-  getCategoryPriority,
-  getJewelryTypeLabel,
-  getJewelryTypePriority,
-  jewelryTypeOptions,
-} from "../lib/products";
+import { shopCategoryTree } from "../data/site";
+import { filterPublishedProducts, getCategoryPriority, getJewelryTypePriority } from "../lib/products";
 import { readProducts } from "../lib/store";
 
-export default function ShopPage({ products, categories, initialCategory, initialJewelryType }) {
+const SHOP_TABS = shopCategoryTree.map((node) => node.label);
+
+function flattenShopNodes(nodes, trail = []) {
+  return nodes.flatMap((node) => [
+    { ...node, trail },
+    ...(Array.isArray(node.children) ? flattenShopNodes(node.children, [...trail, node.id]) : []),
+  ]);
+}
+
+const FLAT_SHOP_NODES = flattenShopNodes(shopCategoryTree);
+const SHOP_NODE_BY_ID = new Map(FLAT_SHOP_NODES.map((node) => [node.id, node]));
+const SHOP_NODE_BY_LABEL = new Map(shopCategoryTree.map((node) => [node.label, node]));
+const LEGACY_CATEGORY_MAP = new Map([
+  ["All", "all"],
+  ["Jewellery", "jewellery"],
+  ["Accessories", "accessories"],
+  ["Home Decor", "home-living"],
+  ["Gift Sets", "gifted-carry"],
+  ["Bridal & Occasion", "african-wear"],
+  ["African Wear", "african-wear"],
+  ["Art & Craft", "art-craft"],
+  ["Home & Living", "home-living"],
+  ["Gifted Carry", "gifted-carry"],
+]);
+const LEGACY_SUBCATEGORY_MAP = new Map([
+  ["necklace", "necklaces"],
+  ["bracelet", "bracelets"],
+  ["earring", "earrings"],
+]);
+
+function getProductSearchText(product) {
+  return [
+    product?.name,
+    product?.description,
+    product?.shortDescription,
+    product?.heritageStory,
+    product?.category,
+    product?.jewelryType,
+    ...(Array.isArray(product?.materials) ? product.materials : []),
+    ...(Array.isArray(product?.details) ? product.details : []),
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
+function matchesRule(product, match) {
+  if (!match) return true;
+
+  if (Array.isArray(match.categories) && match.categories.length > 0 && !match.categories.includes(product.category)) {
+    return false;
+  }
+
+  if (
+    Array.isArray(match.jewelryTypes) &&
+    match.jewelryTypes.length > 0 &&
+    !match.jewelryTypes.includes(product.jewelryType)
+  ) {
+    return false;
+  }
+
+  if (Array.isArray(match.keywords) && match.keywords.length > 0) {
+    const haystack = getProductSearchText(product);
+    if (!match.keywords.some((keyword) => haystack.includes(String(keyword).toLowerCase()))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function resolveCategoryId(queryCategory) {
+  const raw = typeof queryCategory === "string" ? queryCategory.trim() : "";
+  if (!raw) return "all";
+  return LEGACY_CATEGORY_MAP.get(raw) || SHOP_NODE_BY_ID.get(raw)?.id || "all";
+}
+
+function resolveSubcategoryId(querySubcategory, queryJewelryType) {
+  const rawSubcategory = typeof querySubcategory === "string" ? querySubcategory.trim() : "";
+  if (rawSubcategory && SHOP_NODE_BY_ID.has(rawSubcategory)) {
+    return rawSubcategory;
+  }
+
+  const rawJewelryType = typeof queryJewelryType === "string" ? queryJewelryType.trim() : "";
+  if (rawJewelryType) {
+    return LEGACY_SUBCATEGORY_MAP.get(rawJewelryType) || "";
+  }
+
+  return "";
+}
+
+function matchesPriceRange(product, activePriceRange) {
+  const price = Number(product?.price || 0);
+
+  if (activePriceRange === "under-1000") return price < 1000;
+  if (activePriceRange === "1000-3000") return price >= 1000 && price <= 3000;
+  if (activePriceRange === "3000-5000") return price > 3000 && price <= 5000;
+  if (activePriceRange === "above-5000") return price > 5000;
+
+  return true;
+}
+
+export default function ShopPage({ products, initialCategory, initialSubcategory }) {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [activeJewelryType, setActiveJewelryType] = useState(initialJewelryType);
+  const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
+  const [activePriceRange, setActivePriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -28,7 +123,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
   const ITEMS_PER_PAGE_DESKTOP = 24;
   const ITEMS_PER_PAGE_MOBILE = 12;
-
   const sortOptions = [
     { value: "featured", label: "Featured" },
     { value: "recent", label: "Newest" },
@@ -36,8 +130,12 @@ export default function ShopPage({ products, categories, initialCategory, initia
     { value: "price-desc", label: "Price: High" },
   ];
 
+  const activeCategoryNode = SHOP_NODE_BY_ID.get(activeCategory) || SHOP_NODE_BY_ID.get("all");
+  const activeSubcategoryNode = activeSubcategory ? SHOP_NODE_BY_ID.get(activeSubcategory) : null;
+  const activeTabLabel = activeCategoryNode?.label || "All";
+
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 900);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -48,32 +146,30 @@ export default function ShopPage({ products, categories, initialCategory, initia
     return () => document.body.classList.remove("shop-page--boutique");
   }, []);
 
-  const isJewelleryView = activeCategory === "Jewellery";
-  const hasActiveFilters = activeCategory !== "All" || activeJewelryType !== "all" || showAvailableOnly;
+  useEffect(() => {
+    if (!isMobile) {
+      setIsDrawerOpen(false);
+    }
+  }, [isMobile]);
 
   const filteredProducts = useMemo(() => {
     const next = products
-      .filter((product) => (activeCategory === "All" ? true : product.category === activeCategory))
-      .filter((product) => {
-        if (!isJewelleryView) return true;
-        if (activeJewelryType === "all") return true;
-        return product.jewelryType === activeJewelryType;
-      })
-      .filter((product) => (showAvailableOnly ? !product.isSold && product.stock > 0 : true));
+      .filter((product) => (activeCategory === "all" ? true : matchesRule(product, activeCategoryNode?.match)))
+      .filter((product) => (activeSubcategoryNode ? matchesRule(product, activeSubcategoryNode.match) : true))
+      .filter((product) => (showAvailableOnly ? !product.isSold && product.stock > 0 : true))
+      .filter((product) => matchesPriceRange(product, activePriceRange));
 
     if (sortBy === "recent") {
-      return next.slice().sort((left, right) => Number(right.newArrival) - Number(left.newArrival));
-    }
-    if (sortBy === "best-sellers") {
       return next
         .slice()
-        .sort((left, right) => Number(right.badge === "Best Seller") - Number(left.badge === "Best Seller"));
+        .sort((left, right) => Number(Boolean(right.recent || right.isNew || right.newArrival)) - Number(Boolean(left.recent || left.isNew || left.newArrival)));
     }
+
     if (sortBy === "price-asc") return next.slice().sort((left, right) => left.price - right.price);
     if (sortBy === "price-desc") return next.slice().sort((left, right) => right.price - left.price);
 
     return next.slice().sort((left, right) => {
-      const featuredDiff = Number(right.featured) - Number(left.featured);
+      const featuredDiff = Number(Boolean(right.featured)) - Number(Boolean(left.featured));
       if (featuredDiff !== 0) return featuredDiff;
 
       const categoryDiff = getCategoryPriority(left.category) - getCategoryPriority(right.category);
@@ -84,7 +180,15 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
       return left.name.localeCompare(right.name);
     });
-  }, [activeCategory, activeJewelryType, isJewelleryView, products, showAvailableOnly, sortBy]);
+  }, [
+    activeCategory,
+    activeCategoryNode,
+    activePriceRange,
+    activeSubcategoryNode,
+    products,
+    showAvailableOnly,
+    sortBy,
+  ]);
 
   const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
@@ -92,17 +196,17 @@ export default function ShopPage({ products, categories, initialCategory, initia
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredProducts.slice(start, start + itemsPerPage);
-  }, [filteredProducts, currentPage, itemsPerPage]);
+  }, [currentPage, filteredProducts, itemsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, activeJewelryType, showAvailableOnly, sortBy]);
+  }, [activeCategory, activePriceRange, activeSubcategory, showAvailableOnly, sortBy]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
-  const getPageNumbers = () => {
+  function getPageNumbers() {
     const maxPagesToShow = 5;
     if (totalPages <= maxPagesToShow) {
       return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -118,19 +222,21 @@ export default function ShopPage({ products, categories, initialCategory, initia
     pages.push(totalPages);
 
     return pages;
-  };
+  }
 
-  function handleCategorySelect(nextCategory) {
-    setActiveCategory(nextCategory);
-    if (nextCategory !== "Jewellery") {
-      setActiveJewelryType("all");
-    }
+  function handleCategorySelect(label) {
+    const node = SHOP_NODE_BY_LABEL.get(label);
+    if (!node) return;
+    setActiveCategory(node.id);
+    setActiveSubcategory("");
   }
 
   function clearAllFilters() {
-    setActiveCategory("All");
-    setActiveJewelryType("all");
+    setActiveCategory("all");
+    setActiveSubcategory("");
     setShowAvailableOnly(false);
+    setActivePriceRange("all");
+    setSortBy("featured");
     setCurrentPage(1);
   }
 
@@ -145,108 +251,39 @@ export default function ShopPage({ products, categories, initialCategory, initia
       <Nav />
       <CategoryStrip
         className="shop-category-strip"
-        categories={categories}
-        activeCategory={activeCategory}
+        categories={SHOP_TABS}
+        activeCategory={activeTabLabel}
         onSelect={handleCategorySelect}
       />
 
       <main className="shop-page">
         <div className="shop-breadcrumb" aria-label="Breadcrumb">
           <a href="/">Home</a>
-          <span>/</span>
+          <span className="shop-breadcrumb__separator">›</span>
           <a href="/shop">Shop</a>
-          {activeCategory !== "All" ? (
+          {activeCategory !== "all" ? (
             <>
-              <span>/</span>
-              <span>{activeCategory}</span>
+              <span className="shop-breadcrumb__separator">›</span>
+              <span className="shop-breadcrumb__current">{activeCategoryNode?.label}</span>
             </>
           ) : null}
-          {activeJewelryType !== "all" ? (
+          {activeSubcategoryNode ? (
             <>
-              <span>/</span>
-              <span>{getJewelryTypeLabel(activeJewelryType)}</span>
+              <span className="shop-breadcrumb__separator">›</span>
+              <span className="shop-breadcrumb__current">{activeSubcategoryNode.label}</span>
             </>
           ) : null}
         </div>
 
-        <section className="shop-page__header">
-          <div className="shop-page__header-left">
-            <h1 className="shop-page__title">Our Pieces</h1>
-          </div>
-        </section>
-
-        {hasActiveFilters ? (
-          <section className="shop-page__active-filters" aria-label="Active filters">
-            <div className="shop-page__active-filters-content">
-              <div className="shop-page__filter-pills">
-                {activeCategory !== "All" ? (
-                  <div className="filter-pill">
-                    <span>{activeCategory}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveCategory("All");
-                        setCurrentPage(1);
-                      }}
-                      aria-label={`Remove ${activeCategory} filter`}
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ) : null}
-
-                {isJewelleryView && activeJewelryType !== "all" ? (
-                  <div className="filter-pill">
-                    <span>{getJewelryTypeLabel(activeJewelryType)}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveJewelryType("all");
-                        setCurrentPage(1);
-                      }}
-                      aria-label="Remove jewellery type filter"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ) : null}
-
-                {showAvailableOnly ? (
-                  <div className="filter-pill">
-                    <span>Available Now</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAvailableOnly(false);
-                        setCurrentPage(1);
-                      }}
-                      aria-label="Remove stock filter"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-
-              <button type="button" onClick={clearAllFilters} className="shop-page__clear-all">
-                Clear All
-              </button>
-            </div>
-          </section>
-        ) : null}
-
         <div className="shop-page__layout">
           <ShopSidebar
-            categories={categories}
+            categoryTree={shopCategoryTree}
             activeCategory={activeCategory}
-            onCategoryChange={(category) => {
-              setActiveCategory(category);
-              if (category !== "Jewellery") setActiveJewelryType("all");
-            }}
-            activeJewelryType={activeJewelryType}
-            onJewelryTypeChange={setActiveJewelryType}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
+            onCategoryChange={setActiveCategory}
+            activeSubcategory={activeSubcategory}
+            onSubcategoryChange={setActiveSubcategory}
+            activePriceRange={activePriceRange}
+            onPriceRangeChange={setActivePriceRange}
             showAvailableOnly={showAvailableOnly}
             onShowAvailableChange={setShowAvailableOnly}
             isMobile={isMobile}
@@ -256,28 +293,48 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
           <section className="shop-page__results">
             <div className="shop-page__results-bar">
-              <p className="shop-page__count-text">{filteredProducts.length} pieces</p>
-
-              <div className="shop-page__sort-links" aria-label="Sort products">
-                {sortOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={`shop-page__sort-link ${sortBy === option.value ? "shop-page__sort-link--active" : ""}`}
-                    onClick={() => setSortBy(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
               {isMobile ? (
                 <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
-                  <Icon name="filter" size={16} />
-                  <span>Filters</span>
-                  {hasActiveFilters ? <span className="shop-page__filter-dot" /> : null}
+                  <span>Filter</span>
                 </button>
-              ) : null}
+              ) : (
+                <p className="shop-page__count-text">{filteredProducts.length} pieces found</p>
+              )}
+
+              {isMobile ? (
+                <div className="shop-page__results-controls">
+                  <p className="shop-page__count-text">{filteredProducts.length} pieces found</p>
+                  <label className="shop-page__sort-select-wrap">
+                    <span className="shop-page__sort-select-label">Sort</span>
+                    <select
+                      className="shop-page__sort-select"
+                      value={sortBy}
+                      onChange={(event) => setSortBy(event.target.value)}
+                    >
+                      {sortOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              ) : (
+                <div className="shop-page__sort-links" aria-label="Sort products">
+                  {sortOptions.map((option, index) => (
+                    <div key={option.value} className="shop-page__sort-item">
+                      <button
+                        type="button"
+                        className={`shop-page__sort-link ${sortBy === option.value ? "shop-page__sort-link--active" : ""}`}
+                        onClick={() => setSortBy(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                      {index < sortOptions.length - 1 ? <span className="shop-page__sort-separator">|</span> : null}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {paginatedProducts.length === 0 ? (
@@ -285,9 +342,6 @@ export default function ShopPage({ products, categories, initialCategory, initia
                 <div className="no-results-icon">?</div>
                 <h3>No products found</h3>
                 <p>We couldn&apos;t find items matching these filters.</p>
-                <div className="no-results-suggestions">
-                  <p>Try adjusting the category, availability, or sort selection.</p>
-                </div>
                 <button type="button" onClick={clearAllFilters} className="no-results-btn">
                   Clear Filters &amp; Browse All
                 </button>
@@ -355,13 +409,14 @@ export default function ShopPage({ products, categories, initialCategory, initia
 
 export async function getServerSideProps({ query }) {
   const products = filterPublishedProducts(await readProducts());
-  const categories = getCatalogCategories(products);
-  const requestedCategory = typeof query.category === "string" ? query.category : "Jewellery";
-  const initialCategory = categories.includes(requestedCategory) ? requestedCategory : categoryOptions[0];
-  const requestedJewelryType =
-    typeof query.jewelryType === "string" && jewelryTypeOptions.includes(query.jewelryType)
-      ? query.jewelryType
-      : "all";
+  const initialCategory = resolveCategoryId(query.category);
+  const initialSubcategory = resolveSubcategoryId(query.subcategory, query.jewelryType);
 
-  return { props: { products, categories, initialCategory, initialJewelryType: requestedJewelryType } };
+  return {
+    props: {
+      products,
+      initialCategory,
+      initialSubcategory,
+    },
+  };
 }

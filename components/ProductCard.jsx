@@ -10,7 +10,7 @@ export default function ProductCard({ product, variant = "default" }) {
   const isShopCatalog = variant === "shop-catalog";
   const hasSale = Number(originalPrice) > Number(price) && !isSold;
   const salePercent = hasSale ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-  const showNewBadge = Boolean(newArrival || badge === "New");
+  const showNewBadge = Boolean(product.isNew || newArrival || badge === "New");
 
   // Mock ratings - you can replace with real data from your database
   const rating = 4.5;
@@ -37,8 +37,8 @@ export default function ProductCard({ product, variant = "default" }) {
             <div className="product-card__image-wrap">
               {showNewBadge || hasSale ? (
                 <div className="product-card__badges">
-                  {showNewBadge ? <span className="product-card__badge">New</span> : null}
-                  {hasSale ? <span className="product-card__badge">Save {salePercent}%</span> : null}
+                  {showNewBadge ? <span className="product-card__badge product-card__badge--new">New</span> : null}
+                  {hasSale ? <span className="product-card__badge product-card__badge--sale">Save {salePercent}%</span> : null}
                 </div>
               ) : null}
 
@@ -49,6 +49,7 @@ export default function ProductCard({ product, variant = "default" }) {
                 decoding="async"
                 className="product-card__image"
               />
+              <span className="product-card__hover-label">View</span>
             </div>
           </Link>
 
@@ -56,10 +57,6 @@ export default function ProductCard({ product, variant = "default" }) {
             className="product-card__wishlist"
             aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
             onClick={handleToggleWishlist}
-            style={{
-              color: saved ? "#1c1c1c" : "#555",
-              background: "rgba(250, 250, 248, 0.94)",
-            }}
           >
             <Icon name={saved ? "heart-filled" : "heart"} size={14} />
           </button>
@@ -75,25 +72,6 @@ export default function ProductCard({ product, variant = "default" }) {
 
             <h3 className="product-card__name">{name}</h3>
 
-            <div className="product-card__rating" aria-label={`${rating} out of 5 stars`}>
-              <div className="product-card__stars">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    width="14"
-                    height="14"
-                    viewBox="0 0 16 16"
-                    fill={i < Math.floor(rating) ? "currentColor" : i < rating ? "currentColor" : "none"}
-                    stroke="currentColor"
-                    strokeWidth="0.5"
-                  >
-                    <path d="M8 1l2.5 5h5.5l-4.5 3.5 1.5 5.5-5-4-5 4 1.5-5.5-4.5-3.5h5.5z" />
-                  </svg>
-                ))}
-              </div>
-              <span className="product-card__review-count">({reviews})</span>
-            </div>
-
             <div className="product-card__pricing">
               <span className="product-card__price">{isSold ? "Sold Out" : `KES ${price.toLocaleString()}`}</span>
               {originalPrice && !isSold ? (
@@ -101,22 +79,6 @@ export default function ProductCard({ product, variant = "default" }) {
               ) : null}
             </div>
           </Link>
-
-          <div className="product-card__actions product-card__actions--shop">
-            <button
-              className="product-card__add-btn product-card__add-btn--shop"
-              onClick={handleAddToCart}
-              disabled={isSold}
-              aria-label={`Add ${name} to cart`}
-            >
-              <Icon name="shopping-cart" size={15} />
-              <span>{isSold ? "Sold Out" : "Add to Cart"}</span>
-            </button>
-
-            <Link href={`/product/${slug}`} className="product-card__view-link" aria-label={`View ${name}`}>
-              View Piece
-            </Link>
-          </div>
         </div>
       </div>
     );
