@@ -1,6 +1,7 @@
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 import { runCloudflareAiModel, getCloudflareAiConfig } from "../../../lib/cloudflare-ai";
 import { normalizeCategory, normalizeJewelryType, slugify } from "../../../lib/products";
+import { readProducts } from "../../../lib/store";
 
 const PRODUCT_COPY_FIELDS = [
   "suggestedName",
@@ -86,9 +87,22 @@ async function describeImage(visionModel, imageInput, index) {
   return String(result?.response || result?.description || "").trim();
 }
 
-function buildPrompt(body, imageSummaries) {
+function collectExistingNames(products, currentId) {
+  return Array.from(
+    new Set(
+      (Array.isArray(products) ? products : [])
+        .filter((product) => String(product?.id || "").trim() !== String(currentId || "").trim())
+        .map((product) => String(product?.name || "").trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function buildPrompt(body, imageSummaries, existingNames) {
   const lockedCategory = normalizeCategory(body?.category || "Jewellery");
   const lockedJewelryType = lockedCategory === "Jewellery" ? normalizeJewelryType(body?.jewelryType || "") : "";
+  const providedName = String(body?.name || "").trim();
+  const preserveName = body?.preserveName !== false;
   const currentMaterials = Array.isArray(body?.materials)
     ? body.materials
     : String(body?.materials || "")
@@ -104,6 +118,8 @@ function buildPrompt(body, imageSummaries) {
     "Return valid JSON only, with no markdown fences and no commentary before or after the object.",
     "",
     "Brand direction:",
+    "- Base the copy primarily on the provided product name and selected category path.",
+    "- Treat the typed product name as the source of truth unless explicitly told to suggest a different name.",
     "- Follow the selected admin category path instead of inventing a new one.",
     "- Use Kenyan and African cultural references: Maasai, Swahili, Nairobi, beadwork heritage, African aesthetics.",
     "- Incorporate African words naturally. Use DIFFERENT African word prefixes for similar categories:",
@@ -137,9 +153,10 @@ function buildPrompt(body, imageSummaries) {
     "- Keep fullDescription to 2 short paragraphs max.",
     "- tags should be short shopper-facing phrases that reference culture and craft.",
     "- photographyNotes should suggest stronger next images if needed.",
+    "- Never return a product name that duplicates an existing catalog name.",
     "",
     "Known product context:",
-    `Current name: ${String(body?.name || "").trim() || "Unknown"}`,
+    `Current name: ${providedName || "Unknown"}`,
     `Selected category path: ${lockedCategory}`,
     `Selected jewellery type path: ${lockedJewelryType || "Not applicable"}`,
     `Artisan: ${String(body?.artisan || "").trim() || "Unknown"}`,
@@ -150,6 +167,11 @@ function buildPrompt(body, imageSummaries) {
     "Image observations:",
     imageSummaries.length > 0 ? imageSummaries.map((summary, index) => `${index + 1}. ${summary}`).join("\n") : "No images available.",
     "",
+    preserveName && providedName
+      ? `suggestedName must be exactly "${providedName}". Do not rename this product.`
+      : existingNames.length > 0
+        ? `Avoid these existing catalog names: ${existingNames.slice(0, 80).join(" | ")}.`
+        : "If you suggest a name, make sure it is distinct from existing catalog names.",
     `category must be exactly "${lockedCategory}". Do not suggest any other category.`,
     lockedCategory === "Jewellery"
       ? lockedJewelryType
@@ -216,8 +238,39 @@ async function repairJsonWithModel(textModel, rawResponse) {
   return parseModelJson(result?.response);
 }
 
-function normalizeSuggestions(raw, body) {
-  const suggestedName = String(raw?.suggestedName || "").trim();
+function ensureUniqueName(name, body, existingNames) {
+  const preferred = String(name || "").trim();
+  const providedName = String(body?.name || "").trim();
+  const preserveName = body?.preserveName !== false;
+  const category = normalizeCategory(body?.category || "Jewellery");
+  const jewelryType = normalizeJewelryType(body?.jewelryType || "");
+
+  if (preserveName && providedName) {
+    return providedName;
+  }
+
+  const taken = new Set(existingNames.map((item) => item.toLowerCase()));
+  let candidate = preferred || providedName || `${category} Piece`;
+  if (!taken.has(candidate.toLowerCase())) {
+    return candidate;
+  }
+
+  const descriptor = jewelryType || category;
+  candidate = `${candidate} ${descriptor}`.trim();
+  if (!taken.has(candidate.toLowerCase())) {
+    return candidate;
+  }
+
+  let suffix = 2;
+  while (taken.has(`${candidate} ${suffix}`.toLowerCase())) {
+    suffix += 1;
+  }
+
+  return `${candidate} ${suffix}`;
+}
+
+function normalizeSuggestions(raw, body, existingNames) {
+  const suggestedName = ensureUniqueName(raw?.suggestedName, body, existingNames);
   const category = normalizeCategory(body?.category || raw?.category || "Jewellery");
   const jewelryType = category === "Jewellery" ? normalizeJewelryType(body?.jewelryType || raw?.jewelryType) : "";
   const slug = slugify(raw?.slug || suggestedName);
@@ -267,6 +320,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    const existingProducts = await readProducts();
+    const existingNames = collectExistingNames(existingProducts, req.body?.id);
     const imageUrls = uniqueImageUrls(req, req.body);
     let imageSummaries = [];
 
@@ -282,7 +337,7 @@ export default async function handler(req, res) {
       }
     }
 
-    const prompt = buildPrompt(req.body, imageSummaries);
+    const prompt = buildPrompt(req.body, imageSummaries, existingNames);
     const result = await runCloudflareAiModel(textModel, {
       prompt,
       max_tokens: 700,
@@ -301,7 +356,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      suggestions: normalizeSuggestions(parsed, req.body),
+      suggestions: normalizeSuggestions(parsed, req.body, existingNames),
       imageSummaries,
     });
   } catch (error) {

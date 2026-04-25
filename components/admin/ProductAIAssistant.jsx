@@ -7,6 +7,7 @@ function formatList(items) {
 
 export default function ProductAIAssistant({ values, onApply }) {
   const [notes, setNotes] = useState("");
+  const [preserveName, setPreserveName] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -55,7 +56,7 @@ export default function ProductAIAssistant({ values, onApply }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ ...values, notes }),
+        body: JSON.stringify({ ...values, notes, preserveName }),
       });
 
       const body = await response.json().catch(() => ({}));
@@ -82,8 +83,8 @@ export default function ProductAIAssistant({ values, onApply }) {
             AI product helper
           </p>
           <p className="body-sm">
-            Uses Cloudflare AI to read your current product images and suggest a stronger name, copy, materials, and
-            shopper-friendly tags.
+            Uses Cloudflare AI to write product copy from the name and category you entered, with images acting as
+            optional support for materials and styling details.
           </p>
           <p className={`caption admin-ai-status ${status.configured ? "admin-ai-status--ok" : "admin-ai-status--warning"}`}>
             {status.loading
@@ -97,11 +98,23 @@ export default function ProductAIAssistant({ values, onApply }) {
           type="button"
           className="admin-button"
           onClick={handleGenerate}
-          disabled={loading || !status.configured || (!values.image && !values.description)}
+          disabled={loading || !status.configured || !values.name || !values.category}
         >
           {loading ? "Generating..." : "Generate with AI"}
         </button>
       </div>
+
+      <label className="admin-field" style={{ marginBottom: "var(--space-3)" }}>
+        <span>AI naming mode</span>
+        <select
+          className="admin-input"
+          value={preserveName ? "preserve" : "suggest"}
+          onChange={(event) => setPreserveName(event.target.value === "preserve")}
+        >
+          <option value="preserve">Keep my typed product name</option>
+          <option value="suggest">Let AI suggest a different name</option>
+        </select>
+      </label>
 
       <label className="admin-field" style={{ marginBottom: "var(--space-3)" }}>
         <span>Notes for AI</span>
@@ -114,9 +127,9 @@ export default function ProductAIAssistant({ values, onApply }) {
         />
       </label>
 
-      {!values.image && !values.description ? (
+      {!values.name || !values.category ? (
         <p className="admin-note" style={{ marginBottom: 0 }}>
-          Add at least one image or a short description first, then the AI can help.
+          Add the product name and category first. Images are optional, but they help the AI refine materials and styling.
         </p>
       ) : null}
 

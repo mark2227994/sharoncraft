@@ -69,8 +69,8 @@ export default function QuickAddProductPage() {
   }
 
   async function handleAIGenerate() {
-    if (!form.image) {
-      setError("Please upload an image first");
+    if (!form.name.trim()) {
+      setError("Please enter a product name first");
       return;
     }
 
@@ -83,10 +83,11 @@ export default function QuickAddProductPage() {
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({
-          name: form.name || "Unknown Product",
+          name: form.name.trim(),
           category: form.category,
           image: form.image,
-          notes: "Quick product generation from image",
+          preserveName: true,
+          notes: "Quick product generation from the typed name and selected category",
         }),
       });
 
