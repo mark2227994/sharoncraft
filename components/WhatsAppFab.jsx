@@ -1,11 +1,49 @@
+import { useEffect, useMemo, useState } from "react";
+
+const fallbackSiteContent = {
+  contactWhatsApp: "0112222572",
+};
+
+function formatWhatsAppNumber(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return "254112222572";
+  if (digits.startsWith("254")) return digits;
+  if (digits.startsWith("0")) return `254${digits.slice(1)}`;
+  return digits;
+}
+
 export default function WhatsAppFab() {
+  const [siteContent, setSiteContent] = useState(fallbackSiteContent);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/site-images");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled && data && typeof data === "object") {
+          setSiteContent((current) => ({ ...current, ...data }));
+        }
+      } catch {
+        // Keep fallback content if site settings cannot be fetched.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const phoneNumber = useMemo(
+    () => formatWhatsAppNumber(siteContent.contactWhatsApp || fallbackSiteContent.contactWhatsApp),
+    [siteContent.contactWhatsApp],
+  );
+
   const handleWhatsAppClick = () => {
-    const phoneNumber = "254712345678"; // Replace with actual number from env
     const message = encodeURIComponent("Hi SharonCraft! I'm interested in your products. Can you help me?");
-    window.open(
-      `https://wa.me/${phoneNumber}?text=${message}`,
-      "_blank"
-    );
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
   };
 
   return (
@@ -39,7 +77,7 @@ export default function WhatsAppFab() {
           width: 56px;
           height: 56px;
           border-radius: 50%;
-          background: #8B5A2B;
+          background: #8b5a2b;
           color: white;
           border: none;
           cursor: pointer;
