@@ -9,6 +9,9 @@ const ALLOWED_KEYS = [
   "collectionHome",
   "collectionAccessories",
   "collectionBridal",
+  "customOrdersMediaType",
+  "customOrdersImage",
+  "customOrdersVideo",
   "pageTexture",
   // Text content
   "heroTitle",

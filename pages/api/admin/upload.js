@@ -11,13 +11,25 @@ export const config = {
   },
 };
 
-const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
+const ALLOWED = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]);
 const MIME_EXTENSION_MAP = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
   "image/webp": ".webp",
   "image/gif": ".gif",
   "image/svg+xml": ".svg",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
 };
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -96,7 +108,7 @@ export default async function handler(req, res) {
     uploadDir: "/tmp",
     keepExtensions: true,
     maxFiles: 1,
-    maxFileSize: 8 * 1024 * 1024,
+    maxFileSize: 40 * 1024 * 1024,
     filter: ({ mimetype }) => mimetype != null && ALLOWED.has(String(mimetype)),
   });
 
@@ -111,7 +123,7 @@ export default async function handler(req, res) {
   const list = files.file;
   const file = Array.isArray(list) ? list[0] : list;
   if (!file) {
-    return res.status(400).json({ error: "Add an image (JPEG, PNG, WebP, GIF, or SVG)." });
+    return res.status(400).json({ error: "Add an image or video file." });
   }
 
   if (!ALLOWED.has(String(file.mimetype || ""))) {

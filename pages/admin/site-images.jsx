@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import LocalImageUpload from "../../components/admin/LocalImageUpload";
 
+function isVideoPath(value) {
+  return /\.(mp4|webm|mov)(\?.*)?$/i.test(String(value || "").trim());
+}
+
 const IMAGE_FIELDS = [
   {
     key: "heroImage",
@@ -46,6 +50,23 @@ const IMAGE_FIELDS = [
     label: "Page background texture (SVG or small tile)",
     uploadFolder: "site/textures",
     localFolder: "public/media/site/textures",
+  },
+];
+
+const CUSTOM_ORDERS_MEDIA_FIELDS = [
+  {
+    key: "customOrdersImage",
+    label: "Design With Us image",
+    uploadFolder: "site/homepage",
+    localFolder: "public/media/site/homepage",
+    placeholder: "/media/site/homepage/design.jpg",
+  },
+  {
+    key: "customOrdersVideo",
+    label: "Design With Us video",
+    uploadFolder: "site/homepage",
+    localFolder: "public/media/site/homepage",
+    placeholder: "https://.../design-with-us.mp4",
   },
 ];
 
@@ -118,6 +139,8 @@ export default function AdminSiteImagesPage() {
     return diffs;
   }
 
+  const mediaFields = [...IMAGE_FIELDS, ...CUSTOM_ORDERS_MEDIA_FIELDS];
+
   function pullFromLive() {
     if (!liveContent) return;
     setForm(liveContent);
@@ -180,7 +203,7 @@ export default function AdminSiteImagesPage() {
                   <p className="live-comparison-title">🔴 {getDiffFields().length} field(s) differ from live site</p>
                   <p className="live-comparison-fields">
                     Changed: {getDiffFields().map((k) => {
-                      const field = [...IMAGE_FIELDS, ...TEXT_FIELDS].find((f) => f.key === k);
+                      const field = [...mediaFields, ...TEXT_FIELDS].find((f) => f.key === k);
                       return field ? field.label : k;
                     }).join(", ")}
                   </p>
@@ -217,7 +240,7 @@ export default function AdminSiteImagesPage() {
                   Here's what's currently published on your live website. Red border = different from admin version.
                 </p>
                 <div className="live-gallery">
-                  {IMAGE_FIELDS.map((field) => {
+                  {mediaFields.map((field) => {
                     const liveValue = liveContent[field.key];
                     const adminValue = form[field.key];
                     const isDifferent = liveValue !== adminValue;
@@ -232,17 +255,27 @@ export default function AdminSiteImagesPage() {
                         </p>
                         {liveValue ? (
                           <div className="live-image-container">
-                            <img
-                              src={liveValue}
-                              alt={field.label}
-                              onError={(e) => {
-                                e.target.parentElement.innerHTML =
-                                  '<p style="color: #999; padding: 1rem; text-align: center;">Image not found</p>';
-                              }}
-                            />
+                            {isVideoPath(liveValue) ? (
+                              <video
+                                src={liveValue}
+                                controls
+                                muted
+                                playsInline
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              />
+                            ) : (
+                              <img
+                                src={liveValue}
+                                alt={field.label}
+                                onError={(e) => {
+                                  e.target.parentElement.innerHTML =
+                                    '<p style="color: #999; padding: 1rem; text-align: center;">Media not found</p>';
+                                }}
+                              />
+                            )}
                           </div>
                         ) : (
-                          <div className="live-image-empty">No image</div>
+                          <div className="live-image-empty">No media</div>
                         )}
                       </div>
                     );
@@ -257,9 +290,9 @@ export default function AdminSiteImagesPage() {
                 <h2 className="site-content-section-title">🔄 Image Comparisons (Admin vs Live)</h2>
                 <div className="comparison-grid">
                   {getDiffFields()
-                    .filter((key) => IMAGE_FIELDS.find((f) => f.key === key))
+                    .filter((key) => mediaFields.find((f) => f.key === key))
                     .map((key) => {
-                      const field = IMAGE_FIELDS.find((f) => f.key === key);
+                      const field = mediaFields.find((f) => f.key === key);
                       const adminValue = form[key];
                       const liveValue = liveContent[key];
                       return (
@@ -269,29 +302,37 @@ export default function AdminSiteImagesPage() {
                             <div className="comparison-image-column">
                               <p className="comparison-label admin">Admin Version</p>
                               {adminValue ? (
-                                <img
-                                  src={adminValue}
-                                  alt="Admin"
-                                  onError={(e) => {
-                                    e.target.style.display = "none";
-                                  }}
-                                />
+                                isVideoPath(adminValue) ? (
+                                  <video src={adminValue} controls muted playsInline />
+                                ) : (
+                                  <img
+                                    src={adminValue}
+                                    alt="Admin"
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
+                                  />
+                                )
                               ) : (
-                                <div className="comparison-empty">No image</div>
+                                <div className="comparison-empty">No media</div>
                               )}
                             </div>
                             <div className="comparison-image-column">
                               <p className="comparison-label live">Live Version</p>
                               {liveValue ? (
-                                <img
-                                  src={liveValue}
-                                  alt="Live"
-                                  onError={(e) => {
-                                    e.target.style.display = "none";
-                                  }}
-                                />
+                                isVideoPath(liveValue) ? (
+                                  <video src={liveValue} controls muted playsInline />
+                                ) : (
+                                  <img
+                                    src={liveValue}
+                                    alt="Live"
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
+                                  />
+                                )
                               ) : (
-                                <div className="comparison-empty">No image</div>
+                                <div className="comparison-empty">No media</div>
                               )}
                             </div>
                           </div>
@@ -347,6 +388,81 @@ export default function AdminSiteImagesPage() {
             <section className="site-content-section">
               <h2 className="site-content-section-title">✍️ Text Content</h2>
               <div className="site-content-fields">
+                <div className="site-content-fields">
+                  <div className="site-content-text-field">
+                    <strong style={{ display: "block", marginBottom: "8px", color: "#333" }}>Design With Us Media</strong>
+                    <p className="admin-note" style={{ margin: 0 }}>
+                      Manage the homepage custom orders section with either an image or a looping video.
+                    </p>
+                  </div>
+                  <label className="admin-field site-content-text-field">
+                    <span>Homepage custom orders media type</span>
+                    <select
+                      className="admin-input"
+                      value={form.customOrdersMediaType || "image"}
+                      onChange={(event) => set("customOrdersMediaType", event.target.value)}
+                    >
+                      <option value="image">Use image</option>
+                      <option value="video">Use video</option>
+                    </select>
+                    <p className="admin-note" style={{ marginTop: "8px" }}>
+                      Choose whether the Design With Us section shows a still image or a looping video.
+                    </p>
+                  </label>
+
+                  {CUSTOM_ORDERS_MEDIA_FIELDS.map((field) => {
+                    const value = form[field.key] || "";
+                    const isVideoField = field.key === "customOrdersVideo";
+                    return (
+                      <div key={field.key} className="site-image-field">
+                        <label className="admin-field">
+                          <span className="admin-note">{field.label}</span>
+                          <input
+                            className="admin-input"
+                            value={value}
+                            onChange={(event) => set(field.key, event.target.value)}
+                            placeholder={field.placeholder}
+                          />
+                        </label>
+                        <p className="caption" style={{ marginBottom: "8px" }}>
+                          Upload folder: <code>product-images/catalog/{field.uploadFolder}</code>
+                        </p>
+                        <p className="caption" style={{ marginBottom: "8px" }}>
+                          Local mirror: <code>{field.localFolder}</code>
+                        </p>
+                        {value ? (
+                          isVideoField ? (
+                            <video
+                              src={value}
+                              controls
+                              muted
+                              playsInline
+                              style={{ marginTop: 8, maxHeight: 140, maxWidth: 240, borderRadius: 6, background: "#111" }}
+                            />
+                          ) : (
+                            <img
+                              src={value}
+                              alt=""
+                              style={{ marginTop: 8, maxHeight: 100, maxWidth: 220, objectFit: "cover", borderRadius: 6 }}
+                              onError={(event) => {
+                                event.target.style.display = "none";
+                              }}
+                            />
+                          )
+                        ) : null}
+                        <LocalImageUpload
+                          label={isVideoField ? "Upload video from device" : "Upload image from device"}
+                          folder={field.uploadFolder}
+                          currentPath={value}
+                          accept={isVideoField ? "video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" : undefined}
+                          previewType={isVideoField ? "video" : "image"}
+                          onUploaded={(path) => set(field.key, path)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+
                 {TEXT_FIELDS.map((field) => (
                   <label key={field.key} className="admin-field site-content-text-field">
                     <span>{field.label}</span>
@@ -567,7 +683,8 @@ export default function AdminSiteImagesPage() {
                 background: #f5f5f5;
               }
 
-              .live-image-container img {
+              .live-image-container img,
+              .live-image-container video {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
@@ -635,7 +752,8 @@ export default function AdminSiteImagesPage() {
                 color: #166534;
               }
 
-              .comparison-image-column img {
+              .comparison-image-column img,
+              .comparison-image-column video {
                 width: 100%;
                 height: 200px;
                 object-fit: cover;

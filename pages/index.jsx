@@ -200,6 +200,10 @@ export default function HomePage({
         ? recentProducts
         : allProducts
   ).slice(0, 3);
+  const customOrdersMediaType = siteContent?.customOrdersMediaType === "video" ? "video" : "image";
+  const customOrdersImage = siteContent?.customOrdersImage || "/media/site/homepage/design.jpg";
+  const customOrdersVideo = siteContent?.customOrdersVideo || "";
+  const showCustomOrdersVideo = customOrdersMediaType === "video" && Boolean(customOrdersVideo);
 
   useEffect(() => {
     document.body.classList.add("home-page--hero-refresh");
@@ -240,22 +244,25 @@ export default function HomePage({
       <section className="custom-orders-section">
         <div className="custom-orders-card">
           <div className="custom-orders-media" aria-hidden="true">
-            {/* MEDIA: Replace src="" with your video or image URL here */}
-            <video
-              className="custom-orders-media__video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              src=""
-            />
-            <img
-              className="custom-orders-media__image"
-              src="/media/site/homepage/design.jpg"
-              alt="Jewelry being handcrafted"
-              loading="lazy"
-              decoding="async"
-            />
+            {showCustomOrdersVideo ? (
+              <video
+                className="custom-orders-media__video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                src={customOrdersVideo}
+                poster={customOrdersImage}
+              />
+            ) : (
+              <img
+                className="custom-orders-media__image"
+                src={customOrdersImage}
+                alt="Jewelry being handcrafted"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
             <span className="custom-orders-media__overlay" />
           </div>
 

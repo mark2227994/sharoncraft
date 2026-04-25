@@ -9,6 +9,8 @@ export default function LocalImageUpload({
   label = "Choose image from your device",
   folder = "",
   currentPath = "",
+  accept = "image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg",
+  previewType = "image",
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -69,7 +71,7 @@ export default function LocalImageUpload({
       <span className="admin-note">{label}</span>
       <input
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg"
+        accept={accept}
         onChange={onChange}
         disabled={busy}
         className="admin-input admin-input--file"
@@ -91,19 +93,35 @@ export default function LocalImageUpload({
       ) : null}
       {uploadedUrl && !busy ? (
         <div style={{ marginTop: "8px" }}>
-          <img
-            src={uploadedUrl}
-            alt="Uploaded preview"
-            style={{
-              maxWidth: "120px",
-              maxHeight: "120px",
-              borderRadius: "4px",
-              border: "2px solid #4CAF50",
-              padding: "4px",
-            }}
-          />
+          {previewType === "video" ? (
+            <video
+              src={uploadedUrl}
+              controls
+              muted
+              style={{
+                maxWidth: "180px",
+                maxHeight: "120px",
+                borderRadius: "4px",
+                border: "2px solid #4CAF50",
+                padding: "4px",
+                background: "#111",
+              }}
+            />
+          ) : (
+            <img
+              src={uploadedUrl}
+              alt="Uploaded preview"
+              style={{
+                maxWidth: "120px",
+                maxHeight: "120px",
+                borderRadius: "4px",
+                border: "2px solid #4CAF50",
+                padding: "4px",
+              }}
+            />
+          )}
           <p className="admin-note" style={{ marginTop: "6px", color: "#2E7D32" }}>
-            Image uploaded successfully
+            {previewType === "video" ? "Video uploaded successfully" : "Image uploaded successfully"}
           </p>
         </div>
       ) : null}
