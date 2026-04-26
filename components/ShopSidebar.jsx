@@ -2,13 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import Icon from "./icons";
 
 const PRICE_OPTIONS = [
-  { value: "all", label: "All Prices" },
   { value: "under-1000", label: "Under KES 1,000" },
-  { value: "1000-3000", label: "KES 1,000 - 3,000" },
-  { value: "3000-5000", label: "KES 3,000 - 5,000" },
+  { value: "1000-3000", label: "KES 1,000 – 3,000" },
+  { value: "3000-5000", label: "KES 3,000 – 5,000" },
   { value: "above-5000", label: "Above KES 5,000" },
 ];
 
+/**
+ * Find the parent chain for a given node id.
+ * Returns array of parent ids leading to (and including) the target.
+ */
 function findParentChain(nodes, targetId, parents = []) {
   for (const node of nodes) {
     if (node.id === targetId) {
@@ -36,51 +39,56 @@ export default function ShopSidebar({
   isOpen,
   onClose,
 }) {
+  /* ───────────────────────────────────────────
+     STATE: Accordion — only one parent open at a time
+     ─────────────────────────────────────────── */
   const activeChain = useMemo(
-    () => (activeSubcategory ? findParentChain(categoryTree, activeSubcategory) : findParentChain(categoryTree, activeCategory)),
+    () =>
+      activeSubcategory
+        ? findParentChain(categoryTree, activeSubcategory)
+        : findParentChain(categoryTree, activeCategory),
     [activeCategory, activeSubcategory, categoryTree],
   );
 
-  const [expanded, setExpanded] = useState(() => {
-    const seeded = new Set(activeChain.filter(Boolean));
-    seeded.add("jewellery");
-    return seeded;
-  });
+  // Determine default expanded parent from URL/active state
+  const defaultExpanded = useMemo(() => {
+    if (activeChain.length > 0) return activeChain[0];
+    if (activeCategory && activeCategory !== "all") return activeCategory;
+    return null;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [expandedCategory, setExpandedCategory] = useState(defaultExpanded);
+
+  // Keep expanded in sync if user navigates via tabs/breadcrumb
   useEffect(() => {
-    if (activeChain.length === 0) return;
-    setExpanded((current) => {
-      const next = new Set(current);
-      activeChain.forEach((id) => next.add(id));
-      return next;
-    });
-  }, [activeChain]);
+    const target = activeChain.length > 0 ? activeChain[0] : activeCategory !== "all" ? activeCategory : null;
+    if (target && target !== "all") {
+      setExpandedCategory((current) => (current === target ? current : target));
+    }
+  }, [activeChain, activeCategory]);
 
-  function toggleExpanded(nodeId) {
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(nodeId)) next.delete(nodeId);
-      else next.add(nodeId);
-      return next;
-    });
+  function toggleCategory(nodeId) {
+    setExpandedCategory((current) => (current === nodeId ? null : nodeId));
   }
 
-  function handleParentSelect(node) {
+  function selectSubcat(parentId, subId) {
+    onCategoryChange(parentId);
+    onSubcategoryChange(subId);
+    if (isMobile) onClose?.();
+  }
+
+  function selectCategory(node) {
+    const isAll = node.id === "all";
     onCategoryChange(node.id);
     onSubcategoryChange("");
-    if (node.children?.length) {
-      setExpanded((current) => {
-        const next = new Set(current);
-        next.add(node.id);
-        return next;
-      });
+    if (!isAll && node.children?.length) {
+      setExpandedCategory(node.id);
     }
     if (isMobile) onClose?.();
   }
 
-  function handleNestedSelect(parentId, nodeId) {
-    onCategoryChange(parentId);
-    onSubcategoryChange(nodeId);
+  function selectPriceRange(value) {
+    onPriceRangeChange(value);
     if (isMobile) onClose?.();
   }
 
@@ -89,71 +97,40 @@ export default function ShopSidebar({
     onSubcategoryChange("");
     onPriceRangeChange("all");
     onShowAvailableChange(false);
+    setExpandedCategory(null);
     if (isMobile) onClose?.();
   }
 
-  function renderNestedItems(items, parentId, level = 1) {
-    return (
-      <div className={`shop-sidebar__nested-level shop-sidebar__nested-level--${level}`}>
-        {items.map((item) => {
-          const isActive = activeSubcategory === item.id;
-          const isExpanded = expanded.has(item.id);
-          const hasChildren = Array.isArray(item.children) && item.children.length > 0;
-
-          return (
-            <div key={item.id} className="shop-sidebar__nested-item">
-              <div className="shop-sidebar__row">
-                <button
-                  type="button"
-                  className={`shop-sidebar__text-link shop-sidebar__text-link--sub shop-sidebar__text-link--level-${level}${isActive ? " shop-sidebar__text-link--active" : ""}`}
-                  onClick={() => handleNestedSelect(parentId, item.id)}
-                >
-                  {item.label}
-                </button>
-
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    className={`shop-sidebar__expand-btn${isExpanded ? " shop-sidebar__expand-btn--open" : ""}`}
-                    onClick={() => toggleExpanded(item.id)}
-                    aria-label={`${isExpanded ? "Collapse" : "Expand"} ${item.label}`}
-                  >
-                    <span className="shop-sidebar__arrow">›</span>
-                  </button>
-                ) : null}
-              </div>
-
-              {hasChildren ? (
-                <div className={`shop-sidebar__nested${isExpanded ? " shop-sidebar__nested--open" : ""}`}>
-                  {renderNestedItems(item.children, parentId, level + 1)}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
+  /* ───────────────────────────────────────────
+     SECTION: Collection (Categories)
+     ─────────────────────────────────────────── */
   function renderCollectionSection() {
     return (
       <div className="shop-sidebar__section">
-        <p className="shop-sidebar__title shop-sidebar__title--first">Collection</p>
+        <span className="shop-sidebar__title shop-sidebar__title--first">Collection</span>
 
         <div className="shop-sidebar__options-list" role="list">
           {categoryTree.map((node) => {
             const isAll = node.id === "all";
-            const isActive = isAll ? activeCategory === "all" && !activeSubcategory : activeCategory === node.id && !activeSubcategory;
-            const isExpanded = expanded.has(node.id);
+            if (!isAll && !node.children?.length) return null; // skip empty parents
+
+            const isActive = isAll
+              ? activeCategory === "all" && !activeSubcategory
+              : activeCategory === node.id && !activeSubcategory;
+            const isExpanded = expandedCategory === node.id;
             const hasChildren = Array.isArray(node.children) && node.children.length > 0;
 
             return (
               <div key={node.id} className="shop-sidebar__option-item" role="listitem">
-                <div className="shop-sidebar__row">
+                {/* Parent category row */}
+                <div className="shop-sidebar__row" onClick={() => (hasChildren ? toggleCategory(node.id) : selectCategory(node))}>
                   <button
                     type="button"
-                    className={`shop-sidebar__text-link${isActive ? " shop-sidebar__text-link--active" : ""}`}
-                    onClick={() => handleParentSelect(node)}
+                    className={`shop-sidebar__parent-link${isActive ? " shop-sidebar__parent-link--active" : ""}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectCategory(node);
+                    }}
                   >
                     {isAll ? "All Products" : node.label}
                   </button>
@@ -161,8 +138,11 @@ export default function ShopSidebar({
                   {hasChildren ? (
                     <button
                       type="button"
-                      className={`shop-sidebar__expand-btn${isExpanded ? " shop-sidebar__expand-btn--open" : ""}`}
-                      onClick={() => toggleExpanded(node.id)}
+                      className={`shop-sidebar__arrow-btn${isExpanded ? " shop-sidebar__arrow-btn--open" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCategory(node.id);
+                      }}
                       aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.label}`}
                     >
                       <span className="shop-sidebar__arrow">›</span>
@@ -170,9 +150,23 @@ export default function ShopSidebar({
                   ) : null}
                 </div>
 
+                {/* Subcategory list — accordion */}
                 {hasChildren ? (
-                  <div className={`shop-sidebar__nested${isExpanded ? " shop-sidebar__nested--open" : ""}`}>
-                    {renderNestedItems(node.children, node.id)}
+                  <div className={`shop-sidebar__subcats${isExpanded ? " shop-sidebar__subcats--open" : ""}`}>
+                    {node.children.map((sub) => {
+                      const isSubActive = activeSubcategory === sub.id;
+                      return (
+                        <span
+                          key={sub.id}
+                          className={`shop-sidebar__subcat${isSubActive ? " shop-sidebar__subcat--active" : ""}`}
+                          onClick={() => selectSubcat(node.id, sub.id)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          {sub.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
@@ -183,50 +177,55 @@ export default function ShopSidebar({
     );
   }
 
+  /* ───────────────────────────────────────────
+     SECTION: Availability
+     ─────────────────────────────────────────── */
   function renderAvailabilitySection() {
     return (
       <div className="shop-sidebar__section">
-        <p className="shop-sidebar__title">Availability</p>
+        <span className="shop-sidebar__title">Availability</span>
         <div className="shop-sidebar__availability" aria-label="Availability filter">
-          <button
-            type="button"
+          <span
             className={`shop-sidebar__availability-option${!showAvailableOnly ? " shop-sidebar__availability-option--active" : ""}`}
             onClick={() => {
               onShowAvailableChange(false);
               if (isMobile) onClose?.();
             }}
+            role="button"
+            tabIndex={0}
           >
             All
-          </button>
-          <button
-            type="button"
+          </span>
+          <span
             className={`shop-sidebar__availability-option${showAvailableOnly ? " shop-sidebar__availability-option--active" : ""}`}
             onClick={() => {
               onShowAvailableChange(true);
               if (isMobile) onClose?.();
             }}
+            role="button"
+            tabIndex={0}
           >
             In Stock
-          </button>
+          </span>
         </div>
       </div>
     );
   }
 
+  /* ───────────────────────────────────────────
+     SECTION: Price Range
+     ─────────────────────────────────────────── */
   function renderPriceSection() {
     return (
       <div className="shop-sidebar__section">
-        <p className="shop-sidebar__title">Price Range</p>
+        <span className="shop-sidebar__title">Price Range</span>
         <div className="shop-sidebar__options-list" role="list">
-          {PRICE_OPTIONS.filter((option) => option.value !== "all").map((option) => (
+          {PRICE_OPTIONS.map((option) => (
             <div key={option.value} className="shop-sidebar__option-item" role="listitem">
               <button
                 type="button"
-                className={`shop-sidebar__text-link${activePriceRange === option.value ? " shop-sidebar__text-link--active" : ""}`}
-                onClick={() => {
-                  onPriceRangeChange(option.value);
-                  if (isMobile) onClose?.();
-                }}
+                className={`shop-sidebar__parent-link${activePriceRange === option.value ? " shop-sidebar__parent-link--active" : ""}`}
+                onClick={() => selectPriceRange(option.value)}
               >
                 {option.label}
               </button>
@@ -237,16 +236,24 @@ export default function ShopSidebar({
     );
   }
 
+  /* ───────────────────────────────────────────
+     CLEAR ALL
+     ─────────────────────────────────────────── */
+  function renderClear() {
+    return (
+      <button type="button" onClick={handleClear} className="shop-sidebar__clear">
+        Clear All
+      </button>
+    );
+  }
+
   function renderSidebarContent() {
     return (
       <div className="shop-sidebar">
         {renderCollectionSection()}
         {renderAvailabilitySection()}
         {renderPriceSection()}
-
-        <button type="button" onClick={handleClear} className="shop-sidebar__clear">
-          Clear All
-        </button>
+        {renderClear()}
       </div>
     );
   }
@@ -257,7 +264,10 @@ export default function ShopSidebar({
 
       {isMobile ? (
         <div className={`shop-sidebar__overlay${isOpen ? " shop-sidebar__overlay--open" : ""}`} onClick={onClose}>
-          <div className={`shop-sidebar__drawer${isOpen ? " shop-sidebar__drawer--open" : ""}`} onClick={(event) => event.stopPropagation()}>
+          <div
+            className={`shop-sidebar__drawer${isOpen ? " shop-sidebar__drawer--open" : ""}`}
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="shop-sidebar__drawer-header">
               <h3>Filters</h3>
               <button type="button" onClick={onClose} className="shop-sidebar__close" aria-label="Close filters">
@@ -270,6 +280,7 @@ export default function ShopSidebar({
       ) : null}
 
       <style jsx>{`
+        /* ── Layout ── */
         .shop-sidebar__desktop {
           width: 180px;
           min-width: 180px;
@@ -291,6 +302,7 @@ export default function ShopSidebar({
           background: #ffffff;
         }
 
+        /* ── Section Labels ── */
         .shop-sidebar__section {
           margin: 0;
         }
@@ -313,6 +325,7 @@ export default function ShopSidebar({
           border-top: none;
         }
 
+        /* ── Category List ── */
         .shop-sidebar__options-list {
           display: block;
         }
@@ -323,11 +336,13 @@ export default function ShopSidebar({
 
         .shop-sidebar__row {
           display: flex;
-          align-items: flex-start;
-          gap: 8px;
+          justify-content: space-between;
+          align-items: center;
+          cursor: pointer;
         }
 
-        .shop-sidebar__text-link {
+        /* ── Parent Link ── */
+        .shop-sidebar__parent-link {
           display: block;
           flex: 1;
           padding: 5px 0;
@@ -346,11 +361,11 @@ export default function ShopSidebar({
           cursor: pointer;
         }
 
-        .shop-sidebar__text-link:hover {
+        .shop-sidebar__parent-link:hover {
           color: #8b5e3c;
         }
 
-        .shop-sidebar__text-link--active {
+        .shop-sidebar__parent-link--active {
           color: #1c1c1c;
           font-weight: 500;
           border-left-color: #8b5e3c;
@@ -358,7 +373,8 @@ export default function ShopSidebar({
           margin-left: -10px;
         }
 
-        .shop-sidebar__expand-btn {
+        /* ── Arrow Button ── */
+        .shop-sidebar__arrow-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -372,64 +388,60 @@ export default function ShopSidebar({
           cursor: pointer;
         }
 
-        .shop-sidebar__expand-btn:hover {
+        .shop-sidebar__arrow-btn:hover {
           color: #8b5e3c;
         }
 
         .shop-sidebar__arrow {
           display: inline-block;
           font-size: 9px;
+          color: #999;
           line-height: 1;
           transition: transform 0.2s ease;
         }
 
-        .shop-sidebar__expand-btn--open .shop-sidebar__arrow {
+        .shop-sidebar__arrow-btn--open .shop-sidebar__arrow {
           transform: rotate(90deg);
         }
 
-        .shop-sidebar__nested {
-          max-height: 0;
-          opacity: 0;
+        /* ── Subcategory List ── */
+        .shop-sidebar__subcats {
           overflow: hidden;
           transition: max-height 0.3s ease, opacity 0.3s ease;
+          max-height: 0;
+          opacity: 0;
         }
 
-        .shop-sidebar__nested--open {
-          max-height: 300px;
+        .shop-sidebar__subcats--open {
+          max-height: 400px;
           opacity: 1;
         }
 
-        .shop-sidebar__nested-level {
-          margin-left: 4px;
-          padding-left: 10px;
-          border-left: 0.5px solid #f0f0f0;
-        }
-
-        .shop-sidebar__nested-item {
+        .shop-sidebar__subcat {
           display: block;
-        }
-
-        .shop-sidebar__text-link--sub {
-          padding: 3px 0 3px 8px;
-          color: #888;
           font-size: 10px;
+          color: #888;
+          padding: 3px 0 3px 8px;
+          border-left: 0.5px solid #e8e8e8;
+          margin-left: 4px;
+          line-height: 1.6;
+          cursor: pointer;
+          transition: color 0.2s ease;
         }
 
-        .shop-sidebar__text-link--sub.shop-sidebar__text-link--active {
+        .shop-sidebar__subcat:hover {
           color: #8b5e3c;
-          border-left-color: #8b5e3c;
+        }
+
+        .shop-sidebar__subcat--active {
+          color: #8b5e3c;
           font-weight: 500;
+          border-left: 2px solid #8b5e3c;
         }
 
-        .shop-sidebar__text-link--level-2 {
-          padding-left: 16px;
-          color: #aaa;
-          font-size: 9px;
-        }
-
+        /* ── Availability ── */
         .shop-sidebar__availability {
           display: flex;
-          align-items: center;
           gap: 12px;
         }
 
@@ -456,6 +468,7 @@ export default function ShopSidebar({
           border-bottom-color: #1c1c1c;
         }
 
+        /* ── Clear All ── */
         .shop-sidebar__clear {
           display: block;
           margin-top: 20px;
@@ -477,6 +490,7 @@ export default function ShopSidebar({
           color: #1c1c1c;
         }
 
+        /* ── Mobile Drawer ── */
         .shop-sidebar__overlay {
           position: fixed;
           inset: 0;
@@ -554,3 +568,4 @@ export default function ShopSidebar({
     </>
   );
 }
+

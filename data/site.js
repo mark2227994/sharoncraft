@@ -36,35 +36,6 @@ export const shopCategoryTree = [
           categories: ["Jewellery"],
           jewelryTypes: ["earring"],
         },
-        children: [
-          {
-            id: "hoop-earrings",
-            label: "Hoop Earrings",
-            match: {
-              categories: ["Jewellery"],
-              jewelryTypes: ["earring"],
-              keywords: ["hoop"],
-            },
-          },
-          {
-            id: "drop-earrings",
-            label: "Drop Earrings",
-            match: {
-              categories: ["Jewellery"],
-              jewelryTypes: ["earring"],
-              keywords: ["drop"],
-            },
-          },
-          {
-            id: "stud-earrings",
-            label: "Stud Earrings",
-            match: {
-              categories: ["Jewellery"],
-              jewelryTypes: ["earring"],
-              keywords: ["stud"],
-            },
-          },
-        ],
       },
       {
         id: "bracelets",
@@ -207,14 +178,6 @@ export const shopCategoryTree = [
           keywords: ["key holder", "keychain", "key fob"],
         },
       },
-      {
-        id: "beaded-hair-accessories",
-        label: "Beaded Hair Accessories",
-        match: {
-          categories: ["Accessories"],
-          keywords: ["hair accessory", "hair clip", "headband", "beaded hair"],
-        },
-      },
     ],
   },
   {
@@ -303,19 +266,19 @@ export const shopCategoryTree = [
         },
       },
       {
-        id: "custom-gift-boxes",
-        label: "Custom Gift Boxes",
-        match: {
-          categories: ["Gift Sets"],
-          keywords: ["custom gift", "gift box"],
-        },
-      },
-      {
         id: "gift-wrapping",
         label: "Gift Wrapping",
         match: {
           categories: ["Gift Sets", "Accessories"],
           keywords: ["gift wrapping", "gift wrap"],
+        },
+      },
+      {
+        id: "custom-gift-boxes",
+        label: "Custom Gift Boxes",
+        match: {
+          categories: ["Gift Sets"],
+          keywords: ["custom gift", "gift box"],
         },
       },
     ],

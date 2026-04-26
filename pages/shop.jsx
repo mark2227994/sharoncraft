@@ -17,6 +17,7 @@ function flattenShopNodes(nodes, trail = []) {
     ...(Array.isArray(node.children) ? flattenShopNodes(node.children, [...trail, node.id]) : []),
   ]);
 }
+
 const LEGACY_CATEGORY_MAP = new Map([
   ["All", "all"],
   ["Jewellery", "jewellery"],
@@ -29,6 +30,7 @@ const LEGACY_CATEGORY_MAP = new Map([
   ["Home & Living", "home-living"],
   ["Gifted Carry", "gifted-carry"],
 ]);
+
 const LEGACY_SUBCATEGORY_MAP = new Map([
   ["necklace", "necklaces"],
   ["bracelet", "bracelets"],
