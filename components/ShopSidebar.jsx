@@ -107,7 +107,7 @@ export default function ShopSidebar({
   function renderCollectionSection() {
     return (
       <div className="shop-sidebar__section">
-        <span className="shop-sidebar__title shop-sidebar__title--first">Collection</span>
+        <div className="sidebar-section-label sidebar-section-label--first">Collection</div>
 
         <div className="shop-sidebar__options-list" role="list">
           {categoryTree.map((node) => {
@@ -121,12 +121,15 @@ export default function ShopSidebar({
             const hasChildren = Array.isArray(node.children) && node.children.length > 0;
 
             return (
-              <div key={node.id} className="shop-sidebar__option-item" role="listitem">
+              <div key={node.id} className="cat-item" role="listitem">
                 {/* Parent category row */}
-                <div className="shop-sidebar__row" onClick={() => (hasChildren ? toggleCategory(node.id) : selectCategory(node))}>
+                <div
+                  className="cat-parent"
+                  onClick={() => (hasChildren ? toggleCategory(node.id) : selectCategory(node))}
+                >
                   <button
                     type="button"
-                    className={`shop-sidebar__parent-link${isActive ? " shop-sidebar__parent-link--active" : ""}`}
+                    className={`cat-name${isActive ? " cat-name--active" : ""}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       selectCategory(node);
@@ -138,33 +141,35 @@ export default function ShopSidebar({
                   {hasChildren ? (
                     <button
                       type="button"
-                      className={`shop-sidebar__arrow-btn${isExpanded ? " shop-sidebar__arrow-btn--open" : ""}`}
+                      className={`cat-arrow${isExpanded ? " cat-arrow--open" : ""}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleCategory(node.id);
                       }}
                       aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.label}`}
                     >
-                      <span className="shop-sidebar__arrow">›</span>
+                      <span className="cat-arrow__icon">›</span>
                     </button>
                   ) : null}
                 </div>
 
                 {/* Subcategory list — accordion */}
                 {hasChildren ? (
-                  <div className={`shop-sidebar__subcats${isExpanded ? " shop-sidebar__subcats--open" : ""}`}>
+                  <div
+                    className={`subcat-list${isExpanded ? " subcat-list--open" : ""}`}
+                  >
                     {node.children.map((sub) => {
                       const isSubActive = activeSubcategory === sub.id;
                       return (
-                        <span
+                        <div
                           key={sub.id}
-                          className={`shop-sidebar__subcat${isSubActive ? " shop-sidebar__subcat--active" : ""}`}
+                          className={`subcat-item${isSubActive ? " subcat-item--active" : ""}`}
                           onClick={() => selectSubcat(node.id, sub.id)}
                           role="button"
                           tabIndex={0}
                         >
                           {sub.label}
-                        </span>
+                        </div>
                       );
                     })}
                   </div>
@@ -183,10 +188,10 @@ export default function ShopSidebar({
   function renderAvailabilitySection() {
     return (
       <div className="shop-sidebar__section">
-        <span className="shop-sidebar__title">Availability</span>
-        <div className="shop-sidebar__availability" aria-label="Availability filter">
-          <span
-            className={`shop-sidebar__availability-option${!showAvailableOnly ? " shop-sidebar__availability-option--active" : ""}`}
+        <div className="sidebar-section-label">Availability</div>
+        <div className="availability-options" aria-label="Availability filter">
+          <div
+            className={`avail-opt${!showAvailableOnly ? " avail-opt--active" : ""}`}
             onClick={() => {
               onShowAvailableChange(false);
               if (isMobile) onClose?.();
@@ -195,9 +200,9 @@ export default function ShopSidebar({
             tabIndex={0}
           >
             All
-          </span>
-          <span
-            className={`shop-sidebar__availability-option${showAvailableOnly ? " shop-sidebar__availability-option--active" : ""}`}
+          </div>
+          <div
+            className={`avail-opt${showAvailableOnly ? " avail-opt--active" : ""}`}
             onClick={() => {
               onShowAvailableChange(true);
               if (isMobile) onClose?.();
@@ -206,7 +211,7 @@ export default function ShopSidebar({
             tabIndex={0}
           >
             In Stock
-          </span>
+          </div>
         </div>
       </div>
     );
@@ -218,13 +223,13 @@ export default function ShopSidebar({
   function renderPriceSection() {
     return (
       <div className="shop-sidebar__section">
-        <span className="shop-sidebar__title">Price Range</span>
+        <div className="sidebar-section-label">Price Range</div>
         <div className="shop-sidebar__options-list" role="list">
           {PRICE_OPTIONS.map((option) => (
-            <div key={option.value} className="shop-sidebar__option-item" role="listitem">
+            <div key={option.value} className="price-item" role="listitem">
               <button
                 type="button"
-                className={`shop-sidebar__parent-link${activePriceRange === option.value ? " shop-sidebar__parent-link--active" : ""}`}
+                className={`price-opt${activePriceRange === option.value ? " price-opt--active" : ""}`}
                 onClick={() => selectPriceRange(option.value)}
               >
                 {option.label}
@@ -241,7 +246,7 @@ export default function ShopSidebar({
      ─────────────────────────────────────────── */
   function renderClear() {
     return (
-      <button type="button" onClick={handleClear} className="shop-sidebar__clear">
+      <button type="button" onClick={handleClear} className="clear-all">
         Clear All
       </button>
     );
@@ -303,23 +308,20 @@ export default function ShopSidebar({
         }
 
         /* ── Section Labels ── */
-        .shop-sidebar__section {
-          margin: 0;
-        }
-
-        .shop-sidebar__title {
+        .sidebar-section-label {
           display: block;
-          margin: 20px 0 10px;
-          padding-top: 20px;
-          border-top: 0.5px solid #f0f0f0;
-          color: #999;
           font-size: 9px;
           font-weight: 400;
           letter-spacing: 3px;
           text-transform: uppercase;
+          color: #999;
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 0.5px solid #f0f0f0;
+          margin-bottom: 10px;
         }
 
-        .shop-sidebar__title--first {
+        .sidebar-section-label--first {
           margin-top: 0;
           padding-top: 0;
           border-top: none;
@@ -330,19 +332,21 @@ export default function ShopSidebar({
           display: block;
         }
 
-        .shop-sidebar__option-item {
+        .cat-item {
           display: block;
+          width: 100%;
         }
 
-        .shop-sidebar__row {
+        .cat-parent {
           display: flex;
           justify-content: space-between;
           align-items: center;
           cursor: pointer;
+          width: 100%;
         }
 
         /* ── Parent Link ── */
-        .shop-sidebar__parent-link {
+        .cat-name {
           display: block;
           flex: 1;
           padding: 5px 0;
@@ -357,15 +361,15 @@ export default function ShopSidebar({
           line-height: 1.6;
           text-align: left;
           text-decoration: none;
-          transition: color 0.2s ease, border-left-width 0.2s ease, padding-left 0.2s ease, margin-left 0.2s ease;
+          transition: color 0.2s ease, border-left-color 0.2s ease, padding-left 0.2s ease, margin-left 0.2s ease;
           cursor: pointer;
         }
 
-        .shop-sidebar__parent-link:hover {
+        .cat-name:hover {
           color: #8b5e3c;
         }
 
-        .shop-sidebar__parent-link--active {
+        .cat-name--active {
           color: #1c1c1c;
           font-weight: 500;
           border-left-color: #8b5e3c;
@@ -374,7 +378,7 @@ export default function ShopSidebar({
         }
 
         /* ── Arrow Button ── */
-        .shop-sidebar__arrow-btn {
+        .cat-arrow {
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -388,11 +392,11 @@ export default function ShopSidebar({
           cursor: pointer;
         }
 
-        .shop-sidebar__arrow-btn:hover {
+        .cat-arrow:hover {
           color: #8b5e3c;
         }
 
-        .shop-sidebar__arrow {
+        .cat-arrow__icon {
           display: inline-block;
           font-size: 9px;
           color: #999;
@@ -400,25 +404,26 @@ export default function ShopSidebar({
           transition: transform 0.2s ease;
         }
 
-        .shop-sidebar__arrow-btn--open .shop-sidebar__arrow {
+        .cat-arrow--open .cat-arrow__icon {
           transform: rotate(90deg);
         }
 
         /* ── Subcategory List ── */
-        .shop-sidebar__subcats {
+        .subcat-list {
           overflow: hidden;
           transition: max-height 0.3s ease, opacity 0.3s ease;
           max-height: 0;
           opacity: 0;
         }
 
-        .shop-sidebar__subcats--open {
+        .subcat-list--open {
           max-height: 400px;
           opacity: 1;
         }
 
-        .shop-sidebar__subcat {
+        .subcat-item {
           display: block;
+          width: 100%;
           font-size: 10px;
           color: #888;
           padding: 3px 0 3px 8px;
@@ -426,51 +431,88 @@ export default function ShopSidebar({
           margin-left: 4px;
           line-height: 1.6;
           cursor: pointer;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
           transition: color 0.2s ease;
         }
 
-        .shop-sidebar__subcat:hover {
+        .subcat-item:hover {
           color: #8b5e3c;
         }
 
-        .shop-sidebar__subcat--active {
+        .subcat-item--active {
           color: #8b5e3c;
           font-weight: 500;
           border-left: 2px solid #8b5e3c;
         }
 
         /* ── Availability ── */
-        .shop-sidebar__availability {
+        .availability-options {
           display: flex;
-          gap: 12px;
+          gap: 16px;
+          margin-top: 4px;
         }
 
-        .shop-sidebar__availability-option {
-          padding: 0;
-          border: none;
-          border-bottom: 1px solid transparent;
-          background: transparent;
-          color: #999;
+        .avail-opt {
+          display: inline-flex;
           font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-          transition: color 0.2s ease, border-color 0.2s ease;
+          color: #999;
           cursor: pointer;
+          padding-bottom: 2px;
+          transition: color 0.2s ease, border-color 0.2s ease;
+          border-bottom: 1px solid transparent;
         }
 
-        .shop-sidebar__availability-option:hover {
+        .avail-opt:hover {
           color: #1c1c1c;
         }
 
-        .shop-sidebar__availability-option--active {
+        .avail-opt--active {
           color: #1c1c1c;
           font-weight: 500;
           border-bottom-color: #1c1c1c;
         }
 
-        /* ── Clear All ── */
-        .shop-sidebar__clear {
+        /* ── Price Range ── */
+        .price-item {
           display: block;
+          width: 100%;
+        }
+
+        .price-opt {
+          display: block;
+          width: 100%;
+          font-size: 11px;
+          color: #666;
+          padding: 5px 0;
+          margin: 0;
+          border: none;
+          border-left: 2px solid transparent;
+          background: transparent;
+          cursor: pointer;
+          letter-spacing: 0.5px;
+          line-height: 1.6;
+          text-align: left;
+          transition: color 0.2s ease, border-left-color 0.2s ease, padding-left 0.2s ease, margin-left 0.2s ease;
+        }
+
+        .price-opt:hover {
+          color: #8b5e3c;
+        }
+
+        .price-opt--active {
+          color: #1c1c1c;
+          font-weight: 500;
+          border-left-color: #8b5e3c;
+          padding-left: 8px;
+          margin-left: -10px;
+        }
+
+        /* ── Clear All ── */
+        .clear-all {
+          display: block;
+          width: 100%;
           margin-top: 20px;
           padding: 20px 0 0;
           border: none;
@@ -486,7 +528,7 @@ export default function ShopSidebar({
           cursor: pointer;
         }
 
-        .shop-sidebar__clear:hover {
+        .clear-all:hover {
           color: #1c1c1c;
         }
 
