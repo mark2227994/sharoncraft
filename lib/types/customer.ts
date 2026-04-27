@@ -8,8 +8,7 @@ export type Customer = {
   total_orders: number;
   total_spent: number;
   created_at: string;
-  updated_at: string;
 };
 
-export type CreateCustomerInput = Omit<Customer, 'id' | 'total_orders' | 'total_spent' | 'created_at' | 'updated_at'>;
+export type CreateCustomerInput = Omit<Customer, 'id' | 'total_orders' | 'total_spent' | 'created_at'>;
 export type UpdateCustomerInput = Partial<CreateCustomerInput>;

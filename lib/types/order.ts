@@ -21,8 +21,7 @@ export type Order = {
   tracking_number: string | null;
   notes: string | null;
   created_at: string;
-  updated_at: string;
 };
 
-export type CreateOrderInput = Omit<Order, 'id' | 'created_at' | 'updated_at'>;
+export type CreateOrderInput = Omit<Order, 'id' | 'created_at'>;
 export type UpdateOrderInput = Partial<CreateOrderInput>;
