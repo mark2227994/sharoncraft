@@ -52,6 +52,7 @@
   "exclude": [
     "node_modules",
     ".next",
-    "supabase/functions/**/*"
+    "supabase/functions/**/*",
+    "google-calendar-mcp/**/*"
   ]
 }
