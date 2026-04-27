@@ -8,7 +8,7 @@ import { Product } from '@/lib/types';
 export default function ProductFormPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = params.id as string;
+  const productId = typeof params?.id === 'string' ? params.id : '';
   const isEditing = productId && productId !== 'new';
 
   const [loading, setLoading] = useState(isEditing);
@@ -49,7 +49,7 @@ export default function ProductFormPage() {
 
     if (error) {
       console.error('Error fetching product:', error);
-      router.push('/admin/products');
+      router.push('/admin-v2/products');
       return;
     }
 
@@ -94,7 +94,7 @@ export default function ProductFormPage() {
       return;
     }
 
-    router.push('/admin/products');
+    router.push('/admin-v2/products');
   }
 
   if (loading) return <div className="text-xs text-gray-500">Loading...</div>;
@@ -229,7 +229,7 @@ export default function ProductFormPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/admin/products')}
+            onClick={() => router.push('/admin-v2/products')}
             className="text-xs tracking-wider uppercase px-4 py-2 border rounded-sm transition-colors hover:bg-gray-50"
             style={{ borderColor: '#e0e0e0', letterSpacing: '2px' }}
           >

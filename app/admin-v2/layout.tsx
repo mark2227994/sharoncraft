@@ -14,7 +14,7 @@ export default function AdminLayout({
   async function handleLogout() {
     await supabase.auth.signOut();
     document.cookie = 'auth-token=; path=/; max-age=0';
-    router.push('/admin/login');
+    router.push('/admin-v2/login');
   }
 
   return (
@@ -38,7 +38,7 @@ export default function AdminLayout({
           <ul className="space-y-1 mt-3">
             <li>
               <Link
-                href="/admin"
+                href="/admin-v2"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -48,7 +48,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/orders"
+                href="/admin-v2/orders"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -58,7 +58,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/products"
+                href="/admin-v2/products"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -68,7 +68,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/customers"
+                href="/admin-v2/customers"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -87,7 +87,7 @@ export default function AdminLayout({
           <ul className="space-y-1 mt-3">
             <li>
               <Link
-                href="/admin/categories"
+                href="/admin-v2/categories"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -97,7 +97,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/inventory"
+                href="/admin-v2/inventory"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -107,7 +107,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/media"
+                href="/admin-v2/media"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -117,7 +117,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/discounts"
+                href="/admin-v2/discounts"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -136,7 +136,7 @@ export default function AdminLayout({
           <ul className="space-y-1 mt-3">
             <li>
               <Link
-                href="/admin/migration"
+                href="/admin-v2/migration"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -146,7 +146,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/reviews"
+                href="/admin-v2/reviews"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -156,7 +156,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/custom-orders"
+                href="/admin-v2/custom-orders"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -166,7 +166,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/settings"
+                href="/admin-v2/settings"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >

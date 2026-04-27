@@ -52,7 +52,7 @@ export default function LoginPage() {
       document.cookie = `auth-token=${data.session.access_token}; path=/; max-age=3600`;
 
       // Redirect to admin dashboard
-      router.push('/admin');
+      router.push('/admin-v2');
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       console.error(err);

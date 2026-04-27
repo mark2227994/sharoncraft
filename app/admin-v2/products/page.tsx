@@ -81,7 +81,7 @@ export default function ProductsPage() {
           <p className="text-xs text-gray-500 mt-1">{products.length} items</p>
         </div>
         <Link
-          href="/admin/products/new"
+          href="/admin-v2/products/new"
           className="text-xs tracking-wider uppercase px-4 py-2 rounded-sm transition-opacity"
           style={{
             backgroundColor: '#1c1c1c',
@@ -167,7 +167,7 @@ export default function ProductsPage() {
                   </td>
                   <td className="px-4 py-3 space-x-2">
                     <Link
-                      href={`/admin/products/${product.id}`}
+                      href={`/admin-v2/products/${product.id}`}
                       className="text-xs hover:underline"
                       style={{ color: '#1c1c1c' }}
                     >
