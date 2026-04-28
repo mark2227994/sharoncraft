@@ -1,8 +1,23 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  Users,
+  Grid3X3,
+  Archive,
+  Image as ImageIcon,
+  Tag,
+  Star,
+  ClipboardList,
+  Settings,
+  Bell,
+} from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -10,12 +25,41 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const currentPath = pathname ?? '';
+  const [adminEmail, setAdminEmail] = useState<string>('Admin');
+
+  useEffect(() => {
+    async function fetchSession() {
+      try {
+        const response = await supabase.auth.getSession();
+        if (response && response.data && response.data.session) {
+          setAdminEmail(response.data.session.user?.email ?? 'Admin');
+        } else {
+          setAdminEmail('Admin');
+        }
+      } catch (error) {
+        console.error('Session fetch error:', error);
+        setAdminEmail('Admin');
+      }
+    }
+    fetchSession();
+  }, []);
+
+  const isActive = (href: string) => 
+    href === '/admin-v2' ? currentPath === '/admin-v2' : currentPath.startsWith(href);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     document.cookie = 'auth-token=; path=/; max-age=0';
     router.push('/admin-v2/login');
   }
+
+  const iconProps = {
+    size: 14,
+    strokeWidth: 1.5,
+    style: { opacity: 0.7 },
+  };
 
   return (
     <div className="flex h-screen bg-gray-100" style={{ backgroundColor: '#f8f8f6' }}>
@@ -39,40 +83,56 @@ export default function AdminLayout({
             <li>
               <Link
                 href="/admin-v2"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>📊</span>
+                <LayoutDashboard {...iconProps} />
                 <span>Dashboard</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/orders"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/orders') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/orders') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/orders') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>📦</span>
+                <ShoppingBag {...iconProps} />
                 <span>Orders</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/products"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/products') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/products') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/products') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>🛍️</span>
+                <Package {...iconProps} />
                 <span>Products</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/customers"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/customers') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/customers') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/customers') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>👥</span>
+                <Users {...iconProps} />
                 <span>Customers</span>
               </Link>
             </li>
@@ -88,40 +148,56 @@ export default function AdminLayout({
             <li>
               <Link
                 href="/admin-v2/categories"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/categories') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/categories') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/categories') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>🗂️</span>
+                <Grid3X3 {...iconProps} />
                 <span>Categories</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/inventory"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/inventory') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/inventory') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/inventory') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>📦</span>
+                <Archive {...iconProps} />
                 <span>Inventory</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/media"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/media') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/media') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/media') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>🖼️</span>
+                <ImageIcon {...iconProps} />
                 <span>Media</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/discounts"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/discounts') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/discounts') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/discounts') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>🎯</span>
+                <Tag {...iconProps} />
                 <span>Discounts</span>
               </Link>
             </li>
@@ -136,41 +212,43 @@ export default function AdminLayout({
           <ul className="space-y-1 mt-3">
             <li>
               <Link
-                href="/admin-v2/migration"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
-              >
-                <span>🔄</span>
-                <span>Migration</span>
-              </Link>
-            </li>
-            <li>
-              <Link
                 href="/admin-v2/reviews"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/reviews') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/reviews') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/reviews') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>⭐</span>
+                <Star {...iconProps} />
                 <span>Reviews</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/custom-orders"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/custom-orders') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/custom-orders') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/custom-orders') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>🎁</span>
+                <ClipboardList {...iconProps} />
                 <span>Custom Orders</span>
               </Link>
             </li>
             <li>
               <Link
                 href="/admin-v2/settings"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
-                style={{ color: 'rgba(255,255,255,0.6)' }}
+                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                style={{
+                  color: isActive('/admin-v2/settings') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                  borderLeftColor: isActive('/admin-v2/settings') ? '#8B5E3C' : 'transparent',
+                  backgroundColor: isActive('/admin-v2/settings') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                }}
               >
-                <span>⚙️</span>
+                <Settings {...iconProps} />
                 <span>Settings</span>
               </Link>
             </li>
@@ -182,8 +260,8 @@ export default function AdminLayout({
           <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
             Admin User
           </p>
-          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            admin@example.com
+          <p className="text-xs mb-3 truncate max-w-[160px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            {adminEmail}
           </p>
           <button
             onClick={handleLogout}
@@ -204,10 +282,10 @@ export default function AdminLayout({
               Admin Dashboard
             </h1>
             <div className="flex items-center gap-4">
-              <button className="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded transition-colors">
-                🔔
+              <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors" style={{ borderRadius: '2px' }}>
+                <Bell size={16} strokeWidth={1.5} style={{ color: '#999' }} />
               </button>
-              <div className="w-8 h-8 flex items-center justify-center text-xs font-medium text-white rounded" style={{ backgroundColor: '#8B5E3C' }}>
+              <div className="w-8 h-8 flex items-center justify-center text-xs font-medium text-white" style={{ backgroundColor: '#8B5E3C', borderRadius: '2px' }}>
                 SK
               </div>
             </div>

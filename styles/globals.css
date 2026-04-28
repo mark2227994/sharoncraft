@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ============================================================
    SHARONCRAFT.CO.KE — Global Design Tokens
    Anti-AI rule: No component library. Hand-authored CSS only.

@@ -24,17 +24,23 @@ export default function CategoriesPage() {
   async function fetchCategories() {
     setLoading(true);
     try {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('display_order');
+
+      console.log('Categories response:', { data, error });
 
       if (error) {
         console.error('Error fetching categories:', error);
         return;
       }
 
+      console.log('Setting categories:', data);
       setCategories(data || []);
+    } catch (err) {
+      console.error('Exception fetching categories:', err);
     } finally {
       setLoading(false);
     }

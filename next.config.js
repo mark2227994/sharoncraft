@@ -2,6 +2,8 @@
 const nextConfig = {
   async redirects() {
     return [
+      { source: "/admin", destination: "/admin-v2", permanent: false },
+      { source: "/admin/login", destination: "/admin-v2/login", permanent: false },
       { source: "/leadership.html", destination: "/#about-story", permanent: true },
       { source: "/archive/leadership.html", destination: "/#about-story", permanent: true },
       { source: "/why-trust-sharoncraft.html", destination: "/#about-story", permanent: true },

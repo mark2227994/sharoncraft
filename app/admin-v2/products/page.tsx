@@ -20,6 +20,7 @@ export default function ProductsPage() {
   async function fetchProducts() {
     setLoading(true);
     try {
+      console.log('Fetching products...');
       let query = supabase.from('products').select('*').order('created_at', { ascending: false });
 
       if (searchTerm) {
@@ -31,12 +32,16 @@ export default function ProductsPage() {
 
       const { data, error } = await query;
 
+      console.log('Products response:', { data, error, count: data?.length });
+
       if (error) {
         console.error('Error fetching products:', error);
         return;
       }
 
       setProducts(data || []);
+    } catch (err) {
+      console.error('Exception fetching products:', err);
     } finally {
       setLoading(false);
     }
