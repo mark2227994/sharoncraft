@@ -46,7 +46,7 @@ export default function AdminLayout({
     fetchSession();
   }, []);
 
-  const isActive = (href: string) => 
+  const isActive = (href: string) =>
     href === '/admin-v2' ? currentPath === '/admin-v2' : currentPath.startsWith(href);
 
   async function handleLogout() {
@@ -64,7 +64,10 @@ export default function AdminLayout({
   return (
     <div className="flex h-screen bg-gray-100" style={{ backgroundColor: '#f8f8f6' }}>
       {/* SIDEBAR */}
-      <aside className="w-56 bg-black text-white fixed h-full overflow-y-auto" style={{ backgroundColor: '#1c1c1c' }}>
+      <aside
+        className="fixed flex h-full w-56 flex-col overflow-hidden bg-black text-white"
+        style={{ backgroundColor: '#1c1c1c' }}
+      >
         <div className="p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <h2 className="text-sm font-normal tracking-wider uppercase mb-1" style={{ letterSpacing: '2px' }}>
             SHARONCRAFT
@@ -74,189 +77,191 @@ export default function AdminLayout({
           </p>
         </div>
 
-        {/* MAIN Section */}
-        <nav className="pt-6">
-          <label className="px-4 text-xs tracking-wider uppercase font-normal" style={{ letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
-            MAIN
-          </label>
-          <ul className="space-y-1 mt-3">
-            <li>
-              <Link
-                href="/admin-v2"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <LayoutDashboard {...iconProps} />
-                <span>Dashboard</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/orders"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/orders') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/orders') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/orders') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <ShoppingBag {...iconProps} />
-                <span>Orders</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/products"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/products') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/products') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/products') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Package {...iconProps} />
-                <span>Products</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/customers"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/customers') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/customers') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/customers') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Users {...iconProps} />
-                <span>Customers</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        <div className="flex-1 overflow-y-auto pb-4">
+          {/* MAIN Section */}
+          <nav className="pt-6">
+            <label className="px-4 text-xs tracking-wider uppercase font-normal" style={{ letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
+              MAIN
+            </label>
+            <ul className="space-y-1 mt-3">
+              <li>
+                <Link
+                  href="/admin-v2"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <LayoutDashboard {...iconProps} />
+                  <span>Dashboard</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/orders"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/orders') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/orders') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/orders') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <ShoppingBag {...iconProps} />
+                  <span>Orders</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/products"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/products') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/products') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/products') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Package {...iconProps} />
+                  <span>Products</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/customers"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/customers') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/customers') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/customers') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Users {...iconProps} />
+                  <span>Customers</span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
 
-        {/* STORE Section */}
-        <nav className="pt-6">
-          <label className="px-4 text-xs tracking-wider uppercase font-normal" style={{ letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
-            STORE
-          </label>
-          <ul className="space-y-1 mt-3">
-            <li>
-              <Link
-                href="/admin-v2/categories"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/categories') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/categories') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/categories') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Grid3X3 {...iconProps} />
-                <span>Categories</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/inventory"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/inventory') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/inventory') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/inventory') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Archive {...iconProps} />
-                <span>Inventory</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/media"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/media') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/media') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/media') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <ImageIcon {...iconProps} />
-                <span>Media</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/discounts"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/discounts') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/discounts') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/discounts') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Tag {...iconProps} />
-                <span>Discounts</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
+          {/* STORE Section */}
+          <nav className="pt-6">
+            <label className="px-4 text-xs tracking-wider uppercase font-normal" style={{ letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
+              STORE
+            </label>
+            <ul className="space-y-1 mt-3">
+              <li>
+                <Link
+                  href="/admin-v2/categories"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/categories') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/categories') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/categories') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Grid3X3 {...iconProps} />
+                  <span>Categories</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/inventory"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/inventory') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/inventory') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/inventory') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Archive {...iconProps} />
+                  <span>Inventory</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/media"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/media') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/media') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/media') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <ImageIcon {...iconProps} />
+                  <span>Media</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/discounts"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/discounts') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/discounts') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/discounts') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Tag {...iconProps} />
+                  <span>Discounts</span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
 
-        {/* OTHER Section */}
-        <nav className="pt-6">
-          <label className="px-4 text-xs tracking-wider uppercase font-normal" style={{ letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
-            OTHER
-          </label>
-          <ul className="space-y-1 mt-3">
-            <li>
-              <Link
-                href="/admin-v2/reviews"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/reviews') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/reviews') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/reviews') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Star {...iconProps} />
-                <span>Reviews</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/custom-orders"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/custom-orders') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/custom-orders') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/custom-orders') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <ClipboardList {...iconProps} />
-                <span>Custom Orders</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/admin-v2/settings"
-                className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
-                style={{
-                  color: isActive('/admin-v2/settings') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
-                  borderLeftColor: isActive('/admin-v2/settings') ? '#8B5E3C' : 'transparent',
-                  backgroundColor: isActive('/admin-v2/settings') ? 'rgba(255,255,255,0.03)' : 'transparent',
-                }}
-              >
-                <Settings {...iconProps} />
-                <span>Settings</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
+          {/* OTHER Section */}
+          <nav className="pt-6">
+            <label className="px-4 text-xs tracking-wider uppercase font-normal" style={{ letterSpacing: '2px', color: 'rgba(255,255,255,0.3)' }}>
+              OTHER
+            </label>
+            <ul className="space-y-1 mt-3">
+              <li>
+                <Link
+                  href="/admin-v2/reviews"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/reviews') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/reviews') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/reviews') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Star {...iconProps} />
+                  <span>Reviews</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/custom-orders"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/custom-orders') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/custom-orders') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/custom-orders') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <ClipboardList {...iconProps} />
+                  <span>Custom Orders</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin-v2/settings"
+                  className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors border-l-2"
+                  style={{
+                    color: isActive('/admin-v2/settings') ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.6)',
+                    borderLeftColor: isActive('/admin-v2/settings') ? '#8B5E3C' : 'transparent',
+                    backgroundColor: isActive('/admin-v2/settings') ? 'rgba(255,255,255,0.03)' : 'transparent',
+                  }}
+                >
+                  <Settings {...iconProps} />
+                  <span>Settings</span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
 
         {/* Bottom Sign Out */}
-        <div className="absolute bottom-0 w-56 p-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="w-56 shrink-0 border-t p-4" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
             Admin User
           </p>
