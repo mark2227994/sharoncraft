@@ -283,6 +283,15 @@ export default function SettingsPage() {
             />
             <div className="space-y-2 mb-3">
               <label className="text-xs font-medium block">Portrait Image</label>
+              {artisanFormData.image_url && (
+                <div className="w-full h-24 bg-gray-200 rounded-sm flex items-center justify-center mb-2">
+                  <img
+                    src={artisanFormData.image_url}
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-sm"
+                  />
+                </div>
+              )}
               <input
                 type="file"
                 accept="image/*"
@@ -298,7 +307,13 @@ export default function SettingsPage() {
               />
               {artisanUploading && <p className="text-xs text-gray-500">Uploading...</p>}
               {artisanFormData.image_url && (
-                <p className="text-xs text-gray-600 truncate">✓ Image ready</p>
+                <button
+                  onClick={() => setArtisanFormData({ ...artisanFormData, image_url: '' })}
+                  className="text-xs px-2 py-1 border rounded-sm"
+                  style={{ borderColor: '#e0e0e0', color: '#c33' }}
+                >
+                  Clear Image
+                </button>
               )}
             </div>
             <textarea

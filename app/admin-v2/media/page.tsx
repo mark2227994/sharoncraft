@@ -121,8 +121,8 @@ export default function MediaPage() {
         <p className="text-xs text-gray-500 mt-1">Manage homepage hero slideshow</p>
       </div>
 
-      {/* Add New Slide Form */}
-      {editingId === 'new' && (
+      {/* Add/Edit Slide Form */}
+      {editingId && (
         <div
           className="border p-4 rounded-sm space-y-3"
           style={{ borderColor: '#f0f0f0', backgroundColor: '#fafafa' }}
@@ -145,6 +145,15 @@ export default function MediaPage() {
           />
           <div className="space-y-2">
             <label className="text-xs font-medium block">Image</label>
+            {formData.image_url && (
+              <div className="w-full h-32 bg-gray-200 rounded-sm flex items-center justify-center mb-2">
+                <img
+                  src={formData.image_url}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-sm"
+                />
+              </div>
+            )}
             <input
               type="file"
               accept="image/*"
@@ -160,12 +169,18 @@ export default function MediaPage() {
             />
             {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
             {formData.image_url && (
-              <p className="text-xs text-gray-600 truncate">✓ Image ready</p>
+              <button
+                onClick={() => setFormData({ ...formData, image_url: '' })}
+                className="text-xs px-2 py-1 border rounded-sm"
+                style={{ borderColor: '#e0e0e0', color: '#c33' }}
+              >
+                Clear Image
+              </button>
             )}
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => saveSlide()}
+              onClick={() => saveSlide(editingId === 'new' ? undefined : editingId)}
               className="text-xs px-3 py-2 rounded-sm"
               style={{
                 backgroundColor: '#1c1c1c',
@@ -189,7 +204,7 @@ export default function MediaPage() {
       )}
 
       {/* Add Button */}
-      {editingId !== 'new' && (
+      {!editingId && (
         <button
           onClick={() => setEditingId('new')}
           className="text-xs px-3 py-2 rounded-sm"
@@ -232,7 +247,21 @@ export default function MediaPage() {
                   <p className="text-xs text-gray-600 mt-1">{slide.subtitle}</p>
                   <p className="text-xs text-gray-500 mt-2">{slide.image_url}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setEditingId(slide.id);
+                      setFormData({
+                        title: slide.headline,
+                        subtitle: slide.subtitle,
+                        image_url: slide.image_url,
+                      });
+                    }}
+                    className="text-xs hover:underline"
+                    style={{ color: '#1c1c1c' }}
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => toggleSlide(slide.id, slide.is_visible)}
                     className="text-xs px-2 py-1 rounded-sm transition-colors"

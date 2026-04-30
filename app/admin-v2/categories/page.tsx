@@ -130,8 +130,8 @@ export default function CategoriesPage() {
         <p className="text-xs text-gray-500 mt-1">{categories.length} categories</p>
       </div>
 
-      {/* Add New Category Form */}
-      {editingId === 'new' && (
+      {/* Add/Edit Category Form */}
+      {editingId && (
         <div
           className="border p-4 rounded-sm"
           style={{ borderColor: '#f0f0f0', backgroundColor: '#fafafa' }}
@@ -154,6 +154,15 @@ export default function CategoriesPage() {
           />
           <div className="space-y-2 mb-3">
             <label className="text-xs font-medium block">Category Image</label>
+            {formData.image_url && (
+              <div className="w-full h-24 bg-gray-200 rounded-sm flex items-center justify-center mb-2">
+                <img
+                  src={formData.image_url}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-sm"
+                />
+              </div>
+            )}
             <input
               type="file"
               accept="image/*"
@@ -169,12 +178,18 @@ export default function CategoriesPage() {
             />
             {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
             {formData.image_url && (
-              <p className="text-xs text-gray-600 truncate">✓ Image ready</p>
+              <button
+                onClick={() => setFormData({ ...formData, image_url: '' })}
+                className="text-xs px-2 py-1 border rounded-sm"
+                style={{ borderColor: '#e0e0e0', color: '#c33' }}
+              >
+                Clear Image
+              </button>
             )}
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => saveCategory()}
+              onClick={() => saveCategory(editingId === 'new' ? undefined : editingId)}
               className="text-xs px-3 py-2 rounded-sm"
               style={{
                 backgroundColor: '#1c1c1c',
@@ -198,7 +213,7 @@ export default function CategoriesPage() {
       )}
 
       {/* Add Button */}
-      {editingId !== 'new' && (
+      {!editingId && (
         <button
           onClick={() => setEditingId('new')}
           className="text-xs px-3 py-2 rounded-sm"
@@ -242,6 +257,20 @@ export default function CategoriesPage() {
                 )}
               </div>
               <div className="flex gap-3 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    setEditingId(category.id);
+                    setFormData({
+                      name: category.name,
+                      subcategories: category.subcategories.join(', '),
+                      image_url: category.image_url || '',
+                    });
+                  }}
+                  className="text-xs hover:underline"
+                  style={{ color: '#1c1c1c' }}
+                >
+                  Edit
+                </button>
                 <button
                   onClick={() => toggleVisibility(category.id, category.is_visible)}
                   className="text-xs px-2 py-1 rounded-sm transition-colors"
