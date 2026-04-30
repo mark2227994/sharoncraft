@@ -169,7 +169,7 @@ export default function CustomOrderPage() {
                   <div>3-5 days production</div>
                 </div>
                 <div className="pricing-row">
-                  <div><strong>Home Decor Item</strong></div>
+                  <div><strong>Home & Living Item</strong></div>
                   <div>KES 3,000 - 8,000</div>
                   <div>Depends on size</div>
                 </div>

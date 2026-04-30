@@ -125,8 +125,9 @@ export default function Footer({ siteContent }) {
             <div className="footer__links">
               <Link href="/shop" className="footer__link">Shop All Products</Link>
               <Link href="/shop?category=Jewellery" className="footer__link">Jewellery</Link>
-              <Link href="/shop?category=Home%20Decor" className="footer__link">Home Decor</Link>
-              <Link href="/shop?category=Gift%20Sets" className="footer__link">Gift Sets</Link>
+              <Link href="/shop?category=Home%20%26%20Living" className="footer__link">Home & Living</Link>
+              <Link href="/shop?category=Gifted%20Carry" className="footer__link">Gifted Carry</Link>
+              <Link href="/shop?category=African%20Wear" className="footer__link">African Wear</Link>
               <Link href="/custom-order" className="footer__link">Custom Design</Link>
               <Link href="/track-order" className="footer__link">Track Order</Link>
             </div>

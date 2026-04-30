@@ -17,7 +17,7 @@ export default function MobileProductShowcase({ products = [] }) {
     },
     {
       id: 2,
-      name: "Terracotta Home Decor",
+      name: "Terracotta Home & Living",
       price: 35,
       image: "https://images.unsplash.com/photo-1578500494198-246f612d03b3?w=500&h=500&fit=crop",
       category: "Home",

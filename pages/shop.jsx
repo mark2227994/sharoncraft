@@ -37,6 +37,33 @@ const LEGACY_SUBCATEGORY_MAP = new Map([
   ["earring", "earrings"],
 ]);
 
+function compactText(value) {
+  return String(value || "").trim();
+}
+
+function slugifyShopValue(value) {
+  return compactText(value)
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function resolveShopCategoryId(value) {
+  const rawValue = compactText(value);
+  if (!rawValue) return "";
+
+  return (
+    LEGACY_CATEGORY_MAP.get(rawValue) ||
+    LEGACY_CATEGORY_MAP.get(rawValue.replace(/\s+/g, " ")) ||
+    LEGACY_CATEGORY_MAP.get(rawValue.replace(/\sand\s/gi, " & ")) ||
+    LEGACY_CATEGORY_MAP.get(rawValue.replace(/\s&\s/g, " and ")) ||
+    LEGACY_CATEGORY_MAP.get(rawValue.replace(/-/g, " ")) ||
+    slugifyShopValue(rawValue)
+  );
+}
+
 function getProductSearchText(product) {
   return [
     product?.name,
@@ -55,8 +82,16 @@ function getProductSearchText(product) {
 function matchesRule(product, match) {
   if (!match) return true;
 
-  if (Array.isArray(match.categories) && match.categories.length > 0 && !match.categories.includes(product.category)) {
-    return false;
+  if (Array.isArray(match.categories) && match.categories.length > 0) {
+    const productCategoryId = resolveShopCategoryId(product?.category);
+    const categoryMatch = match.categories.some((category) => {
+      const matchCategoryId = resolveShopCategoryId(category);
+      return matchCategoryId ? matchCategoryId === productCategoryId : category === product.category;
+    });
+
+    if (!categoryMatch) {
+      return false;
+    }
   }
 
   if (
@@ -77,13 +112,40 @@ function matchesRule(product, match) {
   return true;
 }
 
-function resolveSubcategoryId(querySubcategory, queryJewelryType, nodeById) {
-  const rawSubcategory = typeof querySubcategory === "string" ? querySubcategory.trim() : "";
-  if (rawSubcategory && nodeById.has(rawSubcategory)) {
-    return rawSubcategory;
+function productMatchesCategoryNode(product, node) {
+  if (!node) return false;
+  return resolveShopCategoryId(product?.category) === node.id;
+}
+
+function getShopNodeLookupValues(node) {
+  return Array.from(
+    new Set(
+      [node?.id, node?.label, node?.queryValue]
+        .flatMap((value) => {
+          const safeValue = compactText(value);
+          return safeValue ? [safeValue, slugifyShopValue(safeValue)] : [];
+        })
+        .filter(Boolean),
+    ),
+  );
+}
+
+function productMatchesSubcategory(product, node) {
+  const productSubcategory = compactText(product?.subcategory);
+  if (!productSubcategory || !node) return false;
+
+  const productValues = new Set([productSubcategory, slugifyShopValue(productSubcategory)].filter(Boolean));
+  return getShopNodeLookupValues(node).some((value) => productValues.has(value));
+}
+
+function resolveSubcategoryId(querySubcategory, queryJewelryType, nodeByLookup) {
+  const rawSubcategory = compactText(querySubcategory);
+  if (rawSubcategory) {
+    const lookupKey = slugifyShopValue(rawSubcategory);
+    return nodeByLookup.get(rawSubcategory) || nodeByLookup.get(lookupKey) || "";
   }
 
-  const rawJewelryType = typeof queryJewelryType === "string" ? queryJewelryType.trim() : "";
+  const rawJewelryType = compactText(queryJewelryType);
   if (rawJewelryType) {
     return LEGACY_SUBCATEGORY_MAP.get(rawJewelryType) || "";
   }
@@ -154,8 +216,14 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
 
   const filteredProducts = useMemo(() => {
     const next = products
-      .filter((product) => (activeCategory === "all" ? true : matchesRule(product, activeCategoryNode?.match)))
-      .filter((product) => (activeSubcategoryNode ? matchesRule(product, activeSubcategoryNode.match) : true))
+      .filter((product) => {
+        if (activeCategory === "all") return true;
+        return productMatchesCategoryNode(product, activeCategoryNode) || matchesRule(product, activeCategoryNode?.match);
+      })
+      .filter((product) => {
+        if (!activeSubcategoryNode) return true;
+        return productMatchesSubcategory(product, activeSubcategoryNode) || matchesRule(product, activeSubcategoryNode.match);
+      })
       .filter((product) => (showAvailableOnly ? !product.isSold && product.stock > 0 : true))
       .filter((product) => matchesPriceRange(product, activePriceRange));
 
@@ -412,7 +480,11 @@ export async function getServerSideProps({ query }) {
   const categoryTree = normalizeShopCategoryTree(
     await readAdminContentField("shopTaxonomy", shopCategoryTree),
   );
-  const nodeById = new Map(flattenShopNodes(categoryTree).map((node) => [node.id, node]));
+  const flatNodes = flattenShopNodes(categoryTree);
+  const nodeById = new Map(flatNodes.map((node) => [node.id, node]));
+  const nodeByLookup = new Map(
+    flatNodes.flatMap((node) => getShopNodeLookupValues(node).map((value) => [value, node.id])),
+  );
   const nodeByQueryValue = new Map(
     categoryTree
       .map((node) => [String(node.queryValue || "").trim(), node.id])
@@ -423,7 +495,7 @@ export async function getServerSideProps({ query }) {
     LEGACY_CATEGORY_MAP.get(rawCategory) ||
     nodeByQueryValue.get(rawCategory) ||
     (rawCategory && nodeById.has(rawCategory) ? rawCategory : "all");
-  const initialSubcategory = resolveSubcategoryId(query.subcategory, query.jewelryType, nodeById);
+  const initialSubcategory = resolveSubcategoryId(query.subcategory, query.jewelryType, nodeByLookup);
 
   return {
     props: {

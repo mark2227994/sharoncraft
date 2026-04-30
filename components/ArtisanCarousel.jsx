@@ -22,7 +22,10 @@ function getFallbackProducts(artisan, products) {
     return products.filter((product) => product.category === "Jewellery" && product.jewelryType === "earring");
   }
   if (craft.includes("home")) {
-    return products.filter((product) => product.category === "Home Decor");
+    return products.filter((product) => product.category === "Home & Living");
+  }
+  if (craft.includes("wear") || craft.includes("bridal") || craft.includes("occasion")) {
+    return products.filter((product) => product.category === "African Wear");
   }
 
   return products.filter((product) => product.category === "Jewellery");

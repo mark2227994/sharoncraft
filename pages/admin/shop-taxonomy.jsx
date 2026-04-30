@@ -186,7 +186,7 @@ function TaxonomyNodeEditor({
                 },
               })
             }
-            placeholder="Jewellery, Accessories, Home Decor"
+            placeholder="Jewellery, Accessories, Home & Living"
           />
         </label>
 

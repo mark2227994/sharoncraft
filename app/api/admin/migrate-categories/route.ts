@@ -10,34 +10,40 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 
 const CATEGORIES = [
   {
-    name: 'Necklaces',
-    subcategories: ['Collar Necklaces', 'Statement Necklaces', 'Cascading Necklaces'],
+    name: 'Jewellery',
+    subcategories: ['Necklaces', 'Earrings', 'Bracelets', 'Bangles', 'Anklets', 'Rings', 'Hair Accessories'],
     is_visible: true,
     display_order: 1,
   },
   {
-    name: 'Bracelets',
-    subcategories: ['Stacked Bracelets', 'Statement Bracelets', 'Affordable Bracelets'],
+    name: 'African Wear',
+    subcategories: ['T-Shirts', 'Embroidered Tops', 'Maasai Shuka Wraps', 'Jumpsuit Suits', 'Sudanese Occasion Sets'],
     is_visible: true,
     display_order: 2,
   },
   {
-    name: 'Earrings',
-    subcategories: ['Drop Earrings', 'Statement Earrings', 'Daily Wear Earrings'],
+    name: 'Accessories',
+    subcategories: ['Beaded Sandals', 'Kiondos', 'Belts', 'Bags & Pouches', 'Key Holders'],
     is_visible: true,
     display_order: 3,
   },
   {
-    name: 'Home Decor',
-    subcategories: ['Mirrors', 'Wall Art', 'Table Decor', 'Accents'],
+    name: 'Art & Craft',
+    subcategories: ['Wood Carvings', 'Soapstone', 'Mixed Media'],
     is_visible: true,
     display_order: 4,
   },
   {
-    name: 'Gift Sets',
-    subcategories: ['Jewelry Sets', 'Decor Sets', 'Themed Collections'],
+    name: 'Home & Living',
+    subcategories: ['Kitchen & Serving', 'Baskets & Storage', 'Wall & Table Decor'],
     is_visible: true,
     display_order: 5,
+  },
+  {
+    name: 'Gifted Carry',
+    subcategories: ['Gift Sets', 'Gift Wrapping', 'Custom Gift Boxes'],
+    is_visible: true,
+    display_order: 6,
   },
 ];
 

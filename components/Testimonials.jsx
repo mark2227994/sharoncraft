@@ -19,7 +19,7 @@ export default function Testimonials() {
       location: "UK",
       rating: 5,
       quote: "Arrived perfectly packaged. The quality is incredible. Supporting artisans has never felt so good.",
-      product: "Terracotta Home Decor Set",
+      product: "Terracotta Home & Living Set",
     },
     {
       name: "Zainab H.",
@@ -33,7 +33,7 @@ export default function Testimonials() {
       location: "Australia",
       rating: 5,
       quote: "Every detail is perfect. This is my third purchase and I keep coming back for more.",
-      product: "Gift Set Bundle",
+      product: "Gifted Carry Bundle",
     },
   ];
 

@@ -27,7 +27,7 @@ export default function QuickFiltersDrawer({ categories = [], onFilterChange, ma
     { id: "all", name: "All Products", count: 120 },
     { id: "jewelry", name: "Jewelry", count: 45 },
     { id: "gifts", name: "Gifts", count: 30 },
-    { id: "home", name: "Home Decor", count: 25 },
+    { id: "home", name: "Home & Living", count: 25 },
     { id: "limited", name: "Limited Edition", count: 20 },
   ];
 

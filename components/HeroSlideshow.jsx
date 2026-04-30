@@ -144,7 +144,7 @@ export default function HeroSlideshow({ slides = [] }) {
       image: "/media/site/homepage/ai-home-hero-decor-card--favorite-240.webp",
       title: "Muthoni Wairimu",
       subtitle: "Nairobi, Kenya",
-      description: "Master of Home Decor",
+      description: "Master of Home & Living",
       quote: '"I never want a piece to look repeated, only remembered"',
       cta: "Explore Her Work",
       ctaLink: "/shop?artisan=muthoni",

@@ -36,12 +36,12 @@ export default function SocialMediaManagerPage() {
     },
     {
       id: "homedecor",
-      name: "Home Decor",
+      name: "Home & Living",
       template: "Transform your space with authentic African home decor 🏠✨ Hand-woven by skilled artisans. Each piece brings warmth, color, and stories of Kenya into your home. Limited pieces available! #SharonCraft #HomeArt #KenyanCraft",
     },
     {
       id: "giftset",
-      name: "Gift Set",
+      name: "Gifted Carry",
       template: "Looking for the perfect gift? 🎁 Our curated gift sets bring Kenyan craftsmanship and cultural beauty. Packaged with love, ready to give. Surprise someone special today! #SharonCraft #GiftIdeas #SupportLocal",
     },
   ];

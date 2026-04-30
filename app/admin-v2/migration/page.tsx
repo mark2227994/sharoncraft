@@ -78,7 +78,7 @@ export default function MigrationPage() {
       >
         <h3 className="text-sm font-medium mb-2">Step 1: Migrate Categories</h3>
         <p className="text-xs text-gray-500 mb-4">
-          Create category structure (Necklaces, Bracelets, Earrings, Home Decor, Gift Sets)
+          Create category structure (Jewellery, African Wear, Accessories, Art & Craft, Home & Living, Gifted Carry)
         </p>
         <button
           onClick={migrateCategories}

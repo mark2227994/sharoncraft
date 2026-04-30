@@ -193,7 +193,7 @@
   },
   {
     "name": "Kambaa (Web) Wall Hanging",
-    "category": "Home Decor",
+    "category": "Home & Living",
     "jewelryType": "wall-decor",
     "price": 8500,
     "materials": "Beads, natural fibers, wooden frame",
@@ -203,12 +203,12 @@
     "publishStatus": "published",
     "images": [],
     "tags": [
-      "Home Decor",
+      "Home & Living",
       "Wall Hanging",
       "Geometric",
       "Statement"
     ],
-    "seoTitle": "Kambaa Wall Hanging - Handmade Kenyan Home Decor",
+    "seoTitle": "Kambaa Wall Hanging - Handmade Kenyan Home & Living",
     "seoDescription": "Geometric beaded wall hanging bringing Kenyan culture to your home. Handcrafted decor.",
     "id": "prod_1776708569070_8",
     "slug": "kambaa-web-wall-hanging",
@@ -217,7 +217,7 @@
   },
   {
     "name": "Chakula (Feast) Table Runner",
-    "category": "Home Decor",
+    "category": "Home & Living",
     "jewelryType": "table-decor",
     "price": 7200,
     "materials": "Beads, fabric base, finishing thread",
@@ -227,12 +227,12 @@
     "publishStatus": "published",
     "images": [],
     "tags": [
-      "Home Decor",
+      "Home & Living",
       "Table Decor",
       "Fabric",
       "Beaded"
     ],
-    "seoTitle": "Chakula Beaded Table Runner - Handmade Home Decor",
+    "seoTitle": "Chakula Beaded Table Runner - Handmade Home & Living",
     "seoDescription": "Elegant beaded table runner for your dining space. Handcrafted Kenyan home decor.",
     "id": "prod_1776708569070_9",
     "slug": "chakula-feast-table-runner",

@@ -108,7 +108,7 @@ export default function AdminImportProductsPage() {
 name,price,category,jewelryType,description,materials,stock
 Gold Maasai Necklace,15000,Jewellery,necklace,Hand-beaded statement necklace,Beads;Gold,5
 Burgundy Bracelet,8000,Jewellery,bracelet,Bold statement piece,Beads;Leather,3
-Home Decor Set,12000,Home Decor,,Beautiful centerpiece,Beads;Wood,2
+Home Living Set,12000,Home & Living,,Beautiful centerpiece,Beads;Wood,2
             </pre>
           </div>
 

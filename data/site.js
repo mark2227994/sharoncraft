@@ -1,10 +1,11 @@
 export const categoryOptions = [
   "All",
   "Jewellery",
-  "Home Decor",
-  "Gift Sets",
+  "African Wear",
   "Accessories",
-  "Bridal & Occasion",
+  "Art & Craft",
+  "Home & Living",
+  "Gifted Carry",
 ];
 
 export const shopCategoryTree = [
@@ -85,7 +86,7 @@ export const shopCategoryTree = [
     label: "African Wear",
     queryValue: "African Wear",
     match: {
-      categories: ["African Wear", "Bridal & Occasion"],
+      categories: ["African Wear"],
     },
     children: [
       {
@@ -124,7 +125,7 @@ export const shopCategoryTree = [
         id: "sudanese-occasion-sets",
         label: "Sudanese Occasion Sets",
         match: {
-          categories: ["African Wear", "Bridal & Occasion"],
+          categories: ["African Wear"],
           keywords: ["sudanese", "occasion set"],
         },
       },
@@ -185,7 +186,7 @@ export const shopCategoryTree = [
     label: "Art & Craft",
     queryValue: "Art & Craft",
     match: {
-      categories: ["Art & Craft", "Home Decor"],
+      categories: ["Art & Craft", "Home & Living"],
       keywords: ["carving", "soapstone", "mixed media", "art", "craft"],
     },
     children: [
@@ -193,7 +194,7 @@ export const shopCategoryTree = [
         id: "wood-carvings",
         label: "Wood Carvings",
         match: {
-          categories: ["Art & Craft", "Home Decor"],
+          categories: ["Art & Craft", "Home & Living"],
           keywords: ["wood carving", "carving", "wood"],
         },
       },
@@ -201,7 +202,7 @@ export const shopCategoryTree = [
         id: "soapstone",
         label: "Soapstone",
         match: {
-          categories: ["Art & Craft", "Home Decor"],
+          categories: ["Art & Craft", "Home & Living"],
           keywords: ["soapstone"],
         },
       },
@@ -209,7 +210,7 @@ export const shopCategoryTree = [
         id: "mixed-media",
         label: "Mixed Media",
         match: {
-          categories: ["Art & Craft", "Home Decor"],
+          categories: ["Art & Craft", "Home & Living"],
           keywords: ["mixed media"],
         },
       },
@@ -220,14 +221,14 @@ export const shopCategoryTree = [
     label: "Home & Living",
     queryValue: "Home & Living",
     match: {
-      categories: ["Home Decor"],
+      categories: ["Home & Living"],
     },
     children: [
       {
         id: "kitchen-serving",
         label: "Kitchen & Serving",
         match: {
-          categories: ["Home Decor"],
+          categories: ["Home & Living"],
           keywords: ["kitchen", "serving", "tray", "bowl", "plate"],
         },
       },
@@ -235,7 +236,7 @@ export const shopCategoryTree = [
         id: "baskets-storage",
         label: "Baskets & Storage",
         match: {
-          categories: ["Home Decor", "Accessories"],
+          categories: ["Home & Living", "Accessories"],
           keywords: ["basket", "storage", "organizer"],
         },
       },
@@ -243,7 +244,7 @@ export const shopCategoryTree = [
         id: "wall-table-decor",
         label: "Wall & Table Decor",
         match: {
-          categories: ["Home Decor"],
+          categories: ["Home & Living"],
           keywords: ["wall", "table decor", "centerpiece", "decor"],
         },
       },
@@ -254,7 +255,7 @@ export const shopCategoryTree = [
     label: "Gifted Carry",
     queryValue: "Gifted Carry",
     match: {
-      categories: ["Gift Sets", "Accessories"],
+      categories: ["Gifted Carry", "Accessories"],
       keywords: ["gift"],
     },
     children: [
@@ -262,14 +263,14 @@ export const shopCategoryTree = [
         id: "gift-sets",
         label: "Gift Sets",
         match: {
-          categories: ["Gift Sets"],
+          categories: ["Gifted Carry"],
         },
       },
       {
         id: "gift-wrapping",
         label: "Gift Wrapping",
         match: {
-          categories: ["Gift Sets", "Accessories"],
+          categories: ["Gifted Carry", "Accessories"],
           keywords: ["gift wrapping", "gift wrap"],
         },
       },
@@ -277,7 +278,7 @@ export const shopCategoryTree = [
         id: "custom-gift-boxes",
         label: "Custom Gift Boxes",
         match: {
-          categories: ["Gift Sets"],
+          categories: ["Gifted Carry"],
           keywords: ["custom gift", "gift box"],
         },
       },
@@ -287,9 +288,9 @@ export const shopCategoryTree = [
 
 export const collectionCardLayout = [
   { title: "Jewellery", href: "/shop?category=Jewellery", imageKey: "collectionJewellery", itemCount: 24 },
-  { title: "Home Objects", href: "/shop?category=Home%20Decor", imageKey: "collectionHome", itemCount: 18 },
-  { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories", itemCount: 12 },
-  { title: "Bridal & Occasion", href: "/shop?category=Bridal%20%26%20Occasion", imageKey: "collectionBridal", itemCount: 16 },
+  { title: "Home & Living", href: "/shop?category=Home%20%26%20Living", imageKey: "collectionHome", itemCount: 18 },
+  { title: "Gifted Carry", href: "/shop?category=Gifted%20Carry", imageKey: "collectionAccessories", itemCount: 12 },
+  { title: "African Wear", href: "/shop?category=African%20Wear", imageKey: "collectionBridal", itemCount: 16 },
 ];
 
 export const defaultAboutStory =
@@ -454,9 +455,12 @@ function resolveArtisanHref(craft, href) {
   if (normalizedCraft.includes("necklace")) return "/shop?category=Jewellery&jewelryType=necklace";
   if (normalizedCraft.includes("bracelet")) return "/shop?category=Jewellery&jewelryType=bracelet";
   if (normalizedCraft.includes("earring")) return "/shop?category=Jewellery&jewelryType=earring";
-  if (normalizedCraft.includes("home")) return "/shop?category=Home%20Decor";
-  if (normalizedCraft.includes("gift")) return "/shop?category=Gift%20Sets";
+  if (normalizedCraft.includes("home")) return "/shop?category=Home%20%26%20Living";
+  if (normalizedCraft.includes("gift")) return "/shop?category=Gifted%20Carry";
   if (normalizedCraft.includes("accessor")) return "/shop?category=Accessories";
+  if (normalizedCraft.includes("wear") || normalizedCraft.includes("bridal") || normalizedCraft.includes("occasion")) {
+    return "/shop?category=African%20Wear";
+  }
   return "/shop?category=Jewellery";
 }
 

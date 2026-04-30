@@ -12,8 +12,8 @@ const defaultPromotions = [
     description: 'Perfect for any occasion',
     startDate: '2025-04-15',
     endDate: '2025-04-30',
-    cta: 'Shop Gift Sets',
-    ctaLink: '/shop?collection=gifts',
+    cta: 'Shop Gifted Carry',
+    ctaLink: '/shop?category=Gifted%20Carry',
     image: '',
     active: true
   },

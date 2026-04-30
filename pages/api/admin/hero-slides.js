@@ -26,8 +26,8 @@ const DEFAULT_SLIDES = [
     subtitle: "Gift Collections",
     description: "This week only",
     duration: 5,
-    cta: "Shop Gift Sets",
-    ctaLink: "/shop?category=gifts",
+    cta: "Shop Gifted Carry",
+    ctaLink: "/shop?category=Gifted%20Carry",
   },
   {
     id: 3,
@@ -92,8 +92,8 @@ const DEFAULT_SLIDES = [
     subtitle: '"I never want a piece to look repeated"',
     description: "18+ years perfecting her craft",
     duration: 7,
-    cta: "Explore Home Decor",
-    ctaLink: "/shop?category=home-decor",
+    cta: "Explore Home & Living",
+    ctaLink: "/shop?category=Home%20%26%20Living",
   },
   {
     id: 8,

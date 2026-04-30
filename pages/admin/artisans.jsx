@@ -87,18 +87,18 @@ const STORY_TEMPLATES = {
     text: "[Name] designs delicate earrings that bring subtle beauty to your look. Their work honors Kenyan beading traditions with refined craftsmanship and gentle elegance."
   },
   homedecor_wall: {
-    category: "Home Decor",
-    label: "Home Decor - Wall Art",
+    category: "Home & Living",
+    label: "Home & Living - Wall Art",
     text: "[Name] brings Kenyan beading traditions into your home through thoughtfully designed wall pieces. Each creation celebrates cultural heritage while adding warmth and character to any space."
   },
   homedecor_functional: {
-    category: "Home Decor",
-    label: "Home Decor - Functional",
+    category: "Home & Living",
+    label: "Home & Living - Functional",
     text: "[Name] creates functional home pieces that honor Kenyan craftsmanship. From decorative holders to woven accents, each item brings both beauty and purpose to your everyday life."
   },
   homedecor_accent: {
-    category: "Home Decor",
-    label: "Home Decor - Accent Pieces",
+    category: "Home & Living",
+    label: "Home & Living - Accent Pieces",
     text: "[Name] designs accent pieces that become focal points in any room. Their work celebrates Kenyan beading and weaving traditions, bringing artisanal beauty to contemporary homes."
   },
   philosophy_story: {
@@ -426,7 +426,7 @@ export default function AdminArtisansPage() {
                   <option value="Necklaces">Necklaces</option>
                   <option value="Bracelets">Bracelets</option>
                   <option value="Earrings">Earrings</option>
-                  <option value="Home Decor">Home Decor</option>
+                  <option value="Home & Living">Home & Living</option>
                 </select>
               </div>
             </div>
@@ -543,9 +543,9 @@ export default function AdminArtisansPage() {
                     ))}
                 </optgroup>
                 
-                <optgroup label="— Home Decor —">
+                <optgroup label="— Home & Living —">
                   {Object.entries(STORY_TEMPLATES)
-                    .filter(([_, t]) => t.category === "Home Decor")
+                    .filter(([_, t]) => t.category === "Home & Living")
                     .map(([key, template]) => (
                       <option key={key} value={key}>{template.label}</option>
                     ))}
