@@ -7,6 +7,7 @@ interface Category {
   id: string;
   name: string;
   subcategories: string[];
+  image_url?: string;
   is_visible: boolean;
   display_order: number;
 }
@@ -14,12 +15,41 @@ interface Category {
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: '', subcategories: '' });
+  const [formData, setFormData] = useState({ name: '', subcategories: '', image_url: '' });
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  async function uploadImage(file: File) {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'category-images');
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Upload failed');
+        return;
+      }
+
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, image_url: data.url }));
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function fetchCategories() {
     setLoading(true);
@@ -55,6 +85,7 @@ export default function CategoriesPage() {
     const categoryData = {
       name: formData.name,
       subcategories: subcategoriesArray,
+      image_url: formData.image_url || null,
     };
 
     const { error } = id
@@ -63,7 +94,7 @@ export default function CategoriesPage() {
 
     if (!error) {
       setEditingId(null);
-      setFormData({ name: '', subcategories: '' });
+      setFormData({ name: '', subcategories: '', image_url: '' });
       fetchCategories();
     }
   }
@@ -121,6 +152,26 @@ export default function CategoriesPage() {
             className="text-xs px-3 py-2 border w-full mb-3"
             style={{ borderColor: '#e0e0e0' }}
           />
+          <div className="space-y-2 mb-3">
+            <label className="text-xs font-medium block">Category Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                if (file) {
+                  uploadImage(file);
+                }
+              }}
+              disabled={uploading}
+              className="text-xs px-3 py-2 border w-full"
+              style={{ borderColor: '#e0e0e0' }}
+            />
+            {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
+            {formData.image_url && (
+              <p className="text-xs text-gray-600 truncate">✓ Image ready</p>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => saveCategory()}
@@ -135,7 +186,7 @@ export default function CategoriesPage() {
             <button
               onClick={() => {
                 setEditingId(null);
-                setFormData({ name: '', subcategories: '' });
+                setFormData({ name: '', subcategories: '', image_url: '' });
               }}
               className="text-xs px-3 py-2 border rounded-sm"
               style={{ borderColor: '#e0e0e0' }}
@@ -170,10 +221,19 @@ export default function CategoriesPage() {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="border p-4 rounded-sm flex items-start justify-between"
+              className="border p-4 rounded-sm flex gap-4 items-start justify-between"
               style={{ borderColor: '#f0f0f0' }}
             >
-              <div className="flex-1">
+              {category.image_url && (
+                <div className="w-16 h-16 bg-gray-200 rounded-sm flex-shrink-0 flex items-center justify-center">
+                  <img
+                    src={category.image_url}
+                    alt={category.name}
+                    className="w-full h-full object-cover rounded-sm"
+                  />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-medium">{category.name}</h3>
                 {category.subcategories.length > 0 && (
                   <p className="text-xs text-gray-600 mt-1">
@@ -181,7 +241,7 @@ export default function CategoriesPage() {
                   </p>
                 )}
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-shrink-0">
                 <button
                   onClick={() => toggleVisibility(category.id, category.is_visible)}
                   className="text-xs px-2 py-1 rounded-sm transition-colors"

@@ -10,13 +10,28 @@ interface AdminUser {
   role: string;
 }
 
+interface Artisan {
+  id: string;
+  name: string;
+  image_url?: string;
+  bio?: string;
+}
+
 export default function SettingsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [artisanUploading, setArtisanUploading] = useState(false);
+  const [editingArtisanId, setEditingArtisanId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     name: '',
     role: 'admin',
+  });
+  const [artisanFormData, setArtisanFormData] = useState({
+    name: '',
+    image_url: '',
+    bio: '',
   });
   const [storeInfo, setStoreInfo] = useState({
     store_name: 'SharonCraft',
@@ -28,6 +43,7 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchAdmins();
     fetchStoreInfo();
+    fetchArtisans();
   }, []);
 
   async function fetchAdmins() {
@@ -58,6 +74,87 @@ export default function SettingsPage() {
 
     if (data) {
       setStoreInfo(data.content || storeInfo);
+    }
+  }
+
+  async function fetchArtisans() {
+    try {
+      const { data, error } = await supabase
+        .from('artisans')
+        .select('*')
+        .order('created_at');
+
+      if (error) {
+        console.error('Error fetching artisans:', error);
+        return;
+      }
+
+      setArtisans(data || []);
+    } catch (err) {
+      console.error('Exception fetching artisans:', err);
+    }
+  }
+
+  async function uploadArtisanImage(file: File) {
+    setArtisanUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'artisan-portraits');
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Upload failed');
+        return;
+      }
+
+      const data = await response.json();
+      setArtisanFormData((prev) => ({ ...prev, image_url: data.url }));
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setArtisanUploading(false);
+    }
+  }
+
+  async function saveArtisan(id?: string) {
+    if (!artisanFormData.name) {
+      alert('Artisan name is required');
+      return;
+    }
+
+    const artisanData = {
+      name: artisanFormData.name,
+      image_url: artisanFormData.image_url || null,
+      bio: artisanFormData.bio || null,
+    };
+
+    const { error } = id
+      ? await supabase.from('artisans').update(artisanData).eq('id', id)
+      : await supabase.from('artisans').insert([artisanData]);
+
+    if (!error) {
+      setEditingArtisanId(null);
+      setArtisanFormData({ name: '', image_url: '', bio: '' });
+      fetchArtisans();
+    } else {
+      alert('Error saving artisan');
+    }
+  }
+
+  async function deleteArtisan(id: string) {
+    if (!confirm('Delete this artisan?')) return;
+
+    const { error } = await supabase.from('artisans').delete().eq('id', id);
+
+    if (!error) {
+      setArtisans(artisans.filter((a) => a.id !== id));
     }
   }
 
@@ -166,6 +263,138 @@ export default function SettingsPage() {
             Save Store Info
           </button>
         </div>
+      </div>
+
+      {/* Featured Artisans Section */}
+      <div className="border p-6 rounded-sm" style={{ borderColor: '#f0f0f0' }}>
+        <h3 className="text-sm font-medium mb-4">Featured Artisans</h3>
+        <p className="text-xs text-gray-500 mb-4">Manage artisan profiles displayed on homepage</p>
+
+        {/* Add/Edit Artisan Form */}
+        {editingArtisanId !== null && (
+          <div className="mb-6 p-4 border rounded-sm" style={{ borderColor: '#e0e0e0', backgroundColor: '#fafafa' }}>
+            <input
+              type="text"
+              placeholder="Artisan name"
+              value={artisanFormData.name}
+              onChange={(e) => setArtisanFormData({ ...artisanFormData, name: e.target.value })}
+              className="text-xs px-3 py-2 border w-full mb-3"
+              style={{ borderColor: '#e0e0e0' }}
+            />
+            <div className="space-y-2 mb-3">
+              <label className="text-xs font-medium block">Portrait Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.currentTarget.files?.[0];
+                  if (file) {
+                    uploadArtisanImage(file);
+                  }
+                }}
+                disabled={artisanUploading}
+                className="text-xs px-3 py-2 border w-full"
+                style={{ borderColor: '#e0e0e0' }}
+              />
+              {artisanUploading && <p className="text-xs text-gray-500">Uploading...</p>}
+              {artisanFormData.image_url && (
+                <p className="text-xs text-gray-600 truncate">✓ Image ready</p>
+              )}
+            </div>
+            <textarea
+              placeholder="Bio (optional)"
+              value={artisanFormData.bio}
+              onChange={(e) => setArtisanFormData({ ...artisanFormData, bio: e.target.value })}
+              className="text-xs px-3 py-2 border w-full mb-3"
+              style={{ borderColor: '#e0e0e0' }}
+              rows={2}
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => saveArtisan(editingArtisanId === 'new' ? undefined : editingArtisanId)}
+                className="text-xs px-3 py-2 rounded-sm"
+                style={{ backgroundColor: '#1c1c1c', color: '#fff' }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setEditingArtisanId(null);
+                  setArtisanFormData({ name: '', image_url: '', bio: '' });
+                }}
+                className="text-xs px-3 py-2 border rounded-sm"
+                style={{ borderColor: '#e0e0e0' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add Button */}
+        {editingArtisanId === null && (
+          <button
+            onClick={() => setEditingArtisanId('new')}
+            className="text-xs px-3 py-2 rounded-sm mb-4"
+            style={{ backgroundColor: '#1c1c1c', color: '#fff' }}
+          >
+            Add Artisan
+          </button>
+        )}
+
+        {/* Artisans List */}
+        {artisans.length === 0 ? (
+          <div className="text-xs text-gray-500">No artisans added yet</div>
+        ) : (
+          <div className="space-y-2">
+            {artisans.map((artisan) => (
+              <div
+                key={artisan.id}
+                className="border p-4 rounded-sm flex gap-4 items-start"
+                style={{ borderColor: '#f0f0f0' }}
+              >
+                {artisan.image_url && (
+                  <div className="w-16 h-16 bg-gray-200 rounded-sm flex-shrink-0 flex items-center justify-center">
+                    <img
+                      src={artisan.image_url}
+                      alt={artisan.name}
+                      className="w-full h-full object-cover rounded-sm"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-medium">{artisan.name}</h4>
+                  {artisan.bio && (
+                    <p className="text-xs text-gray-600 mt-1">{artisan.bio}</p>
+                  )}
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setEditingArtisanId(artisan.id);
+                      setArtisanFormData({
+                        name: artisan.name,
+                        image_url: artisan.image_url || '',
+                        bio: artisan.bio || '',
+                      });
+                    }}
+                    className="text-xs hover:underline"
+                    style={{ color: '#1c1c1c' }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteArtisan(artisan.id)}
+                    className="text-xs hover:underline"
+                    style={{ color: '#c33' }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Admin Users Section */}

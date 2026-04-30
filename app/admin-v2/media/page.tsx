@@ -15,6 +15,7 @@ interface HeroSlide {
 export default function MediaPage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -25,6 +26,34 @@ export default function MediaPage() {
   useEffect(() => {
     fetchSlides();
   }, []);
+
+  async function uploadImage(file: File) {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'hero-slides');
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Upload failed');
+        return;
+      }
+
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, image_url: data.url }));
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function fetchSlides() {
     setLoading(true);
@@ -114,14 +143,26 @@ export default function MediaPage() {
             className="text-xs px-3 py-2 border w-full"
             style={{ borderColor: '#e0e0e0' }}
           />
-          <input
-            type="text"
-            placeholder="Image URL"
-            value={formData.image_url}
-            onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-            className="text-xs px-3 py-2 border w-full"
-            style={{ borderColor: '#e0e0e0' }}
-          />
+          <div className="space-y-2">
+            <label className="text-xs font-medium block">Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                if (file) {
+                  uploadImage(file);
+                }
+              }}
+              disabled={uploading}
+              className="text-xs px-3 py-2 border w-full"
+              style={{ borderColor: '#e0e0e0' }}
+            />
+            {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
+            {formData.image_url && (
+              <p className="text-xs text-gray-600 truncate">✓ Image ready</p>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => saveSlide()}
