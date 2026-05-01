@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
+const path = require('node:path');
+
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['fs/promises'],
-  },
+  serverExternalPackages: ['fs/promises'],
   async redirects() {
     return [
       { source: "/admin", destination: "/admin-v2", permanent: false },

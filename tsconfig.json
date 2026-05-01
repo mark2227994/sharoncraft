@@ -21,6 +21,7 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
@@ -54,6 +55,5 @@
     ".next",
     "supabase/functions/**/*",
     "google-calendar-mcp/**/*"
-  ]
   ]
 }
