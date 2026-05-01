@@ -1,28 +1,61 @@
 import { useEffect, useMemo, useState } from "react";
-import Icon from "./icons";
 
 const PRICE_OPTIONS = [
   { value: "under-1000", label: "Under KES 1,000" },
-  { value: "1000-3000", label: "KES 1,000 – 3,000" },
-  { value: "3000-5000", label: "KES 3,000 – 5,000" },
+  { value: "1000-3000", label: "KES 1,000 - 3,000" },
+  { value: "3000-5000", label: "KES 3,000 - 5,000" },
   { value: "above-5000", label: "Above KES 5,000" },
 ];
+const CHEVRON = "\u203A";
+const MIDDLE_DOT = "\u00B7";
 
-/**
- * Find the parent chain for a given node id.
- * Returns array of parent ids leading to (and including) the target.
- */
 function findParentChain(nodes, targetId, parents = []) {
   for (const node of nodes) {
     if (node.id === targetId) {
       return [...parents, node.id];
     }
+
     if (Array.isArray(node.children) && node.children.length > 0) {
-      const match = findParentChain(node.children, targetId, [...parents, node.id]);
-      if (match.length > 0) return match;
+      const match = findParentChain(node.children, targetId, [
+        ...parents,
+        node.id,
+      ]);
+      if (match.length > 0) {
+        return match;
+      }
     }
   }
+
   return [];
+}
+
+function getExpandedCategory(categoryTree, activeCategory, activeSubcategory) {
+  const activeChain = activeSubcategory
+    ? findParentChain(categoryTree, activeSubcategory)
+    : findParentChain(categoryTree, activeCategory);
+
+  if (activeChain.length > 1) {
+    return activeChain[0];
+  }
+
+  if (activeCategory && activeCategory !== "all") {
+    return activeCategory;
+  }
+
+  return null;
+}
+
+function SidebarSection({ first = false, label, children }) {
+  return (
+    <section className="shop-sidebar__section">
+      <span
+        className={`shop-sidebar__label ${first ? "shop-sidebar__label--first" : ""}`}
+      >
+        {label}
+      </span>
+      {children}
+    </section>
+  );
 }
 
 export default function ShopSidebar({
@@ -39,9 +72,6 @@ export default function ShopSidebar({
   isOpen,
   onClose,
 }) {
-  /* ───────────────────────────────────────────
-     STATE: Accordion — only one parent open at a time
-     ─────────────────────────────────────────── */
   const activeChain = useMemo(
     () =>
       activeSubcategory
@@ -50,125 +80,156 @@ export default function ShopSidebar({
     [activeCategory, activeSubcategory, categoryTree],
   );
 
-  // Determine default expanded parent from URL/active state
-  const defaultExpanded = useMemo(() => {
-    if (activeChain.length > 0) return activeChain[0];
-    if (activeCategory && activeCategory !== "all") return activeCategory;
-    return null;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [expandedCategory, setExpandedCategory] = useState(() =>
+    getExpandedCategory(categoryTree, activeCategory, activeSubcategory),
+  );
 
-  const [expandedCategory, setExpandedCategory] = useState(defaultExpanded);
-
-  // Keep expanded in sync if user navigates via tabs/breadcrumb
   useEffect(() => {
-    const target = activeChain.length > 0 ? activeChain[0] : activeCategory !== "all" ? activeCategory : null;
-    if (target && target !== "all") {
-      setExpandedCategory((current) => (current === target ? current : target));
+    const nextExpanded = getExpandedCategory(
+      categoryTree,
+      activeCategory,
+      activeSubcategory,
+    );
+    if (nextExpanded && nextExpanded !== "all") {
+      setExpandedCategory((current) =>
+        current === nextExpanded ? current : nextExpanded,
+      );
+      return;
     }
-  }, [activeChain, activeCategory]);
+
+    if (activeCategory === "all" && !activeSubcategory) {
+      setExpandedCategory(null);
+    }
+  }, [activeCategory, activeSubcategory, categoryTree]);
+
+  function selectCategory(node) {
+    onCategoryChange(node.id);
+    onSubcategoryChange("");
+
+    if (node.children?.length) {
+      setExpandedCategory(node.id);
+    } else {
+      setExpandedCategory(null);
+    }
+
+    if (isMobile) {
+      onClose?.();
+    }
+  }
 
   function toggleCategory(nodeId) {
     setExpandedCategory((current) => (current === nodeId ? null : nodeId));
   }
 
-  function selectSubcat(parentId, subId) {
+  function selectSubcategory(parentId, subcategoryId) {
     onCategoryChange(parentId);
-    onSubcategoryChange(subId);
-    if (isMobile) onClose?.();
-  }
+    onSubcategoryChange(subcategoryId);
+    setExpandedCategory(parentId);
 
-  function selectCategory(node) {
-    const isAll = node.id === "all";
-    onCategoryChange(node.id);
-    onSubcategoryChange("");
-    if (!isAll && node.children?.length) {
-      setExpandedCategory(node.id);
+    if (isMobile) {
+      onClose?.();
     }
-    if (isMobile) onClose?.();
   }
 
-  function selectPriceRange(value) {
-    onPriceRangeChange(value);
-    if (isMobile) onClose?.();
+  function selectAvailability(nextValue) {
+    onShowAvailableChange(nextValue);
+    if (isMobile) {
+      onClose?.();
+    }
   }
 
-  function handleClear() {
+  function selectPriceRange(nextValue) {
+    onPriceRangeChange(nextValue);
+    if (isMobile) {
+      onClose?.();
+    }
+  }
+
+  function clearAll() {
     onCategoryChange("all");
     onSubcategoryChange("");
     onPriceRangeChange("all");
     onShowAvailableChange(false);
     setExpandedCategory(null);
-    if (isMobile) onClose?.();
+
+    if (isMobile) {
+      onClose?.();
+    }
   }
 
-  /* ───────────────────────────────────────────
-     SECTION: Collection (Categories)
-     ─────────────────────────────────────────── */
   function renderCollectionSection() {
     return (
-      <div className="shop-sidebar__section">
-        <div className="sidebar-section-label sidebar-section-label--first">Collection</div>
-
-        <div className="shop-sidebar__options-list" role="list">
+      <SidebarSection first label="Collection">
+        <div className="shop-sidebar__stack" role="list">
           {categoryTree.map((node) => {
-            const isAll = node.id === "all";
-            if (!isAll && !node.children?.length) return null; // skip empty parents
-
-            const isActive = isAll
-              ? activeCategory === "all" && !activeSubcategory
-              : activeCategory === node.id && !activeSubcategory;
+            const isActiveParent =
+              node.id === "all"
+                ? activeCategory === "all" && !activeSubcategory
+                : activeCategory === node.id;
             const isExpanded = expandedCategory === node.id;
-            const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+            const hasChildren =
+              Array.isArray(node.children) && node.children.length > 0;
 
             return (
-              <div key={node.id} className="cat-item" role="listitem">
-                {/* Parent category row */}
-                <div
-                  className="cat-parent"
-                  onClick={() => (hasChildren ? toggleCategory(node.id) : selectCategory(node))}
-                >
+              <div key={node.id} className="shop-sidebar__item" role="listitem">
+                <div className="shop-sidebar__parent-row">
                   <button
                     type="button"
-                    className={`cat-name${isActive ? " cat-name--active" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      selectCategory(node);
-                    }}
+                    className={`shop-sidebar__parent-link ${isActiveParent ? "shop-sidebar__parent-link--active" : ""}`}
+                    onClick={() => selectCategory(node)}
                   >
-                    {isAll ? "All Products" : node.label}
+                    <span>
+                      {node.id === "all" ? "All Products" : node.label}
+                    </span>
                   </button>
 
                   {hasChildren ? (
                     <button
                       type="button"
-                      className={`cat-arrow${isExpanded ? " cat-arrow--open" : ""}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.label}`}
+                      aria-expanded={isExpanded}
+                      className={`shop-sidebar__arrow ${isExpanded ? "shop-sidebar__arrow--open" : ""}`}
+                      onClick={() => {
+                        if (!isActiveParent) {
+                          onCategoryChange(node.id);
+                          onSubcategoryChange("");
+                          setExpandedCategory(node.id);
+                          return;
+                        }
+
                         toggleCategory(node.id);
                       }}
-                      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${node.label}`}
                     >
-                      <span className="cat-arrow__icon">›</span>
+                      <span className="shop-sidebar__arrow-glyph">
+                        {CHEVRON}
+                      </span>
                     </button>
                   ) : null}
                 </div>
 
-                {/* Subcategory list — accordion */}
                 {hasChildren ? (
                   <div
-                    className={`subcat-list${isExpanded ? " subcat-list--open" : ""}`}
+                    className={`shop-sidebar__subcats ${
+                      isActiveParent && isExpanded
+                        ? "shop-sidebar__subcats--open"
+                        : ""
+                    }`}
                   >
                     {node.children.map((sub) => {
-                      const isSubActive = activeSubcategory === sub.id;
+                      const isSubcategoryActive = activeSubcategory === sub.id;
                       return (
-                        <div
-                          key={sub.id}
-                          className={`subcat-item${isSubActive ? " subcat-item--active" : ""}`}
-                          onClick={() => selectSubcat(node.id, sub.id)}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          {sub.label}
+                        <div key={sub.id} className="shop-sidebar__subcat-row">
+                          <button
+                            type="button"
+                            className={`shop-sidebar__subcat-link ${
+                              isSubcategoryActive
+                                ? "shop-sidebar__subcat-link--active"
+                                : ""
+                            }`}
+                            onClick={() => selectSubcategory(node.id, sub.id)}
+                          >
+                            {sub.label}
+                          </button>
                         </div>
                       );
                     })}
@@ -178,436 +239,109 @@ export default function ShopSidebar({
             );
           })}
         </div>
-      </div>
+      </SidebarSection>
     );
   }
 
-  /* ───────────────────────────────────────────
-     SECTION: Availability
-     ─────────────────────────────────────────── */
   function renderAvailabilitySection() {
     return (
-      <div className="shop-sidebar__section">
-        <div className="sidebar-section-label">Availability</div>
-        <div className="availability-options" aria-label="Availability filter">
-          <div
-            className={`avail-opt${!showAvailableOnly ? " avail-opt--active" : ""}`}
-            onClick={() => {
-              onShowAvailableChange(false);
-              if (isMobile) onClose?.();
-            }}
-            role="button"
-            tabIndex={0}
+      <SidebarSection label="Availability">
+        <div
+          className="shop-sidebar__availability"
+          aria-label="Availability filter"
+        >
+          <button
+            type="button"
+            className={`shop-sidebar__availability-link ${!showAvailableOnly ? "shop-sidebar__availability-link--active" : ""}`}
+            onClick={() => selectAvailability(false)}
           >
             All
-          </div>
-          <div
-            className={`avail-opt${showAvailableOnly ? " avail-opt--active" : ""}`}
-            onClick={() => {
-              onShowAvailableChange(true);
-              if (isMobile) onClose?.();
-            }}
-            role="button"
-            tabIndex={0}
+          </button>
+          <span className="shop-sidebar__availability-separator">
+            {MIDDLE_DOT}
+          </span>
+          <button
+            type="button"
+            className={`shop-sidebar__availability-link ${showAvailableOnly ? "shop-sidebar__availability-link--active" : ""}`}
+            onClick={() => selectAvailability(true)}
           >
             In Stock
-          </div>
+          </button>
         </div>
-      </div>
+      </SidebarSection>
     );
   }
 
-  /* ───────────────────────────────────────────
-     SECTION: Price Range
-     ─────────────────────────────────────────── */
   function renderPriceSection() {
     return (
-      <div className="shop-sidebar__section">
-        <div className="sidebar-section-label">Price Range</div>
-        <div className="shop-sidebar__options-list" role="list">
+      <SidebarSection label="Price Range">
+        <div className="shop-sidebar__stack" role="list">
           {PRICE_OPTIONS.map((option) => (
-            <div key={option.value} className="price-item" role="listitem">
+            <div
+              key={option.value}
+              className="shop-sidebar__item"
+              role="listitem"
+            >
               <button
                 type="button"
-                className={`price-opt${activePriceRange === option.value ? " price-opt--active" : ""}`}
+                className={`shop-sidebar__parent-link ${
+                  activePriceRange === option.value
+                    ? "shop-sidebar__parent-link--active"
+                    : ""
+                }`}
                 onClick={() => selectPriceRange(option.value)}
               >
-                {option.label}
+                <span>{option.label}</span>
               </button>
             </div>
           ))}
         </div>
-      </div>
+      </SidebarSection>
     );
   }
 
-  /* ───────────────────────────────────────────
-     CLEAR ALL
-     ─────────────────────────────────────────── */
-  function renderClear() {
-    return (
-      <button type="button" onClick={handleClear} className="clear-all">
+  const sidebarContent = (
+    <div className="shop-sidebar">
+      {renderCollectionSection()}
+      {renderAvailabilitySection()}
+      {renderPriceSection()}
+
+      <button type="button" className="shop-sidebar__clear" onClick={clearAll}>
         Clear All
       </button>
-    );
-  }
-
-  function renderSidebarContent() {
-    return (
-      <div className="shop-sidebar">
-        {renderCollectionSection()}
-        {renderAvailabilitySection()}
-        {renderPriceSection()}
-        {renderClear()}
-      </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <>
-      <aside className="shop-sidebar__desktop">{renderSidebarContent()}</aside>
+      <aside className="shop-sidebar__desktop" aria-label="Shop filters">
+        {sidebarContent}
+      </aside>
 
       {isMobile ? (
-        <div className={`shop-sidebar__overlay${isOpen ? " shop-sidebar__overlay--open" : ""}`} onClick={onClose}>
+        <div
+          className={`shop-sidebar__overlay ${isOpen ? "shop-sidebar__overlay--open" : ""}`}
+          aria-hidden={!isOpen}
+          onClick={onClose}
+        >
           <div
-            className={`shop-sidebar__drawer${isOpen ? " shop-sidebar__drawer--open" : ""}`}
+            className={`shop-sidebar__drawer ${isOpen ? "shop-sidebar__drawer--open" : ""}`}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="shop-sidebar__drawer-header">
-              <h3>Filters</h3>
-              <button type="button" onClick={onClose} className="shop-sidebar__close" aria-label="Close filters">
-                <Icon name="close" size={14} />
+              <span className="shop-sidebar__drawer-title">Filter Pieces</span>
+              <button
+                type="button"
+                className="shop-sidebar__drawer-close"
+                onClick={onClose}
+              >
+                ✕ Close
               </button>
             </div>
-            <div className="shop-sidebar__drawer-content">{renderSidebarContent()}</div>
+            <div className="shop-sidebar__drawer-body">{sidebarContent}</div>
           </div>
         </div>
       ) : null}
-
-      <style jsx>{`
-        /* ── Layout ── */
-        .shop-sidebar__desktop {
-          width: 180px;
-          min-width: 180px;
-          flex: 0 0 180px;
-          align-self: stretch;
-          border-right: 0.5px solid #f0f0f0;
-          background: #ffffff;
-        }
-
-        @media (max-width: 767px) {
-          .shop-sidebar__desktop {
-            display: none;
-          }
-        }
-
-        .shop-sidebar {
-          width: 100%;
-          padding: 24px 20px 24px 24px;
-          background: #ffffff;
-        }
-
-        /* ── Section Labels ── */
-        .sidebar-section-label {
-          display: block;
-          font-size: 9px;
-          font-weight: 400;
-          letter-spacing: 3px;
-          text-transform: uppercase;
-          color: #999;
-          margin-top: 20px;
-          padding-top: 20px;
-          border-top: 0.5px solid #f0f0f0;
-          margin-bottom: 10px;
-        }
-
-        .sidebar-section-label--first {
-          margin-top: 0;
-          padding-top: 0;
-          border-top: none;
-        }
-
-        /* ── Category List ── */
-        .shop-sidebar__options-list {
-          display: block;
-        }
-
-        .cat-item {
-          display: block;
-          width: 100%;
-        }
-
-        .cat-parent {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          cursor: pointer;
-          width: 100%;
-        }
-
-        /* ── Parent Link ── */
-        .cat-name {
-          display: block;
-          flex: 1;
-          padding: 5px 0;
-          margin: 0;
-          border: none;
-          border-left: 2px solid transparent;
-          background: transparent;
-          color: #666;
-          font-size: 11px;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-          line-height: 1.6;
-          text-align: left;
-          text-decoration: none;
-          transition: color 0.2s ease, border-left-color 0.2s ease, padding-left 0.2s ease, margin-left 0.2s ease;
-          cursor: pointer;
-        }
-
-        .cat-name:hover {
-          color: #8b5e3c;
-        }
-
-        .cat-name--active {
-          color: #1c1c1c;
-          font-weight: 500;
-          border-left-color: #8b5e3c;
-          padding-left: 8px;
-          margin-left: -10px;
-        }
-
-        /* ── Arrow Button ── */
-        .cat-arrow {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          flex: 0 0 auto;
-          min-width: 18px;
-          padding: 5px 0;
-          border: none;
-          background: transparent;
-          color: #999;
-          transition: transform 0.2s ease, color 0.2s ease;
-          cursor: pointer;
-        }
-
-        .cat-arrow:hover {
-          color: #8b5e3c;
-        }
-
-        .cat-arrow__icon {
-          display: inline-block;
-          font-size: 9px;
-          color: #999;
-          line-height: 1;
-          transition: transform 0.2s ease;
-        }
-
-        .cat-arrow--open .cat-arrow__icon {
-          transform: rotate(90deg);
-        }
-
-        /* ── Subcategory List ── */
-        .subcat-list {
-          overflow: hidden;
-          transition: max-height 0.3s ease, opacity 0.3s ease;
-          max-height: 0;
-          opacity: 0;
-        }
-
-        .subcat-list--open {
-          max-height: 400px;
-          opacity: 1;
-        }
-
-        .subcat-item {
-          display: block;
-          width: 100%;
-          font-size: 10px;
-          color: #888;
-          padding: 3px 0 3px 8px;
-          border-left: 0.5px solid #e8e8e8;
-          margin-left: 4px;
-          line-height: 1.6;
-          cursor: pointer;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          transition: color 0.2s ease;
-        }
-
-        .subcat-item:hover {
-          color: #8b5e3c;
-        }
-
-        .subcat-item--active {
-          color: #8b5e3c;
-          font-weight: 500;
-          border-left: 2px solid #8b5e3c;
-        }
-
-        /* ── Availability ── */
-        .availability-options {
-          display: flex;
-          gap: 16px;
-          margin-top: 4px;
-        }
-
-        .avail-opt {
-          display: inline-flex;
-          font-size: 10px;
-          color: #999;
-          cursor: pointer;
-          padding-bottom: 2px;
-          transition: color 0.2s ease, border-color 0.2s ease;
-          border-bottom: 1px solid transparent;
-        }
-
-        .avail-opt:hover {
-          color: #1c1c1c;
-        }
-
-        .avail-opt--active {
-          color: #1c1c1c;
-          font-weight: 500;
-          border-bottom-color: #1c1c1c;
-        }
-
-        /* ── Price Range ── */
-        .price-item {
-          display: block;
-          width: 100%;
-        }
-
-        .price-opt {
-          display: block;
-          width: 100%;
-          font-size: 11px;
-          color: #666;
-          padding: 5px 0;
-          margin: 0;
-          border: none;
-          border-left: 2px solid transparent;
-          background: transparent;
-          cursor: pointer;
-          letter-spacing: 0.5px;
-          line-height: 1.6;
-          text-align: left;
-          transition: color 0.2s ease, border-left-color 0.2s ease, padding-left 0.2s ease, margin-left 0.2s ease;
-        }
-
-        .price-opt:hover {
-          color: #8b5e3c;
-        }
-
-        .price-opt--active {
-          color: #1c1c1c;
-          font-weight: 500;
-          border-left-color: #8b5e3c;
-          padding-left: 8px;
-          margin-left: -10px;
-        }
-
-        /* ── Clear All ── */
-        .clear-all {
-          display: block;
-          width: 100%;
-          margin-top: 20px;
-          padding: 20px 0 0;
-          border: none;
-          border-top: 0.5px solid #f0f0f0;
-          background: transparent;
-          color: #bbb;
-          font-size: 9px;
-          font-weight: 400;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          text-align: left;
-          transition: color 0.2s ease;
-          cursor: pointer;
-        }
-
-        .clear-all:hover {
-          color: #1c1c1c;
-        }
-
-        /* ── Mobile Drawer ── */
-        .shop-sidebar__overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 1200;
-          background: rgba(28, 28, 28, 0.14);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s ease;
-        }
-
-        .shop-sidebar__overlay--open {
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        .shop-sidebar__drawer {
-          position: absolute;
-          inset: 0 auto 0 0;
-          width: 100vw;
-          max-width: 100vw;
-          background: #ffffff;
-          transform: translateX(-100%);
-          transition: transform 0.3s ease;
-          overflow-y: auto;
-        }
-
-        .shop-sidebar__drawer--open {
-          transform: translateX(0);
-        }
-
-        .shop-sidebar__drawer-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px 24px 12px;
-          border-bottom: 0.5px solid #f0f0f0;
-          background: #ffffff;
-        }
-
-        .shop-sidebar__drawer-header h3 {
-          margin: 0;
-          color: #1c1c1c;
-          font-size: 10px;
-          font-weight: 500;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-        }
-
-        .shop-sidebar__close {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          border: none;
-          background: transparent;
-          color: #999;
-          transition: color 0.2s ease;
-          cursor: pointer;
-        }
-
-        .shop-sidebar__close:hover {
-          color: #1c1c1c;
-        }
-
-        .shop-sidebar__drawer-content {
-          padding: 0;
-        }
-
-        @media (min-width: 768px) {
-          .shop-sidebar__overlay {
-            display: none;
-          }
-        }
-      `}</style>
     </>
   );
 }
-

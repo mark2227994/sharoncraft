@@ -1,7 +1,6 @@
+import { SITE_URL } from "../lib/constants";
 import { filterPublishedProducts } from "../lib/products";
 import { readProducts } from "../lib/store";
-
-const SITE_URL = "https://www.sharoncraft.co.ke";
 
 function buildUrl(loc, lastmod, changefreq, priority) {
   return [
@@ -22,7 +21,16 @@ export async function getServerSideProps({ res }) {
 
   const staticUrls = [
     buildUrl(`${SITE_URL}/`, today, "weekly", "1.0"),
+    buildUrl(`${SITE_URL}/about`, today, "monthly", "0.7"),
+    buildUrl(`${SITE_URL}/artisans`, today, "monthly", "0.7"),
     buildUrl(`${SITE_URL}/shop`, today, "daily", "0.9"),
+    buildUrl(`${SITE_URL}/journal`, today, "weekly", "0.7"),
+    buildUrl(`${SITE_URL}/contact`, today, "monthly", "0.6"),
+    buildUrl(`${SITE_URL}/faq`, today, "monthly", "0.6"),
+    buildUrl(`${SITE_URL}/shipping`, today, "monthly", "0.5"),
+    buildUrl(`${SITE_URL}/privacy`, today, "yearly", "0.3"),
+    buildUrl(`${SITE_URL}/terms`, today, "yearly", "0.3"),
+    buildUrl(`${SITE_URL}/track-order`, today, "monthly", "0.4"),
     buildUrl(`${SITE_URL}/wishlist`, today, "weekly", "0.5"),
     buildUrl(`${SITE_URL}/cart`, today, "weekly", "0.4"),
     buildUrl(`${SITE_URL}/checkout`, today, "weekly", "0.4"),

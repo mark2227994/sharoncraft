@@ -1,15 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 
+const WAVE_EMOJI = "\u{1F44B}";
+
 const fallbackSiteContent = {
   contactWhatsApp: "0112222572",
 };
 
-function formatWhatsAppNumber(value) {
+function formatPhoneForWhatsApp(value) {
   const digits = String(value || "").replace(/\D/g, "");
   if (!digits) return "254112222572";
   if (digits.startsWith("254")) return digits;
   if (digits.startsWith("0")) return `254${digits.slice(1)}`;
   return digits;
+}
+
+function IconWhatsApp(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <path d="M20 11.3c0 4.9-3.9 8.7-8.8 8.7-1.6 0-3.1-.4-4.4-1.1L3 20l1.2-3.6A8.5 8.5 0 013 11.3C3 6.5 6.9 2.7 11.8 2.7 16.1 2.7 20 6.4 20 11.3z" />
+      <path d="M8.7 8.3c.2-.4.4-.4.7-.4h.6c.2 0 .5 0 .7.5.2.4.7 1.7.8 1.8.1.2.1.4 0 .6-.1.2-.2.4-.4.6l-.4.4c-.2.2-.3.3-.1.6.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.5 2.9 1.7.3.1.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.3.7-.2.3.1 1.8.8 2.1 1 .3.1.5.2.5.4 0 .2 0 1-.4 1.8-.4.8-2.1 1.7-2.9 1.7-.8 0-1.5.1-5-1.4-4-1.8-6.5-6.2-6.7-6.5-.2-.3-1.6-2.1-1.6-4s1-2.8 1.3-3.1z" />
+    </svg>
+  );
 }
 
 export default function WhatsAppFab() {
@@ -37,112 +48,30 @@ export default function WhatsAppFab() {
   }, []);
 
   const phoneNumber = useMemo(
-    () => formatWhatsAppNumber(siteContent.contactWhatsApp || fallbackSiteContent.contactWhatsApp),
+    () => formatPhoneForWhatsApp(siteContent.contactWhatsApp || fallbackSiteContent.contactWhatsApp),
     [siteContent.contactWhatsApp],
   );
 
-  const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Hi SharonCraft! I'm interested in your products. Can you help me?");
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
-  };
+  const href = useMemo(
+    () =>
+      `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+        `Hi Sharon ${WAVE_EMOJI} I saw your jewelry on sharoncraft.co.ke and would love to know more!`,
+      )}`,
+    [phoneNumber],
+  );
 
   return (
-    <>
-      <button
-        className="whatsapp-fab"
-        onClick={handleWhatsAppClick}
-        aria-label="Chat with us on WhatsApp"
-        title="Chat on WhatsApp"
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <span className="whatsapp-fab__label">Chat</span>
-      </button>
-
-      <style jsx>{`
-        .whatsapp-fab {
-          position: fixed;
-          bottom: 80px;
-          right: 16px;
-          width: 56px;
-          height: 56px;
-          border-radius: 50%;
-          background: #8b5a2b;
-          color: white;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(139, 90, 43, 0.4);
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          font-weight: 600;
-          font-size: 12px;
-          z-index: 40;
-          animation: slideUp 0.4s ease;
-        }
-
-        .whatsapp-fab:hover {
-          transform: scale(1.1);
-          box-shadow: 0 6px 20px rgba(139, 90, 43, 0.5);
-        }
-
-        .whatsapp-fab:active {
-          transform: scale(0.95);
-        }
-
-        .whatsapp-fab__label {
-          position: absolute;
-          bottom: -24px;
-          white-space: nowrap;
-          font-size: 11px;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .whatsapp-fab:hover .whatsapp-fab__label {
-          opacity: 1;
-        }
-
-        @media (max-width: 768px) {
-          .whatsapp-fab {
-            width: 44px;
-            height: 44px;
-            bottom: 72px;
-            right: 16px;
-            background: #1c1c1c;
-            color: #ffffff;
-            box-shadow: none;
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @media (min-width: 769px) {
-          .whatsapp-fab {
-            display: none;
-          }
-        }
-      `}</style>
-    </>
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="whatsapp-fab group fixed bottom-20 right-6 z-[999] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#1c1c1c] text-white shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 ease-out hover:scale-[1.08] hover:bg-[#8B5E3C] md:bottom-6"
+      aria-label="Chat with us"
+    >
+      <IconWhatsApp className="h-[14px] w-[14px]" />
+      <span className="pointer-events-none absolute right-14 whitespace-nowrap bg-[#1c1c1c] px-[10px] py-[5px] text-[10px] tracking-[1px] text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        Chat with us
+      </span>
+    </a>
   );
 }

@@ -279,10 +279,16 @@ function getProductCategoryKey(productCategory) {
   return value;
 }
 
-function buildCategoryCards(categoryRows, products) {
+function buildCategoryCards(categoryRows, products, siteContent) {
   const rows = Array.isArray(categoryRows) ? categoryRows : [];
   const visibleProducts = normalizeVisibleProducts(products);
   const imageByKey = new Map();
+  const homepageImageByKey = new Map([
+    ["jewellery", isPlaceholderAsset(siteContent?.collectionJewellery) ? "" : compact(siteContent?.collectionJewellery)],
+    ["accessories", isPlaceholderAsset(siteContent?.collectionAccessories) ? "" : compact(siteContent?.collectionAccessories)],
+    ["african-wear", isPlaceholderAsset(siteContent?.collectionBridal) ? "" : compact(siteContent?.collectionBridal)],
+    ["home-living", isPlaceholderAsset(siteContent?.collectionHome) ? "" : compact(siteContent?.collectionHome)],
+  ]);
 
   for (const product of visibleProducts) {
     const key = getProductCategoryKey(product?.category);
@@ -294,6 +300,7 @@ function buildCategoryCards(categoryRows, products) {
   return CATEGORY_BLUEPRINTS.map((blueprint) => {
     const matchedRow = rows.find((row) => blueprint.aliases.includes(slugify(row?.name)));
     const image =
+      homepageImageByKey.get(blueprint.key) ||
       (isPlaceholderAsset(matchedRow?.image_url) ? "" : compact(matchedRow?.image_url)) ||
       imageByKey.get(blueprint.key) ||
       null;
@@ -1779,7 +1786,7 @@ export async function getServerSideProps() {
   const featuredProducts = buildFeaturedProducts(products);
   const hero = deriveHeroData(heroRow, siteContent, homepageContent);
   const artisan = deriveArtisanData(artisanSection, siteContent);
-  const categoryCards = buildCategoryCards(categories, products);
+  const categoryCards = buildCategoryCards(categories, products, siteContent);
   const announcementItems = buildAnnouncementItems(announcementRow);
   const trustedBrands = deriveTrustedBrands(trustedBrandsSection);
   const newsletter = deriveNewsletterData(newsletterSection);

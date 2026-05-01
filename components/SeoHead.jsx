@@ -13,10 +13,60 @@ export default function SeoHead({
   image = "/logo-og.png", // Updated default OG image
   type = "website",
   noindex = false,
+  structuredData = [],
 }) {
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonical = normalizeUrl(path);
   const imageUrl = image.startsWith("http") ? image : normalizeUrl(image);
+  const baseStructuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": ["Organization", "LocalBusiness"],
+      name: SITE_NAME,
+      description: "Handmade Kenyan jewelry, gifts, accessories, and home decor by local artisans.",
+      url: SITE_URL,
+      logo: normalizeUrl("/logo-og.png"),
+      image: normalizeUrl("/logo-og.png"),
+      email: "hello@sharoncraft.co.ke",
+      telephone: "+254112222572",
+      areaServed: "KE",
+      address: {
+        "@type": "PostalAddress",
+        addressCountry: "KE",
+        addressRegion: "Nairobi County",
+        addressLocality: "Nairobi",
+      },
+      sameAs: [
+        "https://www.instagram.com/sharoncraft",
+        "https://www.facebook.com/sharoncraft",
+        "https://www.tiktok.com/@sharoncraft",
+      ],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        availableLanguage: ["en", "sw"],
+        url: "https://wa.me/254112222572",
+      },
+      priceRange: "KES",
+      currenciesAccepted: "KES",
+      isBasedNear: {
+        "@type": "Place",
+        name: "Nairobi, Kenya",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL.replace(/\/$/, "")}/shop?search={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ];
+  const allStructuredData = [...baseStructuredData, ...structuredData].filter(Boolean);
 
   return (
     <Head>
@@ -44,47 +94,15 @@ export default function SeoHead({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={imageUrl} />
 
-      {/* JSON-LD Organization + LocalBusiness schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": ["Organization", "LocalBusiness"],
-            "name": "SharonCraft",
-            "description": "Handmade Kenyan jewelry, gifts, and home decor by local artisans",
-            "url": "https://www.sharoncraft.co.ke",
-            "logo": "https://www.sharoncraft.co.ke/logo-og.png",
-            "image": "https://www.sharoncraft.co.ke/logo-og.png",
-            "email": "support@sharoncraft.co.ke",
-            "telephone": "+254112222572",
-            "areaServed": "KE",
-            "address": {
-              "@type": "PostalAddress",
-              "addressCountry": "KE",
-              "addressRegion": "Kenya",
-              "addressLocality": "Nairobi"
-            },
-            "sameAs": [
-              "https://www.instagram.com/sharoncraft",
-              "https://www.facebook.com/sharoncraft",
-              "https://www.tiktok.com/@sharoncraft"
-            ],
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "contactType": "Customer Service",
-              "availableLanguageId": "en",
-              "contactOption": "TollFree",
-              "url": "https://wa.me/254112222572"
-            },
-            "priceRange": "$",
-            "isBasedNear": {
-              "@type": "Place",
-              "name": "Nairobi, Kenya"
-            }
-          })
-        }}
-      />
+      {allStructuredData.map((item, index) => (
+        <script
+          key={`jsonld-${index}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(item),
+          }}
+        />
+      ))}
     </Head>
   );
 }

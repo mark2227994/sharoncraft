@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ['fs/promises'],
+  },
   async redirects() {
     return [
       { source: "/admin", destination: "/admin-v2", permanent: false },

@@ -76,12 +76,19 @@
   --max-width: 1440px;
   --gutter: 8px;
   --announcement-height: 28px;
-  --nav-height: 58px;
+  --nav-height: 52px;
 }
 
 @media (min-width: 600px) {
   :root {
     --gutter: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --announcement-height: 32px;
+    --nav-height: 60px;
   }
 }
 

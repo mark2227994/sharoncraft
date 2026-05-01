@@ -3,6 +3,7 @@ const path = require("path");
 const rootDir = path.resolve(__dirname, "..");
 const dataModulePath = path.join(rootDir, "assets", "js", "data.js");
 const supabaseConfigPath = path.join(rootDir, "supabase", "supabase-config.js");
+const localCatalogCachePath = path.join(rootDir, "data", "store", "products.json");
 const siteUrl = (process.env.SITE_URL || "https://www.sharoncraft.co.ke").replace(/\/+$/, "");
 
 function bootstrapWindow() {
@@ -41,6 +42,16 @@ function loadSupabaseConfig() {
   clearModule(supabaseConfigPath);
   require(supabaseConfigPath);
   return global.window.SUPABASE_CONFIG || {};
+}
+
+function loadLocalCatalogCache() {
+  try {
+    const raw = fs.readFileSync(localCatalogCachePath, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
 }
 
 function normalizeText(value) {
@@ -163,6 +174,7 @@ async function loadLiveProducts(staticData) {
 async function loadCatalogSource() {
   const staticData = loadStaticData();
   const staticProducts = Array.isArray(staticData.products) ? staticData.products : [];
+  const localCachedProducts = loadLocalCatalogCache();
 
   try {
     const liveProducts = await loadLiveProducts(staticData);
@@ -176,6 +188,15 @@ async function loadCatalogSource() {
     }
   } catch (error) {
     console.warn(`Falling back to static catalog for build artifacts. ${error.message}`);
+  }
+
+  if (localCachedProducts.length) {
+    return {
+      source: "local-cache",
+      site: staticData.site || {},
+      categories: staticData.categories || [],
+      products: localCachedProducts
+    };
   }
 
   return {

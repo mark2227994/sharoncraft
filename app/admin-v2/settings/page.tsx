@@ -17,6 +17,33 @@ interface Artisan {
   bio?: string;
 }
 
+type CategoryImageKey =
+  | 'collectionJewellery'
+  | 'collectionAccessories'
+  | 'collectionBridal'
+  | 'collectionHome';
+
+interface HomepageCategoryImages {
+  collectionJewellery: string;
+  collectionAccessories: string;
+  collectionBridal: string;
+  collectionHome: string;
+}
+
+const CATEGORY_IMAGE_FIELDS: Array<{ key: CategoryImageKey; label: string }> = [
+  { key: 'collectionJewellery', label: 'Jewellery' },
+  { key: 'collectionAccessories', label: 'Accessories' },
+  { key: 'collectionBridal', label: 'African Wear' },
+  { key: 'collectionHome', label: 'Home & Living' },
+];
+
+const DEFAULT_CATEGORY_IMAGES: HomepageCategoryImages = {
+  collectionJewellery: '',
+  collectionAccessories: '',
+  collectionBridal: '',
+  collectionHome: '',
+};
+
 export default function SettingsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [artisans, setArtisans] = useState<Artisan[]>([]);
@@ -33,6 +60,10 @@ export default function SettingsPage() {
     image_url: '',
     bio: '',
   });
+  const [categoryImages, setCategoryImages] = useState<HomepageCategoryImages>(DEFAULT_CATEGORY_IMAGES);
+  const [categoryImagesSaving, setCategoryImagesSaving] = useState(false);
+  const [categoryImagesUploading, setCategoryImagesUploading] = useState<CategoryImageKey | null>(null);
+  const [categoryImagesMessage, setCategoryImagesMessage] = useState('');
   const [storeInfo, setStoreInfo] = useState({
     store_name: 'SharonCraft',
     phone: '',
@@ -44,6 +75,7 @@ export default function SettingsPage() {
     fetchAdmins();
     fetchStoreInfo();
     fetchArtisans();
+    fetchCategoryImages();
   }, []);
 
   async function fetchAdmins() {
@@ -95,6 +127,28 @@ export default function SettingsPage() {
     }
   }
 
+  async function fetchCategoryImages() {
+    try {
+      const response = await fetch('/api/admin/site-images', {
+        credentials: 'same-origin',
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = await response.json();
+      setCategoryImages({
+        collectionJewellery: data.collectionJewellery || '',
+        collectionAccessories: data.collectionAccessories || '',
+        collectionBridal: data.collectionBridal || '',
+        collectionHome: data.collectionHome || '',
+      });
+    } catch (error) {
+      console.error('Error fetching homepage category images:', error);
+    }
+  }
+
   async function uploadArtisanImage(file: File) {
     setArtisanUploading(true);
     try {
@@ -120,6 +174,36 @@ export default function SettingsPage() {
       alert('Failed to upload image');
     } finally {
       setArtisanUploading(false);
+    }
+  }
+
+  async function uploadCategoryImage(file: File, key: CategoryImageKey) {
+    setCategoryImagesUploading(key);
+    setCategoryImagesMessage('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'site/homepage');
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Upload failed');
+        return;
+      }
+
+      const data = await response.json();
+      setCategoryImages((prev) => ({ ...prev, [key]: data.url }));
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setCategoryImagesUploading(null);
     }
   }
 
@@ -189,6 +273,41 @@ export default function SettingsPage() {
 
     if (!error) {
       alert('Store info updated');
+    }
+  }
+
+  async function saveCategoryImages() {
+    setCategoryImagesSaving(true);
+    setCategoryImagesMessage('');
+
+    try {
+      const response = await fetch('/api/admin/site-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(categoryImages),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Could not save homepage category images');
+      }
+
+      setCategoryImages({
+        collectionJewellery: data.siteImages?.collectionJewellery || '',
+        collectionAccessories: data.siteImages?.collectionAccessories || '',
+        collectionBridal: data.siteImages?.collectionBridal || '',
+        collectionHome: data.siteImages?.collectionHome || '',
+      });
+      setCategoryImagesMessage('Homepage category images updated');
+    } catch (error) {
+      console.error('Error saving homepage category images:', error);
+      setCategoryImagesMessage(
+        error instanceof Error ? error.message : 'Could not save homepage category images'
+      );
+    } finally {
+      setCategoryImagesSaving(false);
     }
   }
 
@@ -263,6 +382,115 @@ export default function SettingsPage() {
             Save Store Info
           </button>
         </div>
+      </div>
+
+      {/* Homepage Category Images Section */}
+      <div className="border p-6 rounded-sm" style={{ borderColor: '#f0f0f0' }}>
+        <h3 className="text-sm font-medium mb-4">Homepage Category Images</h3>
+        <p className="text-xs text-gray-500 mb-4">
+          These images affect the homepage collection grid only. Category names and links stay the same.
+        </p>
+
+        {categoryImagesMessage && (
+          <p className="text-xs mb-4" style={{ color: categoryImagesMessage.includes('updated') ? '#666' : '#c33' }}>
+            {categoryImagesMessage}
+          </p>
+        )}
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {CATEGORY_IMAGE_FIELDS.map((field) => (
+            <div
+              key={field.key}
+              className="border p-4 rounded-sm space-y-3"
+              style={{ borderColor: '#f0f0f0', backgroundColor: '#fafafa' }}
+            >
+              <div>
+                <label className="text-xs uppercase tracking-wider" style={{ letterSpacing: '2px' }}>
+                  {field.label}
+                </label>
+              </div>
+
+              {categoryImages[field.key] ? (
+                <div className="w-full h-32 bg-gray-100 rounded-sm flex items-center justify-center overflow-hidden">
+                  <img
+                    src={categoryImages[field.key]}
+                    alt={`${field.label} preview`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-full h-32 border rounded-sm flex items-center justify-center text-xs text-gray-400"
+                  style={{ borderColor: '#e0e0e0' }}
+                >
+                  No image selected
+                </div>
+              )}
+
+              <input
+                type="text"
+                value={categoryImages[field.key]}
+                onChange={(e) =>
+                  setCategoryImages((prev) => ({
+                    ...prev,
+                    [field.key]: e.target.value,
+                  }))
+                }
+                placeholder="Paste image URL or upload below"
+                className="w-full text-xs px-3 py-2 border"
+                style={{ borderColor: '#e0e0e0' }}
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.currentTarget.files?.[0];
+                  if (file) {
+                    uploadCategoryImage(file, field.key);
+                  }
+                }}
+                disabled={categoryImagesUploading === field.key}
+                className="w-full text-xs px-3 py-2 border"
+                style={{ borderColor: '#e0e0e0' }}
+              />
+
+              {categoryImagesUploading === field.key && (
+                <p className="text-xs text-gray-500">Uploading...</p>
+              )}
+
+              {categoryImages[field.key] && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCategoryImages((prev) => ({
+                      ...prev,
+                      [field.key]: '',
+                    }))
+                  }
+                  className="text-xs hover:underline"
+                  style={{ color: '#c33' }}
+                >
+                  Clear image
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={saveCategoryImages}
+          disabled={categoryImagesSaving}
+          className="text-xs tracking-wider uppercase px-4 py-2 rounded-sm mt-4"
+          style={{
+            backgroundColor: '#1c1c1c',
+            color: '#fff',
+            letterSpacing: '2px',
+          }}
+        >
+          {categoryImagesSaving ? 'Saving...' : 'Save Homepage Images'}
+        </button>
       </div>
 
       {/* Featured Artisans Section */}
