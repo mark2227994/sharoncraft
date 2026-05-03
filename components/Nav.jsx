@@ -58,6 +58,7 @@ function resolveNavigationLinks(navigation) {
 
 function useScrollNavigationState() {
   const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     let lastScrollY = 0;
@@ -65,11 +66,15 @@ function useScrollNavigationState() {
     const onScroll = () => {
       const currentScrollY = window.scrollY;
 
+      // Hide/show on scroll
       if (currentScrollY > lastScrollY && currentScrollY > 80) {
         setHidden(true);
       } else {
         setHidden(false);
       }
+
+      // Change background when scrolled
+      setScrolled(currentScrollY > 20);
 
       lastScrollY = currentScrollY;
     };
@@ -79,7 +84,7 @@ function useScrollNavigationState() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  return { hidden };
+  return { hidden, scrolled };
 }
 
 function IconSearch(props) {
@@ -87,14 +92,6 @@ function IconSearch(props) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
       <circle cx="11" cy="11" r="6.5" />
       <path d="M16 16l4.5 4.5" />
-    </svg>
-  );
-}
-
-function IconHeart(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
-      <path d="M12 20.4l-1.1-1C5.2 14.3 2 11.4 2 7.8 2 5 4.2 3 7 3c1.8 0 3.5.8 5 2.6C13.5 3.8 15.2 3 17 3c2.8 0 5 2 5 4.8 0 3.6-3.2 6.5-8.9 11.6l-1.1 1z" />
     </svg>
   );
 }
@@ -151,14 +148,51 @@ function AnnouncementBar({ items }) {
             transform: translateX(-50%);
           }
         }
+        
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 53%, 80%, 100% {
+            transform: scale(1);
+          }
+          40%, 43% {
+            transform: scale(1.3);
+          }
+          70% {
+            transform: scale(1.1);
+          }
+          90% {
+            transform: scale(1.05);
+          }
+        }
       `}</style>
     </>
   );
 }
 
 export default function Nav() {
-  const { count, wishlistCount, openCart } = useCart();
-  const { hidden } = useScrollNavigationState();
+  const { count, openCart } = useCart();
+  const { hidden, scrolled } = useScrollNavigationState();
   const [menuOpen, setMenuOpen] = useState(false);
   const [announcementItems, setAnnouncementItems] = useState(FALLBACK_ANNOUNCEMENT_ITEMS);
   const [navigation, setNavigation] = useState({ header: FALLBACK_NAV_LINKS });
@@ -216,8 +250,9 @@ export default function Nav() {
   }, [menuOpen]);
 
   const links = useMemo(() => resolveNavigationLinks(navigation), [navigation]);
-  const shellClass =
-    "border-[rgba(0,0,0,0.08)] bg-[rgba(250,250,248,0.92)] text-[#888] backdrop-blur-[16px]";
+  const shellClass = scrolled
+    ? "border-[rgba(0,0,0,0.12)] bg-[rgba(250,250,248,0.98)] text-[#888] backdrop-blur-[20px] shadow-sm"
+    : "border-[rgba(0,0,0,0.08)] bg-[rgba(250,250,248,0.92)] text-[#888] backdrop-blur-[16px]";
 
   return (
     <>
@@ -237,9 +272,10 @@ export default function Nav() {
               <Link
                 key={link.label}
                 href={link.url}
-                className="text-[10px] uppercase tracking-[2px] transition-colors duration-200 hover:text-[#1c1c1c]"
+                className="text-[10px] uppercase tracking-[2px] transition-all duration-300 hover:text-[#1c1c1c] relative group"
               >
                 {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-px bg-[#8B5E3C] transition-all duration-300 group-hover:w-full"></span>
               </Link>
             ))}
           </div>
@@ -249,11 +285,11 @@ export default function Nav() {
               type="button"
               aria-label="Open cart"
               onClick={openCart}
-              className="relative inline-flex h-9 w-9 items-center justify-center text-[#888] transition-colors duration-300 hover:text-[#1c1c1c]"
+              className="relative inline-flex h-9 w-9 items-center justify-center text-[#888] transition-all duration-300 hover:text-[#1c1c1c] hover:scale-110 active:scale-95"
             >
-              <IconBag className="h-[18px] w-[18px]" />
+              <IconBag className="h-[18px] w-[18px] transition-transform duration-300 group-hover:scale-110" />
               {count > 0 ? (
-                <span className="absolute right-0 top-0 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#1c1c1c] text-[8px] font-normal text-white">
+                <span className="absolute right-0 top-0 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#1c1c1c] text-[8px] font-normal text-white animate-[bounce_0.5s_ease-out]">
                   {count}
                 </span>
               ) : null}
@@ -271,31 +307,19 @@ export default function Nav() {
             <Link
               href="/shop"
               aria-label="Search"
-              className="text-[#888] transition-colors duration-200 hover:text-[#1c1c1c]"
+              className="text-[#888] transition-all duration-300 hover:text-[#1c1c1c] hover:scale-110 active:scale-95"
             >
-              <IconSearch className="h-[15px] w-[15px]" />
-            </Link>
-            <Link
-              href="/wishlist"
-              aria-label="Wishlist"
-              className="relative text-[#888] transition-colors duration-200 hover:text-[#1c1c1c]"
-            >
-              <IconHeart className="h-[15px] w-[15px]" />
-              {wishlistCount > 0 ? (
-                <span className="absolute -right-2 -top-2 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#1c1c1c] text-[8px] font-normal text-white">
-                  {wishlistCount}
-                </span>
-              ) : null}
+              <IconSearch className="h-[15px] w-[15px] transition-transform duration-300" />
             </Link>
             <button
               type="button"
               onClick={openCart}
               aria-label="Cart"
-              className="relative text-[#888] transition-colors duration-200 hover:text-[#1c1c1c]"
+              className="relative text-[#888] transition-all duration-300 hover:text-[#1c1c1c] hover:scale-110 active:scale-95"
             >
-              <IconBag className="h-[15px] w-[15px]" />
+              <IconBag className="h-[15px] w-[15px] transition-transform duration-300" />
               {count > 0 ? (
-                <span className="absolute -right-2 -top-2 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#1c1c1c] text-[8px] font-normal text-white">
+                <span className="absolute -right-2 -top-2 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-[#1c1c1c] text-[8px] font-normal text-white animate-[bounce_0.5s_ease-out]">
                   {count}
                 </span>
               ) : null}
@@ -316,39 +340,38 @@ export default function Nav() {
       </header>
 
       {menuOpen ? (
-        <div className="fixed inset-0 z-[1100] bg-[#080808]">
+        <div className="fixed inset-0 z-[1100] bg-[#080808] animate-[slideIn_0.3s_ease-out]">
           <button
             type="button"
             aria-label="Close menu"
             onClick={() => setMenuOpen(false)}
-            className="absolute right-5 top-5 inline-flex h-10 w-10 items-center justify-center text-white/70 transition-colors duration-200 hover:text-white"
+            className="absolute right-5 top-5 inline-flex h-10 w-10 items-center justify-center text-white/70 transition-all duration-300 hover:text-white hover:rotate-90"
           >
             <IconClose className="h-[18px] w-[18px]" />
           </button>
 
           <nav className="flex h-full items-center justify-center px-8">
             <div className="w-full max-w-[320px]">
-              {links.map((link) => (
+              {links.map((link, index) => (
                 <Link
                   key={link.label}
                   href={link.url}
                   onClick={() => setMenuOpen(false)}
-                  className="block border-b border-[#1a1a1a] py-4 text-center text-[14px] uppercase tracking-[3px] text-white/70 transition-colors duration-200 hover:text-white"
+                  className="block border-b border-[#1a1a1a] py-4 text-center text-[14px] uppercase tracking-[3px] text-white/70 transition-all duration-300 hover:text-white hover:translate-x-2"
+                  style={{
+                    animation: `fadeInUp 0.4s ease-out ${index * 0.1}s both`
+                  }}
                 >
                   {link.label}
                 </Link>
               ))}
               <Link
-                href="/wishlist"
-                onClick={() => setMenuOpen(false)}
-                className="block border-b border-[#1a1a1a] py-4 text-center text-[14px] uppercase tracking-[3px] text-white/70 transition-colors duration-200 hover:text-white"
-              >
-                Wishlist
-              </Link>
-              <Link
                 href="/shop"
                 onClick={() => setMenuOpen(false)}
-                className="block border-b border-[#1a1a1a] py-4 text-center text-[14px] uppercase tracking-[3px] text-white/70 transition-colors duration-200 hover:text-white"
+                className="block border-b border-[#1a1a1a] py-4 text-center text-[14px] uppercase tracking-[3px] text-white/70 transition-all duration-300 hover:text-white hover:translate-x-2"
+                style={{
+                  animation: `fadeInUp 0.4s ease-out ${links.length * 0.1}s both`
+                }}
               >
                 Search
               </Link>
