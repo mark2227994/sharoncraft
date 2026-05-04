@@ -65,7 +65,9 @@ function buildSharePage(product, site, categories) {
   const description = normalizeDescription(product, categoryName);
   const images = getProductImages(product);
   const imageUrl = absoluteUrl(images[0]);
-  const productUrl = `${siteUrl}/product.html?id=${encodeURIComponent(productId)}`;
+  const productSlug = slugify(productId);
+  const productPath = `/product/${encodeURIComponent(productSlug)}`;
+  const productUrl = `${siteUrl}${productPath}`;
   const shareUrl = `${siteUrl}/${buildSharePath(product)}`;
   const siteName = String(site && site.name || "SharonCraft").trim();
 
@@ -173,12 +175,12 @@ function buildSharePage(product, site, categories) {
       <span class="share-kicker">${escapeHtml(categoryName)}</span>
       <h1>${escapeHtml(productName)}</h1>
       <p>${escapeHtml(description)}</p>
-      <a href="${escapeHtml(productUrl)}">Open Product</a>
+      <a href="${escapeHtml(productPath)}">Open Product</a>
     </div>
   </main>
   <script>
     window.setTimeout(function () {
-      window.location.replace(${JSON.stringify(productUrl)});
+      window.location.replace(${JSON.stringify(productPath)});
     }, 250);
   </script>
 </body>

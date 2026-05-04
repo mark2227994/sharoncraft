@@ -1,5 +1,20 @@
 import { isAuthorizedRequest } from "../../../lib/admin-auth";
 
+function resolveLiveSiteBaseUrl(req) {
+  const fromEnv = (process.env.NEXT_PUBLIC_LIVE_SITE_URL || "").trim().replace(/\/+$/, "");
+  if (fromEnv) {
+    return fromEnv;
+  }
+  const proto = (req.headers["x-forwarded-proto"] || "https").split(",")[0].trim();
+  const host = (req.headers["x-forwarded-host"] || req.headers.host || "")
+    .split(",")[0]
+    .trim();
+  if (host) {
+    return `${proto}://${host}`;
+  }
+  return "https://www.sharoncraft.co.ke";
+}
+
 /**
  * Fetches the current live website's site content.
  * This allows admins to see what's actually published and pull it back for editing.
@@ -17,7 +32,7 @@ export default async function handler(req, res) {
   try {
     res.setHeader("Cache-Control", "no-store");
 
-    const LIVE_URL = process.env.NEXT_PUBLIC_LIVE_SITE_URL || "https://www.sharoncraft.co.ke";
+    const LIVE_URL = resolveLiveSiteBaseUrl(req);
     const siteImagesPath = "site-content/site-images.json";
 
     // Try Supabase first (production source of truth)
