@@ -69,6 +69,14 @@ Important:
 - pushing a non-production branch also usually creates a preview deployment
 - for a live deploy, either push to the configured Vercel production branch or use `npm run deploy:prod`
 
+### Vercel: “Current” vs preview (why fixes look on the “wrong” site)
+
+- In the Vercel **Deployments** list, **Current** (Production) is the build serving your **production domain** (e.g. `sharoncraft.co.ke`). That row only moves when Production gets a **new** build (production-branch push, **`npm run deploy:prod`**, or **Promote to Production**).
+- **Preview** rows (and each unique `…-xxxxx-….vercel.app` URL) are **separate** builds. Pushing UI to a **feature branch** updates **preview** URLs, not **Current**, until you merge or promote.
+- **Do not** bookmark every one-off preview URL if you want a stable test URL: use the **branch preview** hostname Vercel shows for your branch, or test on the **production domain** after you intentionally ship.
+
+See **`AGENTS.md`** in the repo root for rules AI assistants should follow when “deploying.”
+
 ## 5. After deploy
 
 Open the live website and check:

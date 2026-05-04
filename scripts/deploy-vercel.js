@@ -39,14 +39,20 @@ const gitArgs = isWindows ? ["/c", "git", "branch", "--show-current"] : ["branch
 const branch = read(gitCommand, gitArgs);
 
 if (isProd) {
-  console.log("[deploy] Starting a production deploy to Vercel.");
+  console.log("[deploy] Starting a PRODUCTION deploy (--prod).");
+  console.log(
+    "[deploy] This targets Vercel Production (the deployment that becomes or replaces 'Current' for your production domain)."
+  );
   if (branch && branch !== "main") {
     console.log(
-      `[deploy] Current branch is "${branch}". Git pushes from non-production branches usually create preview deployments, so this command uses "--prod" to publish live.`
+      `[deploy] Branch is "${branch}" (not main). --prod still publishes to this project's Production; ensure that matches your intent.`
     );
   }
 } else {
-  console.log("[deploy] Starting a preview deploy to Vercel.");
+  console.log("[deploy] Starting a PREVIEW deploy (no --prod).");
+  console.log(
+    "[deploy] IMPORTANT: Preview does NOT update Production 'Current' or your custom domain. Use npm run deploy:prod, push the production branch, or Promote in Vercel to ship live."
+  );
 }
 
 const vercelCommand = isWindows ? "cmd" : "vercel";
