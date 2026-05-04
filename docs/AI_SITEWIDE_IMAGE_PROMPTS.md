@@ -151,7 +151,7 @@ These images should feel believable and calm. They carry more trust risk, so kee
 ### 5. About SharonCraft
 
 Page:
-- [about.html](c:/Users/USER/Desktop/projects/bead%20VN2/about.html)
+- [About page](/about) (`pages/about.jsx`)
 
 Suggested filename:
 - `assets/images/ai-about-sharoncraft-hero.png`

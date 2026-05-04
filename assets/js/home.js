@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     if (heroSecondary) {
       heroSecondary.textContent = hero.secondaryLabel || "Our Story";
-      heroSecondary.href = hero.secondaryHref || "about.html";
+      heroSecondary.href = hero.secondaryHref || "/about";
     }
     if (heroImage) {
       applyResponsiveImage(

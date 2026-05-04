@@ -16,7 +16,7 @@ SharonCraft is a Nairobi-based handmade brand focused on beadwork, gift-ready pi
 ## Trust
 
 - [Why Trust SharonCraft](https://www.sharoncraft.co.ke/why-trust-sharoncraft.html): Handmade identity, support, and visible trust signals.
-- [About](https://www.sharoncraft.co.ke/about.html): Brand background and cultural inspiration.
+- [About](https://www.sharoncraft.co.ke/about): Brand background and cultural inspiration.
 - [Contact](https://www.sharoncraft.co.ke/contact.html): Contact details and ordering help.
 - [Returns](https://www.sharoncraft.co.ke/returns.html): Returns and refund policy.
 - [Privacy](https://www.sharoncraft.co.ke/privacy.html): Privacy details.

@@ -12,7 +12,8 @@ const nextConfig = {
       { source: "/why-trust-sharoncraft.html", destination: "/#about-story", permanent: true },
       { source: "/founder-playbook.html", destination: "/", permanent: true },
       { source: "/follow-up-playbook.html", destination: "/", permanent: true },
-      { source: "/about.html", destination: "/#about-story", permanent: true },
+      // Legacy static URL; send to the real About route (not the homepage fragment).
+      { source: "/about.html", destination: "/about", permanent: true },
       { source: "/contact.html", destination: "/custom-order", permanent: true },
       { source: "/marketing.html", destination: "/", permanent: true },
       { source: "/shop.html", destination: "/shop", permanent: true },

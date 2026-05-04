@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         title: "Inspired by craft, color, family moments, and everyday African beauty.",
         description: "SharonCraft brings together beadwork that feels joyful, modern, and easy to live with. From statement mirrors to simple bracelets, each item is made to feel special without making shopping complicated.",
         primaryLabel: "Read the Story",
-        primaryHref: "about.html",
+        primaryHref: "/about",
         secondaryLabel: "Contact Us",
         secondaryHref: "contact.html",
         images: [
@@ -508,7 +508,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         primaryLabel: String(hero.primaryLabel || fallbackHero.primaryLabel || "Shop Now").trim() || "Shop Now",
         primaryHref: String(hero.primaryHref || fallbackHero.primaryHref || "shop.html").trim() || "shop.html",
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
-        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
+        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "/about").trim() || "/about",
         image: cleanImagePath(hero.image) || cleanImagePath(fallbackHero.image) || fallbackImage,
         imageAlt:
           String(hero.imageAlt || fallbackHero.imageAlt || "SharonCraft welcoming photo").trim() ||
@@ -1523,7 +1523,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeTextField("homeVisuals.hero.primaryLabel", "Hero primary button", "Shop Now"),
         makeTextField("homeVisuals.hero.primaryHref", "Hero primary link", "shop.html"),
         makeTextField("homeVisuals.hero.secondaryLabel", "Hero secondary button", "Our Story"),
-        makeTextField("homeVisuals.hero.secondaryHref", "Hero secondary link", "about.html"),
+        makeTextField("homeVisuals.hero.secondaryHref", "Hero secondary link", "/about"),
         makeImageField("homeVisuals.hero.image", "Hero image", "assets/images/custom-occasion-beadwork-46mokm-opt.webp", "homeVisuals.hero.imageAlt", "Hero image alt"),
         makeTextField("homeVisuals.favorite.kicker", "Favorite kicker", "Client Favorite"),
         makeTextField("homeVisuals.favorite.title", "Favorite title", "Kijani Mirror Duo"),
@@ -1581,7 +1581,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         makeTextField("siteContent.home.story.title", "Story title", "Inspired by craft, color..."),
         makeTextareaField("siteContent.home.story.description", "Story description", "SharonCraft brings together beadwork..."),
         makeTextField("siteContent.home.story.primaryLabel", "Story primary button", "Read the Story"),
-        makeTextField("siteContent.home.story.primaryHref", "Story primary link", "about.html"),
+        makeTextField("siteContent.home.story.primaryHref", "Story primary link", "/about"),
         makeTextField("siteContent.home.story.secondaryLabel", "Story secondary button", "Contact Us"),
         makeTextField("siteContent.home.story.secondaryHref", "Story secondary link", "contact.html"),
         makeImageField("siteContent.home.story.images.0.src", "Story image 1", "assets/images/...", "siteContent.home.story.images.0.alt", "Story image 1 alt"),
@@ -5158,7 +5158,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return "Categories";
     }
 
-    if (pagePath.startsWith("/about.html")) {
+    if (pagePath.startsWith("/about.html") || pagePath === "/about" || pagePath.startsWith("/about?")) {
       return "About";
     }
 

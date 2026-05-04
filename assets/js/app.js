@@ -3530,7 +3530,7 @@
     const primaryNavLinks = [
       { href: "index.html", icon: "home", label: "Home", isActive: currentPage === "home" },
       { href: "shop.html", icon: "shop", label: "Shop", isActive: isShopFamilyPage },
-      { href: "about.html", icon: "about", label: "About", isActive: currentPage === "about" },
+      { href: "/about", icon: "about", label: "About", isActive: currentPage === "about" },
       { href: "contact.html", icon: "contact", label: "Contact", isActive: currentPage === "contact" }
     ];
     const categoryCardsMarkup = (data.categories || [])

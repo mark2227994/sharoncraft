@@ -124,7 +124,7 @@
         primaryLabel: String(hero.primaryLabel || fallbackHero.primaryLabel || "Shop Now").trim() || "Shop Now",
         primaryHref: String(hero.primaryHref || fallbackHero.primaryHref || "shop.html").trim() || "shop.html",
         secondaryLabel: String(hero.secondaryLabel || fallbackHero.secondaryLabel || "Our Story").trim() || "Our Story",
-        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "about.html").trim() || "about.html",
+        secondaryHref: String(hero.secondaryHref || fallbackHero.secondaryHref || "/about").trim() || "/about",
         image:
           String(hero.image || fallbackHero.image || "assets/images/custom-occasion-beadwork-46mokm-opt.webp").trim() ||
           "assets/images/custom-occasion-beadwork-46mokm-opt.webp",

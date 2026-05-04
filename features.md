@@ -4,7 +4,7 @@
 
 ### Customer-Facing Pages
 - **404.html** - Custom error page
-- **about.html** - Company story and information
+- **/about** (Next.js) — Company story and information; legacy `about.html` redirects here.
 - **account.html** - Customer account management
 - **african-home-decor-nairobi.html** - Home decor category page
 - **beaded-earrings-kenya.html** - Earrings product category

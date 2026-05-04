@@ -37,7 +37,6 @@ const pageMetadata = {
   "bridal-bead-sets-kenya.html": { changefreq: "weekly", priority: "0.8", order: 10 },
   "gift-sets-kenya.html": { changefreq: "weekly", priority: "0.8", order: 11 },
   "maasai-inspired-bracelets-kenya.html": { changefreq: "weekly", priority: "0.8", order: 12 },
-  "about.html": { changefreq: "monthly", priority: "0.6", order: 13 },
   "contact.html": { changefreq: "monthly", priority: "0.7", order: 14 },
   "faq.html": { changefreq: "yearly", priority: "0.5", order: 15 },
   "returns.html": { changefreq: "yearly", priority: "0.4", order: 16 },
@@ -213,6 +212,17 @@ async function generateSitemap() {
       }
     });
   });
+
+  const aboutLoc = `${siteUrl}/about`;
+  if (!seen.has(aboutLoc)) {
+    seen.add(aboutLoc);
+    entries.push({
+      loc: aboutLoc,
+      lastmod: toLastmod(Date.now()),
+      changefreq: "monthly",
+      priority: "0.7",
+    });
+  }
 
   fs.writeFileSync(outputPath, buildXml(entries), "utf8");
   return {

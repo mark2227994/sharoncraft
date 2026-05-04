@@ -38,7 +38,7 @@ const PRODUCT_TRIGGER_PATHS = new Set([
 ]);
 const PUBLIC_ROOT_PAGES = new Set([
   "index.html",
-  "about.html",
+  "pages/about.jsx",
   "contact.html",
   "faq.html",
   "journal.html",
@@ -169,7 +169,11 @@ function buildChangedUrlsFromGit() {
     }
 
     if (PUBLIC_ROOT_PAGES.has(filePath)) {
-      urls.add(toSiteUrl(filePath));
+      if (filePath === "pages/about.jsx" || filePath === "pages\\about.jsx") {
+        urls.add(`${SITE_ORIGIN}/about`);
+      } else {
+        urls.add(toSiteUrl(filePath));
+      }
       return;
     }
 
