@@ -544,18 +544,18 @@ export default function ProductCard({
           background: var(--card-bg);
         }
 
-        :global(.product-card-shell__image) {
+        .product-card-shell__image-wrap :global(.product-card-shell__image) {
           z-index: 1;
           background: transparent;
           transition: opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        :global(.product-card-shell__image--primary) {
+        .product-card-shell__image-wrap :global(.product-card-shell__image--primary) {
           opacity: ${showSecondaryImage ? 0 : 1} !important;
           transform: ${hovered ? 'scale(1.04)' : 'scale(1)'};
         }
 
-        :global(.product-card-shell__image--secondary) {
+        .product-card-shell__image-wrap :global(.product-card-shell__image--secondary) {
           z-index: 2 !important;
           opacity: ${showSecondaryImage ? 1 : 0} !important;
           transform: ${showSecondaryImage ? (hovered ? 'scale(1.04)' : 'scale(1)') : 'scale(1.04)'};
