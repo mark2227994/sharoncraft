@@ -123,6 +123,8 @@ export default function ProductCard({
   
   const cardRef = useRef<HTMLElement | null>(null);
   const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const isSwipingRef = useRef<boolean>(false);
 
   // Normalize inputs from either props or product object
   const p = product || ({} as Partial<ProductLike>);
@@ -291,20 +293,43 @@ export default function ProductCard({
 
   function handleTouchStart(event: TouchEvent<HTMLAnchorElement>) {
     touchStartXRef.current = event.changedTouches[0]?.clientX ?? null;
+    touchStartYRef.current = event.changedTouches[0]?.clientY ?? null;
+    isSwipingRef.current = false;
   }
 
   function handleTouchEnd(event: TouchEvent<HTMLAnchorElement>) {
-    if (!hasSecondImage || touchStartXRef.current === null) return;
+    if (!hasSecondImage || touchStartXRef.current === null || touchStartYRef.current === null) return;
 
     const touchEndX = event.changedTouches[0]?.clientX ?? touchStartXRef.current;
-    const delta = touchStartXRef.current - touchEndX;
+    const touchEndY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
+    
+    const deltaX = touchStartXRef.current - touchEndX;
+    const deltaY = touchStartYRef.current - touchEndY;
 
-    if (delta > 40) {
-      setMobileImageIndex(1);
-    } else if (delta < -40) {
-      setMobileImageIndex(0);
+    // Detect horizontal swipe: if horizontal movement is larger than vertical and exceeds 30px
+    if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      isSwipingRef.current = true;
+      if (deltaX > 0) {
+        setMobileImageIndex(1);
+      } else {
+        setMobileImageIndex(0);
+      }
     }
+    
     touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  }
+
+  function handleLinkClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (isSwipingRef.current) {
+      event.preventDefault();
+      event.stopPropagation();
+      isSwipingRef.current = false;
+      return;
+    }
+    if (onOpen) {
+      onOpen();
+    }
   }
 
   return (
@@ -326,7 +351,7 @@ export default function ProductCard({
           aria-label={`View ${safeName}`}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          onClick={onOpen}
+          onClick={handleLinkClick}
         >
           <div className="product-card-shell__image-wrap">
             {showNewBadge || hasSale || isFeaturedVal ? (
@@ -519,20 +544,20 @@ export default function ProductCard({
           background: var(--card-bg);
         }
 
-        .product-card-shell__image {
+        :global(.product-card-shell__image) {
           z-index: 1;
           background: transparent;
           transition: opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        .product-card-shell__image--primary {
-          opacity: ${showSecondaryImage ? 0 : 1};
+        :global(.product-card-shell__image--primary) {
+          opacity: ${showSecondaryImage ? 0 : 1} !important;
           transform: ${hovered ? 'scale(1.04)' : 'scale(1)'};
         }
 
-        .product-card-shell__image--secondary {
-          z-index: 2;
-          opacity: ${showSecondaryImage ? 1 : 0};
+        :global(.product-card-shell__image--secondary) {
+          z-index: 2 !important;
+          opacity: ${showSecondaryImage ? 1 : 0} !important;
           transform: ${showSecondaryImage ? (hovered ? 'scale(1.04)' : 'scale(1)') : 'scale(1.04)'};
         }
 
