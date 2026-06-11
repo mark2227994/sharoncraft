@@ -385,7 +385,7 @@ export default function ProductCard({
                 fill
                 quality={76}
                 sizes="(max-width: 767px) 50vw, 33vw"
-                className="product-card-shell__image product-card-shell__image--primary"
+                className={`product-card-shell__image product-card-shell__image--primary ${showSecondaryImage ? "is-hidden" : ""} ${hovered ? "is-hovered" : ""}`}
                 style={{ objectFit: 'contain', objectPosition: 'center', padding: '16px' }}
                 priority={false}
                 onError={() => {}}
@@ -401,7 +401,7 @@ export default function ProductCard({
                 fill
                 quality={76}
                 sizes="(max-width: 767px) 50vw, 33vw"
-                className="product-card-shell__image product-card-shell__image--secondary"
+                className={`product-card-shell__image product-card-shell__image--secondary ${showSecondaryImage ? "is-visible" : ""} ${hovered ? "is-hovered" : ""}`}
                 style={{ objectFit: 'contain', objectPosition: 'center', padding: '16px' }}
                 priority={false}
                 onError={() => {}}
@@ -547,18 +547,36 @@ export default function ProductCard({
         .product-card-shell__image-wrap :global(.product-card-shell__image) {
           z-index: 1;
           background: transparent;
+          opacity: 1 !important;
+          transform: scale(1);
           transition: opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .product-card-shell__image-wrap :global(.product-card-shell__image--primary) {
-          opacity: ${showSecondaryImage ? 0 : 1} !important;
-          transform: ${hovered ? 'scale(1.04)' : 'scale(1)'};
+          z-index: 1;
+        }
+
+        .product-card-shell__image-wrap :global(.product-card-shell__image--primary.is-hidden) {
+          opacity: 0 !important;
         }
 
         .product-card-shell__image-wrap :global(.product-card-shell__image--secondary) {
           z-index: 2 !important;
-          opacity: ${showSecondaryImage ? 1 : 0} !important;
-          transform: ${showSecondaryImage ? (hovered ? 'scale(1.04)' : 'scale(1)') : 'scale(1.04)'};
+          opacity: 0 !important;
+          transform: scale(1.04);
+        }
+
+        .product-card-shell__image-wrap :global(.product-card-shell__image--secondary.is-visible) {
+          opacity: 1 !important;
+          transform: scale(1);
+        }
+
+        .product-card-shell__image-wrap :global(.product-card-shell__image.is-hovered) {
+          transform: scale(1.04) !important;
+        }
+
+        .product-card-shell__image-wrap :global(.product-card-shell__image--secondary.is-visible.is-hovered) {
+          transform: scale(1.04) !important;
         }
 
         .product-card-shell__sold-overlay {
