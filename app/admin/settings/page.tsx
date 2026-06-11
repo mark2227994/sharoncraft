@@ -2,50 +2,61 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { DEFAULT_WHATSAPP_TEMPLATES, type WhatsappTemplateRecord } from '@/lib/order-management';
 
 interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role: string;
 }
+
+type TemplateResponse = {
+  templates?: WhatsappTemplateRecord[];
+  error?: string;
+};
 
 export default function SettingsPage() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    role: 'admin',
-  });
+  const [loadingAdmins, setLoadingAdmins] = useState(true);
+  const [savingStore, setSavingStore] = useState(false);
+  const [savingTemplates, setSavingTemplates] = useState(false);
+  const [feedback, setFeedback] = useState('');
   const [storeInfo, setStoreInfo] = useState({
     store_name: 'SharonCraft',
     phone: '',
     email: '',
     address: '',
   });
+  const [templates, setTemplates] = useState<WhatsappTemplateRecord[]>(DEFAULT_WHATSAPP_TEMPLATES);
 
   useEffect(() => {
-    fetchAdmins();
-    fetchStoreInfo();
+    void fetchAdmins();
+    void fetchStoreInfo();
+    void fetchTemplates();
   }, []);
 
   async function fetchAdmins() {
-    setLoading(true);
+    setLoadingAdmins(true);
     try {
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .order('created_at');
+      const { data, error } = await supabase.from('admin_users').select('*').order('created_at');
 
       if (error) {
-        console.error('Error fetching admins:', error);
-        return;
+        throw error;
       }
 
-      setAdmins(data || []);
+      setAdmins(
+        Array.isArray(data)
+          ? data.map((admin: any) => ({
+              id: String(admin.user_id || admin.id || ''),
+              email: String(admin.email || ''),
+              name: String(admin.name || admin.email || 'Admin User'),
+            }))
+          : [],
+      );
+    } catch (error) {
+      setFeedback('Unable to load admin users right now.');
     } finally {
-      setLoading(false);
+      setLoadingAdmins(false);
     }
   }
 
@@ -56,20 +67,25 @@ export default function SettingsPage() {
       .eq('section', 'store_info')
       .single();
 
-    if (data) {
-      setStoreInfo(data.content || storeInfo);
+    if (data?.content) {
+      setStoreInfo((currentStore) => ({
+        ...currentStore,
+        ...data.content,
+      }));
     }
   }
 
-  async function addAdmin() {
-    if (!formData.email || !formData.name) {
-      alert('Email and name are required');
-      return;
-    }
+  async function fetchTemplates() {
+    try {
+      const response = await fetch('/api/admin/whatsapp-templates');
+      const data = (await response.json()) as TemplateResponse;
 
-    // Note: In production, you would create the Supabase Auth user first
-    // For now, this is a placeholder
-    alert('To add an admin:\n1. Create a user in Supabase Auth\n2. Copy their UUID\n3. Contact support to add them to admin_users table');
+      if (response.ok && Array.isArray(data.templates) && data.templates.length > 0) {
+        setTemplates(data.templates);
+      }
+    } catch {
+      setFeedback('WhatsApp templates are using the default set until the table is available.');
+    }
   }
 
   async function deleteAdmin(id: string) {
@@ -78,171 +94,270 @@ export default function SettingsPage() {
     const { error } = await supabase.from('admin_users').delete().eq('id', id);
 
     if (!error) {
-      setAdmins(admins.filter((a) => a.id !== id));
+      setAdmins((currentAdmins) => currentAdmins.filter((admin) => admin.id !== id));
     }
   }
 
   async function updateStoreInfo() {
-    const { error } = await supabase
-      .from('homepage_content')
-      .upsert({
+    setSavingStore(true);
+    setFeedback('');
+
+    try {
+      const { error } = await supabase.from('homepage_content').upsert({
         section: 'store_info',
         content: storeInfo,
       });
 
-    if (!error) {
-      alert('Store info updated');
+      if (error) {
+        throw error;
+      }
+
+      setFeedback('Store information updated.');
+    } catch {
+      setFeedback('Unable to update store information.');
+    } finally {
+      setSavingStore(false);
     }
   }
 
+  async function saveTemplates() {
+    setSavingTemplates(true);
+    setFeedback('');
+
+    try {
+      const response = await fetch('/api/admin/whatsapp-templates', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ templates }),
+      });
+
+      const data = (await response.json()) as TemplateResponse;
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to save templates.');
+      }
+
+      if (Array.isArray(data.templates)) {
+        setTemplates(data.templates);
+      }
+
+      setFeedback('WhatsApp templates saved.');
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : 'Unable to save templates.');
+    } finally {
+      setSavingTemplates(false);
+    }
+  }
+
+  function updateTemplate(templateKey: string, partial: Partial<WhatsappTemplateRecord>) {
+    setTemplates((currentTemplates) =>
+      currentTemplates.map((template) =>
+        template.template_key === templateKey
+          ? {
+              ...template,
+              ...partial,
+            }
+          : template,
+      ),
+    );
+  }
+
   return (
-    <div className="space-y-8 max-w-2xl">
-      {/* Header */}
+    <div className="space-y-8" style={{ maxWidth: '1040px', color: '#1c1c1c' }}>
       <div>
-        <h2 className="text-lg font-medium">Settings</h2>
+        <p className="text-[10px] uppercase" style={{ letterSpacing: '3px', color: '#8B5E3C', fontWeight: 400 }}>
+          Admin Settings
+        </p>
+        <h2 className="text-[22px]" style={{ fontWeight: 300 }}>
+          Store + WhatsApp Templates
+        </h2>
       </div>
 
-      {/* Store Information Section */}
-      <div className="border p-6 rounded-sm" style={{ borderColor: '#f0f0f0' }}>
-        <h3 className="text-sm font-medium mb-4">Store Information</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs uppercase tracking-wider" style={{ letterSpacing: '2px' }}>
-              Store Name
-            </label>
-            <input
-              type="text"
-              value={storeInfo.store_name}
-              onChange={(e) => setStoreInfo({ ...storeInfo, store_name: e.target.value })}
-              className="w-full text-xs px-3 py-2 border mt-1"
-              style={{ borderColor: '#e0e0e0' }}
-            />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider" style={{ letterSpacing: '2px' }}>
-              Phone
-            </label>
-            <input
-              type="text"
-              value={storeInfo.phone}
-              onChange={(e) => setStoreInfo({ ...storeInfo, phone: e.target.value })}
-              className="w-full text-xs px-3 py-2 border mt-1"
-              style={{ borderColor: '#e0e0e0' }}
-            />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider" style={{ letterSpacing: '2px' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={storeInfo.email}
-              onChange={(e) => setStoreInfo({ ...storeInfo, email: e.target.value })}
-              className="w-full text-xs px-3 py-2 border mt-1"
-              style={{ borderColor: '#e0e0e0' }}
-            />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider" style={{ letterSpacing: '2px' }}>
-              Address
-            </label>
-            <textarea
-              value={storeInfo.address}
-              onChange={(e) => setStoreInfo({ ...storeInfo, address: e.target.value })}
-              className="w-full text-xs px-3 py-2 border mt-1"
-              style={{ borderColor: '#e0e0e0' }}
-              rows={3}
-            />
-          </div>
-          <button
-            onClick={updateStoreInfo}
-            className="text-xs tracking-wider uppercase px-4 py-2 rounded-sm mt-4"
-            style={{
-              backgroundColor: '#1c1c1c',
-              color: '#fff',
-              letterSpacing: '2px',
-            }}
-          >
-            Save Store Info
-          </button>
+      {feedback ? (
+        <div className="border px-4 py-3 text-xs" style={{ borderColor: '#ece7df', backgroundColor: '#fff', fontWeight: 400 }}>
+          {feedback}
         </div>
-      </div>
+      ) : null}
 
-      {/* Admin Users Section */}
-      <div className="border p-6 rounded-sm" style={{ borderColor: '#f0f0f0' }}>
-        <h3 className="text-sm font-medium mb-4">Admin Users</h3>
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <section className="space-y-8">
+          <div className="border bg-white p-6" style={{ borderColor: '#ece7df' }}>
+            <h3 className="text-sm" style={{ fontWeight: 500 }}>
+              Store Information
+            </h3>
+            <div className="mt-4 space-y-3">
+              {[
+                { key: 'store_name', label: 'Store Name', type: 'text' },
+                { key: 'phone', label: 'Phone', type: 'text' },
+                { key: 'email', label: 'Email', type: 'email' },
+              ].map((field) => (
+                <label key={field.key} className="grid gap-1 text-[10px] uppercase" style={{ letterSpacing: '2px', color: '#8c8377', fontWeight: 400 }}>
+                  <span>{field.label}</span>
+                  <input
+                    type={field.type}
+                    value={storeInfo[field.key as keyof typeof storeInfo]}
+                    onChange={(event) =>
+                      setStoreInfo((currentStore) => ({
+                        ...currentStore,
+                        [field.key]: event.target.value,
+                      }))
+                    }
+                    className="border px-3 py-3 text-xs"
+                    style={{ borderColor: '#e0d8cf', borderRadius: '2px', fontWeight: 400 }}
+                  />
+                </label>
+              ))}
 
-        {/* Add Admin Form */}
-        <div className="mb-6 pb-6 border-b" style={{ borderColor: '#f0f0f0' }}>
-          <p className="text-xs text-gray-600 mb-3">
-            To add a new admin user:
-          </p>
-          <ol className="text-xs text-gray-600 list-decimal list-inside space-y-1 mb-4">
-            <li>Create a user in Supabase Authentication</li>
-            <li>Copy their UUID from the Auth dashboard</li>
-            <li>Contact support with the UUID to add to admin_users</li>
-          </ol>
-        </div>
+              <label className="grid gap-1 text-[10px] uppercase" style={{ letterSpacing: '2px', color: '#8c8377', fontWeight: 400 }}>
+                <span>Address</span>
+                <textarea
+                  value={storeInfo.address}
+                  onChange={(event) =>
+                    setStoreInfo((currentStore) => ({
+                      ...currentStore,
+                      address: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                  className="border px-3 py-3 text-xs"
+                  style={{ borderColor: '#e0d8cf', borderRadius: '2px', fontWeight: 400 }}
+                />
+              </label>
 
-        {/* Admin List */}
-        {loading ? (
-          <div className="text-xs text-gray-500">Loading...</div>
-        ) : admins.length === 0 ? (
-          <div className="text-xs text-gray-500">No admin users configured</div>
-        ) : (
-          <div className="space-y-2">
-            {admins.map((admin) => (
-              <div
-                key={admin.id}
-                className="flex items-center justify-between p-3 border rounded-sm hover:bg-gray-50"
-                style={{ borderColor: '#f0f0f0' }}
+              <button
+                type="button"
+                onClick={updateStoreInfo}
+                disabled={savingStore}
+                className="px-4 py-3 text-[10px] uppercase"
+                style={{
+                  backgroundColor: '#1c1c1c',
+                  color: '#fff',
+                  borderRadius: '2px',
+                  letterSpacing: '2px',
+                  fontWeight: 400,
+                }}
               >
-                <div>
-                  <p className="text-sm font-medium">{admin.name}</p>
-                  <p className="text-xs text-gray-600">{admin.email}</p>
+                {savingStore ? 'Saving...' : 'Save Store Info'}
+              </button>
+            </div>
+          </div>
+
+          <div className="border bg-white p-6" style={{ borderColor: '#ece7df' }}>
+            <h3 className="text-sm" style={{ fontWeight: 500 }}>
+              Admin Users
+            </h3>
+            <p className="mt-2 text-xs" style={{ color: '#777', fontWeight: 400 }}>
+              Admin access is still managed in Supabase Auth. This list shows who is currently allowed into the panel.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              {loadingAdmins ? (
+                <div className="text-xs" style={{ color: '#777', fontWeight: 400 }}>
+                  Loading admins...
                 </div>
-                <div className="flex gap-3">
-                  <span
-                    className="text-xs px-2 py-1 rounded-sm"
-                    style={{
-                      backgroundColor: '#d4edda',
-                      color: '#155724',
-                    }}
+              ) : admins.length === 0 ? (
+                <div className="text-xs" style={{ color: '#777', fontWeight: 400 }}>
+                  No admin users configured.
+                </div>
+              ) : (
+                admins.map((admin) => (
+                  <div
+                    key={admin.id}
+                    className="flex items-center justify-between gap-3 border px-3 py-3"
+                    style={{ borderColor: '#f0ebe5' }}
                   >
-                    {admin.role}
-                  </span>
-                  <button
-                    onClick={() => deleteAdmin(admin.id)}
-                    className="text-xs hover:underline"
-                    style={{ color: '#c33' }}
-                  >
-                    Remove
-                  </button>
+                    <div>
+                      <p className="text-sm" style={{ fontWeight: 400 }}>
+                        {admin.name}
+                      </p>
+                      <p className="text-xs" style={{ color: '#777', fontWeight: 400 }}>
+                        {admin.email}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => deleteAdmin(admin.id)}
+                      className="text-[10px] uppercase"
+                      style={{ letterSpacing: '2px', color: '#C0392B', fontWeight: 400 }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="border bg-white p-6" style={{ borderColor: '#ece7df' }}>
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h3 className="text-sm" style={{ fontWeight: 500 }}>
+                WhatsApp Templates
+              </h3>
+              <p className="mt-1 text-xs" style={{ color: '#777', fontWeight: 400 }}>
+                These templates power the order-status messages from the orders dashboard.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={saveTemplates}
+              disabled={savingTemplates}
+              className="px-4 py-3 text-[10px] uppercase"
+              style={{
+                backgroundColor: '#1c1c1c',
+                color: '#fff',
+                borderRadius: '2px',
+                letterSpacing: '2px',
+                fontWeight: 400,
+              }}
+            >
+              {savingTemplates ? 'Saving...' : 'Save Templates'}
+            </button>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            {templates.map((template) => (
+              <div key={template.template_key} className="border p-4" style={{ borderColor: '#f0ebe5' }}>
+                <div className="flex flex-col gap-3">
+                  <label className="grid gap-1 text-[10px] uppercase" style={{ letterSpacing: '2px', color: '#8c8377', fontWeight: 400 }}>
+                    <span>Template Name</span>
+                    <input
+                      type="text"
+                      value={template.name}
+                      onChange={(event) => updateTemplate(template.template_key, { name: event.target.value })}
+                      className="border px-3 py-3 text-xs"
+                      style={{ borderColor: '#e0d8cf', borderRadius: '2px', fontWeight: 400 }}
+                    />
+                  </label>
+
+                  <label className="grid gap-1 text-[10px] uppercase" style={{ letterSpacing: '2px', color: '#8c8377', fontWeight: 400 }}>
+                    <span>Description</span>
+                    <input
+                      type="text"
+                      value={template.description}
+                      onChange={(event) => updateTemplate(template.template_key, { description: event.target.value })}
+                      className="border px-3 py-3 text-xs"
+                      style={{ borderColor: '#e0d8cf', borderRadius: '2px', fontWeight: 400 }}
+                    />
+                  </label>
+
+                  <label className="grid gap-1 text-[10px] uppercase" style={{ letterSpacing: '2px', color: '#8c8377', fontWeight: 400 }}>
+                    <span>Message Body</span>
+                    <textarea
+                      value={template.body}
+                      onChange={(event) => updateTemplate(template.template_key, { body: event.target.value })}
+                      rows={10}
+                      className="border px-3 py-3 text-xs"
+                      style={{ borderColor: '#e0d8cf', borderRadius: '2px', fontWeight: 400, whiteSpace: 'pre-wrap' }}
+                    />
+                  </label>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Danger Zone */}
-      <div className="border p-6 rounded-sm" style={{ borderColor: '#f8d7da', backgroundColor: '#fff5f7' }}>
-        <h3 className="text-sm font-medium mb-4" style={{ color: '#721c24' }}>
-          Danger Zone
-        </h3>
-        <p className="text-xs text-gray-600 mb-4">
-          These actions cannot be undone. Contact support before proceeding.
-        </p>
-        <button
-          disabled
-          className="text-xs px-4 py-2 rounded-sm opacity-50 cursor-not-allowed"
-          style={{
-            backgroundColor: '#c33',
-            color: '#fff',
-          }}
-        >
-          Clear All Data
-        </button>
+        </section>
       </div>
     </div>
   );

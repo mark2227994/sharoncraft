@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/server';
+import { getSupabaseAdmin } from '@/lib/supabase/server';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin routes
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+  // Protect both /admin and /admin-v2 routes
+  if ((pathname.startsWith('/admin') || pathname.startsWith('/admin-v2')) && pathname !== '/admin/login') {
     // Get auth token from cookies
     const token = request.cookies.get('auth-token')?.value;
 
@@ -14,6 +14,7 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
+      const supabaseAdmin = getSupabaseAdmin();
       // Verify token and check if user is admin
       const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
 
@@ -42,5 +43,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/admin-v2/:path*'],
 };

@@ -48,7 +48,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/orders"
+                href="/admin-v2/orders"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >
@@ -166,7 +166,7 @@ export default function AdminLayout({
             </li>
             <li>
               <Link
-                href="/admin/settings"
+                href="/admin-v2/settings"
                 className="px-4 py-2 text-xs flex items-center gap-3 hover:bg-white hover:bg-opacity-5 transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
               >

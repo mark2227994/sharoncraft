@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/server';
+import { getSupabaseAdmin } from '@/lib/supabase/server';
 
 const CATEGORIES = [
   {
@@ -43,6 +43,7 @@ const CATEGORIES = [
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const results = {
       successful: [] as string[],
       failed: [] as { name: string; error: string }[],

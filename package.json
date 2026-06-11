@@ -35,9 +35,11 @@
     "prestatic:serve:5500": "npm run build:seo"
   },
   "devDependencies": {
+    "@types/react": "19.2.14",
     "postcss": "^8.5.8",
     "postcss-scss": "^4.0.9",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "typescript": "6.0.3"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",

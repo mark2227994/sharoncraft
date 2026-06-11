@@ -24,22 +24,20 @@ export default function StickyMiniCart() {
 
   return (
     <>
-      <Link href="/cart">
-        <a className="sticky-mini-cart">
-          <div className="sticky-mini-cart__content">
-            <div className="sticky-mini-cart__icon-wrapper">
-              <Icon name="shopping-bag" size={20} />
-              {cartCount > 0 && (
-                <span className="sticky-mini-cart__badge">{cartCount}</span>
-              )}
-            </div>
-            <div className="sticky-mini-cart__info">
-              <span className="sticky-mini-cart__label">Your Cart</span>
-              <span className="sticky-mini-cart__total">${cartTotal.toFixed(2)}</span>
-            </div>
+      <Link href="/cart" className="sticky-mini-cart">
+        <div className="sticky-mini-cart__content">
+          <div className="sticky-mini-cart__icon-wrapper">
+            <Icon name="shopping-bag" size={20} />
+            {cartCount > 0 && (
+              <span className="sticky-mini-cart__badge">{cartCount}</span>
+            )}
           </div>
-          <Icon name="arrowR" size={18} />
-        </a>
+          <div className="sticky-mini-cart__info">
+            <span className="sticky-mini-cart__label">Your Cart</span>
+            <span className="sticky-mini-cart__total">${cartTotal.toFixed(2)}</span>
+          </div>
+        </div>
+        <Icon name="arrowR" size={18} />
       </Link>
 
       <style jsx>{`

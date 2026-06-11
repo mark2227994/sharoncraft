@@ -52,11 +52,17 @@ export default function Nav() {
 
   async function fetchNavigation() {
     try {
-      const response = await fetch("/api/admin/navigation");
+      const response = await fetch("/api/site-images");
+      if (!response.ok) return;
       const data = await response.json();
 
-      if (data.header && Array.isArray(data.header)) {
-        const headerItems = data.header.map((item) => ({ href: item.url, label: item.label }));
+      const headerItems = Array.isArray(data?.navigation?.header)
+        ? data.navigation.header
+            .filter((item) => typeof item?.url === "string" && typeof item?.label === "string")
+            .map((item) => ({ href: item.url, label: item.label }))
+        : [];
+
+      if (headerItems.length > 0) {
         setNavItems(headerItems);
         setMobileItems(buildMobileNavItems(headerItems));
       }

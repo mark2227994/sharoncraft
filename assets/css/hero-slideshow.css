@@ -40,6 +40,7 @@
   min-height: var(--hero-height);
   background: #000;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .hero-slideshow__container {
@@ -77,6 +78,7 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  pointer-events: none;
 }
 
 /* ============================================================================
@@ -100,6 +102,11 @@
   padding: var(--overlay-padding);
   max-width: 480px;
   margin: 0;
+  pointer-events: none;
+}
+
+.hero-slideshow__content > * {
+  pointer-events: auto;
 }
 
 /* ============================================================================
@@ -247,6 +254,10 @@
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   margin: 20px 0 0;
   white-space: nowrap;
+  position: relative;
+  z-index: 11;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .hero-slideshow__cta:hover {
@@ -285,6 +296,7 @@
   cursor: pointer;
   transition: background 0.3s ease;
   padding: 0;
+  touch-action: manipulation;
 }
 
 .hero-slideshow__dot--active {
@@ -317,6 +329,7 @@
   justify-content: center;
   transition: color 0.3s ease;
   opacity: 1;
+  touch-action: manipulation;
 }
 
 .hero-slideshow__nav::before {

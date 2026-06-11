@@ -48,6 +48,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  pointer-events: none;
 }
 
 .custom-orders-section .custom-orders-media__overlay {
@@ -120,6 +121,9 @@
   text-decoration: none;
   text-align: center;
   transition: background 0.3s ease, color 0.3s ease;
+  position: relative;
+  z-index: 1;
+  touch-action: manipulation;
 }
 
 .custom-orders-section .custom-orders-button:hover,
@@ -138,6 +142,9 @@
   letter-spacing: 1px;
   text-decoration: none;
   transition: color 0.3s ease, text-decoration-color 0.3s ease;
+  position: relative;
+  z-index: 1;
+  touch-action: manipulation;
 }
 
 .custom-orders-section .custom-orders-link:hover,

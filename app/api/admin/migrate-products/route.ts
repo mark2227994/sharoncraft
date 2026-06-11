@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/server';
+import { getSupabaseAdmin } from '@/lib/supabase/server';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -26,6 +26,7 @@ interface LegacyProduct {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     // Read products.json
     const productsPath = path.join(process.cwd(), 'data/products.json');
 

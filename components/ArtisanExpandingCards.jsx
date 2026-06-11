@@ -1,3 +1,5 @@
+import SafeImage from "./ui/SafeImage";
+
 export default function ArtisanExpandingCards({ artisans }) {
   if (!artisans || artisans.length === 0) return null;
 
@@ -15,11 +17,10 @@ export default function ArtisanExpandingCards({ artisans }) {
         {artisans.map((artisan, index) => (
           <div key={index} className="artisan-card">
             {artisan.image && (
-              <img
+              <SafeImage
                 src={artisan.image}
                 alt={artisan.name}
-                loading="lazy"
-                onerror="this.style.background='#1A0E06'"
+                type="artisan"
               />
             )}
             <div className="artisan-info">

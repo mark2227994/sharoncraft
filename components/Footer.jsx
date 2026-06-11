@@ -28,7 +28,6 @@ function formatPhoneHref(value) {
 
 export default function Footer({ siteContent }) {
   const [content, setContent] = useState({ ...fallbackSiteContent, ...(siteContent || {}) });
-  const [footer, setFooter] = useState(null);
   const [email, setEmail] = useState("");
   const [subscriptionMessage, setSubscriptionMessage] = useState("");
 
@@ -37,16 +36,7 @@ export default function Footer({ siteContent }) {
 
     (async () => {
       try {
-        // Fetch footer content from admin API
-        const footerRes = await fetch("/api/admin/footer-content");
-        if (footerRes.ok) {
-          const footerData = await footerRes.json();
-          if (!cancelled) {
-            setFooter(footerData);
-          }
-        }
-
-        // Also fetch from site-images for backward compatibility
+        // Refresh public site content from the public endpoint only.
         const response = await fetch("/api/site-images");
         if (!response.ok) return;
         const data = await response.json();

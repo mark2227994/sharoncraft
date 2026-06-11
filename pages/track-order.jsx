@@ -5,18 +5,18 @@ import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
 
 const ORDER_STATUSES = {
-  pending: { label: "Order Received", color: "#FFB84D", step: 1 },
-  confirmed: { label: "Order Confirmed", color: "#FFB84D", step: 2 },
-  processing: { label: "Being Handcrafted", color: "#FFB84D", step: 3 },
-  ready: { label: "Ready to Ship", color: "#FFB84D", step: 4 },
-  shipped: { label: "In Transit", color: "#3B9E8F", step: 5 },
-  delivered: { label: "Delivered", color: "#3B9E8F", step: 6 },
-  cancelled: { label: "Cancelled", color: "#D84C3C", step: 0 },
+  pending: { label: "Pending", color: "#F59E0B", step: 1 },
+  confirmed: { label: "Confirmed", color: "#1a56db", step: 2 },
+  in_production: { label: "In Production", color: "#8B5E3C", step: 3 },
+  ready: { label: "Ready", color: "#7B3F9E", step: 4 },
+  dispatched: { label: "Dispatched", color: "#E67E22", step: 5 },
+  delivered: { label: "Delivered", color: "#2E7D32", step: 6 },
+  cancelled: { label: "Cancelled", color: "#C0392B", step: 0 },
 };
 
 export default function TrackOrderPage() {
   const [orderID, setOrderID] = useState("");
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +31,7 @@ export default function TrackOrderPage() {
       const response = await fetch("/api/orders/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: orderID.trim(), email: email.trim() }),
+        body: JSON.stringify({ orderId: orderID.trim(), phone: phone.trim() }),
       });
 
       const data = await response.json();
@@ -74,25 +74,25 @@ export default function TrackOrderPage() {
                 <span>Order ID *</span>
                 <input
                   type="text"
-                  placeholder="e.g., ORD-2026-001234"
+                  placeholder="e.g., #SC-12345"
                   value={orderID}
                   onChange={(e) => setOrderID(e.target.value)}
                   required
                   className="track-order__input"
                 />
-                <p className="track-order__hint">Found in your order confirmation email</p>
+                <p className="track-order__hint">Found in your WhatsApp confirmation message</p>
               </label>
               <label className="track-order__field">
-                <span>Email Address *</span>
+                <span>Phone Number *</span>
                 <input
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  placeholder="07xx xxx xxx"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                   className="track-order__input"
                 />
-                <p className="track-order__hint">The email used when placing the order</p>
+                <p className="track-order__hint">Use the same phone number used when placing the order</p>
               </label>
             </div>
 
@@ -121,6 +121,12 @@ export default function TrackOrderPage() {
                     <span className="detail-row__label">Total Amount:</span>
                     <span className="detail-row__value">KES {orderData.totalAmount?.toLocaleString()}</span>
                   </div>
+                  {orderData.customerLocation && (
+                    <div className="detail-row">
+                      <span className="detail-row__label">Delivery Location:</span>
+                      <span className="detail-row__value">{orderData.customerLocation}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Timeline of status */}
@@ -129,16 +135,16 @@ export default function TrackOrderPage() {
 
                   <div className="timeline-steps">
                     {[
-                      { key: "pending", label: "Order Received" },
-                      { key: "confirmed", label: "Order Confirmed" },
-                      { key: "processing", label: "Handcrafting" },
-                      { key: "ready", label: "Ready to Ship" },
-                      { key: "shipped", label: "In Transit" },
+                      { key: "pending", label: "Pending" },
+                      { key: "confirmed", label: "Confirmed" },
+                      { key: "in_production", label: "In Production" },
+                      { key: "ready", label: "Ready" },
+                      { key: "dispatched", label: "Dispatched" },
                       { key: "delivered", label: "Delivered" },
                     ].map((step, idx) => {
-                      const isCompleted = ["pending", "confirmed", "processing", "ready", "shipped", "delivered"].indexOf(
+                      const isCompleted = ["pending", "confirmed", "in_production", "ready", "dispatched", "delivered"].indexOf(
                         step.key
-                      ) <= ["pending", "confirmed", "processing", "ready", "shipped", "delivered"].indexOf(orderData.status);
+                      ) <= ["pending", "confirmed", "in_production", "ready", "dispatched", "delivered"].indexOf(orderData.status);
 
                       return (
                         <div key={step.key} className={`timeline-step ${isCompleted ? "timeline-step--completed" : ""}`}>
@@ -157,14 +163,22 @@ export default function TrackOrderPage() {
                 </div>
 
                 {/* Delivery Info */}
-                {orderData.trackingNumber && (
+                {(orderData.riderName || orderData.riderPhone || orderData.deliveryEstimate) && (
                   <div className="delivery-info">
                     <h3 className="delivery-info__title">Delivery Information</h3>
                     <div className="delivery-info__details">
-                      <div className="detail-row">
-                        <span className="detail-row__label">Tracking Number:</span>
-                        <span className="detail-row__value">{orderData.trackingNumber}</span>
-                      </div>
+                      {orderData.riderName && (
+                        <div className="detail-row">
+                          <span className="detail-row__label">Rider:</span>
+                          <span className="detail-row__value">{orderData.riderName}</span>
+                        </div>
+                      )}
+                      {orderData.riderPhone && (
+                        <div className="detail-row">
+                          <span className="detail-row__label">Rider Phone:</span>
+                          <span className="detail-row__value">{orderData.riderPhone}</span>
+                        </div>
+                      )}
                       {orderData.deliveryEstimate && (
                         <div className="detail-row">
                           <span className="detail-row__label">Estimated Delivery:</span>
@@ -207,14 +221,14 @@ export default function TrackOrderPage() {
               <div className="faq-item">
                 <h3 className="faq-item__question">Where do I find my order ID?</h3>
                 <p className="faq-item__answer">
-                  Your order ID is in the confirmation email sent after you place an order. It starts with "ORD-" followed by the date and a number.
+                  Your order ID is shared in the WhatsApp message you receive after the order is created. It looks like "#SC-12345".
                 </p>
               </div>
 
               <div className="faq-item">
                 <h3 className="faq-item__question">How often is the tracking updated?</h3>
                 <p className="faq-item__answer">
-                  Tracking updates are sent via WhatsApp automatically. You can also check this page anytime to see the latest status. Updates typically happen within 24 hours of each status change.
+                  Tracking updates are sent via WhatsApp automatically. You can also check this page anytime to see the latest status after each production or delivery update.
                 </p>
               </div>
 

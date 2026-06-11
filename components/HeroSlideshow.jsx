@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import SafeImage from "./ui/SafeImage";
 
 export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -44,22 +45,6 @@ export default function HeroSlideshow({ slides = [] }) {
 
     observer.observe(heroRef.current);
     return () => observer.disconnect();
-  }, []);
-
-  // Fetch slides from API on mount
-  useEffect(() => {
-    async function fetchSlides() {
-      try {
-        const response = await fetch("/api/admin/hero-slides");
-        const data = await response.json();
-        if (data.slides && data.slides.length > 0) {
-          setLoadedSlides(data.slides);
-        }
-      } catch (error) {
-        console.error("Error fetching slides:", error);
-      }
-    }
-    fetchSlides();
   }, []);
 
   // Default slides if none provided
@@ -233,10 +218,12 @@ export default function HeroSlideshow({ slides = [] }) {
             }`}
           >
             {/* Background Image */}
-            <img
+            <SafeImage
               src={getSlideImage(slide)}
               alt={slide.title}
+              type="hero"
               className="hero-slideshow__image"
+              priority={index === 0}
             />
 
             {/* Dark Gradient Overlay */}
@@ -335,11 +322,8 @@ export default function HeroSlideshow({ slides = [] }) {
               )}
 
               {/* CTA Button */}
-              <Link 
-                href={slide.ctaLink || "/shop"}
-                legacyBehavior
-              >
-                <a className="hero-slideshow__cta">{getSlideCtaLabel(slide)}</a>
+              <Link href={slide.ctaLink || "/shop"} className="hero-slideshow__cta">
+                {getSlideCtaLabel(slide)}
               </Link>
             </div>
           </div>

@@ -3,6 +3,7 @@ import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
 import Icon from "../components/icons";
+import SafeImage from "../components/ui/SafeImage";
 
 export default function ArtisansPage({ artisans = [] }) {
   return (
@@ -46,7 +47,12 @@ export default function ArtisansPage({ artisans = [] }) {
           {artisans.map((artisan, index) => (
             <article key={index} className="artisan-card">
               <div className="artisan-card__image">
-                <img src={artisan.image} alt={artisan.name} loading="lazy" />
+                <SafeImage
+                  src={artisan.image}
+                  alt={`${artisan.name} Kenyan artisan SharonCraft`}
+                  type="artisan"
+                  className="artisan-card__image-media"
+                />
                 <div className="artisan-card__overlay">
                   <Link href={artisan.href || "/shop"} className="artisan-card__view-btn">
                     View Collection
@@ -223,18 +229,15 @@ export default function ArtisansPage({ artisans = [] }) {
 
         .artisan-card__image {
           position: relative;
-          aspect-ratio: 16/9;
+          min-height: 480px;
           overflow: hidden;
         }
 
-        .artisan-card__image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+        .artisan-card__image-media {
           transition: transform 0.3s ease;
         }
 
-        .artisan-card:hover .artisan-card__image img {
+        .artisan-card:hover .artisan-card__image-media {
           transform: scale(1.05);
         }
 
@@ -471,8 +474,7 @@ export default function ArtisansPage({ artisans = [] }) {
           }
 
           .artisan-card__image {
-            aspect-ratio: auto;
-            min-height: 300px;
+            min-height: 480px;
           }
 
           .artisan-card__content {
@@ -487,6 +489,10 @@ export default function ArtisansPage({ artisans = [] }) {
         }
 
         @media (max-width: 768px) {
+          .artisan-card__image {
+            min-height: 360px;
+          }
+
           .artisan-card__footer {
             flex-direction: column;
             align-items: flex-start;

@@ -8,8 +8,8 @@ import { Product } from '@/lib/types';
 export default function ProductFormPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = params.id as string;
-  const isEditing = productId && productId !== 'new';
+  const productId = Array.isArray(params?.id) ? params.id[0] ?? '' : params?.id ?? '';
+  const isEditing = productId !== '' && productId !== 'new';
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);

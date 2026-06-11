@@ -18,17 +18,13 @@ export default function CtaSection() {
         </div>
 
         <div className="cta-buttons">
-          <Link href="/shop" legacyBehavior>
-            <a className="cta-button cta-button--primary">
-              <span>Shop Collection</span>
-              <Icon name="arrowR" size={20} />
-            </a>
+          <Link href="/shop" className="cta-button cta-button--primary">
+            <span>Shop Collection</span>
+            <Icon name="arrowR" size={20} />
           </Link>
-          <Link href="/about" legacyBehavior>
-            <a className="cta-button cta-button--secondary">
-              <span>Learn Our Story</span>
-              <Icon name="arrowR" size={20} />
-            </a>
+          <Link href="/about" className="cta-button cta-button--secondary">
+            <span>Learn Our Story</span>
+            <Icon name="arrowR" size={20} />
           </Link>
         </div>
       </div>
