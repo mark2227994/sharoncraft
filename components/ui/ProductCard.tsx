@@ -1,84 +1,101 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
-import { getStockStatus } from '@/lib/utils'
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { useCart } from "../../lib/cart-context";
+import { resolveProductImageSource } from "../../lib/products";
+import { getStockStatus } from "../../lib/utils";
+import Image from "next/image";
 
-interface ProductCardProps {
-  id: string
-  name: string
-  price: number
-  original_price?: number
-  images: string[]
-  artisan?: string | null
-  category?: string | null
-  slug: string
-  is_new?: boolean
-  is_featured?: boolean
-  product_type?: 'ready_to_ship' | 'made_to_order' | 'custom_order' | string
-  stock_quantity?: number
-  low_stock_alert?: number
-  size?: 'default' | 'small' | 'large'
-  showArtisan?: boolean
-  onOpen?: () => void
+type ImageLike =
+  | string
+  | {
+      src?: string | null;
+      url?: string | null;
+      image?: string | null;
+    }
+  | null
+  | undefined;
+
+type ProductLike = {
+  id: string;
+  slug: string;
+  name: string;
+  artisan?: string | null;
+  price?: number | null;
+  sale_price?: number | null;
+  originalPrice?: number | null;
+  original_price?: number | null;
+  image?: string | null;
+  images?: ImageLike[];
+  isSold?: boolean;
+  stock?: number | null;
+  stock_quantity?: number | null;
+  badge?: string | null;
+  featured?: boolean;
+  newArrival?: boolean;
+  isNew?: boolean;
+  product_type?: string | null;
+  productType?: string | null;
+  fulfillmentType?: string | null;
+  low_stock_alert?: number | null;
+};
+
+type ProductCardProps = {
+  product?: ProductLike;
+  id?: string;
+  name?: string;
+  price?: number;
+  original_price?: number;
+  images?: string[] | ImageLike[];
+  artisan?: string | null;
+  category?: string | null;
+  slug?: string;
+  is_new?: boolean;
+  is_featured?: boolean;
+  product_type?: string;
+  stock_quantity?: number;
+  low_stock_alert?: number;
+  size?: 'default' | 'small' | 'large';
+  showArtisan?: boolean;
+  onOpen?: () => void;
+  variant?: string;
+};
+
+const PLACEHOLDER_IMAGE = "/media/site/placeholder.svg";
+
+function normalizeArtisanLabel(artisan: string | null | undefined): string {
+  const safeArtisan = String(artisan || "SHARON").trim() || "SHARON";
+  const withoutPrefix = safeArtisan.replace(/^by\s+/i, "").trim() || "SHARON";
+  return `BY ${withoutPrefix.toUpperCase()}`;
 }
 
-const SIZE_MAP = {
-  default: {
-    aspectRatio: '1 / 1.25',
-    nameSize: '14px',
-    priceSize: '14px',
-    artisanSize: '10px',
-    nameClamp: 2,
-  },
-  small: {
-    aspectRatio: '1 / 1.2',
-    nameSize: '12px',
-    priceSize: '12px',
-    artisanSize: '0px',
-    nameClamp: 1,
-  },
-  large: {
-    aspectRatio: '1 / 1.35',
-    nameSize: '15px',
-    priceSize: '15px',
-    artisanSize: '10px',
-    nameClamp: 2,
-  },
-} as const
-
-function compact(value: unknown) {
-  if (typeof value === 'string') return value.trim()
-  if (typeof value === 'number') return String(value)
-  return ''
+function HeartIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style={{ display: 'block' }}>
+      <path
+        d="M12 20.4 4.9 13.9C3.1 12.2 2 10.7 2 8.8 2 5.9 4.2 4 6.9 4c1.7 0 3.4.8 4.5 2.1C12.6 4.8 14.3 4 16 4 18.8 4 21 5.9 21 8.8c0 1.9-1.1 3.4-2.9 5.1L12 20.4Z"
+        fill={filled ? "#C0392B" : "none"}
+        stroke={filled ? "#C0392B" : "currentColor"}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
-function normalizeImage(value: unknown) {
-  const rawValue =
-    typeof value === 'string'
-      ? value
-      : typeof value === 'object' && value !== null
-        ? (
-            (value as { src?: unknown; url?: unknown; image?: unknown }).src ??
-            (value as { src?: unknown; url?: unknown; image?: unknown }).url ??
-            (value as { src?: unknown; url?: unknown; image?: unknown }).image ??
-            ''
-          )
-        : ''
-
-  const source = compact(rawValue).replace(/\\/g, '/')
-  if (!source) return ''
-  if (/^(https?:|data:|blob:)/i.test(source)) return source
-  if (source.startsWith('//')) return `https:${source}`
-  return source.startsWith('/') ? source : `/${source}`
-}
-
-function isModelShot(source: string) {
-  return /model|wear|worn|portrait|lookbook|body|editorial/i.test(source)
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" style={{ display: 'block' }}>
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  );
 }
 
 export default function ProductCard({
+  product,
   id,
   name,
   price,
@@ -87,501 +104,755 @@ export default function ProductCard({
   artisan,
   category,
   slug,
-  is_new = false,
-  product_type = 'ready_to_ship',
-  stock_quantity = 1,
-  low_stock_alert = 2,
+  is_new,
+  is_featured,
+  product_type,
+  stock_quantity,
+  low_stock_alert,
   size = 'default',
   showArtisan = true,
   onOpen,
+  variant = 'default',
 }: ProductCardProps) {
-  const [hovered, setHovered] = useState(false)
-  const [supportsHover, setSupportsHover] = useState(false)
-  const [erroredImages, setErroredImages] = useState<Record<number, boolean>>({})
+  const { addToCart, openCart, isWishlisted, toggleWishlist } = useCart() as any;
+  
+  const [hovered, setHovered] = useState(false);
+  const [mobileImageIndex, setMobileImageIndex] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  
+  const cardRef = useRef<HTMLElement | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
 
+  // Normalize inputs from either props or product object
+  const p = product || ({} as Partial<ProductLike>);
+  const safeId = id ?? p.id ?? '';
+  const safeName = name ?? p.name ?? 'SharonCraft Piece';
+  const safeSlug = slug ?? p.slug ?? safeId ?? 'piece';
+  const artisanVal = artisan ?? p.artisan ?? null;
+  const isNewVal = is_new ?? p.isNew ?? p.newArrival ?? (p.badge?.trim().toLowerCase() === 'new');
+  const isFeaturedVal = is_featured ?? p.featured ?? false;
+
+  const rawProductType = product_type ?? p.product_type ?? p.productType ?? p.fulfillmentType ?? 'ready_to_ship';
+  const stockQuantity = stock_quantity ?? p.stock ?? p.stock_quantity ?? 1;
+  const lowStockAlert = low_stock_alert ?? p.low_stock_alert ?? 2;
+
+  // Pricing calculations
+  const basePrice = Math.max(0, Number(price ?? p.price ?? 0));
+  const salePrice = Math.max(0, Number(p.sale_price ?? 0));
+  const originalPriceCandidate = Math.max(0, Number(original_price ?? p.originalPrice ?? p.original_price ?? 0));
+  
+  let displayPrice = basePrice;
+  let originalPrice = originalPriceCandidate;
+
+  if (salePrice > 0 && salePrice < basePrice) {
+    displayPrice = salePrice;
+    originalPrice = basePrice;
+  } else if (originalPriceCandidate > basePrice) {
+    displayPrice = basePrice;
+    originalPrice = originalPriceCandidate;
+  } else {
+    displayPrice = basePrice;
+    originalPrice = 0;
+  }
+
+  // Stock status using utils helper
+  const statusProductObj = useMemo(() => ({
+    product_type: rawProductType,
+    stock_quantity: stockQuantity,
+    low_stock_alert: lowStockAlert,
+  }), [rawProductType, stockQuantity, lowStockAlert]);
+  
+  const stockStatus = useMemo(() => getStockStatus(statusProductObj), [statusProductObj]);
+
+  const customStatusColor = useMemo(() => {
+    if (stockStatus.type === 'mto') return '#8B5E3C'; // Clay/terracotta
+    if (stockStatus.type === 'out') return '#666666'; // Gray
+    if (stockStatus.type === 'low') return '#D35400'; // Orange
+    return '#2E7D32'; // Forest Green
+  }, [stockStatus.type]);
+
+  const isSoldOut = stockStatus.isOutOfStock || Boolean(p.isSold);
+  const hasSale = originalPrice > displayPrice && !isSoldOut;
+  const salePercent = hasSale ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100) : 0;
+  const showNewBadge = isNewVal && !hasSale;
+
+  const artisanLabel = normalizeArtisanLabel(artisanVal);
+  const saved = isWishlisted(safeId);
+
+  // Image calculations
+  const imageSources = useMemo(() => {
+    const rawVal = images ?? p.images ?? (p.image ? [p.image] : []);
+    const sources = (Array.isArray(rawVal) ? rawVal.map(resolveProductImageSource) : [])
+      .filter((value): value is string => Boolean(value));
+    
+    const deduped = Array.from(new Set(sources));
+    return deduped.length > 0 ? deduped : [PLACEHOLDER_IMAGE];
+  }, [images, p.images, p.image]);
+
+  const primaryImage = imageSources[0] || PLACEHOLDER_IMAGE;
+  const secondaryImage = imageSources[1] || null;
+  const hasSecondImage = imageSources.length > 1;
+  const showSecondaryImage = hasSecondImage && (isCoarsePointer ? mobileImageIndex === 1 : hovered);
+
+  // Lazy loading intersection observer
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-
-    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)')
-    const syncHoverSupport = () => setSupportsHover(mediaQuery.matches)
-
-    syncHoverSupport()
-
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', syncHoverSupport)
-      return () => mediaQuery.removeEventListener('change', syncHoverSupport)
+    const current = cardRef.current;
+    if (!current || typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
+      setIsInView(true);
+      return undefined;
     }
 
-    mediaQuery.addListener(syncHoverSupport)
-    return () => mediaQuery.removeListener(syncHoverSupport)
-  }, [])
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "160px 0px", threshold: 0.1 }
+    );
 
-  const cardSize = SIZE_MAP[size] ?? SIZE_MAP.default
-  const safeName = compact(name) || 'SharonCraft Piece'
-  const safeSlug = compact(slug) || compact(id) || 'piece'
-  const rawArtisan = artisan?.trim() || 'Sharon'
-  const cleanArtisan = rawArtisan.replace(/^(by\s+)+/i, '')
-  const safeArtisan = cleanArtisan.replace(/[^a-zA-Z\s-]/g, '') || 'Sharon'
-  const safeImages = useMemo(
-    () => (Array.isArray(images) ? images.map((image) => normalizeImage(image)).filter(Boolean) : []),
-    [images],
-  )
-  const primaryImage = safeImages[0] || ''
-  const secondaryImage = safeImages[1] || ''
-  const hasSecondImage = Boolean(secondaryImage)
-  
-  const displayPrice = Number(price || 0).toLocaleString('en-KE')
-  const displayOriginal =
-    typeof original_price === 'number'
-      ? Number(original_price).toLocaleString('en-KE')
-      : undefined
+    observer.observe(current);
+    return () => observer.disconnect();
+  }, []);
 
-  const isOnSale = typeof original_price === 'number' && original_price > price
-  const stockStatus = useMemo(
-    () =>
-      getStockStatus({
-        product_type,
-        stock_quantity,
-        low_stock_alert,
-      }),
-    [low_stock_alert, product_type, stock_quantity],
-  )
-  const customStatusColor = useMemo(() => {
-    if (stockStatus.type === 'mto') return '#8B5E3C' // Savanna clay terracotta
-    if (stockStatus.type === 'low') return '#D35400' // Burnt orange
-    if (stockStatus.type === 'in_stock') return '#2E7D32' // Forest green
-    return '#666666' // Darker grey for better visibility
-  }, [stockStatus.type])
-  const normalizedType = stockStatus.productType
-  const isLowStock = stockStatus.isLowStock
-  const isOutOfStock = stockStatus.isOutOfStock
-  const primaryObjectFit = isModelShot(primaryImage) ? 'cover' : 'contain'
-  const secondaryObjectFit = isModelShot(secondaryImage) ? 'cover' : 'contain'
-  const isInteractiveHover = supportsHover && hovered
-  const shouldRenderHoverImage = supportsHover && hasSecondImage
+  // Coarse pointer detection (touchscreen vs mouse hover)
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
 
-  const showArtisanLine = showArtisan && size !== 'small'
-  const showTypeTag = size !== 'small'
-  const showStockDot =
-    normalizedType === 'ready_to_ship' && !isOutOfStock
+    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse)");
+    const syncPointerMode = () => setIsCoarsePointer(mediaQuery.matches);
 
-  const handleImageError = (index: number) => {
-    setErroredImages((current) => ({
-      ...current,
-      [index]: true,
-    }))
+    syncPointerMode();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncPointerMode);
+      return () => mediaQuery.removeEventListener("change", syncPointerMode);
+    }
+
+    mediaQuery.addListener(syncPointerMode);
+    return () => mediaQuery.removeListener(syncPointerMode);
+  }, []);
+
+  // Preload secondary image on hover
+  useEffect(() => {
+    if (!isInView || !hasSecondImage || !secondaryImage || typeof window === "undefined") {
+      return;
+    }
+    const imageObj = new window.Image();
+    imageObj.src = secondaryImage;
+  }, [hasSecondImage, isInView, secondaryImage]);
+
+  // Event handlers
+  function handleToggleWishlist(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleWishlist({
+      id: safeId,
+      slug: safeSlug,
+      name: safeName,
+      artisan: artisanVal,
+      price: displayPrice,
+      originalPrice: originalPrice || undefined,
+      image: primaryImage,
+      images: imageSources,
+      stock: stockQuantity,
+      isSold: isSoldOut,
+      isNew: isNewVal,
+      featured: isFeaturedVal,
+    });
+  }
+
+  function handleAddToCart(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (isSoldOut) return;
+    
+    addToCart({
+      id: safeId,
+      slug: safeSlug,
+      name: safeName,
+      artisan: artisanVal,
+      price: displayPrice,
+      originalPrice: originalPrice || undefined,
+      image: primaryImage,
+      images: imageSources,
+      stock: stockQuantity,
+      isSold: isSoldOut,
+      isNew: isNewVal,
+      featured: isFeaturedVal,
+    });
+    openCart();
+  }
+
+  function handleTouchStart(event: TouchEvent<HTMLAnchorElement>) {
+    touchStartXRef.current = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  function handleTouchEnd(event: TouchEvent<HTMLAnchorElement>) {
+    if (!hasSecondImage || touchStartXRef.current === null) return;
+
+    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartXRef.current;
+    const delta = touchStartXRef.current - touchEndX;
+
+    if (delta > 40) {
+      setMobileImageIndex(1);
+    } else if (delta < -40) {
+      setMobileImageIndex(0);
+    }
+    touchStartXRef.current = null;
   }
 
   return (
-    <Link
-      href={`/product/${safeSlug}`}
-      className="product-card-link"
-      aria-label={`View ${safeName}`}
-      onClick={onOpen}
-      style={{ textDecoration: 'none' }}
+    <article
+      ref={cardRef}
+      className="product-card-shell"
+      data-variant={variant}
+      onMouseEnter={() => {
+        if (!isCoarsePointer) setHovered(true);
+      }}
+      onMouseLeave={() => {
+        if (!isCoarsePointer) setHovered(false);
+      }}
     >
-      <article
-        className="product-card"
-        data-size={size}
-        onMouseEnter={() => {
-          if (supportsHover) setHovered(true)
-        }}
-        onMouseLeave={() => {
-          if (supportsHover) setHovered(false)
-        }}
-        style={{
-          cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          background: '#ffffff',
-          border: '1px solid rgba(96, 52, 20, 0.125)',
-          borderRadius: '6px',
-          boxShadow: isInteractiveHover ? '0 12px 28px rgba(96, 52, 20, 0.08)' : '0 4px 14px rgba(96, 52, 20, 0.02)',
-          transform: isInteractiveHover ? 'translateY(-4px)' : 'translateY(0)',
-          transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          className="product-card__image product-card-image"
-          style={{
-            position: 'relative',
-            width: '100%',
-            aspectRatio: cardSize.aspectRatio,
-            overflow: 'hidden',
-            background: '#F5F0EB',
-            flexShrink: 0,
-          }}
+      <div className="product-card-shell__media">
+        <Link
+          href={`/product/${safeSlug}`}
+          className="product-card-shell__image-link"
+          aria-label={`View ${safeName}`}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onClick={onOpen}
         >
-          <div
-            className="product-card__image-frame"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              padding: '14px',
-              transition: 'opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              opacity: isInteractiveHover && hasSecondImage ? 0 : 1,
-              transform: isInteractiveHover ? 'scale(1.04)' : 'scale(1)',
-            }}
-          >
-            {primaryImage && !erroredImages[0] ? (
+          <div className="product-card-shell__image-wrap">
+            {showNewBadge || hasSale || isFeaturedVal ? (
+              <div className="product-card-shell__badges">
+                {isFeaturedVal ? (
+                  <span className="product-card-shell__badge product-card-shell__badge--featured">
+                    Featured
+                  </span>
+                ) : null}
+                {showNewBadge ? (
+                  <span className="product-card-shell__badge product-card-shell__badge--new">New</span>
+                ) : null}
+                {hasSale ? (
+                  <span className="product-card-shell__badge product-card-shell__badge--sale">
+                    Save {salePercent}%
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
+            {isSoldOut ? (
+              <div className="product-card-shell__sold-overlay">
+                <span className="product-card-shell__sold-text">Sold Out</span>
+              </div>
+            ) : null}
+
+            {isInView ? (
               <Image
                 src={primaryImage}
                 alt={safeName}
                 fill
                 quality={76}
-                sizes={
-                  size === 'small'
-                    ? '(max-width: 768px) 130px, 160px'
-                    : '(max-width: 768px) 50vw, 33vw'
-                }
-                style={{
-                  objectFit: primaryObjectFit,
-                  objectPosition: primaryObjectFit === 'cover' ? 'center top' : 'center',
-                }}
-                onError={() => handleImageError(0)}
+                sizes="(max-width: 767px) 50vw, 33vw"
+                className="product-card-shell__image product-card-shell__image--primary"
+                style={{ objectFit: 'contain', objectPosition: 'center', padding: '16px' }}
+                priority={false}
+                onError={() => {}}
               />
             ) : (
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#F5F0EB',
-                }}
-              >
-                <span
-                  style={{
-                    color: '#ccc',
-                    fontSize: '11px',
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  No image
-                </span>
-              </div>
+              <div className="product-card-shell__placeholder" />
             )}
-          </div>
 
-          {shouldRenderHoverImage && !erroredImages[1] ? (
-            <div
-              className="product-card__hover-image"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                padding: secondaryObjectFit === 'contain' ? '14px' : '0',
-                transition: 'opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                opacity: isInteractiveHover ? 1 : 0,
-                transform: isInteractiveHover ? 'scale(1.04)' : 'scale(1)',
-              }}
-            >
+            {hasSecondImage && secondaryImage && isInView ? (
               <Image
                 src={secondaryImage}
-                alt={`${safeName} alternate view`}
+                alt={`${safeName} - alternate view`}
                 fill
                 quality={76}
-                sizes={
-                  size === 'small'
-                    ? '(max-width: 768px) 130px, 160px'
-                    : '(max-width: 768px) 50vw, 33vw'
-                }
-                style={{
-                  objectFit: secondaryObjectFit,
-                  objectPosition: secondaryObjectFit === 'cover' ? 'center top' : 'center',
-                }}
-                onError={() => handleImageError(1)}
+                sizes="(max-width: 767px) 50vw, 33vw"
+                className="product-card-shell__image product-card-shell__image--secondary"
+                style={{ objectFit: 'contain', objectPosition: 'center', padding: '16px' }}
+                priority={false}
+                onError={() => {}}
               />
-            </div>
-          ) : null}
-
-          <div
-            className="product-card__overlay"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: isInteractiveHover ? 'rgba(28,28,28,0.12)' : 'rgba(28,28,28,0)',
-              transition: 'background 0.4s ease',
-              pointerEvents: 'none',
-            }}
-          />
-
-          {size !== 'small' ? (
-            <div
-              className="product-card__view-cta"
-              style={{
-                position: 'absolute',
-                right: 0,
-                bottom: 0,
-                left: 0,
-                transform: isInteractiveHover ? 'translateY(0)' : 'translateY(100%)',
-                transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
-                background: 'rgba(28,28,28,0.88)',
-                color: '#ffffff',
-                fontSize: '10px',
-                letterSpacing: '3px',
-                textTransform: 'uppercase',
-                textAlign: 'center',
-                padding: '12px',
-                pointerEvents: 'none',
-              }}
-            >
-              View Piece
-            </div>
-          ) : null}
-
-          <div
-            style={{
-              position: 'absolute',
-              top: '10px',
-              left: '10px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              zIndex: 2,
-            }}
-          >
-            {is_new && !isOnSale ? (
-              <span
-                className="product-card__badge"
-                style={{
-                  background: 'rgba(252, 250, 247, 0.92)',
-                  border: '1px solid rgba(139, 94, 60, 0.15)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  color: '#1c1c1c',
-                  display: 'inline-block',
-                  fontSize: '8px',
-                  letterSpacing: '1.5px',
-                  padding: '4px 10px',
-                  textTransform: 'uppercase',
-                  borderRadius: '2px',
-                  fontWeight: 500,
-                }}
-              >
-                New
-              </span>
             ) : null}
 
-            {isOnSale ? (
-              <span
-                className="product-card__badge"
-                style={{
-                  background: 'rgba(252, 250, 247, 0.92)',
-                  border: '1px solid rgba(139, 94, 60, 0.35)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  color: '#8B5E3C',
-                  display: 'inline-block',
-                  fontSize: '8px',
-                  letterSpacing: '1.5px',
-                  padding: '4px 10px',
-                  textTransform: 'uppercase',
-                  borderRadius: '2px',
-                  fontWeight: 500,
-                }}
+            {/* Desktop Add to Cart Hover Overlay */}
+            {!isCoarsePointer && (
+              <button
+                type="button"
+                className="product-card-shell__cta"
+                onClick={handleAddToCart}
+                disabled={isSoldOut}
               >
-                Sale
-              </span>
-            ) : null}
-
-            {isLowStock ? (
-              <span
-                className="product-card__badge"
-                style={{
-                  background: 'rgba(252, 250, 247, 0.92)',
-                  border: `1px solid ${customStatusColor}`,
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  color: customStatusColor,
-                  display: 'inline-block',
-                  fontSize: '8px',
-                  letterSpacing: '1.5px',
-                  padding: '4px 10px',
-                  textTransform: 'uppercase',
-                  borderRadius: '2px',
-                  fontWeight: 500,
-                }}
-              >
-                Only {stockStatus.stockQuantity} left
-              </span>
-            ) : null}
+                {isSoldOut ? "SOLD OUT" : "ADD TO CART"}
+              </button>
+            )}
           </div>
+        </Link>
 
-          {showStockDot ? (
-            <div
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                zIndex: 2,
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  background: customStatusColor,
-                }}
-              />
-            </div>
-          ) : null}
-
-          {isOutOfStock ? (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: 3,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(250,250,248,0.72)',
-                pointerEvents: 'none',
-              }}
-            >
-              <span
-                style={{
-                  background: '#ffffff',
-                  border: '0.5px solid #e0e0e0',
-                  color: '#bbb',
-                  fontSize: '9px',
-                  letterSpacing: '2px',
-                  padding: '6px 14px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Out of Stock
-              </span>
-            </div>
-          ) : null}
-        </div>
-
-        <div
-          className="product-card-info product-card__info"
-          style={{
-            padding: size === 'small' ? '8px 10px 10px' : '12px 14px 14px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '3px',
-          }}
+        {/* Wishlist Heart Icon Button */}
+        <button
+          type="button"
+          className={`product-card-shell__wishlist ${saved ? 'is-saved' : ''}`}
+          aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
+          onClick={handleToggleWishlist}
         >
-          {showArtisanLine ? (
-            <span
-              className="product-card__artisan"
-              style={{
-                color: 'rgba(28, 28, 28, 0.55)',
-                display: 'block',
-                fontSize: cardSize.artisanSize,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                fontWeight: 500,
-              }}
-            >
-              By {safeArtisan}
-            </span>
+          <HeartIcon filled={saved} />
+        </button>
+
+        {/* Mobile Quick Cart Icon Button */}
+        {isCoarsePointer && !isSoldOut && (
+          <button
+            type="button"
+            className="product-card-shell__quick-cart"
+            aria-label="Add to cart"
+            onClick={handleAddToCart}
+          >
+            <CartIcon />
+          </button>
+        )}
+      </div>
+
+      {hasSecondImage ? (
+        <div className="product-card-shell__dots" aria-hidden="true">
+          <span className={`product-card-shell__dot ${mobileImageIndex === 0 ? "is-active" : ""}`} />
+          <span className={`product-card-shell__dot ${mobileImageIndex === 1 ? "is-active" : ""}`} />
+        </div>
+      ) : null}
+
+      <div className="product-card-shell__content">
+        <Link
+          href={`/product/${safeSlug}`}
+          className="product-card-shell__content-link"
+          aria-label={`View ${safeName}`}
+          onClick={onOpen}
+        >
+          {showArtisan && artisanVal ? (
+            <span className="product-card-shell__artisan">{artisanLabel}</span>
           ) : null}
-
-          <span
-            className="product-card__name"
-            title={safeName}
-            style={{
-              color: '#1c1c1c',
-              display: '-webkit-box',
-              fontSize: cardSize.nameSize,
-              fontWeight: 500,
-              letterSpacing: '0.2px',
-              lineHeight: '1.4',
-              overflow: 'hidden',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: cardSize.nameClamp,
-              minHeight: cardSize.nameClamp === 2 ? '2.8em' : '1.4em',
-            }}
-          >
-            {safeName}
-          </span>
-
-          <div
-            className="product-card__price-row"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginTop: '2px',
-            }}
-          >
-            <span
-              className="product-card__price-current price"
-              style={{
-                color: isOnSale ? '#C0392B' : isInteractiveHover ? '#8B5E3C' : '#1c1c1c',
-                fontSize: cardSize.priceSize,
-                fontWeight: 600,
-                transition: 'color 0.3s ease',
-              }}
-            >
-              KES {displayPrice}
+          
+          <h3 className="product-card-shell__name" title={safeName}>{safeName}</h3>
+          
+          <div className="product-card-shell__pricing">
+            <span className="product-card-shell__price">
+              {isSoldOut ? "Sold Out" : `KES ${displayPrice.toLocaleString("en-KE")}`}
             </span>
-
-            {isOnSale && displayOriginal ? (
-              <span
-                className="product-card__price-original"
-                style={{
-                  color: '#777777',
-                  fontSize: '11px',
-                  textDecoration: 'line-through',
-                }}
-              >
-                KES {displayOriginal}
-              </span>
+            {hasSale && originalPrice > 0 ? (
+              <>
+                <span className="product-card-shell__original-price">
+                  KES {originalPrice.toLocaleString("en-KE")}
+                </span>
+                <span className="product-card-shell__save-amount">
+                  Save KES {(originalPrice - displayPrice).toLocaleString("en-KE")}
+                </span>
+              </>
             ) : null}
           </div>
 
-          {showTypeTag ? (
-            <div
-              className="product-card__type-row"
-              style={{
-                marginTop: '4px',
-              }}
-            >
-              <span
-                className="product-card__type"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  marginTop: '4px',
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  style={{
-                    width: '5px',
-                    height: '5px',
-                    borderRadius: '50%',
-                    background: customStatusColor,
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: '10px',
-                    letterSpacing: '1.05px',
-                    textTransform: 'uppercase',
-                    color: customStatusColor,
-                    fontWeight: 600,
-                  }}
-                >
-                  {stockStatus.label}
-                </span>
+          {/* Fulfillment stock status label */}
+          {size !== 'small' ? (
+            <div className="product-card-shell__status-row">
+              <span className="product-card-shell__status-dot" style={{ background: customStatusColor }} />
+              <span className="product-card-shell__status-text" style={{ color: customStatusColor }}>
+                {stockStatus.label}
               </span>
             </div>
           ) : null}
-        </div>
-      </article>
-    </Link>
-  )
+        </Link>
+      </div>
+
+      <style jsx>{`
+        .product-card-shell {
+          --cream: #fafaf8;
+          --black: #080808;
+          --dark: #1c1c1c;
+          --brown: #8b5e3c;
+          --border: rgba(96, 52, 20, 0.125);
+          --card-bg: #f5f0eb;
+          
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          color: var(--dark);
+          background: #ffffff;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          box-shadow: ${hovered ? '0 12px 28px rgba(96, 52, 20, 0.08)' : '0 4px 14px rgba(96, 52, 20, 0.02)'};
+          transform: ${hovered ? 'translateY(-4px)' : 'translateY(0)'};
+          transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          overflow: hidden;
+        }
+
+        .product-card-shell__media {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .product-card-shell__image-link,
+        .product-card-shell__content-link {
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .product-card-shell__image-wrap {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+          aspect-ratio: ${size === 'small' ? '1 / 1.2' : size === 'large' ? '1 / 1.35' : '1 / 1.25'};
+          background: var(--card-bg);
+          border-radius: 0;
+          flex-shrink: 0;
+        }
+
+        .product-card-shell__placeholder {
+          width: 100%;
+          height: 100%;
+          background: var(--card-bg);
+        }
+
+        .product-card-shell__image {
+          z-index: 1;
+          background: transparent;
+          transition: opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .product-card-shell__image--primary {
+          opacity: ${showSecondaryImage ? 0 : 1};
+          transform: ${hovered ? 'scale(1.04)' : 'scale(1)'};
+        }
+
+        .product-card-shell__image--secondary {
+          z-index: 2;
+          opacity: ${showSecondaryImage ? 1 : 0};
+          transform: ${showSecondaryImage ? (hovered ? 'scale(1.04)' : 'scale(1)') : 'scale(1.04)'};
+        }
+
+        .product-card-shell__sold-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 3;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(250, 250, 248, 0.72);
+          pointer-events: none;
+        }
+
+        .product-card-shell__sold-text {
+          background: #ffffff;
+          border: 0.5px solid #e0e0e0;
+          color: #bbb;
+          font-size: 9px;
+          letter-spacing: 2px;
+          padding: 6px 14px;
+          text-transform: uppercase;
+        }
+
+        .product-card-shell__cta {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 4;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 44px;
+          padding: 0;
+          border: none;
+          background: rgba(28, 28, 28, 0.92);
+          color: #ffffff;
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 2px;
+          text-align: center;
+          text-transform: uppercase;
+          cursor: pointer;
+          transform: ${hovered ? "translateY(0)" : "translateY(100%)"};
+          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+        }
+
+        .product-card-shell__cta:hover {
+          background: #000000;
+        }
+
+        .product-card-shell__cta:disabled {
+          background: rgba(120, 120, 120, 0.92);
+          cursor: not-allowed;
+        }
+
+        .product-card-shell__badges {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 4;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .product-card-shell__badge {
+          display: inline-flex;
+          width: fit-content;
+          align-items: center;
+          justify-content: center;
+          padding: 4px 10px;
+          background: rgba(252, 250, 247, 0.92);
+          border: 1px solid rgba(139, 94, 60, 0.15);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: var(--dark);
+          font-size: 8px;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          border-radius: 2px;
+        }
+
+        .product-card-shell__badge--featured {
+          color: var(--brown);
+          border-color: rgba(139, 94, 60, 0.35);
+        }
+
+        .product-card-shell__badge--sale {
+          color: #C0392B;
+          border-color: rgba(192, 57, 43, 0.25);
+        }
+
+        .product-card-shell__wishlist {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          z-index: 5;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px;
+          height: 34px;
+          padding: 0;
+          border: 1px solid rgba(96, 52, 20, 0.08);
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.85);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          color: rgba(28, 28, 28, 0.6);
+          transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, opacity 0.25s ease;
+          cursor: pointer;
+          opacity: ${hovered ? 1 : 0};
+        }
+
+        .product-card-shell__wishlist.is-saved {
+          opacity: 1;
+          color: #C0392B;
+          background: #ffffff;
+        }
+
+        .product-card-shell__wishlist:hover {
+          transform: scale(1.05);
+          background: #ffffff;
+          color: #C0392B;
+        }
+
+        .product-card-shell__wishlist:active :global(svg) {
+          animation: heartPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Mobile Quick Cart Button */
+        .product-card-shell__quick-cart {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          z-index: 5;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          border: 1px solid rgba(96, 52, 20, 0.08);
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          color: rgba(28, 28, 28, 0.75);
+          transition: transform 0.2s ease, background 0.2s ease;
+          cursor: pointer;
+        }
+
+        .product-card-shell__quick-cart:hover {
+          transform: scale(1.05);
+          background: #ffffff;
+          color: var(--brown);
+        }
+
+        @keyframes heartPop {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.35); }
+          100% { transform: scale(1); }
+        }
+
+        .product-card-shell__dots {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 8px;
+        }
+
+        .product-card-shell__dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 999px;
+          background: #ccc;
+          transition: all 0.3s ease;
+        }
+
+        .product-card-shell__dot.is-active {
+          width: 14px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--dark);
+        }
+
+        .product-card-shell__content {
+          padding: ${size === 'small' ? '8px 10px 10px' : '12px 14px 14px'};
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .product-card-shell__artisan {
+          display: block;
+          margin-bottom: 2px;
+          color: rgba(28, 28, 28, 0.65);
+          font-size: ${size === 'small' ? '8.5px' : '10px'};
+          font-weight: 500;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        .product-card-shell__name {
+          display: -webkit-box;
+          margin: 0;
+          overflow: hidden;
+          color: var(--dark);
+          font-size: ${size === 'small' ? '12px' : '14px'};
+          font-weight: 600;
+          line-height: 1.4;
+          letter-spacing: 0.2px;
+          text-overflow: ellipsis;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          min-height: 2.8em;
+        }
+
+        .product-card-shell__pricing {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 2px;
+        }
+
+        .product-card-shell__price {
+          color: ${hasSale ? '#C0392B' : hovered ? '#8B5E3C' : 'var(--dark)'};
+          font-size: ${size === 'small' ? '12px' : '14px'};
+          font-weight: 700;
+          transition: color 0.3s ease;
+        }
+
+        .product-card-shell__original-price {
+          color: rgba(28, 28, 28, 0.45);
+          font-size: 11px;
+          text-decoration: line-through;
+        }
+
+        .product-card-shell__save-amount {
+          color: var(--brown);
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+        }
+
+        .product-card-shell__status-row {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          margin-top: 6px;
+        }
+
+        .product-card-shell__status-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .product-card-shell__status-text {
+          font-size: ${size === 'small' ? '8.5px' : '10px'};
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        @media (max-width: 767px) {
+          .product-card-shell {
+            box-shadow: 0 4px 12px rgba(96, 52, 20, 0.02);
+            transform: none !important;
+          }
+
+          .product-card-shell__image {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+          }
+
+          .product-card-shell__dots {
+            display: flex;
+          }
+
+          .product-card-shell__wishlist {
+            opacity: 1 !important;
+            width: 36px;
+            height: 36px;
+          }
+
+          .product-card-shell__artisan {
+            font-size: 9px;
+          }
+
+          .product-card-shell__name {
+            font-size: 12px;
+          }
+
+          .product-card-shell__price {
+            font-size: 12.5px;
+          }
+
+          .product-card-shell__status-text {
+            font-size: 9px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .product-card-shell,
+          .product-card-shell__image,
+          .product-card-shell__cta,
+          .product-card-shell__dot,
+          .product-card-shell__wishlist,
+          .product-card-shell__quick-cart {
+            transition: none;
+            transform: none !important;
+          }
+        }
+      `}</style>
+    </article>
+  );
 }
