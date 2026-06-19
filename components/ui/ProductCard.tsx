@@ -60,6 +60,7 @@ type ProductCardProps = {
   showArtisan?: boolean;
   onOpen?: () => void;
   variant?: string;
+  priority?: boolean;
 };
 
 const PLACEHOLDER_IMAGE = "/media/site/placeholder.svg";
@@ -113,13 +114,16 @@ export default function ProductCard({
   showArtisan = true,
   onOpen,
   variant = 'default',
+  priority = false,
 }: ProductCardProps) {
   const { addToCart, openCart, isWishlisted, toggleWishlist } = useCart() as any;
   
   const [hovered, setHovered] = useState(false);
   const [mobileImageIndex, setMobileImageIndex] = useState(0);
-  const [isInView, setIsInView] = useState(false);
+  const [isInView, setIsInView] = useState(priority);
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isSecondaryLoaded, setIsSecondaryLoaded] = useState(false);
   
   const cardRef = useRef<HTMLElement | null>(null);
   const touchStartXRef = useRef<number | null>(null);
@@ -196,9 +200,23 @@ export default function ProductCard({
   const secondaryImage = imageSources[1] || null;
   const hasSecondImage = imageSources.length > 1;
   const showSecondaryImage = hasSecondImage && (isCoarsePointer ? mobileImageIndex === 1 : hovered);
+  const [displayPrimaryImage, setDisplayPrimaryImage] = useState(primaryImage);
+  const [displaySecondaryImage, setDisplaySecondaryImage] = useState(secondaryImage);
+
+  useEffect(() => {
+    setDisplayPrimaryImage(primaryImage);
+  }, [primaryImage]);
+
+  useEffect(() => {
+    setDisplaySecondaryImage(secondaryImage);
+  }, [secondaryImage]);
 
   // Lazy loading intersection observer
   useEffect(() => {
+    if (priority) {
+      setIsInView(true);
+      return undefined;
+    }
     const current = cardRef.current;
     if (!current || typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
       setIsInView(true);
@@ -212,12 +230,12 @@ export default function ProductCard({
           observer.disconnect();
         }
       },
-      { rootMargin: "160px 0px", threshold: 0.1 }
+      { rootMargin: "200px 0px", threshold: 0.05 }
     );
 
     observer.observe(current);
     return () => observer.disconnect();
-  }, []);
+  }, [priority]);
 
   // Coarse pointer detection (touchscreen vs mouse hover)
   useEffect(() => {
@@ -246,6 +264,9 @@ export default function ProductCard({
     }
     const imageObj = new window.Image();
     imageObj.src = secondaryImage;
+    imageObj.onload = () => {
+      setIsSecondaryLoaded(true);
+    };
   }, [hasSecondImage, isInView, secondaryImage]);
 
   // Event handlers
@@ -378,33 +399,43 @@ export default function ProductCard({
               </div>
             ) : null}
 
+            {!isLoaded && (
+              <div className={`product-card-shell__shimmer ${isLoaded ? "is-fading" : ""}`} />
+            )}
+
             {isInView ? (
               <Image
-                src={primaryImage}
+                src={displayPrimaryImage}
                 alt={safeName}
                 fill
                 quality={76}
                 sizes="(max-width: 767px) 50vw, 33vw"
-                className={`product-card-shell__image product-card-shell__image--primary ${showSecondaryImage ? "is-hidden" : ""} ${hovered ? "is-hovered" : ""}`}
+                className={`product-card-shell__image product-card-shell__image--primary ${showSecondaryImage ? "is-hidden" : ""} ${isLoaded ? "is-loaded" : ""}`}
                 style={{ objectFit: 'contain', objectPosition: 'center', padding: '16px' }}
-                priority={false}
-                onError={() => {}}
+                priority={priority}
+                onLoad={() => setIsLoaded(true)}
+                onError={() => {
+                  setDisplayPrimaryImage(PLACEHOLDER_IMAGE);
+                  setIsLoaded(true);
+                }}
               />
-            ) : (
-              <div className="product-card-shell__placeholder" />
-            )}
+            ) : null}
 
-            {hasSecondImage && secondaryImage && isInView ? (
+            {hasSecondImage && displaySecondaryImage && isInView ? (
               <Image
-                src={secondaryImage}
+                src={displaySecondaryImage}
                 alt={`${safeName} - alternate view`}
                 fill
                 quality={76}
                 sizes="(max-width: 767px) 50vw, 33vw"
-                className={`product-card-shell__image product-card-shell__image--secondary ${showSecondaryImage ? "is-visible" : ""} ${hovered ? "is-hovered" : ""}`}
+                className={`product-card-shell__image product-card-shell__image--secondary ${showSecondaryImage ? "is-visible" : ""} ${isSecondaryLoaded ? "is-loaded" : ""}`}
                 style={{ objectFit: 'contain', objectPosition: 'center', padding: '16px' }}
                 priority={false}
-                onError={() => {}}
+                onLoad={() => setIsSecondaryLoaded(true)}
+                onError={() => {
+                  setDisplaySecondaryImage(null);
+                  setIsSecondaryLoaded(true);
+                }}
               />
             ) : null}
 
@@ -445,7 +476,7 @@ export default function ProductCard({
         )}
       </div>
 
-      {hasSecondImage ? (
+      {hasSecondImage && size !== 'small' ? (
         <div className="product-card-shell__dots" aria-hidden="true">
           <span className={`product-card-shell__dot ${mobileImageIndex === 0 ? "is-active" : ""}`} />
           <span className={`product-card-shell__dot ${mobileImageIndex === 1 ? "is-active" : ""}`} />
@@ -459,14 +490,14 @@ export default function ProductCard({
           aria-label={`View ${safeName}`}
           onClick={onOpen}
         >
-          {showArtisan && artisanVal ? (
+          {showArtisan && artisanVal && size !== 'small' ? (
             <span className="product-card-shell__artisan">{artisanLabel}</span>
           ) : null}
           
           <h3 className="product-card-shell__name" title={safeName}>{safeName}</h3>
           
           <div className="product-card-shell__pricing">
-            <span className="product-card-shell__price">
+            <span className={`product-card-shell__price ${hasSale ? 'has-sale' : ''}`}>
               {isSoldOut ? "Sold Out" : `KES ${displayPrice.toLocaleString("en-KE")}`}
             </span>
             {hasSale && originalPrice > 0 ? (
@@ -510,16 +541,24 @@ export default function ProductCard({
           background: #ffffff;
           border: 1px solid var(--border);
           border-radius: 6px;
-          box-shadow: ${hovered ? '0 12px 28px rgba(96, 52, 20, 0.08)' : '0 4px 14px rgba(96, 52, 20, 0.02)'};
-          transform: ${hovered ? 'translateY(-4px)' : 'translateY(0)'};
-          transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          box-shadow: 0 4px 14px rgba(96, 52, 20, 0.02);
+          transform: translateY(0) translateZ(0);
+          transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           overflow: hidden;
+          will-change: transform, box-shadow;
+          backface-visibility: hidden;
+        }
+
+        .product-card-shell:hover {
+          transform: translateY(-4px) translateZ(0);
+          box-shadow: 0 12px 28px rgba(96, 52, 20, 0.08);
         }
 
         .product-card-shell__media {
           position: relative;
           width: 100%;
           overflow: hidden;
+          transform: translateZ(0);
         }
 
         .product-card-shell__image-link,
@@ -536,20 +575,42 @@ export default function ProductCard({
           background: var(--card-bg);
           border-radius: 0;
           flex-shrink: 0;
+          transform: translateZ(0);
         }
 
-        .product-card-shell__placeholder {
-          width: 100%;
-          height: 100%;
-          background: var(--card-bg);
+        .product-card-shell__shimmer {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          background: linear-gradient(90deg, #F5F0EB 25%, #EFE9E2 50%, #F5F0EB 75%);
+          background-size: 200% 100%;
+          animation: skeletonShimmer 1.6s infinite linear;
+          opacity: 1;
+          transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .product-card-shell__shimmer.is-fading {
+          opacity: 0;
+          pointer-events: none;
         }
 
         .product-card-shell__image-wrap :global(.product-card-shell__image) {
           z-index: 1;
           background: transparent;
+          opacity: 0;
+          transform: scale(1) translateZ(0);
+          transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                      transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          will-change: opacity, transform;
+          backface-visibility: hidden;
+        }
+
+        .product-card-shell__image-wrap :global(.product-card-shell__image--primary.is-loaded) {
           opacity: 1 !important;
-          transform: scale(1);
-          transition: opacity 0.55s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .product-card-shell:hover :global(.product-card-shell__image) {
+          transform: scale(1.03) translateZ(0);
         }
 
         .product-card-shell__image-wrap :global(.product-card-shell__image--primary) {
@@ -562,21 +623,12 @@ export default function ProductCard({
 
         .product-card-shell__image-wrap :global(.product-card-shell__image--secondary) {
           z-index: 2 !important;
-          opacity: 0 !important;
-          transform: scale(1.04);
+          opacity: 0;
+          transform: scale(1) translateZ(0);
         }
 
-        .product-card-shell__image-wrap :global(.product-card-shell__image--secondary.is-visible) {
+        .product-card-shell__image-wrap :global(.product-card-shell__image--secondary.is-visible.is-loaded) {
           opacity: 1 !important;
-          transform: scale(1);
-        }
-
-        .product-card-shell__image-wrap :global(.product-card-shell__image.is-hovered) {
-          transform: scale(1.04) !important;
-        }
-
-        .product-card-shell__image-wrap :global(.product-card-shell__image--secondary.is-visible.is-hovered) {
-          transform: scale(1.04) !important;
         }
 
         .product-card-shell__sold-overlay {
@@ -621,8 +673,13 @@ export default function ProductCard({
           text-align: center;
           text-transform: uppercase;
           cursor: pointer;
-          transform: ${hovered ? "translateY(0)" : "translateY(100%)"};
-          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+          transform: translateY(100%) translateZ(0);
+          transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease;
+          will-change: transform;
+        }
+
+        .product-card-shell:hover .product-card-shell__cta {
+          transform: translateY(0) translateZ(0);
         }
 
         .product-card-shell__cta:hover {
@@ -690,7 +747,12 @@ export default function ProductCard({
           color: rgba(28, 28, 28, 0.6);
           transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, opacity 0.25s ease;
           cursor: pointer;
-          opacity: ${hovered ? 1 : 0};
+          opacity: 0;
+          will-change: opacity, transform;
+        }
+
+        .product-card-shell:hover .product-card-shell__wishlist {
+          opacity: 1;
         }
 
         .product-card-shell__wishlist.is-saved {
@@ -777,7 +839,7 @@ export default function ProductCard({
           margin-bottom: 2px;
           color: rgba(28, 28, 28, 0.65);
           font-size: ${size === 'small' ? '8.5px' : '10px'};
-          font-weight: 500;
+          font-weight: 400;
           letter-spacing: 2px;
           text-transform: uppercase;
         }
@@ -788,7 +850,7 @@ export default function ProductCard({
           overflow: hidden;
           color: var(--dark);
           font-size: ${size === 'small' ? '12px' : '14px'};
-          font-weight: 600;
+          font-weight: 400;
           line-height: 1.4;
           letter-spacing: 0.2px;
           text-overflow: ellipsis;
@@ -806,10 +868,18 @@ export default function ProductCard({
         }
 
         .product-card-shell__price {
-          color: ${hasSale ? '#C0392B' : hovered ? '#8B5E3C' : 'var(--dark)'};
+          color: var(--dark);
           font-size: ${size === 'small' ? '12px' : '14px'};
-          font-weight: 700;
+          font-weight: 500;
           transition: color 0.3s ease;
+        }
+
+        .product-card-shell__price.has-sale {
+          color: #C0392B;
+        }
+
+        .product-card-shell:hover .product-card-shell__price:not(.has-sale) {
+          color: #8B5E3C;
         }
 
         .product-card-shell__original-price {
@@ -821,7 +891,7 @@ export default function ProductCard({
         .product-card-shell__save-amount {
           color: var(--brown);
           font-size: 10px;
-          font-weight: 600;
+          font-weight: 500;
           letter-spacing: 0.5px;
           text-transform: uppercase;
         }
@@ -844,17 +914,22 @@ export default function ProductCard({
           font-size: ${size === 'small' ? '8.5px' : '10px'};
           letter-spacing: 1px;
           text-transform: uppercase;
-          font-weight: 600;
+          font-weight: 500;
         }
 
         @media (max-width: 767px) {
           .product-card-shell {
             box-shadow: 0 4px 12px rgba(96, 52, 20, 0.02);
             transform: none !important;
+            border-color: rgba(96, 52, 20, 0.06);
+          }
+
+          .product-card-shell:hover {
+            transform: none !important;
           }
 
           .product-card-shell__image {
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            transition: opacity 0.4s ease;
           }
 
           .product-card-shell__dots {
@@ -884,6 +959,15 @@ export default function ProductCard({
           }
         }
 
+        @keyframes skeletonShimmer {
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -200% 0;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .product-card-shell,
           .product-card-shell__image,
@@ -891,8 +975,9 @@ export default function ProductCard({
           .product-card-shell__dot,
           .product-card-shell__wishlist,
           .product-card-shell__quick-cart {
-            transition: none;
+            transition: none !important;
             transform: none !important;
+            animation: none !important;
           }
         }
       `}</style>
