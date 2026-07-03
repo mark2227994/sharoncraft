@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import ProductCard from '@/components/ui/ProductCard';
+import ProductCard from '../ui/ProductCard';
 
 export interface FeaturedProduct {
   id: string;
@@ -126,75 +126,107 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
   return (
     <section ref={sectionRef} className="featured-products" aria-labelledby="featured-products-title">
       <div className="featured-products__inner">
-        <header className="featured-products__header fp-reveal">
+        {/* Campaign Narrative Left Column */}
+        <div className="featured-products__narrative fp-reveal">
           <div>
             <span className="featured-products__label">Signature Edit</span>
-            <h2 id="featured-products-title">
+            <h2 id="featured-products-title" className="featured-products__title">
               Pieces with a <span className="italic-serif">story.</span>
             </h2>
           </div>
-
-          <Link href="/shop" className="featured-products__view-all">
-            View all -&gt;
-          </Link>
-        </header>
-
-        <div
-          ref={scrollRef}
-          className="featured-products__grid"
-          aria-label="Featured products"
-        >
-          {safeProducts.map((product, index) => (
-            <div
-              key={product.id}
-              className="fp-reveal featured-products__card-wrapper"
-              style={{ transitionDelay: `${index * 80}ms` }}
-            >
-              <ProductCard
-                product={product as any}
-                size={isMobile ? 'small' : 'default'}
-                priority={index < 4}
-              />
-            </div>
-          ))}
+          <p className="featured-products__description">
+            A curated showcase of our most coveted hand-beaded creations. Meticulously crafted by master artisans in Nairobi, blending traditional African heritage with contemporary minimalist design.
+          </p>
+          <div className="featured-products__cta-wrapper">
+            <Link href="/shop" className="featured-products__cta">
+              <span>Explore the Collection</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
-        <div className="featured-products__progress-bar max-md:block hidden">
+        {/* Product Grid / Slider Right Column */}
+        <div className="featured-products__products-area">
+          <div className="featured-products__header-row">
+            <Link href="/shop" className="featured-products__view-all">
+              View all -&gt;
+            </Link>
+          </div>
+
           <div
-            ref={progressThumbRef}
-            className="featured-products__progress-thumb"
-            style={{ width: '25%', transform: 'translateX(0)' }}
-          />
-        </div>
+            ref={scrollRef}
+            className="featured-products__grid"
+            aria-label="Featured products"
+          >
+            {safeProducts.map((product, index) => (
+              <div
+                key={product.id}
+                className="fp-reveal featured-products__card-wrapper"
+                style={{ transitionDelay: `${index * 80}ms` }}
+              >
+                <ProductCard
+                  product={product}
+                  index={index}
+                  priority={index < 4}
+                />
+              </div>
+            ))}
+          </div>
 
-        {showHint ? <p className="featured-products__hint">Swipe to explore</p> : null}
+          <div className="featured-products__progress-bar max-md:block hidden">
+            <div
+              ref={progressThumbRef}
+              className="featured-products__progress-thumb"
+              style={{ width: '25%', transform: 'translateX(0)' }}
+            />
+          </div>
 
-        <div className="featured-products__footer">
-          <Link href="/shop" className="featured-products__cta">
-            <span>Explore the Collection</span>
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
+          {showHint ? <p className="featured-products__hint">Swipe to explore</p> : null}
         </div>
       </div>
 
       <style jsx>{`
         .featured-products {
           background: #ffffff;
-          padding: 80px 80px;
+          padding: 80px clamp(24px, 6vw, 80px);
+          overflow: hidden;
         }
 
         .featured-products__inner {
           max-width: 1320px;
           margin: 0 auto;
+          display: grid;
+          grid-template-columns: 360px 1fr;
+          gap: 64px;
+          align-items: start;
         }
 
-        .featured-products__header {
+        /* Scoped product card overrides for homepage featured products */
+        .featured-products :global(.product-card-wrapper) {
+          border: none !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        .featured-products :global(.product-card__image-area) {
+          background: #ffffff !important;
+          border: none !important;
+        }
+
+        .featured-products :global(.product-card__image) {
+          mix-blend-mode: multiply !important;
+        }
+
+        .featured-products__narrative {
+          background: #f5f0eb;
+          padding: 56px 40px;
+          border-radius: 4px;
           display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 32px;
+          flex-direction: column;
+          gap: 16px;
+          border: 0.5px solid rgba(139, 94, 60, 0.08);
         }
 
         .featured-products__label {
@@ -202,7 +234,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
           margin-bottom: 8px;
           color: #8b5e3c;
           font-size: 10px;
-          font-weight: 400;
+          font-weight: 500;
           letter-spacing: 4px;
           text-transform: uppercase;
         }
@@ -223,7 +255,68 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
           color: #8b5e3c;
         }
 
-        .featured-products__view-all {
+        .featured-products__description {
+          color: #555555;
+          font-size: 13px;
+          line-height: 1.6;
+          font-weight: 300;
+          margin: 8px 0 16px;
+          font-family: inherit;
+        }
+
+        .featured-products__cta-wrapper {
+          margin-top: 8px;
+        }
+
+        :global(.featured-products__cta) {
+          display: inline-flex;
+          height: 48px;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          border: none;
+          background: #1c1c1c;
+          color: #fafaf8;
+          padding: 0 36px;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 3px;
+          text-decoration: none;
+          text-transform: uppercase;
+          border-radius: 24px;
+          transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        :global(.featured-products__cta:hover) {
+          background: #8b5e3c;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(139, 94, 60, 0.15);
+        }
+
+        :global(.featured-products__cta svg) {
+          width: 12px;
+          height: 12px;
+          stroke: currentColor;
+          stroke-width: 1.75px;
+          transition: transform 0.25s ease;
+        }
+
+        :global(.featured-products__cta:hover svg) {
+          transform: translateX(4px);
+        }
+
+        .featured-products__products-area {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .featured-products__header-row {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 24px;
+        }
+
+        :global(.featured-products__view-all) {
           color: #888888;
           border-bottom: 1px solid rgba(0, 0, 0, 0.15);
           padding-bottom: 2px;
@@ -234,48 +327,20 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
           transition: color 0.2s ease, border-color 0.2s ease;
         }
 
-        .featured-products__view-all:hover {
+        :global(.featured-products__view-all:hover) {
           color: #111111;
           border-color: #111111;
         }
 
         .featured-products__grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 24px;
-          margin-top: 40px;
         }
 
         .featured-products__card-wrapper {
           display: flex;
           width: 100%;
-        }
-
-        .featured-products__footer {
-          margin-top: 48px;
-          text-align: center;
-        }
-
-        .featured-products__cta {
-          display: inline-flex;
-          height: 48px;
-          align-items: center;
-          gap: 8px;
-          border: 1.5px solid #111111;
-          background: transparent;
-          color: #111111;
-          padding: 0 44px;
-          font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 3px;
-          text-decoration: none;
-          text-transform: uppercase;
-          transition: background 0.25s ease, color 0.25s ease;
-        }
-
-        .featured-products__cta:hover {
-          background: #111111;
-          color: #ffffff;
         }
 
         .featured-products__hint {
@@ -294,29 +359,34 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
         }
 
         @media (max-width: 1100px) {
-          .featured-products__grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
+          .featured-products__inner {
+            gap: 40px;
+            grid-template-columns: 300px 1fr;
           }
-        }
 
-        @media (max-width: 899px) {
           .featured-products__grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
           }
         }
 
-        @media (max-width: 768px) {
-          .featured-products {
-            padding: 56px 0;
+        @media (max-width: 900px) {
+          .featured-products__inner {
+            grid-template-columns: 1fr;
+            gap: 32px;
           }
 
-          .featured-products__header {
-            padding: 0 20px 28px;
+          .featured-products__narrative {
+            padding: 44px 32px;
+            text-align: center;
+            align-items: center;
           }
 
-          .featured-products__view-all {
+          .featured-products__description {
+            max-width: 540px;
+          }
+
+          .featured-products__header-row {
             display: none;
           }
 
@@ -339,7 +409,6 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             flex: 0 0 48vw;
             max-width: 200px;
             scroll-snap-align: start;
-            display: flex;
           }
 
           .featured-products__hint {
@@ -350,17 +419,6 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             letter-spacing: 2px;
             text-align: center;
             text-transform: uppercase;
-          }
-
-          .featured-products__footer {
-            margin-top: 32px;
-            padding: 0 20px;
-          }
-
-          .featured-products__cta {
-            width: 100%;
-            height: 52px;
-            justify-content: center;
           }
 
           .fp-reveal {
@@ -383,6 +441,18 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             background: #8b5e3c;
             border-radius: 1px;
             transition: transform 0.15s ease-out;
+          }
+
+          :global(.featured-products__cta) {
+            width: 100%;
+            height: 52px;
+            justify-content: center;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .featured-products {
+            padding: 56px 0;
           }
         }
       `}</style>
