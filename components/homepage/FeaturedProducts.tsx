@@ -211,12 +211,8 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
         }
 
         .featured-products :global(.product-card__image-area) {
-          background: #ffffff !important;
+          background: #f5f1ec !important;
           border: none !important;
-        }
-
-        .featured-products :global(.product-card__image) {
-          mix-blend-mode: multiply !important;
         }
 
         .featured-products__narrative {
