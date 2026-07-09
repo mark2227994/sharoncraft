@@ -1,751 +1,644 @@
-import { useEffect, useMemo, useState } from "react";
-import CategoryStrip from "../components/CategoryStrip";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import ProductCard from "../components/ProductCard";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
+import Icon from "../components/icons";
 import SeoHead from "../components/SeoHead";
-import ShopSidebar from "../components/ShopSidebar";
-import { normalizeShopCategoryTree, shopCategoryTree } from "../data/site";
-import { readAdminContentField } from "../lib/admin-content";
 import {
-  filterPublishedProducts,
-  getCategoryPriority,
-  getJewelryTypePriority,
-} from "../lib/products";
-import { readProducts } from "../lib/store";
+  ACTIVE_CATEGORIES,
+  AUDIENCE_FILTERS,
+  getActiveCategoryBySlug,
+  getAudienceBySlug,
+  getSubcategoryBySlug,
+  SMART_FILTERS,
+} from "../lib/categories";
 
-const ITEMS_PER_PAGE = 20;
-const CHEVRON = "\u203A";
-const RANGE_DASH = "\u2013";
+const PAGE_SIZE = 12;
+const PRODUCT_SELECT = [
+  "id",
+  "name",
+  "slug",
+  "price",
+  "original_price",
+  "sale_price",
+  "images",
+  "artisan",
+  "category",
+  "subcategory",
+  "stock_quantity",
+  "product_type",
+  "production_time",
+  "audience",
+  "is_new",
+  "is_best_seller",
+].join(", ");
+
 const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
-  { value: "recent", label: "Newest" },
-  { value: "price-asc", label: "Price: Low" },
-  { value: "price-desc", label: "Price: High" },
+  { value: "newest", label: "Newest" },
+  { value: "price_low", label: "Price: low to high" },
+  { value: "price_high", label: "Price: high to low" },
 ];
 
-function flattenShopNodes(nodes, trail = []) {
-  return nodes.flatMap((node) => [
-    { ...node, trail },
-    ...(Array.isArray(node.children)
-      ? flattenShopNodes(node.children, [...trail, node.id])
-      : []),
-  ]);
+function getSupabaseClient() {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    "https://vonzscriztdcdhobulhy.supabase.co";
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    "";
+
+  if (!supabaseUrl || !supabaseKey) return null;
+  return createClient(supabaseUrl, supabaseKey);
 }
 
-const LEGACY_CATEGORY_MAP = new Map([
-  ["All", "all"],
-  ["Jewellery", "jewellery"],
-  ["Accessories", "accessories"],
-  ["Home Decor", "home-living"],
-  ["Gift Sets", "gifted-carry"],
-  ["Bridal & Occasion", "african-wear"],
-  ["African Wear", "african-wear"],
-  ["Art & Craft", "art-craft"],
-  ["Home & Living", "home-living"],
-  ["Gifted Carry", "gifted-carry"],
-]);
+function normalizeQueryValue(value) {
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
 
-const LEGACY_SUBCATEGORY_MAP = new Map([
-  ["necklace", "necklaces"],
-  ["bracelet", "bracelets"],
-  ["earring", "earrings"],
-]);
+function isValidSort(value) {
+  return SORT_OPTIONS.some((option) => option.value === value);
+}
 
-function EmptyStateIcon() {
+function getSmartFilter(slug) {
+  return SMART_FILTERS.find((filter) => filter.slug === slug);
+}
+
+function getHeading({ activeCategory, activeSubcategory, activeAudience, activeFilter }) {
+  const parts = [];
+
+  if (activeCategory !== "all") {
+    const category = getActiveCategoryBySlug(activeCategory);
+    if (category) {
+      parts.push(
+        activeSubcategory
+          ? getSubcategoryBySlug(category.slug, activeSubcategory)?.name || category.name
+          : category.name,
+      );
+    }
+  }
+
+  if (activeAudience) {
+    const audience = getAudienceBySlug(activeAudience);
+    if (audience) parts.push(audience.name);
+  }
+
+  if (activeFilter) {
+    const filter = getSmartFilter(activeFilter);
+    if (filter) parts.push(filter.label);
+  }
+
+  return parts.length ? parts.join(" · ") : "Shop";
+}
+
+function buildQuery({ category, subcategory, audience, filter, sort }) {
+  const query = {};
+  if (category && category !== "all") query.cat = category;
+  if (subcategory) query.sub = subcategory;
+  if (audience) query.audience = audience;
+  if (filter) query.filter = filter;
+  if (sort && sort !== "featured") query.sort = sort;
+  return query;
+}
+
+function applySort(query, sortBy) {
+  if (sortBy === "newest") {
+    return query.order("created_at", { ascending: false });
+  }
+
+  if (sortBy === "price_low") {
+    return query.order("price", { ascending: true });
+  }
+
+  if (sortBy === "price_high") {
+    return query.order("price", { ascending: false });
+  }
+
+  return query
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: false });
+}
+
+async function queryProducts({ category, subcategory, audience, filter, sort, page }) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { products: [], total: 0, error: "Supabase is not configured." };
+
+  let query = supabase
+    .from("products")
+    .select(PRODUCT_SELECT, { count: "exact" })
+    .eq("is_visible", true);
+
+  if (category && category !== "all") {
+    const selectedCategory = getActiveCategoryBySlug(category);
+    if (selectedCategory) {
+      query = query.eq("category", selectedCategory.name);
+    }
+  }
+
+  if (subcategory) {
+    const selectedCategory = getActiveCategoryBySlug(category);
+    const selectedSubcategory = selectedCategory
+      ? getSubcategoryBySlug(selectedCategory.slug, subcategory)
+      : null;
+    query = query.eq("subcategory", selectedSubcategory?.name || subcategory);
+  }
+
+  if (audience) {
+    const selectedAudience = getAudienceBySlug(audience);
+    if (selectedAudience?.value && selectedAudience.value !== "unisex") {
+      query = query.in("audience", [selectedAudience.value, "unisex"]);
+    } else if (selectedAudience?.value === "unisex") {
+      query = query.eq("audience", "unisex");
+    }
+  }
+
+  if (filter === "best-sellers") {
+    query = query.eq("is_best_seller", true);
+  }
+
+  if (filter === "new-arrivals") {
+    query = query.eq("is_new", true);
+  }
+
+  if (filter === "ready-to-ship") {
+    query = query.eq("product_type", "ready_to_ship").gt("stock_quantity", 0);
+  }
+
+  if (filter === "made-to-order") {
+    query = query.eq("product_type", "made_to_order");
+  }
+
+  query = applySort(query, sort);
+
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  const { data, count, error } = await query.range(from, to);
+
+  if (error) {
+    return { products: [], total: 0, error: error.message };
+  }
+
+  return { products: data || [], total: count || 0, error: "" };
+}
+
+function SortSelect({ value, onChange, id = "shop-sort" }) {
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 48 48"
-      className="shop-page__empty-icon"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
+    <label className="shop-sort" htmlFor={id}>
+      <span className="sr-only">Sort products</span>
+      <span className="shop-sort__label">Sort by:</span>
+      <select id={id} value={value} onChange={(event) => onChange(event.target.value)}>
+        {SORT_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      </svg>
+    </label>
+  );
+}
+
+function FilterChip({ active, children, onClick }) {
+  return (
+    <button
+      type="button"
+      className={`shop-filter-chip ${active ? "shop-filter-chip--active" : ""}`}
+      onClick={onClick}
     >
-      <circle cx="24" cy="24" r="17" />
-      <path d="M15.5 32.5l17-17" />
-    </svg>
+      {children}
+    </button>
   );
 }
 
-function compactText(value) {
-  return String(value || "").trim();
-}
-
-function slugifyShopValue(value) {
-  return compactText(value)
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function resolveShopCategoryId(value) {
-  const rawValue = compactText(value);
-  if (!rawValue) return "";
-
-  return (
-    LEGACY_CATEGORY_MAP.get(rawValue) ||
-    LEGACY_CATEGORY_MAP.get(rawValue.replace(/\s+/g, " ")) ||
-    LEGACY_CATEGORY_MAP.get(rawValue.replace(/\sand\s/gi, " & ")) ||
-    LEGACY_CATEGORY_MAP.get(rawValue.replace(/\s&\s/g, " and ")) ||
-    LEGACY_CATEGORY_MAP.get(rawValue.replace(/-/g, " ")) ||
-    slugifyShopValue(rawValue)
-  );
-}
-
-function getProductSearchText(product) {
-  return [
-    product?.name,
-    product?.description,
-    product?.shortDescription,
-    product?.heritageStory,
-    product?.category,
-    product?.jewelryType,
-    ...(Array.isArray(product?.materials) ? product.materials : []),
-    ...(Array.isArray(product?.details) ? product.details : []),
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
-function matchesRule(product, match) {
-  if (!match) return true;
-
-  if (Array.isArray(match.categories) && match.categories.length > 0) {
-    const productCategoryId = resolveShopCategoryId(product?.category);
-    const categoryMatch = match.categories.some((category) => {
-      const matchCategoryId = resolveShopCategoryId(category);
-      return matchCategoryId
-        ? matchCategoryId === productCategoryId
-        : category === product.category;
-    });
-
-    if (!categoryMatch) {
-      return false;
-    }
-  }
-
-  if (
-    Array.isArray(match.jewelryTypes) &&
-    match.jewelryTypes.length > 0 &&
-    !match.jewelryTypes.includes(product.jewelryType)
-  ) {
-    return false;
-  }
-
-  if (Array.isArray(match.keywords) && match.keywords.length > 0) {
-    const haystack = getProductSearchText(product);
-    if (
-      !match.keywords.some((keyword) =>
-        haystack.includes(String(keyword).toLowerCase()),
-      )
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function productMatchesCategoryNode(product, node) {
-  if (!node) return false;
-  return resolveShopCategoryId(product?.category) === node.id;
-}
-
-function getShopNodeLookupValues(node) {
-  return Array.from(
-    new Set(
-      [node?.id, node?.label, node?.queryValue]
-        .flatMap((value) => {
-          const safeValue = compactText(value);
-          return safeValue ? [safeValue, slugifyShopValue(safeValue)] : [];
-        })
-        .filter(Boolean),
-    ),
-  );
-}
-
-function productMatchesSubcategory(product, node) {
-  const productSubcategory = compactText(product?.subcategory);
-  if (!productSubcategory || !node) return false;
-
-  const productValues = new Set(
-    [productSubcategory, slugifyShopValue(productSubcategory)].filter(Boolean),
-  );
-  return getShopNodeLookupValues(node).some((value) =>
-    productValues.has(value),
-  );
-}
-
-function resolveSubcategoryId(
-  querySubcategory,
-  queryJewelryType,
-  nodeByLookup,
-) {
-  const rawSubcategory = compactText(querySubcategory);
-  if (rawSubcategory) {
-    const lookupKey = slugifyShopValue(rawSubcategory);
-    return (
-      nodeByLookup.get(rawSubcategory) || nodeByLookup.get(lookupKey) || ""
-    );
-  }
-
-  const rawJewelryType = compactText(queryJewelryType);
-  if (rawJewelryType) {
-    return LEGACY_SUBCATEGORY_MAP.get(rawJewelryType) || "";
-  }
-
-  return "";
-}
-
-function matchesPriceRange(product, activePriceRange) {
-  const price = Number(product?.price || 0);
-
-  if (activePriceRange === "under-1000") return price < 1000;
-  if (activePriceRange === "1000-3000") return price >= 1000 && price <= 3000;
-  if (activePriceRange === "3000-5000") return price > 3000 && price <= 5000;
-  if (activePriceRange === "above-5000") return price > 5000;
-
-  return true;
-}
-
-export default function ShopPage({
-  products,
-  initialCategory,
-  initialSubcategory,
-  categoryTree,
-}) {
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [activeSubcategory, setActiveSubcategory] =
-    useState(initialSubcategory);
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-  const [activePriceRange, setActivePriceRange] = useState("all");
+export default function ShopPage({ initialProducts = [], initialTotal = 0 }) {
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeSubcategory, setActiveSubcategory] = useState("");
+  const [activeAudience, setActiveAudience] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
   const [sortBy, setSortBy] = useState("featured");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const normalizedCategoryTree = useMemo(
-    () => normalizeShopCategoryTree(categoryTree),
-    [categoryTree],
-  );
-  const shopTabs = useMemo(
-    () => normalizedCategoryTree.map((node) => node.label),
-    [normalizedCategoryTree],
-  );
-  const flatShopNodes = useMemo(
-    () => flattenShopNodes(normalizedCategoryTree),
-    [normalizedCategoryTree],
-  );
-  const shopNodeById = useMemo(
-    () => new Map(flatShopNodes.map((node) => [node.id, node])),
-    [flatShopNodes],
-  );
-  const shopNodeByLabel = useMemo(
-    () => new Map(normalizedCategoryTree.map((node) => [node.label, node])),
-    [normalizedCategoryTree],
-  );
-
-  const activeCategoryNode =
-    shopNodeById.get(activeCategory) || shopNodeById.get("all");
-  const activeSubcategoryNode = activeSubcategory
-    ? shopNodeById.get(activeSubcategory)
-    : null;
-  const activeTabLabel = activeCategoryNode?.label || "All";
+  const [products, setProducts] = useState(initialProducts);
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasHydratedQuery, setHasHydratedQuery] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [filterStuck, setFilterStuck] = useState(false);
+  const latestRequestRef = useRef(0);
+  const applyingPopStateRef = useRef(false);
+  const lastUrlRef = useRef("");
+  const filterSentinelRef = useRef(null);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const sentinel = filterSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setFilterStuck(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "0px 0px 0px 0px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    document.body.classList.add("shop-page--boutique");
-    return () => document.body.classList.remove("shop-page--boutique");
-  }, []);
-
-  useEffect(() => {
-    if (!isMobile) {
-      setIsDrawerOpen(false);
-      setIsSortOpen(false);
+  const activeCategoryData = activeCategory !== "all" ? getActiveCategoryBySlug(activeCategory) : null;
+  const activeFilterData = activeFilter ? getSmartFilter(activeFilter) : null;
+  const activeAudienceData = activeAudience ? getAudienceBySlug(activeAudience) : null;
+  const heading = getHeading({ activeCategory, activeSubcategory, activeAudience, activeFilter });
+  const descriptionText = useMemo(() => {
+    if (activeFilterData) {
+      return activeFilterData.description || "";
     }
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (!isMobile || (!isDrawerOpen && !isSortOpen)) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isDrawerOpen, isMobile, isSortOpen]);
-
-  const filteredProducts = useMemo(() => {
-    const next = products
-      .filter((product) => {
-        if (activeCategory === "all") return true;
-        return (
-          productMatchesCategoryNode(product, activeCategoryNode) ||
-          matchesRule(product, activeCategoryNode?.match)
-        );
-      })
-      .filter((product) => {
-        if (!activeSubcategoryNode) return true;
-        return (
-          productMatchesSubcategory(product, activeSubcategoryNode) ||
-          matchesRule(product, activeSubcategoryNode.match)
-        );
-      })
-      .filter((product) =>
-        showAvailableOnly ? !product.isSold && product.stock > 0 : true,
-      )
-      .filter((product) => matchesPriceRange(product, activePriceRange));
-
-    if (sortBy === "recent") {
-      return next
-        .slice()
-        .sort(
-          (left, right) =>
-            Number(Boolean(right.recent || right.isNew || right.newArrival)) -
-            Number(Boolean(left.recent || left.isNew || left.newArrival)),
-        );
+    if (activeAudienceData) {
+      return activeAudienceData.description || "";
     }
+    if (activeCategoryData) {
+      return activeCategoryData.description || "";
+    }
+    return "Handcrafted beadwork, jewelry, and lifestyle accessories made in Nairobi.";
+  }, [activeAudienceData, activeCategoryData, activeFilterData]);
 
-    if (sortBy === "price-asc")
-      return next.slice().sort((left, right) => left.price - right.price);
-    if (sortBy === "price-desc")
-      return next.slice().sort((left, right) => right.price - left.price);
-
-    return next.slice().sort((left, right) => {
-      const featuredDiff =
-        Number(Boolean(right.featured)) - Number(Boolean(left.featured));
-      if (featuredDiff !== 0) return featuredDiff;
-
-      const categoryDiff =
-        getCategoryPriority(left.category) -
-        getCategoryPriority(right.category);
-      if (categoryDiff !== 0) return categoryDiff;
-
-      const jewelryDiff =
-        getJewelryTypePriority(left.jewelryType) -
-        getJewelryTypePriority(right.jewelryType);
-      if (jewelryDiff !== 0) return jewelryDiff;
-
-      return left.name.localeCompare(right.name);
-    });
-  }, [
-    activeCategory,
-    activeCategoryNode,
-    activePriceRange,
-    activeSubcategoryNode,
-    products,
-    showAvailableOnly,
-    sortBy,
-  ]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredProducts.length / ITEMS_PER_PAGE),
-  );
-
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [currentPage, filteredProducts]);
-
-  const gridRenderKey = [
-    activeCategory,
-    activeSubcategory,
-    showAvailableOnly ? "stock" : "all-stock",
-    activePriceRange,
-    sortBy,
-    currentPage,
-  ].join("|");
-
+  const hasActiveFilter = activeCategory !== "all" || activeSubcategory || activeAudience || activeFilter;
   const activeFilterCount = [
     activeCategory !== "all",
-    Boolean(activeSubcategory),
-    showAvailableOnly,
-    activePriceRange !== "all",
-  ].filter(Boolean).length;
-
-  const showingFrom =
-    filteredProducts.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
-  const showingTo =
-    filteredProducts.length === 0
-      ? 0
-      : Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length);
-  const shouldShowPagination = filteredProducts.length > ITEMS_PER_PAGE;
-  const resultsLabel = `${filteredProducts.length} pieces found`;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    activeCategory,
-    activePriceRange,
     activeSubcategory,
-    showAvailableOnly,
-    sortBy,
-  ]);
+    activeAudience,
+    activeFilter,
+  ].filter(Boolean).length;
+  const shownCount = products.length;
+  const canLoadMore = shownCount < total;
+
+  const subcategories = useMemo(
+    () => activeCategoryData?.subcategories || [],
+    [activeCategoryData],
+  );
+
+  const fetchProducts = useCallback(
+    async ({ nextPage = 1, append = false } = {}) => {
+      const requestId = latestRequestRef.current + 1;
+      latestRequestRef.current = requestId;
+      if (append) setLoadingMore(true);
+      else setLoading(true);
+
+      const result = await queryProducts({
+        category: activeCategory,
+        subcategory: activeSubcategory,
+        audience: activeAudience,
+        filter: activeFilter,
+        sort: sortBy,
+        page: nextPage,
+      });
+
+      if (requestId === latestRequestRef.current) {
+        setProducts((current) => (append ? [...current, ...result.products] : result.products));
+        setTotal(result.total);
+        setPage(nextPage);
+      }
+
+      setLoading(false);
+      setLoadingMore(false);
+    },
+    [activeCategory, activeSubcategory, activeAudience, activeFilter, sortBy],
+  );
+
+  const applyUrlState = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nextCategory = normalizeQueryValue(params.get("cat")) || "all";
+    const nextSubcategory = normalizeQueryValue(params.get("sub"));
+    const nextAudience = normalizeQueryValue(params.get("audience"));
+    const nextFilter = normalizeQueryValue(params.get("filter"));
+    const nextSort = normalizeQueryValue(params.get("sort"));
+
+    setActiveCategory(getActiveCategoryBySlug(nextCategory) ? nextCategory : "all");
+    setActiveSubcategory(nextSubcategory || "");
+    setActiveAudience(getAudienceBySlug(nextAudience) ? nextAudience : "");
+    setActiveFilter(getSmartFilter(nextFilter) ? nextFilter : "");
+    setSortBy(isValidSort(nextSort) ? nextSort : "featured");
+  }, []);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+    applyUrlState();
+    lastUrlRef.current = `${window.location.pathname}${window.location.search}`;
+    setHasHydratedQuery(true);
 
-  function getPageNumbers() {
-    const maxPagesToShow = 5;
-    if (totalPages <= maxPagesToShow) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    function handlePopState() {
+      applyingPopStateRef.current = true;
+      applyUrlState();
     }
 
-    const pages = [1];
-    const startPage = Math.max(2, currentPage - 1);
-    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [applyUrlState]);
 
-    if (startPage > 2) pages.push("ellipsis-start");
-    for (let page = startPage; page <= endPage; page += 1) pages.push(page);
-    if (endPage < totalPages - 1) pages.push("ellipsis-end");
-    pages.push(totalPages);
+  useEffect(() => {
+    if (!hasHydratedQuery) return;
+    const query = buildQuery({
+      category: activeCategory,
+      subcategory: activeSubcategory,
+      audience: activeAudience,
+      filter: activeFilter,
+      sort: sortBy,
+    });
+    const search = new URLSearchParams(query).toString();
+    const nextUrl = search ? `/shop?${search}` : "/shop";
 
-    return pages;
-  }
+    if (lastUrlRef.current !== nextUrl) {
+      if (applyingPopStateRef.current) {
+        applyingPopStateRef.current = false;
+      } else {
+        window.history.pushState(null, "", nextUrl);
+      }
+      lastUrlRef.current = nextUrl;
+    }
+    fetchProducts({ nextPage: 1, append: false });
+  }, [activeCategory, activeSubcategory, activeAudience, activeFilter, sortBy, hasHydratedQuery, fetchProducts]);
 
-  function handleCategorySelect(label) {
-    const node = shopNodeByLabel.get(label);
-    if (!node) return;
-    setActiveCategory(node.id);
-    setActiveSubcategory("");
-  }
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      const filterShell = document.querySelector(".shop-filter-shell");
+      if (filterShell) {
+        const rect = filterShell.getBoundingClientRect();
+        const absoluteTop = window.pageYOffset + rect.top;
+        const offset = 86; // height of fixed header + announcement
+        if (window.pageYOffset > absoluteTop - offset) {
+          window.scrollTo({ top: absoluteTop - offset, behavior: "auto" });
+        }
+      } else if (window.pageYOffset > 140) {
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+    }
+  };
 
-  function clearAllFilters() {
+  function selectAll() {
     setActiveCategory("all");
     setActiveSubcategory("");
-    setShowAvailableOnly(false);
-    setActivePriceRange("all");
+    setActiveAudience("");
+    setActiveFilter("");
+    setMobileFiltersOpen(false);
+    scrollToTop();
+  }
+
+  function selectCategory(categorySlug) {
+    setActiveCategory((current) => (current === categorySlug ? "all" : categorySlug));
+    setActiveSubcategory("");
+    scrollToTop();
+  }
+
+  function selectSmartFilter(filterSlug) {
+    setActiveFilter((current) => (current === filterSlug ? "" : filterSlug));
+    scrollToTop();
+  }
+
+  function selectAudience(audienceSlug) {
+    setActiveAudience((current) => (current === audienceSlug ? "" : audienceSlug));
+    scrollToTop();
+  }
+
+  function clearFilters() {
+    setActiveCategory("all");
+    setActiveSubcategory("");
+    setActiveAudience("");
+    setActiveFilter("");
     setSortBy("featured");
-    setCurrentPage(1);
-    setIsDrawerOpen(false);
-    setIsSortOpen(false);
+    setMobileFiltersOpen(false);
+    scrollToTop();
   }
 
-  function handleSortChange(nextSort) {
-    setSortBy(nextSort);
-    setIsSortOpen(false);
+  async function loadMore() {
+    if (loadingMore || !canLoadMore) return;
+    await fetchProducts({ nextPage: page + 1, append: true });
   }
-
-  function openFilters() {
-    setIsSortOpen(false);
-    setIsDrawerOpen(true);
-  }
-
-  function openSort() {
-    setIsDrawerOpen(false);
-    setIsSortOpen(true);
-  }
-
   return (
     <>
       <SeoHead
         title="Shop Handmade Kenyan Jewellery, Gifts And Decor"
-        description="Browse SharonCraft necklaces, bracelets, earrings, home decor, gift sets, and artisan-made pieces from Kenya."
+        description="Browse SharonCraft necklaces, bracelets, earrings, and artisan-made pieces from Kenya."
         path="/shop"
       />
-
       <Nav />
-      <CategoryStrip
-        className="shop-category-strip"
-        categories={shopTabs}
-        activeCategory={activeTabLabel}
-        onSelect={handleCategorySelect}
-      />
+      <main className="shop-page shop-page--clean">
+        <header className="shop-header">
+          <div className="shop-header__content">
+            <span className="shop-header__label">Collection // SharonCraft</span>
+            <h1 className="shop-header__title">
+              {heading}
+            </h1>
+            <span className="shop-header__count-badge">
+              {loading ? "..." : total} {total === 1 ? "piece" : "pieces"}
+            </span>
+            <p className="shop-header__description">{descriptionText}</p>
+          </div>
+        </header>
 
-      <main className="shop-page">
-        <div className="shop-breadcrumb" aria-label="Breadcrumb">
-          <a href="/">Home</a>
-          <span className="shop-breadcrumb__separator">{CHEVRON}</span>
-          <a href="/shop">Shop</a>
-          {activeCategory !== "all" ? (
-            <>
-              <span className="shop-breadcrumb__separator">{CHEVRON}</span>
-              <span className="shop-breadcrumb__current">
-                {activeCategoryNode?.label}
-              </span>
-            </>
-          ) : null}
-          {activeSubcategoryNode ? (
-            <>
-              <span className="shop-breadcrumb__separator">{CHEVRON}</span>
-              <span className="shop-breadcrumb__current">
-                {activeSubcategoryNode.label}
-              </span>
-            </>
-          ) : null}
-        </div>
-
-        <div className="shop-page__layout">
-          <ShopSidebar
-            categoryTree={normalizedCategoryTree}
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-            activeSubcategory={activeSubcategory}
-            onSubcategoryChange={setActiveSubcategory}
-            activePriceRange={activePriceRange}
-            onPriceRangeChange={setActivePriceRange}
-            showAvailableOnly={showAvailableOnly}
-            onShowAvailableChange={setShowAvailableOnly}
-            isMobile={isMobile}
-            isOpen={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
-          />
-
-          <section className="shop-page__results">
-            <div className="shop-page__results-bar">
-              {isMobile ? (
-                <>
-                  <button
-                    type="button"
-                    className="shop-page__filter-btn"
-                    onClick={openFilters}
-                  >
-                    <span>Filter</span>
-                    {activeFilterCount > 0 ? (
-                      <span className="shop-page__filter-count">
-                        {activeFilterCount}
-                      </span>
-                    ) : null}
-                  </button>
-
-                  <p className="shop-page__count-text">{resultsLabel}</p>
-
-                  <button
-                    type="button"
-                    className="shop-page__sort-trigger"
-                    onClick={openSort}
-                  >
-                    <span>Sort</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="shop-page__count-text">{resultsLabel}</p>
-
-                  <div
-                    className="shop-page__sort-links"
-                    aria-label="Sort products"
-                  >
-                    {SORT_OPTIONS.map((option, index) => (
-                      <div key={option.value} className="shop-page__sort-item">
-                        <button
-                          type="button"
-                          className={`shop-page__sort-link ${sortBy === option.value ? "shop-page__sort-link--active" : ""}`}
-                          onClick={() => handleSortChange(option.value)}
-                        >
-                          {option.label}
-                        </button>
-                        {index < SORT_OPTIONS.length - 1 ? (
-                          <span className="shop-page__sort-separator">|</span>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </>
+        <div ref={filterSentinelRef} className="shop-filter-sentinel" aria-hidden="true" />
+        
+        {/* Sticky Toolbar Bar replacing old scrollable chip rows */}
+        <div className={`shop-toolbar-bar${filterStuck ? " is-stuck" : ""}`}>
+          <div className="shop-toolbar-bar__info">
+            <span>{loading ? "Loading..." : `${total} ${total === 1 ? "piece" : "pieces"}`}</span>
+          </div>
+          <div className="shop-toolbar-bar__actions">
+            <button
+              type="button"
+              className={`shop-toolbar-filter-btn ${mobileFiltersOpen ? "is-active" : ""}`}
+              onClick={() => setMobileFiltersOpen((current) => !current)}
+            >
+              <Icon name="sliders" size={16} />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="shop-toolbar-filter-count">{activeFilterCount}</span>
               )}
-            </div>
-
-            {paginatedProducts.length === 0 ? (
-              <div className="shop-page__no-results">
-                <EmptyStateIcon />
-                <h3>No pieces found</h3>
-                <p>Try adjusting your filters or browse all pieces</p>
-                <button
-                  type="button"
-                  onClick={clearAllFilters}
-                  className="shop-page__empty-button"
-                >
-                  View All Pieces
-                </button>
-              </div>
-            ) : (
-              <div key={gridRenderKey} className="shop-products__catalog">
-                {paginatedProducts.map((product, index) => (
-                  <div
-                    key={`${product.id}-${gridRenderKey}`}
-                    className="product-card-grid-item shop-products__catalog-item"
-                    style={{ animationDelay: `${index * 60}ms` }}
-                  >
-                    <ProductCard product={product} variant="shop-catalog" />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {shouldShowPagination ? (
-              <>
-                {!isMobile ? (
-                  <div className="shop-pagination shop-pagination--desktop">
-                    <button
-                      type="button"
-                      className="shop-page-btn"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((page) => page - 1)}
-                    >
-                      ← Prev
-                    </button>
-
-                    <div className="shop-page-numbers">
-                      {getPageNumbers().map((pageNum) =>
-                        typeof pageNum === "number" ? (
-                          <button
-                            key={pageNum}
-                            type="button"
-                            className={`shop-page-num ${currentPage === pageNum ? "shop-page-num--active" : ""}`}
-                            onClick={() => setCurrentPage(pageNum)}
-                          >
-                            {pageNum}
-                          </button>
-                        ) : (
-                          <span key={pageNum} className="shop-page-ellipsis">
-                            …
-                          </span>
-                        ),
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      className="shop-page-btn"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage((page) => page + 1)}
-                    >
-                      Next →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="shop-pagination shop-pagination--mobile">
-                    <button
-                      type="button"
-                      className="shop-pagination__mobile-link"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((page) => page - 1)}
-                    >
-                      ← Previous
-                    </button>
-                    <span className="shop-pagination__mobile-status">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      className="shop-pagination__mobile-link"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage((page) => page + 1)}
-                    >
-                      Next →
-                    </button>
-                  </div>
-                )}
-
-                <p className="shop-page__showing-text">
-                  Showing {`${showingFrom}${RANGE_DASH}${showingTo}`} of{" "}
-                  {filteredProducts.length} pieces
-                </p>
-              </>
-            ) : paginatedProducts.length > 0 ? (
-              <p className="shop-page__showing-text">
-                Showing {`${showingFrom}${RANGE_DASH}${showingTo}`} of{" "}
-                {filteredProducts.length} pieces
-              </p>
-            ) : null}
-          </section>
-        </div>
-      </main>
-
-      <Footer />
-
-      {isMobile ? (
-        <div
-          className={`shop-page__sort-overlay ${isSortOpen ? "shop-page__sort-overlay--open" : ""}`}
-          aria-hidden={!isSortOpen}
-          onClick={() => setIsSortOpen(false)}
-        >
-          <div
-            className="shop-page__sort-sheet"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="shop-page__sort-sheet-header">
-              <span className="shop-page__sort-sheet-title">Sort Pieces</span>
-              <button
-                type="button"
-                className="shop-page__sort-sheet-close"
-                onClick={() => setIsSortOpen(false)}
-              >
-                ✕ Close
-              </button>
-            </div>
-
-            <div className="shop-page__sort-sheet-options">
-              {SORT_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`shop-page__sort-sheet-option ${
-                    sortBy === option.value
-                      ? "shop-page__sort-sheet-option--active"
-                      : ""
-                  }`}
-                  onClick={() => handleSortChange(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
+            </button>
+            <div className="shop-toolbar-sort-wrap">
+              <SortSelect value={sortBy} onChange={setSortBy} id="shop-sort-toolbar" />
             </div>
           </div>
         </div>
-      ) : null}
+
+        {/* Slide-out Filter Drawer for desktop (side) & mobile (bottom-sheet) */}
+        <div className={`shop-filter-drawer ${mobileFiltersOpen ? "is-open" : ""}`} aria-modal="true" role="dialog">
+          <div className="shop-filter-drawer__overlay" onClick={() => setMobileFiltersOpen(false)} />
+          <div className="shop-filter-drawer__content">
+            <div className="shop-filter-drawer__header">
+              <h3>Filters</h3>
+              <button type="button" className="shop-filter-drawer__close" onClick={() => setMobileFiltersOpen(false)} aria-label="Close filters">
+                &times;
+              </button>
+            </div>
+            
+            <div className="shop-filter-drawer__body">
+              {/* Categories */}
+              <div className="shop-filter-drawer__section">
+                <h4>Category</h4>
+                <div className="shop-filter-drawer__chips">
+                  <FilterChip active={activeCategory === "all"} onClick={selectAll}>
+                    All
+                  </FilterChip>
+                  {ACTIVE_CATEGORIES.map((category) => (
+                    <FilterChip
+                      key={category.slug}
+                      active={activeCategory === category.slug}
+                      onClick={() => selectCategory(category.slug)}
+                    >
+                      {category.name}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subcategories (Dynamic type filtering) */}
+              {activeCategoryData && subcategories.length > 0 && (
+                <div className="shop-filter-drawer__section">
+                  <h4>Type</h4>
+                  <div className="shop-filter-drawer__chips">
+                    <FilterChip
+                      active={!activeSubcategory}
+                      onClick={() => {
+                        setActiveSubcategory("");
+                        scrollToTop();
+                      }}
+                    >
+                      All {activeCategoryData.name}
+                    </FilterChip>
+                    {subcategories.map((subcategory) => (
+                      <FilterChip
+                        key={subcategory.slug}
+                        active={activeSubcategory === subcategory.slug}
+                        onClick={() => {
+                          setActiveSubcategory(subcategory.slug);
+                          scrollToTop();
+                        }}
+                      >
+                        {subcategory.name}
+                      </FilterChip>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Audience */}
+              <div className="shop-filter-drawer__section">
+                <h4>For</h4>
+                <div className="shop-filter-drawer__chips">
+                  <FilterChip
+                    active={!activeAudience}
+                    onClick={() => {
+                      setActiveAudience("");
+                      scrollToTop();
+                    }}
+                  >
+                    Everyone
+                  </FilterChip>
+                  {AUDIENCE_FILTERS.map((audience) => (
+                    <FilterChip
+                      key={audience.slug}
+                      active={activeAudience === audience.slug}
+                      onClick={() => selectAudience(audience.slug)}
+                    >
+                      {audience.name}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+
+              {/* Smart Collections */}
+              <div className="shop-filter-drawer__section">
+                <h4>Collections</h4>
+                <div className="shop-filter-drawer__chips">
+                  {SMART_FILTERS.map((filter) => (
+                    <FilterChip
+                      key={filter.slug}
+                      active={activeFilter === filter.slug}
+                      onClick={() => selectSmartFilter(filter.slug)}
+                    >
+                      {filter.label}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="shop-filter-drawer__footer">
+              {hasActiveFilter && (
+                <button type="button" className="shop-filter-drawer__clear-btn" onClick={clearFilters}>
+                  Clear All
+                </button>
+              )}
+              <button type="button" className="shop-filter-drawer__apply-btn" onClick={() => setMobileFiltersOpen(false)}>
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section className="shop-grid-wrap" aria-live="polite">
+          {loading ? (
+            <div className="shop-grid">
+              {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                <ProductCardSkeleton key={`skeleton-${index}`} />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="shop-empty">
+              <h3>No pieces found.</h3>
+              <p>
+                Nothing matched this filter. Try a different category or browse everything.
+              </p>
+              <button type="button" className="no-results-btn" onClick={clearFilters}>
+                Clear filter
+              </button>
+            </div>
+          ) : (
+            <div className="shop-grid" style={{ minHeight: "400px" }}>
+              {products.map((product, index) => (
+                <ProductCard key={product.id || product.slug} product={product} index={index} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {total > PAGE_SIZE && products.length > 0 ? (
+          <section className="shop-load-more">
+            <p>
+              Showing {Math.min(shownCount, total)} of {total} pieces
+            </p>
+            <div className="shop-load-more__track" aria-hidden="true">
+              <span style={{ width: `${Math.min(100, (shownCount / total) * 100)}%` }} />
+            </div>
+            {canLoadMore ? (
+              <button type="button" disabled={loadingMore} onClick={loadMore}>
+                {loadingMore ? "Loading..." : "Load more"}
+              </button>
+            ) : null}
+          </section>
+        ) : null}
+      </main>
+
+      <Footer />
     </>
   );
 }
 
-export async function getServerSideProps({ query }) {
-  const products = filterPublishedProducts(await readProducts());
-  const categoryTree = normalizeShopCategoryTree(
-    await readAdminContentField("shopTaxonomy", shopCategoryTree),
-  );
-  const flatNodes = flattenShopNodes(categoryTree);
-  const nodeById = new Map(flatNodes.map((node) => [node.id, node]));
-  const nodeByLookup = new Map(
-    flatNodes.flatMap((node) =>
-      getShopNodeLookupValues(node).map((value) => [value, node.id]),
-    ),
-  );
-  const nodeByQueryValue = new Map(
-    categoryTree
-      .map((node) => [String(node.queryValue || "").trim(), node.id])
-      .filter(([queryValue]) => Boolean(queryValue)),
-  );
-  const rawCategory =
-    typeof query.category === "string" ? query.category.trim() : "";
-  const initialCategory =
-    LEGACY_CATEGORY_MAP.get(rawCategory) ||
-    nodeByQueryValue.get(rawCategory) ||
-    (rawCategory && nodeById.has(rawCategory) ? rawCategory : "all");
-  const initialSubcategory = resolveSubcategoryId(
-    query.subcategory,
-    query.jewelryType,
-    nodeByLookup,
-  );
+export async function getStaticProps() {
+  const result = await queryProducts({
+    category: "all",
+    subcategory: "",
+    audience: "",
+    filter: "",
+    sort: "featured",
+    page: 1,
+  });
 
   return {
     props: {
-      products,
-      initialCategory,
-      initialSubcategory,
-      categoryTree,
+      initialProducts: result.products,
+      initialTotal: result.total,
     },
+    revalidate: 300,
   };
 }
