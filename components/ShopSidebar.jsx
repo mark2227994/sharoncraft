@@ -31,6 +31,7 @@ export default function ShopSidebar({
   onCategoryChange,
   activeSubcategory,
   onSubcategoryChange,
+  onSelectionChange,
   activePriceRange,
   onPriceRangeChange,
   showAvailableOnly,
@@ -38,6 +39,9 @@ export default function ShopSidebar({
   isMobile,
   isOpen,
   onClose,
+  sortBy,
+  onSortByChange,
+  sortOptions = [],
 }) {
   /* ───────────────────────────────────────────
      STATE: Accordion — only one parent open at a time
@@ -72,15 +76,23 @@ export default function ShopSidebar({
   }
 
   function selectSubcat(parentId, subId) {
-    onCategoryChange(parentId);
-    onSubcategoryChange(subId);
+    if (onSelectionChange) {
+      onSelectionChange(parentId, subId);
+    } else {
+      onCategoryChange(parentId);
+      onSubcategoryChange(subId);
+    }
     if (isMobile) onClose?.();
   }
 
   function selectCategory(node) {
     const isAll = node.id === "all";
-    onCategoryChange(node.id);
-    onSubcategoryChange("");
+    if (onSelectionChange) {
+      onSelectionChange(node.id, "");
+    } else {
+      onCategoryChange(node.id);
+      onSubcategoryChange("");
+    }
     if (!isAll && node.children?.length) {
       setExpandedCategory(node.id);
     }
@@ -93,8 +105,12 @@ export default function ShopSidebar({
   }
 
   function handleClear() {
-    onCategoryChange("all");
-    onSubcategoryChange("");
+    if (onSelectionChange) {
+      onSelectionChange("all", "");
+    } else {
+      onCategoryChange("all");
+      onSubcategoryChange("");
+    }
     onPriceRangeChange("all");
     onShowAvailableChange(false);
     setExpandedCategory(null);
@@ -252,12 +268,38 @@ export default function ShopSidebar({
     );
   }
 
+  function renderSortSection() {
+    if (!isMobile || !sortOptions || sortOptions.length === 0) return null;
+    return (
+      <div className="shop-sidebar__section">
+        <div className="sidebar-section-label">Sort By</div>
+        <div className="shop-sidebar__options-list" role="list">
+          {sortOptions.map((option) => (
+            <div key={option.value} className="price-item" role="listitem">
+              <button
+                type="button"
+                className={`price-opt${sortBy === option.value ? " price-opt--active" : ""}`}
+                onClick={() => {
+                  onSortByChange?.(option.value);
+                  onClose?.();
+                }}
+              >
+                {option.label}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   function renderSidebarContent() {
     return (
       <div className="shop-sidebar">
         {renderCollectionSection()}
         {renderAvailabilitySection()}
         {renderPriceSection()}
+        {renderSortSection()}
         {renderClear()}
       </div>
     );

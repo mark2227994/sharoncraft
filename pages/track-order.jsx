@@ -3,6 +3,7 @@ import Head from "next/head";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY } from "../lib/contact";
 
 const ORDER_STATUSES = {
   pending: { label: "Pending", color: "#F59E0B", step: 1 },
@@ -206,8 +207,8 @@ export default function TrackOrderPage() {
                 {/* Help section */}
                 <div className="order-help">
                   <p className="order-help__text">
-                    Need help? Contact us via WhatsApp at <strong>+254 112 222 572</strong> or email{" "}
-                    <a href="mailto:kelvinmark.services@gmail.com">kelvinmark.services@gmail.com</a>
+                    Need help? Contact us via WhatsApp at <strong>{CONTACT_PHONE_DISPLAY}</strong> or email{" "}
+                    <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
                   </p>
                 </div>
               </div>

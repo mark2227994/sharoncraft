@@ -1,7 +1,11 @@
 export type Product = {
   id: string;
   name: string;
+  slug?: string | null;
   description: string | null;
+  short_description?: string | null;
+  full_description?: string | null;
+  heritage_story?: string | null;
   price: number;
   sale_price: number | null;
   category: string;
@@ -11,9 +15,16 @@ export type Product = {
   images: string[];
   sizes: string[];
   colors: string[];
+  materials?: string[];
+  details?: string[];
   artisan: string;
   care_instructions: string | null;
   sku: string | null;
+  fulfillment_type?: string | null;
+  featured_order?: number | null;
+  story_text?: string | null;
+  story_cultural_note?: string | null;
+  badge?: string | null;
   is_visible: boolean;
   is_featured: boolean;
   is_new: boolean;

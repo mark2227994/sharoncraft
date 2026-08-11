@@ -4,12 +4,13 @@ import Head from "next/head";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
+import { CONTACT_EMAIL, CONTACT_LOCATION, CONTACT_PHONE_DISPLAY, CONTACT_WHATSAPP } from "../lib/contact";
 
 const DEFAULT_CONTACT = {
-  email: "kelvinmark.services@gmail.com",
-  phone: "+254 112 222 572",
-  whatsapp: "254112222572",
-  address: "Nairobi, Kenya",
+  email: CONTACT_EMAIL,
+  phone: CONTACT_PHONE_DISPLAY,
+  whatsapp: CONTACT_WHATSAPP,
+  address: CONTACT_LOCATION,
   hours: "Mon-Sat, 9am-6pm EAT",
 };
 

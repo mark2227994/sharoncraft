@@ -80,17 +80,30 @@ export default function ProductsPage() {
           <h2 className="text-lg font-medium">Products</h2>
           <p className="text-xs text-gray-500 mt-1">{products.length} items</p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="text-xs tracking-wider uppercase px-4 py-2 rounded-sm transition-opacity"
-          style={{
-            backgroundColor: '#1c1c1c',
-            color: '#fff',
-            letterSpacing: '2px',
-          }}
-        >
-          Add Product
-        </Link>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={async () => {
+              await fetch('/api/admin/sync-catalog', { method: 'POST' });
+              await fetchProducts();
+            }}
+            className="text-xs tracking-wider uppercase px-4 py-2 border rounded-sm"
+            style={{ borderColor: '#e0e0e0', letterSpacing: '2px' }}
+          >
+            Sync Storefront
+          </button>
+          <Link
+            href="/admin/products/new"
+            className="text-xs tracking-wider uppercase px-4 py-2 rounded-sm transition-opacity"
+            style={{
+              backgroundColor: '#1c1c1c',
+              color: '#fff',
+              letterSpacing: '2px',
+            }}
+          >
+            Add Product
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

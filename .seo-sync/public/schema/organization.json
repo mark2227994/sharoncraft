@@ -1,0 +1,41 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://www.sharoncraft.co.ke/#organization",
+  "name": "SharonCraft",
+  "url": "https://www.sharoncraft.co.ke",
+  "logo": "https://www.sharoncraft.co.ke/logo.png",
+  "image": "https://www.sharoncraft.co.ke/logo-og.png",
+  "description": "SharonCraft is a Nairobi-based handmade jewelry and craft brand founded by Kelvin Mark in 2024 and led creatively by Sharon Ruth.",
+  "founder": {
+    "@type": "Person",
+    "name": "Kelvin Mark",
+    "jobTitle": "Founder and CEO"
+  },
+  "employee": {
+    "@type": "Person",
+    "name": "Sharon Ruth",
+    "jobTitle": "Lead Designer"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Nairobi",
+    "addressCountry": "KE"
+  },
+  "areaServed": "KE",
+  "sameAs": [
+    "https://www.instagram.com/sharoncraft.ke",
+    "https://www.tiktok.com/@sharoncraft",
+    "https://www.facebook.com/sharoncraft"
+  ],
+  "priceRange": "KES 650 - KES 15,000",
+  "currenciesAccepted": "KES",
+  "paymentAccepted": "M-Pesa, Cash, Bank Transfer",
+  "knowsAbout": [
+    "Handmade Kenyan jewelry",
+    "Maasai beadwork",
+    "Artisan accessories",
+    "Custom jewelry in Nairobi",
+    "Kenyan gift sets"
+  ]
+}

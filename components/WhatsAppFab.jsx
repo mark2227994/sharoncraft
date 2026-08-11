@@ -1,16 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { buildWhatsAppUrl, CONTACT_WHATSAPP, normalizeWhatsAppNumber } from "../lib/contact";
 
 const fallbackSiteContent = {
-  contactWhatsApp: "0112222572",
+  contactWhatsApp: CONTACT_WHATSAPP,
 };
-
-function formatWhatsAppNumber(value) {
-  const digits = String(value || "").replace(/\D/g, "");
-  if (!digits) return "254112222572";
-  if (digits.startsWith("254")) return digits;
-  if (digits.startsWith("0")) return `254${digits.slice(1)}`;
-  return digits;
-}
 
 export default function WhatsAppFab() {
   const [siteContent, setSiteContent] = useState(fallbackSiteContent);
@@ -37,13 +30,15 @@ export default function WhatsAppFab() {
   }, []);
 
   const phoneNumber = useMemo(
-    () => formatWhatsAppNumber(siteContent.contactWhatsApp || fallbackSiteContent.contactWhatsApp),
+    () => normalizeWhatsAppNumber(siteContent.contactWhatsApp || fallbackSiteContent.contactWhatsApp),
     [siteContent.contactWhatsApp],
   );
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Hi SharonCraft! I'm interested in your products. Can you help me?");
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+    window.open(
+      buildWhatsAppUrl(phoneNumber, "Hi SharonCraft! I'm interested in your products. Can you help me?"),
+      "_blank",
+    );
   };
 
   return (

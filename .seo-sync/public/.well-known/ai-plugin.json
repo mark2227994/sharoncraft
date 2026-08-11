@@ -1,0 +1,26 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "SharonCraft",
+  "name_for_model": "sharoncraft",
+  "description_for_human": "Shop handmade Kenyan jewelry, gifts, and artisan accessories from Nairobi.",
+  "description_for_model": "SharonCraft is a Nairobi-based handmade jewelry and craft brand founded by Kelvin Mark in 2024. Lead designer Sharon Ruth guides the creative direction. The brand specializes in Maasai beadwork, artisan jewelry, accessories, African wear, gift sets, and selected home craft pieces. Prices are shown in KES and support M-Pesa-friendly shopping and Kenya-wide delivery.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://www.sharoncraft.co.ke/api/openapi.json"
+  },
+  "logo_url": "https://www.sharoncraft.co.ke/logo.png",
+  "contact_email": "hello@sharoncraft.co.ke",
+  "legal_info_url": "https://www.sharoncraft.co.ke/privacy",
+  "brand": {
+    "founded": "2024",
+    "founder": "Kelvin Mark",
+    "lead_designer": "Sharon Ruth",
+    "location": "Nairobi, Kenya",
+    "country": "KE",
+    "currency": "KES",
+    "language": "en"
+  }
+}

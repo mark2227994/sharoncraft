@@ -1,295 +1,13 @@
-export const categoryOptions = [
-  "All",
-  "Jewellery",
-  "Home Decor",
-  "Gift Sets",
-  "Accessories",
-  "Bridal & Occasion",
-];
+import { buildShopCategoryTree, buildShopHref, CATEGORY_NAMES } from "../lib/categories";
 
-export const shopCategoryTree = [
-  {
-    id: "all",
-    label: "All",
-    queryValue: "All",
-  },
-  {
-    id: "jewellery",
-    label: "Jewellery",
-    queryValue: "Jewellery",
-    match: {
-      categories: ["Jewellery"],
-    },
-    children: [
-      {
-        id: "necklaces",
-        label: "Necklaces",
-        match: {
-          categories: ["Jewellery"],
-          jewelryTypes: ["necklace"],
-        },
-      },
-      {
-        id: "earrings",
-        label: "Earrings",
-        match: {
-          categories: ["Jewellery"],
-          jewelryTypes: ["earring"],
-        },
-      },
-      {
-        id: "bracelets",
-        label: "Bracelets",
-        match: {
-          categories: ["Jewellery"],
-          jewelryTypes: ["bracelet"],
-        },
-      },
-      {
-        id: "bangles",
-        label: "Bangles",
-        match: {
-          categories: ["Jewellery"],
-          jewelryTypes: ["bracelet"],
-          keywords: ["bangle"],
-        },
-      },
-      {
-        id: "anklets",
-        label: "Anklets",
-        match: {
-          categories: ["Jewellery"],
-          keywords: ["anklet"],
-        },
-      },
-      {
-        id: "rings",
-        label: "Rings",
-        match: {
-          categories: ["Jewellery"],
-          keywords: ["ring"],
-        },
-      },
-      {
-        id: "hair-accessories",
-        label: "Hair Accessories",
-        match: {
-          categories: ["Jewellery", "Accessories"],
-          keywords: ["hair accessory", "hair clip", "hair pin", "hair tie", "scrunchie", "headband"],
-        },
-      },
-    ],
-  },
-  {
-    id: "african-wear",
-    label: "African Wear",
-    queryValue: "African Wear",
-    match: {
-      categories: ["African Wear", "Bridal & Occasion"],
-    },
-    children: [
-      {
-        id: "t-shirts",
-        label: "T-Shirts",
-        match: {
-          categories: ["African Wear"],
-          keywords: ["t-shirt", "tee"],
-        },
-      },
-      {
-        id: "embroidered-tops",
-        label: "Embroidered Tops",
-        match: {
-          categories: ["African Wear"],
-          keywords: ["embroidered top", "embroidered blouse", "top"],
-        },
-      },
-      {
-        id: "maasai-shuka-wraps",
-        label: "Maasai Shuka Wraps",
-        match: {
-          categories: ["African Wear"],
-          keywords: ["shuka", "wrap"],
-        },
-      },
-      {
-        id: "jumpsuit-suits",
-        label: "Jumpsuit Suits",
-        match: {
-          categories: ["African Wear"],
-          keywords: ["jumpsuit", "suit"],
-        },
-      },
-      {
-        id: "sudanese-occasion-sets",
-        label: "Sudanese Occasion Sets",
-        match: {
-          categories: ["African Wear", "Bridal & Occasion"],
-          keywords: ["sudanese", "occasion set"],
-        },
-      },
-    ],
-  },
-  {
-    id: "accessories",
-    label: "Accessories",
-    queryValue: "Accessories",
-    match: {
-      categories: ["Accessories"],
-    },
-    children: [
-      {
-        id: "beaded-sandals",
-        label: "Beaded Sandals",
-        match: {
-          categories: ["Accessories"],
-          keywords: ["sandal"],
-        },
-      },
-      {
-        id: "kiondos",
-        label: "Kiondos",
-        match: {
-          categories: ["Accessories"],
-          keywords: ["kiondo"],
-        },
-      },
-      {
-        id: "belts",
-        label: "Belts",
-        match: {
-          categories: ["Accessories"],
-          keywords: ["belt"],
-        },
-      },
-      {
-        id: "bags-pouches",
-        label: "Bags & Pouches",
-        match: {
-          categories: ["Accessories"],
-          keywords: ["bag", "pouch"],
-        },
-      },
-      {
-        id: "key-holders",
-        label: "Key Holders",
-        match: {
-          categories: ["Accessories"],
-          keywords: ["key holder", "keychain", "key fob"],
-        },
-      },
-    ],
-  },
-  {
-    id: "art-craft",
-    label: "Art & Craft",
-    queryValue: "Art & Craft",
-    match: {
-      categories: ["Art & Craft", "Home Decor"],
-      keywords: ["carving", "soapstone", "mixed media", "art", "craft"],
-    },
-    children: [
-      {
-        id: "wood-carvings",
-        label: "Wood Carvings",
-        match: {
-          categories: ["Art & Craft", "Home Decor"],
-          keywords: ["wood carving", "carving", "wood"],
-        },
-      },
-      {
-        id: "soapstone",
-        label: "Soapstone",
-        match: {
-          categories: ["Art & Craft", "Home Decor"],
-          keywords: ["soapstone"],
-        },
-      },
-      {
-        id: "mixed-media",
-        label: "Mixed Media",
-        match: {
-          categories: ["Art & Craft", "Home Decor"],
-          keywords: ["mixed media"],
-        },
-      },
-    ],
-  },
-  {
-    id: "home-living",
-    label: "Home & Living",
-    queryValue: "Home & Living",
-    match: {
-      categories: ["Home Decor"],
-    },
-    children: [
-      {
-        id: "kitchen-serving",
-        label: "Kitchen & Serving",
-        match: {
-          categories: ["Home Decor"],
-          keywords: ["kitchen", "serving", "tray", "bowl", "plate"],
-        },
-      },
-      {
-        id: "baskets-storage",
-        label: "Baskets & Storage",
-        match: {
-          categories: ["Home Decor", "Accessories"],
-          keywords: ["basket", "storage", "organizer"],
-        },
-      },
-      {
-        id: "wall-table-decor",
-        label: "Wall & Table Decor",
-        match: {
-          categories: ["Home Decor"],
-          keywords: ["wall", "table decor", "centerpiece", "decor"],
-        },
-      },
-    ],
-  },
-  {
-    id: "gifted-carry",
-    label: "Gifted Carry",
-    queryValue: "Gifted Carry",
-    match: {
-      categories: ["Gift Sets", "Accessories"],
-      keywords: ["gift"],
-    },
-    children: [
-      {
-        id: "gift-sets",
-        label: "Gift Sets",
-        match: {
-          categories: ["Gift Sets"],
-        },
-      },
-      {
-        id: "gift-wrapping",
-        label: "Gift Wrapping",
-        match: {
-          categories: ["Gift Sets", "Accessories"],
-          keywords: ["gift wrapping", "gift wrap"],
-        },
-      },
-      {
-        id: "custom-gift-boxes",
-        label: "Custom Gift Boxes",
-        match: {
-          categories: ["Gift Sets"],
-          keywords: ["custom gift", "gift box"],
-        },
-      },
-    ],
-  },
-];
+export const categoryOptions = ["All", ...CATEGORY_NAMES];
+export const shopCategoryTree = buildShopCategoryTree();
 
 export const collectionCardLayout = [
-  { title: "Jewellery", href: "/shop?category=Jewellery", imageKey: "collectionJewellery", itemCount: 24 },
-  { title: "Home Objects", href: "/shop?category=Home%20Decor", imageKey: "collectionHome", itemCount: 18 },
-  { title: "Gifted Carry", href: "/shop?category=Accessories", imageKey: "collectionAccessories", itemCount: 12 },
-  { title: "Bridal & Occasion", href: "/shop?category=Bridal%20%26%20Occasion", imageKey: "collectionBridal", itemCount: 16 },
+  { title: "Jewellery", href: buildShopHref("Jewellery"), imageKey: "collectionJewellery", itemCount: 24 },
+  { title: "Home & Living", href: buildShopHref("Home & Living"), imageKey: "collectionHome", itemCount: 18 },
+  { title: "Accessories", href: buildShopHref("Accessories"), imageKey: "collectionAccessories", itemCount: 12 },
+  { title: "Gifted Carry", href: buildShopHref("Gifted Carry"), imageKey: "collectionBridal", itemCount: 16 },
 ];
 
 export const defaultAboutStory =
@@ -314,7 +32,7 @@ export const primaryNavLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/artisans", label: "Artisans" },
   { href: "/about", label: "About" },
-  { href: "/journal", label: "Journal" },
+  { href: "/blog", label: "Journal" },
   { href: "/custom-order", label: "Custom Orders" },
 ];
 
@@ -341,7 +59,7 @@ export const featuredArtisans = [
     location: "Karatina, Nyeri County",
     craft: "Jewellery",
     image: "",
-    href: "/shop?category=Jewellery",
+    href: buildShopHref("Jewellery"),
     story:
       "Nafula creates beadwork with a balanced, ceremonial feel. Her pieces are known for clean lines, confident color, and the kind of finish that still feels handmade in the best way.",
   },
@@ -350,7 +68,7 @@ export const featuredArtisans = [
     location: "Kisumu County, Kenya",
     craft: "Earrings",
     image: "",
-    href: "/shop?category=Jewellery&jewelryType=earring",
+    href: buildShopHref("Jewellery", "Earrings"),
     story:
       "Achieng focuses on lighter jewellery meant to move well with the body. Her earrings carry bright rhythm and a playful elegance that works beautifully for gifting and celebrations.",
   },
@@ -359,7 +77,7 @@ export const featuredArtisans = [
     location: "Nairobi, Kenya",
     craft: "Necklaces",
     image: "",
-    href: "/shop?category=Jewellery&jewelryType=necklace",
+    href: buildShopHref("Jewellery", "Necklaces"),
     story:
       "Muthoni's necklace work leans toward bold centerpieces and bridal styling. She builds each design to frame the neckline softly while still holding its own as the main statement.",
   },
@@ -451,13 +169,27 @@ function resolveArtisanHref(craft, href) {
   if (explicitHref) return explicitHref;
 
   const normalizedCraft = compactText(craft).toLowerCase();
-  if (normalizedCraft.includes("necklace")) return "/shop?category=Jewellery&jewelryType=necklace";
-  if (normalizedCraft.includes("bracelet")) return "/shop?category=Jewellery&jewelryType=bracelet";
-  if (normalizedCraft.includes("earring")) return "/shop?category=Jewellery&jewelryType=earring";
-  if (normalizedCraft.includes("home")) return "/shop?category=Home%20Decor";
-  if (normalizedCraft.includes("gift")) return "/shop?category=Gift%20Sets";
-  if (normalizedCraft.includes("accessor")) return "/shop?category=Accessories";
-  return "/shop?category=Jewellery";
+  if (normalizedCraft.includes("necklace")) return buildShopHref("Jewellery", "Necklaces");
+  if (normalizedCraft.includes("bracelet")) return buildShopHref("Jewellery", "Bracelets");
+  if (normalizedCraft.includes("earring")) return buildShopHref("Jewellery", "Earrings");
+  if (normalizedCraft.includes("home")) return buildShopHref("Home & Living");
+  if (normalizedCraft.includes("gift")) return buildShopHref("Gifted Carry");
+  if (normalizedCraft.includes("accessor")) return buildShopHref("Accessories");
+  return buildShopHref("Jewellery");
+}
+
+function normalizeArtisanStory(name, story) {
+  const safeStory = compactText(story);
+  if (!safeStory) return "";
+
+  if (name.toLowerCase() === "sharon ruth") {
+    return safeStory.replace(
+      /Sharon Ruth is the founder and lead artisan of SharonCraft\.?/i,
+      "Sharon Ruth is the Lead Designer and lead artisan at SharonCraft."
+    );
+  }
+
+  return safeStory;
 }
 
 function normalizeArtisanEntry(entry, fallbackImage) {
@@ -470,7 +202,7 @@ function normalizeArtisanEntry(entry, fallbackImage) {
     craft: compactText(entry?.craft) || "Jewellery",
     image: compactText(entry?.image) || fallbackImage || "/media/site/placeholder.svg",
     href: resolveArtisanHref(entry?.craft, entry?.href),
-    story: compactText(entry?.story),
+    story: normalizeArtisanStory(name, entry?.story),
   };
 }
 

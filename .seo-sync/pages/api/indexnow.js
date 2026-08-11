@@ -1,0 +1,60 @@
+const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
+const HOST = "www.sharoncraft.co.ke";
+
+function normalizeUrls(input) {
+  const list = Array.isArray(input) ? input : [input];
+  return list
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .map((value) => (value.startsWith("http") ? value : `https://${HOST}${value.startsWith("/") ? value : `/${value}`}`));
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const key = process.env.INDEXNOW_KEY;
+  if (!key) {
+    return res.status(500).json({
+      error: "INDEXNOW_KEY is not configured",
+      manualStep:
+        "Add INDEXNOW_KEY to the environment and publish a matching /public/[INDEXNOW_KEY].txt file with the same value.",
+    });
+  }
+
+  try {
+    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+    const urlList = normalizeUrls(body.urlList || body.url);
+
+    if (urlList.length === 0) {
+      return res.status(400).json({ error: "Provide url or urlList" });
+    }
+
+    const response = await fetch(INDEXNOW_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        host: HOST,
+        key,
+        keyLocation: `https://${HOST}/${key}.txt`,
+        urlList,
+      }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      return res.status(response.status).json({ error: "IndexNow request failed", detail });
+    }
+
+    return res.status(200).json({ success: true, urlList });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Unable to submit IndexNow request",
+      detail: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+}

@@ -4,8 +4,38 @@ import { useCart } from "../lib/cart-context";
 import { mobileNavLinks, mobileUtilityNavLinks, primaryNavLinks } from "../data/site";
 import Icon from "./icons";
 
+const JOURNAL_ITEM = { href: "/blog", label: "Journal" };
+
+function ensureJournalLink(items) {
+  const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  const normalized = safeItems.map((item) =>
+    String(item?.label || "").toLowerCase() === "journal"
+      ? { ...item, href: "/blog", label: "Journal" }
+      : item,
+  );
+  const hasJournal = normalized.some((item) => String(item?.label || "").toLowerCase() === "journal");
+
+  if (hasJournal) {
+    return normalized;
+  }
+
+  const customOrdersIndex = normalized.findIndex(
+    (item) => String(item?.href || "").toLowerCase() === "/custom-order",
+  );
+
+  if (customOrdersIndex >= 0) {
+    return [
+      ...normalized.slice(0, customOrdersIndex),
+      JOURNAL_ITEM,
+      ...normalized.slice(customOrdersIndex),
+    ];
+  }
+
+  return [...normalized, JOURNAL_ITEM];
+}
+
 function buildMobileNavItems(items) {
-  return [...items, ...mobileUtilityNavLinks];
+  return [...ensureJournalLink(items), ...mobileUtilityNavLinks];
 }
 
 export default function Nav() {
@@ -14,8 +44,8 @@ export default function Nav() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState(null);
-  const [navItems, setNavItems] = useState(primaryNavLinks);
-  const [mobileItems, setMobileItems] = useState(mobileNavLinks);
+  const [navItems, setNavItems] = useState(ensureJournalLink(primaryNavLinks));
+  const [mobileItems, setMobileItems] = useState(buildMobileNavItems(primaryNavLinks));
   const searchInputRef = useRef(null);
   const { count, wishlistCount, openCart } = useCart();
 
@@ -63,8 +93,9 @@ export default function Nav() {
         : [];
 
       if (headerItems.length > 0) {
-        setNavItems(headerItems);
-        setMobileItems(buildMobileNavItems(headerItems));
+        const nextItems = ensureJournalLink(headerItems);
+        setNavItems(nextItems);
+        setMobileItems(buildMobileNavItems(nextItems));
       }
     } catch (error) {
       // Keep default nav items.

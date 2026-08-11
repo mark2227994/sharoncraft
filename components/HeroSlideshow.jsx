@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import SafeImage from "./ui/SafeImage";
+import { buildShopHref } from "../lib/categories";
 
 export default function HeroSlideshow({ slides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -58,7 +59,7 @@ export default function HeroSlideshow({ slides = [] }) {
       description: "15+ years of ceremonial beadwork",
       quote: '"Every bead must feel like it belongs to the hand that wears it"',
       cta: "Shop Her Collection",
-      ctaLink: "/shop?artisan=nafula",
+      ctaLink: buildShopHref("Jewellery"),
       duration: 6,
     },
     {
@@ -70,7 +71,7 @@ export default function HeroSlideshow({ slides = [] }) {
       subtitle: "",
       description: "Code: GIFT20",
       cta: "Shop Now",
-      ctaLink: "/shop?category=Gift%20Sets",
+      ctaLink: buildShopHref("Gifted Carry", "Gift Sets"),
       duration: 5,
     },
     {
@@ -96,7 +97,7 @@ export default function HeroSlideshow({ slides = [] }) {
       author: "Sarah, London",
       badge: "Verified Purchase",
       cta: "Read 1,200+ Reviews",
-      ctaLink: "/shop?sort=reviews",
+      ctaLink: "/reviews",
       duration: 6,
     },
     {
@@ -108,7 +109,7 @@ export default function HeroSlideshow({ slides = [] }) {
       description: "Normally $184 → Now $129",
       savings: "(Save $55)",
       cta: "Get Bundle",
-      ctaLink: "/shop?collection=bundle",
+      ctaLink: buildShopHref("Gifted Carry"),
       duration: 5,
     },
     {
@@ -132,7 +133,7 @@ export default function HeroSlideshow({ slides = [] }) {
       description: "Master of Home Decor",
       quote: '"I never want a piece to look repeated, only remembered"',
       cta: "Explore Her Work",
-      ctaLink: "/shop?artisan=muthoni",
+      ctaLink: buildShopHref("Home & Living"),
       duration: 7,
     },
     {

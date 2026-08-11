@@ -318,3 +318,259 @@
     padding: 10px 0;
   }
 }
+
+/* ============================================================
+   PRODUCT CARD SHELL — new component (ProductCard.tsx)
+   ============================================================ */
+
+.product-card-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: #1c1c1c;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.35s ease;
+}
+
+.product-card-shell:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Media wrapper */
+.product-card-shell__media {
+  position: relative;
+}
+
+.product-card-shell__image-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 1 / 1.25;
+  background: #f5f0eb;
+}
+
+/* Images — Next.js fill images need parent to be position:relative */
+.product-card-shell__image {
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 12px !important;
+  transition: opacity 0.45s ease, transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.product-card-shell__image--primary {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.product-card-shell__image--secondary {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.03);
+  z-index: 2;
+}
+
+/* Hover: swap images on desktop */
+@media (hover: hover) and (pointer: fine) {
+  .product-card-shell:hover .product-card-shell__image--primary {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  .product-card-shell:hover .product-card-shell__image--secondary {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .product-card-shell:hover .product-card-shell__image--primary:only-child {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+/* Badges */
+.product-card-shell__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.product-card-shell__badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: rgba(252, 250, 247, 0.96);
+  border: 1px solid rgba(139, 94, 60, 0.15);
+  color: #1c1c1c;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+/* Sold out overlay */
+.product-card-shell__unavailable {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 250, 248, 0.82);
+  pointer-events: none;
+}
+
+.product-card-shell__unavailable span {
+  padding: 6px 12px;
+  border: 0.5px solid #e0e0e0;
+  background: #ffffff;
+  color: #999;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Swipe dots (mobile) */
+.product-card-shell__dots {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.product-card-shell__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #ccc;
+  transition: all 0.3s ease;
+}
+
+.product-card-shell__dot.is-active {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  background: #1c1c1c;
+}
+
+/* Content area */
+.product-card-shell__content {
+  padding: 12px 14px 14px;
+}
+
+.product-card-shell__artisan {
+  display: block;
+  margin-bottom: 4px;
+  color: #bbb;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.product-card-shell__name {
+  display: -webkit-box;
+  margin: 0 0 6px;
+  overflow: hidden;
+  color: #1c1c1c;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-height: 2.8em;
+}
+
+.product-card-shell__pricing {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-card-shell__price {
+  color: #1c1c1c;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+.product-card-shell__price--sale {
+  color: #c0392b;
+}
+
+.product-card-shell:hover .product-card-shell__price {
+  color: #8b5e3c;
+}
+
+.product-card-shell__original-price {
+  color: #bbb;
+  font-size: 11px;
+  text-decoration: line-through;
+}
+
+.product-card-shell__status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.product-card-shell__status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.product-card-shell__status-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .product-card-shell__dots {
+    display: flex;
+  }
+
+  .product-card-shell__artisan {
+    font-size: 8px;
+    letter-spacing: 1.6px;
+  }
+
+  .product-card-shell__name {
+    font-size: 11px;
+  }
+
+  .product-card-shell__price {
+    font-size: 11px;
+  }
+
+  .product-card-shell__status-label {
+    font-size: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card-shell__image,
+  .product-card-shell__dot,
+  .product--card-shell__price {
+    transition: none;
+  }
+}

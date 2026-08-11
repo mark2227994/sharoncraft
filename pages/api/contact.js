@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     console.log("Contact form submission:", { name, email, phone, subject, message, timestamp: new Date().toISOString() });
 
     // For now, just log it
-    // TODO: Integrate email service to send to kelvinmark.services@gmail.com
+    // TODO: Integrate email service to send to sharoncraft.co.ke@gmail.com
 
     return res.status(200).json({
       ok: true,

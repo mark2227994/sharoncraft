@@ -52,6 +52,10 @@
   "exclude": [
     "node_modules",
     ".next",
-    "supabase/functions"
+    "supabase/functions",
+    "**/*.work.ts",
+    "**/*.work.tsx",
+    "**/*.work.js",
+    "**/*.work.jsx"
   ]
 }

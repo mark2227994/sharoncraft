@@ -1,95 +1,63 @@
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import CategoryStrip from "../components/CategoryStrip";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import ProductCard from "../components/ProductCard";
+import SafeImage from "../components/ui/SafeImage";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import SeoHead from "../components/SeoHead";
 import ShopSidebar from "../components/ShopSidebar";
 import Icon from "../components/icons";
-import { normalizeShopCategoryTree, shopCategoryTree } from "../data/site";
-import { readAdminContentField } from "../lib/admin-content";
+import {
+  buildShopCategoryTree,
+  buildShopHref,
+  getCategoryByName,
+  getCategoryBySlug,
+  getSubcategoryBySlug,
+  normalizeCategoryName,
+  normalizeSubcategoryName,
+} from "../lib/categories";
 import { filterPublishedProducts, getCategoryPriority, getJewelryTypePriority } from "../lib/products";
-import { readProducts } from "../lib/store";
 
-function flattenShopNodes(nodes, trail = []) {
-  return nodes.flatMap((node) => [
-    { ...node, trail },
-    ...(Array.isArray(node.children) ? flattenShopNodes(node.children, [...trail, node.id]) : []),
-  ]);
-}
-
-const LEGACY_CATEGORY_MAP = new Map([
-  ["All", "all"],
-  ["Jewellery", "jewellery"],
-  ["Accessories", "accessories"],
-  ["Home Decor", "home-living"],
-  ["Gift Sets", "gifted-carry"],
-  ["Bridal & Occasion", "african-wear"],
-  ["African Wear", "african-wear"],
-  ["Art & Craft", "art-craft"],
-  ["Home & Living", "home-living"],
-  ["Gifted Carry", "gifted-carry"],
-]);
-
-const LEGACY_SUBCATEGORY_MAP = new Map([
-  ["necklace", "necklaces"],
-  ["bracelet", "bracelets"],
-  ["earring", "earrings"],
-]);
-
-function getProductSearchText(product) {
-  return [
-    product?.name,
-    product?.description,
-    product?.shortDescription,
-    product?.heritageStory,
-    product?.category,
-    product?.jewelryType,
-    ...(Array.isArray(product?.materials) ? product.materials : []),
-    ...(Array.isArray(product?.details) ? product.details : []),
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
-function matchesRule(product, match) {
-  if (!match) return true;
-
-  if (Array.isArray(match.categories) && match.categories.length > 0 && !match.categories.includes(product.category)) {
-    return false;
+const HERO_CONTENT = {
+  all: {
+    title: "The SharonCraft Catalog",
+    description: "Explore our curated collection of premium handmade Kenyan beadwork. Each piece tells a unique story of culture, precision, and raw textured beauty.",
+    image: "/media/site/homepage/ai-intent-wear-it.webp"
+  },
+  jewellery: {
+    title: "Boutique Jewellery",
+    description: "Elevate your style with our signature hand-beaded necklaces, earrings, and bracelets. Made from premium glass beads and organic components.",
+    image: "/media/site/homepage/ai-intent-wear-it.webp"
+  },
+  accessories: {
+    title: "Handcrafted Accessories",
+    description: "Timeless handcrafted items from beaded sandals to beautifully woven kiondo bags. Designed for natural texture and premium durability.",
+    image: "/media/site/collections/Gemini_Generated_Image_mqtg1imqtg1imqtg.png"
+  },
+  "african-wear": {
+    title: "African Wear & Shukas",
+    description: "Vibrant occasion wear, authentic Maasai Shukas, and statement bridal sets that embody rich cultural pride and premium editorial design.",
+    image: "/media/site/homepage/Wedding Jewelry Around the World - Kenya.webp"
+  },
+  "home-living": {
+    title: "Home & Living Accents",
+    description: "Infuse your home with handcrafted warmth. Explore soapstone carvings, hand-woven storage baskets, and clay-terracotta table accent decor.",
+    image: "/media/site/collections/ai-intent-style-home.webp"
+  },
+  "art-craft": {
+    title: "Art & Heritage Craft",
+    description: "Collector's carvings and heritage artifact sculptures, curated to anchor modern living spaces with organic texture and cultural stories.",
+    image: "/media/site/collections/Gemini_Generated_Image_mqtg1imqtg1imqtg.png"
+  },
+  "gifted-carry": {
+    title: "Curated Gift Sets",
+    description: "Give the gift of human touch. Hand-packed corporate sets, custom wrapping, and curated occasion bundles of authentic Kenyan artistry.",
+    image: "/media/site/collections/ai-explore-gift-path.webp"
   }
-
-  if (
-    Array.isArray(match.jewelryTypes) &&
-    match.jewelryTypes.length > 0 &&
-    !match.jewelryTypes.includes(product.jewelryType)
-  ) {
-    return false;
-  }
-
-  if (Array.isArray(match.keywords) && match.keywords.length > 0) {
-    const haystack = getProductSearchText(product);
-    if (!match.keywords.some((keyword) => haystack.includes(String(keyword).toLowerCase()))) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function resolveSubcategoryId(querySubcategory, queryJewelryType, nodeById) {
-  const rawSubcategory = typeof querySubcategory === "string" ? querySubcategory.trim() : "";
-  if (rawSubcategory && nodeById.has(rawSubcategory)) {
-    return rawSubcategory;
-  }
-
-  const rawJewelryType = typeof queryJewelryType === "string" ? queryJewelryType.trim() : "";
-  if (rawJewelryType) {
-    return LEGACY_SUBCATEGORY_MAP.get(rawJewelryType) || "";
-  }
-
-  return "";
-}
+};
 
 function matchesPriceRange(product, activePriceRange) {
   const price = Number(product?.price || 0);
@@ -102,7 +70,18 @@ function matchesPriceRange(product, activePriceRange) {
   return true;
 }
 
-export default function ShopPage({ products, initialCategory, initialSubcategory, categoryTree }) {
+function buildCanonicalPath(categorySlug, subcategorySlug = "") {
+  if (!categorySlug || categorySlug === "all") return "/shop";
+
+  const category = getCategoryBySlug(categorySlug);
+  if (!category) return "/shop";
+
+  const subcategory = subcategorySlug ? getSubcategoryBySlug(category.slug, subcategorySlug) : null;
+  return buildShopHref(category.name, subcategory?.name);
+}
+
+export default function ShopPage({ products, initialCategory, initialSubcategory }) {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeSubcategory, setActiveSubcategory] = useState(initialSubcategory);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
@@ -111,9 +90,41 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
 
-  const ITEMS_PER_PAGE_DESKTOP = 24;
-  const ITEMS_PER_PAGE_MOBILE = 12;
+  useEffect(() => {
+    const handleStart = (url) => {
+      if (url.includes("/shop")) {
+        setIsFilterLoading(true);
+      }
+    };
+    const handleComplete = () => setIsFilterLoading(false);
+
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
+
+    return () => {
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
+    };
+  }, [router]);
+
+  useEffect(() => {
+    setIsFilterLoading(true);
+    const timer = setTimeout(() => {
+      setIsFilterLoading(false);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [activePriceRange, sortBy, showAvailableOnly]);
+
+  const trendingProducts = useMemo(() => {
+    return (products || []).filter((p) => p.featured).slice(0, 4);
+  }, [products]);
+
+  const ITEMS_PER_PAGE_DESKTOP = 16;
+  const ITEMS_PER_PAGE_MOBILE = 16;
   const sortOptions = [
     { value: "featured", label: "Featured" },
     { value: "recent", label: "Newest" },
@@ -121,18 +132,18 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
     { value: "price-desc", label: "Price: High" },
   ];
 
-  const normalizedCategoryTree = useMemo(() => normalizeShopCategoryTree(categoryTree), [categoryTree]);
-  const shopTabs = useMemo(() => normalizedCategoryTree.map((node) => node.label), [normalizedCategoryTree]);
-  const flatShopNodes = useMemo(() => flattenShopNodes(normalizedCategoryTree), [normalizedCategoryTree]);
-  const shopNodeById = useMemo(() => new Map(flatShopNodes.map((node) => [node.id, node])), [flatShopNodes]);
-  const shopNodeByLabel = useMemo(
-    () => new Map(normalizedCategoryTree.map((node) => [node.label, node])),
-    [normalizedCategoryTree],
-  );
+  const categoryTree = useMemo(() => buildShopCategoryTree(), []);
+  const shopTabs = useMemo(() => categoryTree.map((node) => node.label), [categoryTree]);
+  const activeCategoryData = activeCategory !== "all" ? getCategoryBySlug(activeCategory) : null;
+  const activeSubcategoryData =
+    activeCategoryData && activeSubcategory ? getSubcategoryBySlug(activeCategoryData.slug, activeSubcategory) : null;
+  const activeTabLabel = activeCategoryData?.name || "All";
+  const canonicalPath = buildCanonicalPath(activeCategory, activeSubcategory);
 
-  const activeCategoryNode = shopNodeById.get(activeCategory) || shopNodeById.get("all");
-  const activeSubcategoryNode = activeSubcategory ? shopNodeById.get(activeSubcategory) : null;
-  const activeTabLabel = activeCategoryNode?.label || "All";
+  useEffect(() => {
+    setActiveCategory(initialCategory);
+    setActiveSubcategory(initialSubcategory);
+  }, [initialCategory, initialSubcategory]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -154,15 +165,19 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
 
   const filteredProducts = useMemo(() => {
     const next = products
-      .filter((product) => (activeCategory === "all" ? true : matchesRule(product, activeCategoryNode?.match)))
-      .filter((product) => (activeSubcategoryNode ? matchesRule(product, activeSubcategoryNode.match) : true))
+      .filter((product) => (activeCategoryData ? product.category === activeCategoryData.name : true))
+      .filter((product) => (activeSubcategoryData ? product.subcategory === activeSubcategoryData.name : true))
       .filter((product) => (showAvailableOnly ? !product.isSold && product.stock > 0 : true))
       .filter((product) => matchesPriceRange(product, activePriceRange));
 
     if (sortBy === "recent") {
       return next
         .slice()
-        .sort((left, right) => Number(Boolean(right.recent || right.isNew || right.newArrival)) - Number(Boolean(left.recent || left.isNew || left.newArrival)));
+        .sort(
+          (left, right) =>
+            Number(Boolean(right.recent || right.isNew || right.newArrival)) -
+            Number(Boolean(left.recent || left.isNew || left.newArrival)),
+        );
     }
 
     if (sortBy === "price-asc") return next.slice().sort((left, right) => left.price - right.price);
@@ -172,6 +187,10 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
       const featuredDiff = Number(Boolean(right.featured)) - Number(Boolean(left.featured));
       if (featuredDiff !== 0) return featuredDiff;
 
+      const orderDiff =
+        Number(left.featuredOrder ?? 999) - Number(right.featuredOrder ?? 999);
+      if (orderDiff !== 0) return orderDiff;
+
       const categoryDiff = getCategoryPriority(left.category) - getCategoryPriority(right.category);
       if (categoryDiff !== 0) return categoryDiff;
 
@@ -180,15 +199,7 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
 
       return left.name.localeCompare(right.name);
     });
-  }, [
-    activeCategory,
-    activeCategoryNode,
-    activePriceRange,
-    activeSubcategoryNode,
-    products,
-    showAvailableOnly,
-    sortBy,
-  ]);
+  }, [activeCategoryData, activePriceRange, activeSubcategoryData, products, showAvailableOnly, sortBy]);
 
   const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
@@ -203,7 +214,7 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
   }, [activeCategory, activePriceRange, activeSubcategory, showAvailableOnly, sortBy]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [currentPage]);
 
   function getPageNumbers() {
@@ -224,28 +235,43 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
     return pages;
   }
 
+  function routeToSelection(nextCategorySlug = "all", nextSubcategorySlug = "") {
+    const resolvedCategorySlug = nextCategorySlug || "all";
+    const resolvedSubcategorySlug = resolvedCategorySlug === "all" ? "" : nextSubcategorySlug || "";
+    const href = buildCanonicalPath(resolvedCategorySlug, resolvedSubcategorySlug);
+
+    setActiveCategory(resolvedCategorySlug);
+    setActiveSubcategory(resolvedSubcategorySlug);
+    router.push(href, undefined, { scroll: false });
+  }
+
   function handleCategorySelect(label) {
-    const node = shopNodeByLabel.get(label);
-    if (!node) return;
-    setActiveCategory(node.id);
-    setActiveSubcategory("");
+    if (label === "All") {
+      routeToSelection("all");
+      return;
+    }
+
+    const category = getCategoryByName(label);
+    if (!category) return;
+    routeToSelection(category.slug);
   }
 
   function clearAllFilters() {
-    setActiveCategory("all");
-    setActiveSubcategory("");
+    routeToSelection("all");
     setShowAvailableOnly(false);
     setActivePriceRange("all");
     setSortBy("featured");
     setCurrentPage(1);
   }
 
+  const currentHero = HERO_CONTENT[activeCategory] || HERO_CONTENT.all;
+
   return (
     <>
       <SeoHead
         title="Shop Handmade Kenyan Jewellery, Gifts And Decor"
         description="Browse SharonCraft necklaces, bracelets, earrings, home decor, gift sets, and artisan-made pieces from Kenya."
-        path="/shop"
+        path={canonicalPath}
       />
 
       <Nav />
@@ -257,31 +283,58 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
       />
 
       <main className="shop-page">
-        <div className="shop-breadcrumb" aria-label="Breadcrumb">
-          <a href="/">Home</a>
-          <span className="shop-breadcrumb__separator">›</span>
-          <a href="/shop">Shop</a>
-          {activeCategory !== "all" ? (
-            <>
+        <div className="shop-hero">
+          <div className="shop-hero__copy-pane">
+            <div className="shop-breadcrumb" aria-label="Breadcrumb">
+              <Link href="/">Home</Link>
               <span className="shop-breadcrumb__separator">›</span>
-              <span className="shop-breadcrumb__current">{activeCategoryNode?.label}</span>
-            </>
-          ) : null}
-          {activeSubcategoryNode ? (
-            <>
-              <span className="shop-breadcrumb__separator">›</span>
-              <span className="shop-breadcrumb__current">{activeSubcategoryNode.label}</span>
-            </>
-          ) : null}
+              <Link href="/shop">Shop</Link>
+              {activeCategoryData ? (
+                <>
+                  <span className="shop-breadcrumb__separator">›</span>
+                  <Link href={buildShopHref(activeCategoryData.name)}>{activeCategoryData.name}</Link>
+                </>
+              ) : null}
+              {activeSubcategoryData ? (
+                <>
+                  <span className="shop-breadcrumb__separator">›</span>
+                  <span className="shop-breadcrumb__current">{activeSubcategoryData.name}</span>
+                </>
+              ) : null}
+            </div>
+
+            <span className="shop-hero__vintage-label">SHARONCRAFT EST. 2021</span>
+            <h1 className="shop-hero__heading">
+              {activeSubcategoryData ? activeSubcategoryData.name : currentHero.title}
+            </h1>
+            <p className="shop-hero__description">
+              {currentHero.description}
+            </p>
+            <div className="shop-hero__meta">
+              <span className="shop-hero__count">{filteredProducts.length} curated pieces</span>
+            </div>
+          </div>
+
+          <div className="shop-hero__media-pane">
+            <div className="shop-hero__image-frame">
+              <SafeImage
+                src={currentHero.image}
+                alt={activeSubcategoryData ? activeSubcategoryData.name : currentHero.title}
+                type="hero"
+                className="shop-hero__image"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="shop-page__layout">
           <ShopSidebar
-            categoryTree={normalizedCategoryTree}
+            categoryTree={categoryTree}
             activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
+            onCategoryChange={(categorySlug) => routeToSelection(categorySlug)}
             activeSubcategory={activeSubcategory}
-            onSubcategoryChange={setActiveSubcategory}
+            onSubcategoryChange={(subcategorySlug) => routeToSelection(activeCategory, subcategorySlug)}
+            onSelectionChange={routeToSelection}
             activePriceRange={activePriceRange}
             onPriceRangeChange={setActivePriceRange}
             showAvailableOnly={showAvailableOnly}
@@ -289,13 +342,16 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
             isMobile={isMobile}
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortOptions={sortOptions}
           />
 
           <section className="shop-page__results">
             <div className="shop-page__results-bar">
               {isMobile ? (
                 <button type="button" className="shop-page__filter-btn" onClick={() => setIsDrawerOpen(true)}>
-                  <span>Filter</span>
+                  <span>Filter &amp; Sort</span>
                 </button>
               ) : (
                 <p className="shop-page__count-text">{filteredProducts.length} pieces found</p>
@@ -304,20 +360,6 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
               {isMobile ? (
                 <div className="shop-page__results-controls">
                   <p className="shop-page__count-text">{filteredProducts.length} pieces found</p>
-                  <label className="shop-page__sort-select-wrap">
-                    <span className="shop-page__sort-select-label">Sort</span>
-                    <select
-                      className="shop-page__sort-select"
-                      value={sortBy}
-                      onChange={(event) => setSortBy(event.target.value)}
-                    >
-                      {sortOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
                 </div>
               ) : (
                 <div className="shop-page__sort-links" aria-label="Sort products">
@@ -337,27 +379,62 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
               )}
             </div>
 
-            {paginatedProducts.length === 0 ? (
-              <div className="shop-page__no-results">
-                <div className="no-results-icon">?</div>
-                <h3>No products found</h3>
-                <p>We couldn&apos;t find items matching these filters.</p>
-                <button type="button" onClick={clearAllFilters} className="no-results-btn">
-                  Clear Filters &amp; Browse All
-                </button>
-              </div>
-            ) : (
-              <div className="shop-products__catalog">
-                {paginatedProducts.map((product) => (
-                  <div key={product.id} className="product-card-grid-item">
-                    <ProductCard product={product} variant="shop-catalog" />
+            <div className="shop-products-container" style={{ position: "relative" }}>
+              {paginatedProducts.length === 0 ? (
+                isFilterLoading ? (
+                  <div className="shop-products__catalog">
+                    {Array.from({ length: isMobile ? 4 : 8 }).map((_, index) => (
+                      <div key={`skeleton-${index}`} className="product-card-grid-item">
+                        <ProductCardSkeleton />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                ) : (
+                  <div className="shop-page__no-results-container">
+                    <div className="shop-page__no-results">
+                      <div className="no-results-icon">?</div>
+                      <h3>No products found</h3>
+                      <p>We couldn&apos;t find items matching these filters.</p>
+                      <button type="button" onClick={clearAllFilters} className="no-results-btn">
+                        Clear Filters &amp; Browse All
+                      </button>
+                    </div>
+                    {trendingProducts.length > 0 ? (
+                      <div className="shop-page__no-results-suggestions">
+                        <h4 className="shop-page__suggestions-title">Artisan Favorites</h4>
+                        <div className="shop-products__catalog">
+                          {trendingProducts.map((product) => (
+                            <div key={product.id} className="product-card-grid-item">
+                              <ProductCard product={product} variant="shop-catalog" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              ) : (
+                <div
+                  key={`${activeCategory}-${activeSubcategory}-${activePriceRange}-${sortBy}-${showAvailableOnly}-${currentPage}`}
+                  className="shop-products__catalog"
+                  style={{
+                    opacity: isFilterLoading ? 0.6 : 1,
+                    pointerEvents: isFilterLoading ? "none" : "auto",
+                    transition: "opacity 0.25s ease",
+                    minHeight: "400px"
+                  }}
+                >
+                  {paginatedProducts.map((product) => (
+                    <div key={product.id} className="product-card-grid-item">
+                      <ProductCard product={product} variant="shop-catalog" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            {!isMobile && totalPages > 1 ? (
-              <div className="shop-pagination shop-pagination--desktop">
+            {totalPages > 1 ? (
+              <div className="shop-pagination">
                 <button
                   type="button"
                   className="shop-page-btn"
@@ -407,30 +484,4 @@ export default function ShopPage({ products, initialCategory, initialSubcategory
   );
 }
 
-export async function getServerSideProps({ query }) {
-  const products = filterPublishedProducts(await readProducts());
-  const categoryTree = normalizeShopCategoryTree(
-    await readAdminContentField("shopTaxonomy", shopCategoryTree),
-  );
-  const nodeById = new Map(flattenShopNodes(categoryTree).map((node) => [node.id, node]));
-  const nodeByQueryValue = new Map(
-    categoryTree
-      .map((node) => [String(node.queryValue || "").trim(), node.id])
-      .filter(([queryValue]) => Boolean(queryValue)),
-  );
-  const rawCategory = typeof query.category === "string" ? query.category.trim() : "";
-  const initialCategory =
-    LEGACY_CATEGORY_MAP.get(rawCategory) ||
-    nodeByQueryValue.get(rawCategory) ||
-    (rawCategory && nodeById.has(rawCategory) ? rawCategory : "all");
-  const initialSubcategory = resolveSubcategoryId(query.subcategory, query.jewelryType, nodeById);
-
-  return {
-    props: {
-      products,
-      initialCategory,
-      initialSubcategory,
-      categoryTree,
-    },
-  };
-}
+export { getServerSideProps } from "../lib/server/shop-page";

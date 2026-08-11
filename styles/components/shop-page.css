@@ -98,6 +98,120 @@ body.shop-page--boutique .shop-category-strip .category-pill--active {
   color: #1c1c1c;
 }
 
+/* Hero section */
+.shop-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  background: #ffffff;
+  border-bottom: 0.5px solid #f0f0f0;
+}
+
+@media (min-width: 768px) {
+  .shop-hero {
+    grid-template-columns: 1fr 1fr;
+    min-height: 480px;
+  }
+}
+
+.shop-hero__copy-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .shop-hero__copy-pane {
+    padding: 48px 48px 48px 64px;
+    gap: 20px;
+  }
+}
+
+.shop-hero__vintage-label {
+  color: #8b5e3c;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.shop-hero__heading {
+  margin: 0;
+  color: #1c1c1c;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .shop-hero__heading {
+    font-size: 42px;
+  }
+}
+
+.shop-hero__description {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+@media (min-width: 768px) {
+  .shop-hero__description {
+    font-size: 16px;
+  }
+}
+
+.shop-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-hero__count {
+  color: #999;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.shop-hero__media-pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f5f5f3;
+}
+
+.shop-hero__image-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .shop-hero__image-frame {
+    min-height: 480px;
+  }
+}
+
+.shop-hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 /* Layout */
 .shop-page__layout {
   display: flex;
@@ -397,5 +511,18 @@ body.shop-page--boutique .shop-category-strip .category-pill--active {
 
   .shop-page__sort-select {
     min-width: 124px;
+  }
+
+  .shop-pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .shop-page-btn span {
+    display: none; /* Hide 'Previous'/'Next' text, keep icon or use compact format on very small screens */
+  }
+
+  .shop-page-btn {
+    padding: 0 10px;
   }
 }

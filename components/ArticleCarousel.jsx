@@ -1,34 +1,43 @@
-import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function ArticleCarousel({ limit = 3 }) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
+    let cancelled = false;
 
-  async function fetchArticles() {
-    try {
-      const res = await fetch("/api/admin/articles");
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        const published = data.filter(a => a.published).slice(0, limit);
-        setArticles(published);
+    async function fetchArticles() {
+      try {
+        const response = await fetch(`/api/blog-posts?limit=${limit}`);
+        const data = await response.json();
+
+        if (!cancelled && Array.isArray(data)) {
+          setArticles(data.slice(0, limit));
+        }
+      } catch (error) {
+        console.error("Failed to fetch blog posts:", error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    } catch (err) {
-      console.error("Failed to fetch articles:", err);
-      setLoading(false);
     }
-  }
+
+    void fetchArticles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [limit]);
 
   if (loading) {
-    return <div className="article-carousel">Loading articles...</div>;
+    return <div className="article-carousel">Loading stories...</div>;
   }
 
-  if (!articles || articles.length === 0) {
+  if (!articles.length) {
     return null;
   }
 
@@ -39,31 +48,34 @@ export default function ArticleCarousel({ limit = 3 }) {
         <div className="article-carousel__grid">
           {articles.map((article) => (
             <article key={article.slug} className="article-card">
-              {article.image && (
-                <div className="article-card__image">
-                  <img 
-                    src={article.image} 
+              <div className="article-card__image">
+                {article.cover_image_url ? (
+                  <Image
+                    src={article.cover_image_url}
                     alt={article.title}
-                    loading="lazy"
-                    decoding="async"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    style={{ objectFit: "cover" }}
                   />
-                </div>
-              )}
+                ) : (
+                  <div className="article-card__image-fallback" />
+                )}
+              </div>
               <div className="article-card__content">
                 <div className="article-card__meta">
                   <span className="article-card__category">{article.category}</span>
-                  <span className="article-card__read-time">{article.readTime} min read</span>
+                  <span className="article-card__read-time">
+                    {article.read_time || article.readTime || 5} min read
+                  </span>
                 </div>
                 <h3 className="article-card__title">
-                  <Link href={`/journal/${article.slug}`}>
-                    {article.title}
-                  </Link>
+                  <Link href={`/blog/${article.slug}`}>{article.title}</Link>
                 </h3>
                 <p className="article-card__author">By {article.author}</p>
                 <p className="article-card__excerpt">
-                  {article.body.substring(0, 120)}...
+                  {(article.excerpt || article.body || "").substring(0, 120)}...
                 </p>
-                <Link href={`/journal/${article.slug}`} className="article-card__link">
+                <Link href={`/blog/${article.slug}`} className="article-card__link">
                   Read more →
                 </Link>
               </div>
@@ -111,16 +123,17 @@ export default function ArticleCarousel({ limit = 3 }) {
         }
 
         .article-card__image {
+          position: relative;
           width: 100%;
           height: 200px;
           background: #e0e0e0;
           overflow: hidden;
         }
 
-        .article-card__image img {
+        .article-card__image-fallback {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          background: linear-gradient(145deg, #f5f0eb 0%, #eadfcf 100%);
         }
 
         .article-card__content {
@@ -136,7 +149,7 @@ export default function ArticleCarousel({ limit = 3 }) {
 
         .article-card__category {
           display: inline-block;
-          background: #C04D29;
+          background: #c04d29;
           color: white;
           padding: 2px 8px;
           border-radius: 12px;
@@ -163,7 +176,7 @@ export default function ArticleCarousel({ limit = 3 }) {
         }
 
         .article-card__title a:hover {
-          color: #C04D29;
+          color: #c04d29;
         }
 
         .article-card__author {
@@ -182,7 +195,7 @@ export default function ArticleCarousel({ limit = 3 }) {
 
         .article-card__link {
           display: inline-block;
-          color: #C04D29;
+          color: #c04d29;
           text-decoration: none;
           font-weight: 600;
           font-size: 0.9rem;
@@ -190,7 +203,7 @@ export default function ArticleCarousel({ limit = 3 }) {
         }
 
         .article-card__link:hover {
-          color: #D4A574;
+          color: #d4a574;
         }
 
         @media (max-width: 640px) {

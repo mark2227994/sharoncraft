@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { SITE_NAME, SITE_URL } from "../lib/constants";
+import { CONTACT_EMAIL, CONTACT_PHONE_E164, CONTACT_WHATSAPP } from "../lib/contact";
 
 function normalizeUrl(path = "/") {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
@@ -9,6 +10,7 @@ function normalizeUrl(path = "/") {
 export default function SeoHead({
   title,
   description,
+  keywords,
   path = "/",
   image = "/logo-og.png", // Updated default OG image
   type = "website",
@@ -22,14 +24,15 @@ export default function SeoHead({
     <Head>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      {keywords ? <meta name="keywords" content={keywords} /> : null}
       <link rel="canonical" href={canonical} />
       {noindex ? <meta name="robots" content="noindex,nofollow" /> : null}
 
       {/* SEO Icons and Manifest */}
-      <link rel="icon" href="/favicon.ico" />
-      <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
-      <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
-      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      <link rel="icon" href="/favicon.ico?v=2" />
+      <link rel="icon" href="/favicon-32x32.png?v=2" sizes="32x32" type="image/png" />
+      <link rel="icon" href="/favicon-16x16.png?v=2" sizes="16x16" type="image/png" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
       <link rel="manifest" href="/site.webmanifest" />
 
       <meta property="og:site_name" content={SITE_NAME} />
@@ -53,11 +56,11 @@ export default function SeoHead({
             "@type": ["Organization", "LocalBusiness"],
             "name": "SharonCraft",
             "description": "Handmade Kenyan jewelry, gifts, and home decor by local artisans",
-            "url": "https://www.sharoncraft.co.ke",
-            "logo": "https://www.sharoncraft.co.ke/logo-og.png",
-            "image": "https://www.sharoncraft.co.ke/logo-og.png",
-            "email": "support@sharoncraft.co.ke",
-            "telephone": "+254112222572",
+            "url": SITE_URL,
+            "logo": `${SITE_URL}/logo-og.png`,
+            "image": `${SITE_URL}/logo-og.png`,
+            "email": CONTACT_EMAIL,
+            "telephone": CONTACT_PHONE_E164,
             "areaServed": "KE",
             "address": {
               "@type": "PostalAddress",
@@ -75,7 +78,9 @@ export default function SeoHead({
               "contactType": "Customer Service",
               "availableLanguageId": "en",
               "contactOption": "TollFree",
-              "url": "https://wa.me/254112222572"
+              "email": CONTACT_EMAIL,
+              "telephone": CONTACT_PHONE_E164,
+              "url": `https://wa.me/${CONTACT_WHATSAPP}`
             },
             "priceRange": "$",
             "isBasedNear": {

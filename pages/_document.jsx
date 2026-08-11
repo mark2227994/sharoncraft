@@ -23,13 +23,13 @@ export default class SharonCraftDocument extends Document {
           <meta name="msapplication-TileColor" content="#D32F2F" />
           
           {/* Modern favicon support */}
-          <link rel="icon" href="/favicon-32x32.png?v=1" sizes="32x32" type="image/png" />
-          <link rel="icon" href="/favicon-16x16.png?v=1" sizes="16x16" type="image/png" />
-          <link rel="shortcut icon" href="/favicon-32x32.png?v=1" type="image/png" />
-          <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+          <link rel="icon" href="/favicon-32x32.png?v=2" sizes="32x32" type="image/png" />
+          <link rel="icon" href="/favicon-16x16.png?v=2" sizes="16x16" type="image/png" />
+          <link rel="shortcut icon" href="/favicon-32x32.png?v=2" type="image/png" />
+          <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon" />
           
           {/* Apple touch icon for iOS home screen */}
-          <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" sizes="180x180" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           

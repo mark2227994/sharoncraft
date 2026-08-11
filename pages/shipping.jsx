@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import SeoHead from "../components/SeoHead";
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY } from "../lib/contact";
 
 export default function ShippingReturnsPage() {
   const [content, setContent] = useState(null);
@@ -85,9 +86,9 @@ export default function ShippingReturnsPage() {
             <section>
               <h2 className="heading-md">Questions?</h2>
               <p>
-                Email: <a href="mailto:kelvinmark.services@gmail.com">kelvinmark.services@gmail.com</a>
+                Email: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
                 <br />
-                WhatsApp: +254 112 222 572
+                WhatsApp: {CONTACT_PHONE_DISPLAY}
               </p>
             </section>
           </div>

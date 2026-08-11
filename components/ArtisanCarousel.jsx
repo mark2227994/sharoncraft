@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Icon from "./icons";
+import { buildShopHref } from "../lib/categories";
 
 function normalizeText(value) {
   return String(value || "")
@@ -22,7 +23,7 @@ function getFallbackProducts(artisan, products) {
     return products.filter((product) => product.category === "Jewellery" && product.jewelryType === "earring");
   }
   if (craft.includes("home")) {
-    return products.filter((product) => product.category === "Home Decor");
+    return products.filter((product) => product.category === "Home & Living");
   }
 
   return products.filter((product) => product.category === "Jewellery");
@@ -121,7 +122,7 @@ export default function ArtisanCarousel({ artisans = [], products = [] }) {
           ) : null}
 
           <div className="artisan-carousel__actions">
-            <Link href={activeArtisan.href || "/shop?category=Jewellery"} className="artisan-carousel__cta">
+            <Link href={activeArtisan.href || buildShopHref("Jewellery")} className="artisan-carousel__cta">
               Shop this artisan
             </Link>
             {multipleArtisans ? (

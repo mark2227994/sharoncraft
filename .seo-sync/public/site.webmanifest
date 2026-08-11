@@ -1,0 +1,37 @@
+{
+  "name": "SharonCraft",
+  "short_name": "SharonCraft",
+  "description": "Handmade Kenyan jewelry by Nairobi artisans.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#8B5E3C",
+  "orientation": "portrait",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop",
+      "url": "/shop",
+      "description": "Browse handmade products"
+    },
+    {
+      "name": "Custom Order",
+      "url": "/custom-order",
+      "description": "Request a custom piece"
+    }
+  ]
+}
